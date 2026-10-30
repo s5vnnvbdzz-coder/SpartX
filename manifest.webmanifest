@@ -1,12 +1,12 @@
 {
-  "name": "SPARTX — Strength Training",
-  "short_name": "SPARTX",
+  "name": "SPARTANX — Strength Training",
+  "short_name": "SPARTANX",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b0d0f",
   "theme_color": "#101114",
-  "description": "SPARTX strength training log",
+  "description": "SPARTANX strength training log",
   "icons": [
     {
       "src": "icon.svg",

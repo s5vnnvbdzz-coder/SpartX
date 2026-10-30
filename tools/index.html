@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#30343a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -138,6 +138,7 @@ document.querySelectorAll('input[type="number"]').forEach(input=>input.addEventL
 $('ormWeight').addEventListener('input',calcOrm);$('ormReps').addEventListener('input',calcOrm);$('tm').addEventListener('input',calc531);$('week').addEventListener('change',calc531);$('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);
 calcOrm();calc531();calcPlates();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});
 </script>
 </body>
 </html>

@@ -66,8 +66,8 @@ function apply531ToWorkout(){
  const pcts=[[.65,.75,.85],[.70,.80,.90],[.75,.85,.95],[.40,.50,.60]][w-1],reps=[['5','5','5+'],['3','3','3+'],['5','3','1+'],['5','5','5']][w-1];
  const sets=pcts.map((p,i)=>({weight:Math.round(tm*p/2.5)*2.5,reps:reps[i].replace('+',''),rpe:'',type:'Working Set',done:false}));
  const detail={exercise:$('applyLift').value,week:w,weekLabel:['5s','3s','5/3/1','Deload'][w-1],tm,sets};
- window.dispatchEvent(new CustomEvent('spartx:apply531',{detail,bubbles:true,composed:true}));
- $('applyHint').textContent='Added '+detail.exercise+' · Week '+w+' to your workout.';
+ const imported=typeof window.spartanxImport531==='function'&&window.spartanxImport531(detail);
+ $('applyHint').textContent=imported?'Added '+detail.exercise+' · Week '+w+' to your workout.':'Could not connect to the workout logger. Refresh the tracker and try again.';
 }
 $('apply531').addEventListener('click',apply531ToWorkout);
 $('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);

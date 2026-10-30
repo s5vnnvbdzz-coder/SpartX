@@ -52,7 +52,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="field"><label for="ormWeight">Weight (kg)</label><input id="ormWeight" type="number" min="0" step="0.5" placeholder="e.g. 100" inputmode="decimal"></div>
 <div class="field"><label for="ormReps">Reps</label><input id="ormReps" type="number" min="1" max="12" step="1" placeholder="e.g. 5" inputmode="numeric"></div>
 </div>
-<div class="result" id="ormResult">116.7 kg</div>
+<div class="result" id="ormResult">—</div>
 <div class="hint">Most useful for sets of 1–10 reps. This is an estimate, not a tested max.</div>
 </section>
 
@@ -72,7 +72,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="field"><label for="target">Target bar weight (kg)</label><input id="target" type="number" min="0" step="2.5" placeholder="e.g. 180" inputmode="decimal"></div>
 <div class="field"><label for="bar">Bar weight (kg)</label><input id="bar" type="number" min="0" step="0.5" placeholder="e.g. 20" inputmode="decimal"></div>
 </div>
-<div class="result" id="plateTotal">80 kg per side</div>
+<div class="result" id="plateTotal">—</div>
 <div class="plate-output" id="plates"></div><div class="plate-diagram-wrap" id="plateDiagramWrap"><svg id="plateDiagram" viewBox="0 0 440 116" role="img" aria-label="Diagram showing the plates loaded on each side of the barbell"></svg><div class="plate-diagram-caption" id="plateDiagramCaption">Plate layout updates with your target weight.</div></div>
 <div class="hint" id="plateHint">Plates required per side, using standard plate sizes.</div>
 </section>
@@ -135,7 +135,7 @@ calculatorInputIds.forEach(id=>$(id).addEventListener('change',saveCalculatorInp
 window.addEventListener('pagehide',saveCalculatorInputs);
 // Select the existing value when a numeric field receives focus, so a new entry replaces it.
 document.querySelectorAll('input[type="number"]').forEach(input=>input.addEventListener('focus',()=>input.select()));
-$('ormWeight').addEventListener('input',calcOrm);$('ormReps').addEventListener('input',calcOrm);$('tm').addEventListener('input',calc531);$('week').addEventListener('change',calc531);$('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);
+['ormWeight','ormReps'].forEach(id=>$(id).addEventListener('input',calcOrm));$('tm').addEventListener('input',calc531);$('week').addEventListener('change',calc531);['target','bar'].forEach(id=>$(id).addEventListener('input',calcPlates));
 calcOrm();calc531();calcPlates();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});

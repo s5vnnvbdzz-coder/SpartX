@@ -80,6 +80,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
 <script>
 const $=id=>document.getElementById(id);
+$('ormResult').textContent='—';$('plateTotal').textContent='—';$('plates').replaceChildren();$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';
 const plateColors={25:{fill:'#d62828',text:'#ffffff'},20:{fill:'#1769aa',text:'#ffffff'},15:{fill:'#f4d03f',text:'#171717'},10:{fill:'#238b45',text:'#ffffff'},5:{fill:'#f1f3f5',text:'#171717'},2.5:{fill:'#f28c28',text:'#171717'},1.25:{fill:'#7e57c2',text:'#ffffff'}};
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 function calcOrm(){const w=+$('ormWeight').value,r=Math.max(1,Math.min(12,+$('ormReps').value||1));$('ormResult').textContent=w>0?fmt(w*(1+r/30))+' kg':'—';}

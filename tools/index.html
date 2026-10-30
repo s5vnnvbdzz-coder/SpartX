@@ -85,34 +85,44 @@ function calcOrm(){const w=+$('ormWeight').value,r=Math.max(1,Math.min(12,+$('or
 function calc531(){const tm=+$('tm').value,w=+$('week').value,pcts=[[.65,.75,.85],[.70,.80,.90],[.75,.85,.95],[.40,.50,.60]][w-1],reps=[['5','5','5+'],['3','3','3+'],['5','3','1+'],['5','5','5']][w-1];$('wendler').innerHTML=pcts.map((p,i)=>{const load=Math.round(tm*p/2.5)*2.5;return '<div class="calc-row"><div>Set '+(i+1)+'<small>'+Math.round(p*100)+'% · '+reps[i]+' reps</small></div><strong>'+(tm>0?fmt(load)+' kg':'—')+'</strong></div>';}).join('');}
 function renderPlateDiagram(loaded){
  const svg=$('plateDiagram');if(!svg)return;
- const colors={25:'#777f89',20:'#c8f169',15:'#9ca6b1',10:'#d5d9de',5:'#69737e',2.5:'#aab2bb',1.25:'#e0e4e8'};
- const plateWidth=size=>size>=25?15:size>=20?13:size>=15?11:size>=10?9:size>=5?7:6;
- const stackWidth=loaded.reduce((sum,p)=>sum+p.count*plateWidth(p.size),0);
- const scale=Math.min(1,142/Math.max(1,stackWidth));
- const widthFor=size=>plateWidth(size)*scale;
- const totalWidth=stackWidth*scale;
+ const colors={25:'#77818c',20:'#c8f169',15:'#9ca6b1',10:'#d5d9de',5:'#69737e',2.5:'#aab2bb',1.25:'#e0e4e8'};
+ const plateWidth=size=>size>=25?16:size>=20?14:size>=15?12:size>=10?10:size>=5?8:7;
+ const rawWidth=loaded.reduce((sum,p)=>sum+p.count*plateWidth(p.size),0);
+ const scale=Math.min(1,88/Math.max(1,rawWidth));
+ const totalWidth=rawWidth*scale;
  let left='',right='',offset=0;
+ // Plates are packed against the collars at the outer ends of each sleeve.
+ // The largest plate sits innermost; progressively smaller plates sit outboard.
  loaded.forEach(({size,count})=>{
-  const w=widthFor(size),h=Math.max(27,Math.min(78,25+size*1.9)),y=(116-h)/2,color=colors[size]||'#9ca6b1';
+  const w=plateWidth(size)*scale;
+  const h=Math.max(32,Math.min(88,34+size*2.0));
+  const y=(116-h)/2;
+  const color=colors[size]||'#9ca6b1';
   for(let i=0;i<count;i++){
-   const lx=190-offset-w,rx=250+offset;
-   left+=`<rect x="${lx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="2" fill="${color}" stroke="#20262b" stroke-width="1"/>`;
-   right+=`<rect x="${rx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="2" fill="${color}" stroke="#20262b" stroke-width="1"/>`;
+   const rx=270+offset;
+   const lx=170-offset-w;
+   right+=`<rect x="${rx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="3" fill="${color}" stroke="#20262b" stroke-width="1.5"/><rect x="${(rx+w*.22).toFixed(2)}" y="52" width="${(w*.56).toFixed(2)}" height="12" rx="3" fill="#3d454e" opacity=".85"/>`;
+   left+=`<rect x="${lx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="3" fill="${color}" stroke="#20262b" stroke-width="1.5"/><rect x="${(lx+w*.22).toFixed(2)}" y="52" width="${(w*.56).toFixed(2)}" height="12" rx="3" fill="#3d454e" opacity=".85"/>`;
    offset+=w;
   }
  });
- const leftCollarX=190-totalWidth-8,rightCollarX=250+totalWidth;
+ // Bar shaft, sleeves and end caps are drawn first so the plates sit on top.
+ const leftPlateEdge=170-totalWidth;
+ const rightPlateEdge=270+totalWidth;
+ const collarLeft=leftPlateEdge-7;
+ const collarRight=rightPlateEdge;
  svg.innerHTML=
-  '<rect x="18" y="54" width="404" height="8" rx="4" fill="#aab2bb"/>'+
-  '<rect x="190" y="49" width="60" height="18" rx="5" fill="#737d87"/>'+
-  '<rect x="25" y="49" width="165" height="18" rx="5" fill="#8b949e"/>'+
-  '<rect x="250" y="49" width="165" height="18" rx="5" fill="#8b949e"/>'+
+  '<rect x="20" y="54" width="400" height="8" rx="4" fill="#aeb7c0"/>'+
+  '<rect x="20" y="48" width="50" height="20" rx="5" fill="#77818b"/>'+
+  '<rect x="370" y="48" width="50" height="20" rx="5" fill="#77818b"/>'+
+  '<rect x="70" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
+  '<rect x="270" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
+  '<rect x="170" y="47" width="100" height="22" rx="6" fill="#737d87"/>'+
   left+right+
-  '<rect x="'+leftCollarX.toFixed(2)+'" y="43" width="7" height="30" rx="2" fill="#c8f169" stroke="#e2ff9a"/>'+
-  '<rect x="'+rightCollarX.toFixed(2)+'" y="43" width="7" height="30" rx="2" fill="#c8f169" stroke="#e2ff9a"/>'+
-  '<rect x="14" y="46" width="5" height="24" rx="2" fill="#555e68"/>'+
-  '<rect x="421" y="46" width="5" height="24" rx="2" fill="#555e68"/>';
- const total=loaded.reduce((a,p)=>a+p.size*p.count,0);
+  '<rect x="'+collarLeft.toFixed(2)+'" y="39" width="7" height="38" rx="2" fill="#c8f169" stroke="#e2ff9a" stroke-width="1.5"/>'+
+  '<rect x="'+collarRight.toFixed(2)+'" y="39" width="7" height="38" rx="2" fill="#c8f169" stroke="#e2ff9a" stroke-width="1.5"/>'+
+  '<rect x="15" y="44" width="6" height="28" rx="2" fill="#555e68"/>'+
+  '<rect x="419" y="44" width="6" height="28" rx="2" fill="#555e68"/>';
  $('plateDiagramCaption').textContent=loaded.length?loaded.map(p=>p.count+' × '+fmt(p.size)+' kg').join(' · ')+' per side':'No plates required — bar only';
 }
 function calcPlates(){const target=+$('target').value,bar=+$('bar').value;const out=$('plates');out.innerHTML='';if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';renderPlateDiagram([]);return;}let rem=(target-bar)/2,loaded=[];$('plateTotal').textContent=fmt(rem)+' kg per side';const sizes=[25,20,15,10,5,2.5,1.25];sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(p)+' kg';out.appendChild(chip);loaded.push({size:p,count:n});rem=+(rem-n*p).toFixed(4);}});renderPlateDiagram(loaded);$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(rem)+' kg per side. Check the available plate sizes.':'Plates required per side, using standard plate sizes.';}

@@ -1,2 +1,2 @@
-# SpartX
+# SpartanX
 Workout Planner and Tracker

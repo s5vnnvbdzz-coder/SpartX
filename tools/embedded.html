@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#30343a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPARTANX Tools">
+<meta name="description" content="Strength training calculators: one-rep max, 5/3/1 working weights and plates.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<title>SPARTANX Tools</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d0f;--panel:#171a1e;--panel2:#22272d;--line:#30363e;--txt:#f3f4f6;--muted:#9ba3ad;--lime:#c8f169}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--txt);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:0 0 calc(28px + env(safe-area-inset-bottom))}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 15px;border-bottom:1px solid #454b52;background:#30343a;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3;min-height:calc(76px + env(safe-area-inset-top))}
+.brand{font-size:22px;font-weight:950;letter-spacing:3px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:1.7px;margin-top:3px}
+main{max-width:700px;margin:auto;padding:20px 16px 30px}
+.eyebrow{font-size:11px;color:var(--lime);font-weight:850;letter-spacing:1.6px}
+h1{font-size:29px;margin:7px 0 5px}h2{font-size:18px;margin:0}
+.intro{color:var(--muted);margin:0 0 19px;line-height:1.5}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}.card-head h2{flex:1}.gear-btn{display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:5;width:38px;height:38px;padding:0;border:1px solid var(--line);background:#252a30;color:var(--txt);font-size:20px;border-radius:10px;text-decoration:none;cursor:pointer}.settings-page{display:none;max-width:700px;min-height:calc(100vh - env(safe-area-inset-top));margin:0 auto;padding:22px 16px 40px}.settings-page.active{display:block}body.settings-open>header{display:none}body.settings-open>footer{display:none}.settings-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.back-btn{background:#252a30;color:var(--txt);border:1px solid var(--line)}.setting-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 0;border-bottom:1px solid var(--line)}.setting-row:last-child{border-bottom:0}.setting-copy strong{display:block;font-size:14px}.setting-copy small{display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:4px}.switch{position:relative;width:48px;height:28px;flex:0 0 48px}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:20px;background:#454b53;transition:.2s;cursor:pointer}.switch span:before{content:'';position:absolute;width:20px;height:20px;left:4px;top:4px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked+span{background:var(--lime)}.switch input:checked+span:before{transform:translateX(20px);background:#18200d}.plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.plate-setting{display:flex;align-items:center;gap:8px;background:#101316;border:1px solid var(--line);padding:10px;border-radius:10px;font-size:13px}.plate-dot{width:13px;height:13px;border-radius:4px;flex:0 0 13px}.warmup{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.warmup-title{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.8px;margin-bottom:5px}.warmup .calc-row strong{color:#dce7f3}
+.tool-icon{display:none}
+.fields{display:flex;gap:10px;margin:10px 0}.field{flex:1;min-width:0}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+input,select,button{font:inherit}
+input,select{width:100%;min-width:0;padding:12px;background:#0f1215;color:var(--txt);border:1px solid var(--line);border-radius:10px;font-size:16px}
+input:focus,select:focus{outline:1px solid var(--lime);border-color:var(--lime)}\ninput::placeholder{color:#737c86;font-style:italic;opacity:1}
+.result{font-size:28px;font-weight:900;color:var(--lime);font-variant-numeric:tabular-nums;margin:14px 0 2px}
+.hint{font-size:11px;color:var(--muted);line-height:1.5}
+.rows{margin-top:10px}.calc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}.calc-row:last-child{border-bottom:0}.calc-row strong{font-size:18px;color:var(--lime);white-space:nowrap}.calc-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.plate-output{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.plate-diagram-wrap{margin:16px 0 8px;padding:12px 8px;background:#101316;border:1px solid #30363e;border-radius:12px}#plateDiagram{width:100%;display:block;height:auto;min-height:100px}.plate-diagram-caption{text-align:center;color:var(--muted);font-size:10px;margin-top:2px}.plate{border:1px solid #ffffff55;padding:8px 11px;border-radius:9px;font-size:13px;font-weight:850;}.empty{color:var(--muted);font-size:13px;padding:8px 0}
+button{border:0;border-radius:10px;padding:11px 13px;background:var(--lime);color:#11150b;font-weight:850;cursor:pointer}
+footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px}
+@media(max-width:390px){main{padding:17px 12px}.card{padding:14px}.fields{gap:8px}.result{font-size:25px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sub">TOOLS</div></header>
+<main>
+<div class="eyebrow">NUMBERS DON'T LIE</div>
+<h1>Training tools</h1>
+
+
+<section class="card" aria-labelledby="ormTitle">
+<div class="card-head"><h2 id="ormTitle">One-rep max calculator</h2></div>
+<div class="fields">
+<div class="field"><label for="ormWeight">Weight (kg)</label><input id="ormWeight" type="number" min="0" step="0.5" placeholder="e.g. 100" inputmode="decimal"></div>
+<div class="field"><label for="ormReps">Reps</label><input id="ormReps" type="number" min="1" max="12" step="1" placeholder="e.g. 5" inputmode="numeric"></div>
+</div>
+<div class="result" id="ormResult">116.7 kg</div>
+<div class="hint">Most useful for sets of 1–10 reps. This is an estimate, not a tested max.</div>
+</section>
+
+<section class="card" aria-labelledby="531Title">
+<div class="card-head"><h2 id="531Title">5/3/1 Working Weights</h2><a class="gear-btn" href="./settings.html" aria-label="Open settings" title="Settings">⚙</a></div>
+<div class="fields">
+<div class="field"><label for="tm">Training max (kg)</label><input id="tm" type="number" min="0" step="2.5" placeholder="e.g. 145" inputmode="decimal"></div>
+<div class="field"><label for="week">Week</label><select id="week"><option value="1">Week 1 · 5s</option><option value="2">Week 2 · 3s</option><option value="3">Week 3 · 5/3/1</option><option value="4">Week 4 · Deload</option></select></div>
+</div>
+<div class="rows" id="wendler"></div>
+<div class="hint">Weights are rounded to the nearest 2.5 kg. Percentages are based on your training max.</div><div class="warmup" id="warmupOutput" hidden></div>
+</section>
+
+<section class="card" aria-labelledby="plateTitle">
+<div class="card-head"><div class="tool-icon">▤</div><h2 id="plateTitle">Plate calculator</h2></div>
+<div class="fields">
+<div class="field"><label for="target">Target bar weight (kg)</label><input id="target" type="number" min="0" step="2.5" placeholder="e.g. 180" inputmode="decimal"></div>
+<div class="field"><label for="bar">Bar weight (kg)</label><input id="bar" type="number" min="0" step="0.5" placeholder="e.g. 20" inputmode="decimal"></div>
+</div>
+<div class="result" id="plateTotal">80 kg per side</div>
+<div class="plate-output" id="plates"></div><div class="plate-diagram-wrap" id="plateDiagramWrap"><svg id="plateDiagram" viewBox="0 0 440 116" role="img" aria-label="Diagram showing the plates loaded on each side of the barbell"></svg><div class="plate-diagram-caption" id="plateDiagramCaption">Plate layout updates with your target weight.</div></div>
+<div class="hint" id="plateHint">Plates required per side, using standard plate sizes.</div>
+</section>
+</main>
+<footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
+<script>
+const $=id=>document.getElementById(id);
+const plateColors={25:{fill:'#d62828',text:'#ffffff'},20:{fill:'#1769aa',text:'#ffffff'},15:{fill:'#f4d03f',text:'#171717'},10:{fill:'#238b45',text:'#ffffff'},5:{fill:'#f1f3f5',text:'#171717'},2.5:{fill:'#f28c28',text:'#171717'},1.25:{fill:'#7e57c2',text:'#ffffff'}};
+const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+function calcOrm(){const w=+$('ormWeight').value,r=Math.max(1,Math.min(12,+$('ormReps').value||1));$('ormResult').textContent=w>0?fmt(w*(1+r/30))+' kg':'—';}
+const defaultSettings={warmup:true,diagram:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
+let settings={...defaultSettings,plates:{...defaultSettings.plates}};
+try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...defaultSettings.plates,...(saved.plates||{})}};}catch(e){}
+function saveSettings(){try{localStorage.setItem('spartxToolsSettings',JSON.stringify(settings));}catch(e){}}
+function calc531(){const tm=+$('tm').value,w=+$('week').value,pcts=[[.65,.75,.85],[.70,.80,.90],[.75,.85,.95],[.40,.50,.60]][w-1],reps=[['5','5','5+'],['3','3','3+'],['5','3','1+'],['5','5','5']][w-1];$('wendler').innerHTML=pcts.map((p,i)=>{const load=Math.round(tm*p/2.5)*2.5;return '<div class="calc-row"><div>Set '+(i+1)+'<small>'+Math.round(p*100)+'% · '+reps[i]+' reps</small></div><strong>'+(tm>0?fmt(load)+' kg':'—')+'</strong></div>';}).join('');
+ const warm=$('warmupOutput');warm.hidden=!settings.warmup||w===4;if(settings.warmup&&w!==4){const stages=[{pct:.4,reps:5},{pct:.5,reps:5},{pct:.6,reps:3}].map(x=>({weight:Math.round((tm*x.pct)/2.5)*2.5,reps:x.reps,pct:x.pct,label:Math.round(x.pct*100)+'% of training max'})).filter(x=>tm>0&&x.weight>0);const firstWorking=tm>0?Math.round((tm*pcts[0])/2.5)*2.5:0;const bridge=firstWorking>0?Math.round((firstWorking*.875)/2.5)*2.5:0;if(w===3&&bridge>0&&(!stages.length||bridge>stages[stages.length-1].weight)){stages.push({weight:bridge,reps:1,label:'87.5% of first working set'});}warm.innerHTML='<div class="warmup-title">SUGGESTED WARM-UP - BASED ON YOUR TRAINING MAX</div>'+stages.map((x,i)=>'<div class="calc-row"><div>Warm-up '+(i+1)+'<small>'+x.label+' · '+x.reps+' reps</small></div><strong>'+fmt(x.weight)+' kg</strong></div>').join('')+'<div class="hint">Keep every rep crisp and comfortable.'+(w===3?' The final ramp-up set bridges the gap to your first working set ('+fmt(firstWorking)+' kg).':'')+'</div>';}}
+
+function renderPlateDiagram(loaded){
+ const svg=$('plateDiagram');if(!svg)return;
+ 
+ const plateWidth=size=>size>=25?16:size>=20?14:size>=15?12:size>=10?10:size>=5?8:7;
+ const rawWidth=loaded.reduce((sum,p)=>sum+p.count*plateWidth(p.size),0);
+ const scale=Math.min(1,88/Math.max(1,rawWidth));
+ const totalWidth=rawWidth*scale;
+ let left='',right='',offset=0;
+ // Plates are packed against the collars at the outer ends of each sleeve.
+ // The largest plate sits innermost; progressively smaller plates sit outboard.
+ loaded.forEach(({size,count})=>{
+  const w=plateWidth(size)*scale;
+  const h=Math.max(32,Math.min(88,34+size*2.0));
+  const y=(116-h)/2;
+  const color=(plateColors[size]||{fill:'#9ca6b1'}).fill;
+  for(let i=0;i<count;i++){
+   const rx=370-totalWidth+offset;
+   const lx=70+totalWidth-offset-w;
+   right+=`<rect x="${rx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="3" fill="${color}" stroke="#20262b" stroke-width="1.5"/><rect x="${(rx+w*.22).toFixed(2)}" y="52" width="${(w*.56).toFixed(2)}" height="12" rx="3" fill="#3d454e" opacity=".85"/>`;
+   left+=`<rect x="${lx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="3" fill="${color}" stroke="#20262b" stroke-width="1.5"/><rect x="${(lx+w*.22).toFixed(2)}" y="52" width="${(w*.56).toFixed(2)}" height="12" rx="3" fill="#3d454e" opacity=".85"/>`;
+   offset+=w;
+  }
+ });
+ // Bar shaft, sleeves and end caps are drawn first so the plates sit on top.
+ const collarLeft=63;
+ const collarRight=370;
+ svg.innerHTML=
+  '<rect x="20" y="54" width="400" height="8" rx="4" fill="#aeb7c0"/>'+
+  '<rect x="70" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
+  '<rect x="270" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
+  '<rect x="170" y="47" width="100" height="22" rx="6" fill="#737d87"/>'+
+  left+right;
+ $('plateDiagramCaption').textContent=loaded.length?loaded.map(p=>p.count+' × '+fmt(p.size)+' kg').join(' · ')+' per side':'No plates required — bar only';
+}
+function calcPlates(){const target=+$('target').value,bar=+$('bar').value;const out=$('plates');out.innerHTML='';if($('target').value.trim()===''||$('bar').value.trim()===''){$('plateTotal').textContent='—';$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';renderPlateDiagram([]);return;}if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';renderPlateDiagram([]);return;}let rem=(target-bar)/2,loaded=[];$('plateTotal').textContent=fmt(rem)+' kg per side';const sizes=[25,20,15,10,5,2.5,1.25].filter(p=>settings.plates[p]);sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(p)+' kg';chip.style.backgroundColor=plateColors[p].fill;chip.style.color=plateColors[p].text;out.appendChild(chip);loaded.push({size:p,count:n});rem=+(rem-n*p).toFixed(4);}});renderPlateDiagram(loaded);$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(rem)+' kg per side. Enable more plate sizes in settings or check the target/bar weight.':'Plates required per side, using your enabled plate sizes.';}
+$('plateDiagramWrap').style.display=settings.diagram?'block':'none';
+// Keep calculator entries while navigating to Settings and back in the same app session.
+const calculatorInputIds=['ormWeight','ormReps','tm','week','target','bar'];
+function saveCalculatorInputs(){try{const values={};calculatorInputIds.forEach(id=>{values[id]=$(id).value;});sessionStorage.setItem('spartxToolsInputs',JSON.stringify(values));}catch(e){}}
+try{const savedInputs=JSON.parse(sessionStorage.getItem('spartxToolsInputs')||'null');if(savedInputs){calculatorInputIds.forEach(id=>{if(Object.prototype.hasOwnProperty.call(savedInputs,id))$(id).value=savedInputs[id];});}}catch(e){}
+calculatorInputIds.forEach(id=>$(id).addEventListener('input',saveCalculatorInputs));
+calculatorInputIds.forEach(id=>$(id).addEventListener('change',saveCalculatorInputs));
+window.addEventListener('pagehide',saveCalculatorInputs);
+// Select the existing value when a numeric field receives focus, so a new entry replaces it.
+document.querySelectorAll('input[type="number"]').forEach(input=>input.addEventListener('focus',()=>input.select()));
+$('ormWeight').addEventListener('input',calcOrm);$('ormReps').addEventListener('input',calcOrm);$('tm').addEventListener('input',calc531);$('week').addEventListener('change',calc531);$('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);
+calcOrm();calc531();calcPlates();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>

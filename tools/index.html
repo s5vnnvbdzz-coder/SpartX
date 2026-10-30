@@ -99,18 +99,16 @@ function renderPlateDiagram(loaded){
   const y=(116-h)/2;
   const color=colors[size]||'#9ca6b1';
   for(let i=0;i<count;i++){
-   const rx=270+offset;
-   const lx=170-offset-w;
+   const rx=370-totalWidth+offset;
+   const lx=70+totalWidth-offset-w;
    right+=`<rect x="${rx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="3" fill="${color}" stroke="#20262b" stroke-width="1.5"/><rect x="${(rx+w*.22).toFixed(2)}" y="52" width="${(w*.56).toFixed(2)}" height="12" rx="3" fill="#3d454e" opacity=".85"/>`;
    left+=`<rect x="${lx.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="3" fill="${color}" stroke="#20262b" stroke-width="1.5"/><rect x="${(lx+w*.22).toFixed(2)}" y="52" width="${(w*.56).toFixed(2)}" height="12" rx="3" fill="#3d454e" opacity=".85"/>`;
    offset+=w;
   }
  });
  // Bar shaft, sleeves and end caps are drawn first so the plates sit on top.
- const leftPlateEdge=170-totalWidth;
- const rightPlateEdge=270+totalWidth;
- const collarLeft=leftPlateEdge-7;
- const collarRight=rightPlateEdge;
+ const collarLeft=63;
+ const collarRight=370;
  svg.innerHTML=
   '<rect x="20" y="54" width="400" height="8" rx="4" fill="#aeb7c0"/>'+
   '<rect x="20" y="48" width="50" height="20" rx="5" fill="#77818b"/>'+

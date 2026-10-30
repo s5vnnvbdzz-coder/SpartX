@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#30343a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPARTANX Tools">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>SPARTANX Tools · Settings</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d0f;--panel:#171a1e;--line:#30363e;--txt:#f3f4f6;--muted:#9ba3ad;--lime:#c8f169}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--txt);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:0 0 calc(28px + env(safe-area-inset-bottom))}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 15px;border-bottom:1px solid #454b52;background:#30343a;display:flex;align-items:center;justify-content:space-between;min-height:calc(76px + env(safe-area-inset-top))}
+.brand{font-size:22px;font-weight:950;letter-spacing:3px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:1.7px;margin-top:3px}
+main{max-width:700px;margin:auto;padding:22px 16px 40px}.eyebrow{font-size:11px;color:var(--lime);font-weight:850;letter-spacing:1.6px}h1{font-size:29px;margin:7px 0 5px}h2{font-size:18px;margin:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.back{display:inline-flex;align-items:center;gap:6px;background:#252a30;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-weight:800;text-decoration:none}
+.row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.copy strong{display:block;font-size:14px}.copy small{display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:4px}
+.switch{position:relative;width:48px;height:28px;flex:0 0 48px;margin:0}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:20px;background:#454b53;transition:.2s;cursor:pointer}.switch span:before{content:'';position:absolute;width:20px;height:20px;left:4px;top:4px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked+span{background:var(--lime)}.switch input:checked+span:before{transform:translateX(20px);background:#18200d}
+.plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.plate-setting{display:flex;align-items:center;gap:8px;background:#101316;border:1px solid var(--line);padding:10px;border-radius:10px;font-size:13px;margin:0}.plate-dot{width:13px;height:13px;border-radius:4px;flex:0 0 13px}.plate-setting input{width:18px;height:18px;margin-left:auto;accent-color:var(--lime)}
+footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px}
+</style>
+</head>
+<body>
+<header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sub">SETTINGS</div></header>
+<main>
+<div class="top"><a class="back" href="./embedded.html">← Back</a><div><div class="eyebrow">PERSONALISE YOUR TOOLS</div><h1>Settings</h1></div></div>
+<section class="card"><h2>Working weights</h2><div class="row"><div class="copy"><strong>Suggested warm-up</strong><small>Show ramp-up sets calculated from your selected training max.</small></div><label class="switch"><input type="checkbox" id="warmupToggle"><span></span></label></div></section>
+<section class="card"><h2>Plate calculator</h2><div class="row"><div class="copy"><strong>Barbell diagram</strong><small>Show or hide the visual plate layout.</small></div><label class="switch"><input type="checkbox" id="diagramToggle"><span></span></label></div><div class="copy" style="margin-top:16px"><strong>Available plates</strong><small>Turn off any plate sizes you do not have. The calculator will only use enabled plates.</small></div><div class="plate-settings" id="plateSettings"></div></section>
+</main>
+<footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
+<script>
+const defaults={warmup:true,diagram:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
+let settings={...defaults,plates:{...defaults.plates}};
+try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...defaults.plates,...(saved.plates||{})}};}catch(e){}
+function save(){try{localStorage.setItem('spartxToolsSettings',JSON.stringify(settings));}catch(e){}}
+const colors={25:'#d62828',20:'#1769aa',15:'#f4d03f',10:'#238b45',5:'#f1f3f5',2.5:'#f28c28',1.25:'#7e57c2'};
+const warm=document.getElementById('warmupToggle'),diagram=document.getElementById('diagramToggle'),list=document.getElementById('plateSettings');
+warm.checked=!!settings.warmup;diagram.checked=!!settings.diagram;
+warm.addEventListener('change',()=>{settings.warmup=warm.checked;save();});
+diagram.addEventListener('change',()=>{settings.diagram=diagram.checked;save();});
+[25,20,15,10,5,2.5,1.25].forEach(p=>{const label=document.createElement('label');label.className='plate-setting';const dot=document.createElement('span');dot.className='plate-dot';dot.style.background=colors[p];const name=document.createElement('span');name.textContent=p+' kg';const input=document.createElement('input');input.type='checkbox';input.checked=!!settings.plates[p];input.addEventListener('change',()=>{settings.plates[p]=input.checked;save();});label.append(dot,name,input);list.append(label);});
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>

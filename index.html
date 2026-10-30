@@ -106,15 +106,20 @@ const SPARTANX_STANDARDS={
 const SPARTANX_SESSION_STANDARDS={male:[20,35,50,70,90],female:[15,25,40,55,75]};
 function spartanRank(value,thresholds){let rank=0;for(let i=0;i<thresholds.length;i++){if(value>=thresholds[i])rank=i+1;else break;}return SPARTANX_RANKS[rank];}
 function rankEmblem(rank){
- const paths=[
- '<path d="M24 4 40 10v13c0 11-7 19-16 23C15 42 8 34 8 23V10z"/><path d="M24 15v18M16 24h16"/>',
- '<path d="M24 4 40 10v13c0 11-7 19-16 23C15 42 8 34 8 23V10z"/><path d="m17 29 7-15 7 15-7 5z"/>',
- '<path d="M9 35V23c0-9 6-16 15-16s15 7 15 16v12H9z"/><path d="M7 24h34M17 18h14M24 8v8"/>',
- '<path d="M24 5c-5 8-10 11-10 21a10 10 0 0 0 20 0C34 16 29 13 24 5z"/><path d="M5 19c4-5 8-7 13-7M43 19c-4-5-8-7-13-7M8 34l8-2M40 34l-8-2"/>',
- '<path d="M24 5 29 16 41 12 35 24 43 33 30 33 24 45 18 33 5 33 13 24 7 12 19 16z"/><path d="M24 17v16M16 25h16"/>',
- '<circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="10"/><path d="M24 1v7M24 40v7M1 24h7M40 24h7M8 8l5 5M35 35l5 5M40 8l-5 5M13 35l-5 5"/>'
- ];
- return '<svg class="rank-emblem" viewBox="0 0 48 48" aria-hidden="true">'+paths[Math.max(0,Math.min(5,rank))]+'</svg>';
+ const level=Math.max(0,Math.min(5,Number(rank)||0));
+ const helmet='<path d="M18 39V27C18 16 26 9 36 9s18 7 18 18v12l-6 9H24z"/><path d="M18 27 25 24l11 3 11-3 7 3M19 34l10 2 7-3 7 3 10-2M24 39l5 9M48 39l-5 9M36 27v17M29 36h14"/><path d="M24 18 29 14M48 18l-5-4"/><circle cx="24" cy="30" r="1"/><circle cx="48" cy="30" r="1"/>';
+ const damage='<path d="m30 10-3 9 5 4-6 7 4 4-3 8M19 28l5 3-3 6M47 43l5 3"/><path d="m17 17 5 4M52 13l-4 5"/>';
+ const plume='<path d="M27 12C22 5 25 2 30 3c3-4 9-3 11 1 6 0 8 5 4 10M29 11c2-3 7-4 12-2M31 7l-2-4M37 7l2-5M43 9l4-3"/>';
+ const sword='<g><path d="m9 8 4-4 5 5-4 4M13 13l25 25M11 7l-4 4 4 4 4-4M35 35l6-6M38 38l-6 6"/></g>';
+ const secondSword='<g><path d="m57 8-4-4-5 5 4 4M53 13 28 38M55 7l4 4-4 4-4-4M31 35l-6-6M28 38l6 6"/></g>';
+ const laurel='<path d="M13 42c-5-8-5-17 0-25M59 42c5-8 5-17 0-25M11 31l-6-3 1 7M13 23l-5-5 1 8M16 17l-2-7 5 5M61 31l6-3-1 7M59 23l5-5-1 8M56 17l2-7-5 5"/>';
+ let extras='';
+ if(level===0) extras=damage;
+ if(level>=2) extras+=plume;
+ if(level>=3) extras=sword+extras;
+ if(level>=4) extras=sword+secondSword+extras;
+ if(level===5) extras=laurel+extras+'<path d="m28 16 8-4 8 4M27 20h18M27 43l9 5 9-5"/>';
+ return '<svg class="rank-emblem" viewBox="0 0 72 56" role="img" aria-label="'+['Mortal damaged helmet','Spartan repaired helmet','Hero crested helmet','Demigod helmet and sword','Titan helmet with crossed swords','Olympian elite helmet'][level]+'">'+extras+helmet+'</svg>';
 }
 function compoundKind(name){let n=name.toLowerCase().replace(/[^a-z]/g,'');if(n.includes('squat')&&!n.includes('split')&&!n.includes('bulgarian')&&!n.includes('goblet'))return 'squat';if(n.includes('benchpress')||n==='bench')return 'bench';if(n.includes('deadlift')&&!n.includes('romanian')&&!n.includes('stiffleg'))return 'deadlift';return null;}
 function getCompoundBest(kind){let best=0;for(const session of db.sessions||[])for(const ex of session.exercises||[])if(compoundKind(ex.name)===kind)for(const set of ex.sets||[]){const w=+set.weight||0,reps=+set.reps||0;if(w>0&&reps>0)best=Math.max(best,w);}return best;}

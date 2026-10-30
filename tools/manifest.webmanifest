@@ -1,6 +1,6 @@
 {
-  "name": "SPARTX Tools",
-  "short_name": "SPARTX Tools",
+  "name": "SPARTANX Tools",
+  "short_name": "SPARTANX Tools",
   "description": "Strength training calculators",
   "start_url": "./",
   "scope": "./",

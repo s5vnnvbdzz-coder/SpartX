@@ -33,7 +33,7 @@ input:focus,select:focus{outline:1px solid var(--lime);border-color:var(--lime)}
 .result{font-size:28px;font-weight:900;color:var(--lime);font-variant-numeric:tabular-nums;margin:14px 0 2px}
 .hint{font-size:11px;color:var(--muted);line-height:1.5}
 .rows{margin-top:10px}.calc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}.calc-row:last-child{border-bottom:0}.calc-row strong{font-size:18px;color:var(--lime);white-space:nowrap}.calc-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-.plate-output{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}\n.plate-diagram-wrap{margin:16px 0 8px;padding:12px 8px;background:#101316;border:1px solid #30363e;border-radius:12px}\n.plate-diagram-title{font-size:10px;color:var(--muted);letter-spacing:1.2px;font-weight:800;margin:0 0 5px 4px}\n#plateDiagram{width:100%;display:block;height:auto;min-height:100px}\n.plate-diagram-caption{text-align:center;color:var(--muted);font-size:10px;margin-top:2px}.plate{background:#28321c;border:1px solid #526a31;color:#e1f7ae;padding:8px 11px;border-radius:9px;font-size:13px;font-weight:800}.empty{color:var(--muted);font-size:13px;padding:8px 0}
+.plate-output{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.plate-diagram-wrap{margin:16px 0 8px;padding:12px 8px;background:#101316;border:1px solid #30363e;border-radius:12px}#plateDiagram{width:100%;display:block;height:auto;min-height:100px}.plate-diagram-caption{text-align:center;color:var(--muted);font-size:10px;margin-top:2px}.plate{background:#28321c;border:1px solid #526a31;color:#e1f7ae;padding:8px 11px;border-radius:9px;font-size:13px;font-weight:800}.empty{color:var(--muted);font-size:13px;padding:8px 0}
 button{border:0;border-radius:10px;padding:11px 13px;background:var(--lime);color:#11150b;font-weight:850;cursor:pointer}
 footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px}
 @media(max-width:390px){main{padding:17px 12px}.card{padding:14px}.fields{gap:8px}.result{font-size:25px}}
@@ -73,7 +73,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="field"><label for="bar">Bar weight (kg)</label><input id="bar" type="number" min="0" step="0.5" value="20" inputmode="decimal"></div>
 </div>
 <div class="result" id="plateTotal">80 kg per side</div>
-<div class="plate-output" id="plates"></div>\n<div class="plate-diagram-wrap"><div class="plate-diagram-title">BAR LOADING DIAGRAM · EACH SIDE MATCHES</div><svg id="plateDiagram" viewBox="0 0 340 116" role="img" aria-label="Diagram showing the plates loaded on each side of the barbell"></svg><div class="plate-diagram-caption" id="plateDiagramCaption">Plate layout updates with your target weight.</div></div>
+<div class="plate-output" id="plates"></div><div class="plate-diagram-wrap"><svg id="plateDiagram" viewBox="0 0 440 116" role="img" aria-label="Diagram showing the plates loaded on each side of the barbell"></svg><div class="plate-diagram-caption" id="plateDiagramCaption">Plate layout updates with your target weight.</div></div>
 <div class="hint" id="plateHint">Plates required per side, using standard plate sizes.</div>
 </section>
 </main>

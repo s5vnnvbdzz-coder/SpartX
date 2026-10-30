@@ -154,6 +154,13 @@ let sessionStarted=null,sessionTicker=null,sessionActive=false,libraryCategory='
 function switchScreen(id){document.body.classList.toggle('tools-screen-active',id==='tools');document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));updateMinimizedSession();}
 document.getElementById('trackerNav').addEventListener('click',function(e){const button=e.target.closest('button[data-screen]');if(!button)return;e.preventDefault();switchScreen(button.dataset.screen);});
 function startSession(){if(sessionActive){switchScreen('activeWorkout');return;}work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionActive=true;$('sessionClock').textContent='00:00:00';$('activeWorkoutName').textContent=$('workoutName').value.trim()||'Workout';switchScreen('activeWorkout');renderWork();updateMinimizedSession();}
+window.addEventListener('spartx:apply531',function(event){
+ const d=event.detail;if(!d||!Array.isArray(d.sets)||!d.exercise)return;
+ if(!sessionActive){$('workoutName').value=d.exercise+' · 5/3/1';startSession();}
+ const imported={name:d.exercise,rest:120,notes:'Imported from SPARTANX Tools · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')',sets:d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))};
+ work.unshift(imported);beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();
+});
+
 function beginSessionClock(){if(sessionStarted!==null)return;sessionStarted=Date.now();updateSessionClock();clearInterval(sessionTicker);sessionTicker=setInterval(updateSessionClock,1000);}
 function updateSessionClock(){let clock='00:00:00';if(sessionStarted!==null){let s=Math.floor((Date.now()-sessionStarted)/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=s%60;clock=[h,m,sec].map(v=>String(v).padStart(2,'0')).join(':');}$('sessionClock').textContent=clock;$('minSessionClock').textContent=clock+' · Tap to return';updateMinimizedSession();}
 function updateMinimizedSession(){const bar=$('minimizedSession');if(!bar)return;const show=sessionActive&&!$('activeWorkout').classList.contains('active');bar.classList.toggle('hidden',!show);$('minSessionName').textContent=($('activeWorkoutName').textContent||'WORKOUT').toUpperCase();}

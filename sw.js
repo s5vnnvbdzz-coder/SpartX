@@ -1,4 +1,4 @@
-const CACHE='spartx-v5';
+const CACHE='spartx-v6';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(

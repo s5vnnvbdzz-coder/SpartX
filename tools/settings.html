@@ -21,7 +21,7 @@ main{max-width:700px;margin:auto;padding:22px 16px 40px}.eyebrow{font-size:11px;
 .row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.copy strong{display:block;font-size:14px}.copy small{display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:4px}
 .switch{position:relative;width:48px;height:28px;flex:0 0 48px;margin:0}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:20px;background:#454b53;transition:.2s;cursor:pointer}.switch span:before{content:'';position:absolute;width:20px;height:20px;left:4px;top:4px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked+span{background:var(--lime)}.switch input:checked+span:before{transform:translateX(20px);background:#18200d}
 .plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.plate-setting{display:flex;align-items:center;gap:8px;background:#101316;border:1px solid var(--line);padding:10px;border-radius:10px;font-size:13px;margin:0}.plate-dot{width:13px;height:13px;border-radius:4px;flex:0 0 13px}.plate-setting input{width:18px;height:18px;margin-left:auto;accent-color:var(--lime)}
-footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px}
+#settingsNav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:50;justify-content:space-around;align-items:center;background:#171a1ef5;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom))}#settingsNav a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-size:18px;font-weight:800;padding:5px}#settingsNav a span{display:block;font-size:10px}body.tracker-return #settingsNav{display:flex}body.tracker-return{padding-bottom:calc(78px + env(safe-area-inset-bottom))}footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px}
 </style>
 </head>
 <body>
@@ -31,9 +31,9 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <section class="card"><h2>Working weights</h2><div class="row"><div class="copy"><strong>Suggested warm-up</strong><small>Show ramp-up sets calculated from your selected training max.</small></div><label class="switch"><input type="checkbox" id="warmupToggle"><span></span></label></div></section>
 <section class="card"><h2>Plate calculator</h2><div class="row"><div class="copy"><strong>Barbell diagram</strong><small>Show or hide the visual plate layout.</small></div><label class="switch"><input type="checkbox" id="diagramToggle"><span></span></label></div><div class="copy" style="margin-top:16px"><strong>Available plates</strong><small>Turn off any plate sizes you do not have. The calculator will only use enabled plates.</small></div><div class="plate-settings" id="plateSettings"></div></section>
 </main>
-<footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
+<nav id="settingsNav" aria-label="Tracker navigation"><a href="../#home">⌂<span>HOME</span></a><a href="../#tools">⌗<span>TOOLS</span></a><a href="../#plan">▦<span>PLANNER</span></a><a href="../#profile">♙<span>PROFILE</span></a></nav><footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
 <script>
-const defaults={warmup:true,diagram:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
+if(new URLSearchParams(location.search).get("return")==="tracker"){document.body.classList.add("tracker-return");document.getElementById("settingsBack").href="../#tools";}const defaults={warmup:true,diagram:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
 let settings={...defaults,plates:{...defaults.plates}};
 try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...defaults.plates,...(saved.plates||{})}};}catch(e){}
 function save(){try{localStorage.setItem('spartxToolsSettings',JSON.stringify(settings));}catch(e){}}

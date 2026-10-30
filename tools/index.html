@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0d0f">
+<meta name="theme-color" content="#30343a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SPARTX Tools">
@@ -16,7 +16,7 @@
 :root{color-scheme:dark;--bg:#0b0d0f;--panel:#171a1e;--panel2:#22272d;--line:#30363e;--txt:#f3f4f6;--muted:#9ba3ad;--lime:#c8f169}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--txt);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:0 0 calc(28px + env(safe-area-inset-bottom))}
-header{padding:18px 18px 15px;border-bottom:1px solid var(--line);background:#101114;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 15px;border-bottom:1px solid #454b52;background:#30343a;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3;min-height:calc(76px + env(safe-area-inset-top))}
 .brand{font-size:22px;font-weight:950;letter-spacing:3px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:1.7px;margin-top:3px}
 main{max-width:700px;margin:auto;padding:20px 16px 30px}
 .eyebrow{font-size:11px;color:var(--lime);font-weight:850;letter-spacing:1.6px}
@@ -24,7 +24,7 @@ h1{font-size:29px;margin:7px 0 5px}h2{font-size:18px;margin:0}
 .intro{color:var(--muted);margin:0 0 19px;line-height:1.5}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0}
 .card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.tool-icon{width:36px;height:36px;border-radius:11px;background:#28321c;color:var(--lime);display:grid;place-items:center;font-size:19px;font-weight:900}
+.tool-icon{display:none}
 .fields{display:flex;gap:10px;margin:10px 0}.field{flex:1;min-width:0}
 label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
 input,select,button{font:inherit}
@@ -33,7 +33,7 @@ input:focus,select:focus{outline:1px solid var(--lime);border-color:var(--lime)}
 .result{font-size:28px;font-weight:900;color:var(--lime);font-variant-numeric:tabular-nums;margin:14px 0 2px}
 .hint{font-size:11px;color:var(--muted);line-height:1.5}
 .rows{margin-top:10px}.calc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}.calc-row:last-child{border-bottom:0}.calc-row strong{font-size:18px;color:var(--lime);white-space:nowrap}.calc-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
-.plate-output{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.plate{background:#28321c;border:1px solid #526a31;color:#e1f7ae;padding:8px 11px;border-radius:9px;font-size:13px;font-weight:800}.empty{color:var(--muted);font-size:13px;padding:8px 0}
+.plate-output{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}\n.plate-diagram-wrap{margin:16px 0 8px;padding:12px 8px;background:#101316;border:1px solid #30363e;border-radius:12px}\n.plate-diagram-title{font-size:10px;color:var(--muted);letter-spacing:1.2px;font-weight:800;margin:0 0 5px 4px}\n#plateDiagram{width:100%;display:block;height:auto;min-height:100px}\n.plate-diagram-caption{text-align:center;color:var(--muted);font-size:10px;margin-top:2px}.plate{background:#28321c;border:1px solid #526a31;color:#e1f7ae;padding:8px 11px;border-radius:9px;font-size:13px;font-weight:800}.empty{color:var(--muted);font-size:13px;padding:8px 0}
 button{border:0;border-radius:10px;padding:11px 13px;background:var(--lime);color:#11150b;font-weight:850;cursor:pointer}
 footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px}
 @media(max-width:390px){main{padding:17px 12px}.card{padding:14px}.fields{gap:8px}.result{font-size:25px}}
@@ -47,7 +47,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <p class="intro">Quick, practical calculators for your strength training. Change any value to update the results instantly.</p>
 
 <section class="card" aria-labelledby="ormTitle">
-<div class="card-head"><div class="tool-icon">1RM</div><h2 id="ormTitle">One-rep max calculator</h2></div>
+<div class="card-head"><h2 id="ormTitle">One-rep max calculator</h2></div>
 <div class="fields">
 <div class="field"><label for="ormWeight">Weight (kg)</label><input id="ormWeight" type="number" min="0" step="0.5" value="100" inputmode="decimal"></div>
 <div class="field"><label for="ormReps">Reps</label><input id="ormReps" type="number" min="1" max="12" step="1" value="5" inputmode="numeric"></div>
@@ -57,7 +57,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 </section>
 
 <section class="card" aria-labelledby="531Title">
-<div class="card-head"><div class="tool-icon">5/3/1</div><h2 id="531Title">5/3/1 working weights</h2></div>
+<div class="card-head"><h2 id="531Title">5/3/1 Working Weights</h2></div>
 <div class="fields">
 <div class="field"><label for="tm">Training max (kg)</label><input id="tm" type="number" min="0" step="2.5" value="145" inputmode="decimal"></div>
 <div class="field"><label for="week">Week</label><select id="week"><option value="1">Week 1 · 5s</option><option value="2">Week 2 · 3s</option><option value="3">Week 3 · 5/3/1</option><option value="4">Week 4 · Deload</option></select></div>
@@ -73,7 +73,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="field"><label for="bar">Bar weight (kg)</label><input id="bar" type="number" min="0" step="0.5" value="20" inputmode="decimal"></div>
 </div>
 <div class="result" id="plateTotal">80 kg per side</div>
-<div class="plate-output" id="plates"></div>
+<div class="plate-output" id="plates"></div>\n<div class="plate-diagram-wrap"><div class="plate-diagram-title">BAR LOADING DIAGRAM · EACH SIDE MATCHES</div><svg id="plateDiagram" viewBox="0 0 340 116" role="img" aria-label="Diagram showing the plates loaded on each side of the barbell"></svg><div class="plate-diagram-caption" id="plateDiagramCaption">Plate layout updates with your target weight.</div></div>
 <div class="hint" id="plateHint">Plates required per side, using standard plate sizes.</div>
 </section>
 </main>
@@ -83,7 +83,8 @@ const $=id=>document.getElementById(id);
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 function calcOrm(){const w=+$('ormWeight').value,r=Math.max(1,Math.min(12,+$('ormReps').value||1));$('ormResult').textContent=w>0?fmt(w*(1+r/30))+' kg':'—';}
 function calc531(){const tm=+$('tm').value,w=+$('week').value,pcts=[[.65,.75,.85],[.70,.80,.90],[.75,.85,.95],[.40,.50,.60]][w-1],reps=[['5','5','5+'],['3','3','3+'],['5','3','1+'],['5','5','5']][w-1];$('wendler').innerHTML=pcts.map((p,i)=>{const load=Math.round(tm*p/2.5)*2.5;return '<div class="calc-row"><div>Set '+(i+1)+'<small>'+Math.round(p*100)+'% · '+reps[i]+' reps</small></div><strong>'+(tm>0?fmt(load)+' kg':'—')+'</strong></div>';}).join('');}
-function calcPlates(){const target=+$('target').value,bar=+$('bar').value;const out=$('plates');out.innerHTML='';if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';return;}let rem=(target-bar)/2;$('plateTotal').textContent=fmt(rem)+' kg per side';const sizes=[25,20,15,10,5,2.5,1.25];sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(p)+' kg';out.appendChild(chip);rem=+(rem-n*p).toFixed(4);}});$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(rem)+' kg per side. Check the available plate sizes.':'Plates required per side, using standard plate sizes.';}
+function renderPlateDiagram(loaded){const svg=$('plateDiagram');if(!svg)return;const colors={25:'#777f89',20:'#c8f169',15:'#9ca6b1',10:'#d5d9de',5:'#69737e',2.5:'#aab2bb',1.25:'#e0e4e8'};let left='',right='',xL=157,xR=183;loaded.forEach(({size,count})=>{for(let i=0;i<count;i++){const w=Math.max(5,Math.min(15,size*.48)),h=Math.max(30,Math.min(76,28+size*1.8)),y=(116-h)/2; xL-=w+2;xR+=w+2;const color=colors[size]||'#9ca6b1';left+=`<rect x="${xL}" y="${y}" width="${w}" height="${h}" rx="2" fill="${color}" stroke="#20262b" stroke-width="1"/>`;right+=`<rect x="${xR}" y="${y}" width="${w}" height="${h}" rx="2" fill="${color}" stroke="#20262b" stroke-width="1"/>`;}});svg.innerHTML='<rect x="20" y="55" width="300" height="7" rx="3.5" fill="#aab2bb"/><rect x="14" y="48" width="8" height="21" rx="2" fill="#68727c"/><rect x="318" y="48" width="8" height="21" rx="2" fill="#68727c"/>'+left+right+'<rect x="151" y="49" width="38" height="19" rx="4" fill="#555e68"/><circle cx="170" cy="58.5" r="4" fill="#c8f169"/>';const total=loaded.reduce((a,p)=>a+p.size*p.count,0);$('plateDiagramCaption').textContent=loaded.length?loaded.map(p=>p.count+' × '+fmt(p.size)+' kg').join(' · ')+' per side':'No plates required — bar only';}
+function calcPlates(){const target=+$('target').value,bar=+$('bar').value;const out=$('plates');out.innerHTML='';if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';renderPlateDiagram([]);return;}let rem=(target-bar)/2,loaded=[];$('plateTotal').textContent=fmt(rem)+' kg per side';const sizes=[25,20,15,10,5,2.5,1.25];sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(p)+' kg';out.appendChild(chip);loaded.push({size:p,count:n});rem=+(rem-n*p).toFixed(4);}});renderPlateDiagram(loaded);$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(rem)+' kg per side. Check the available plate sizes.':'Plates required per side, using standard plate sizes.';}
 $('ormWeight').addEventListener('input',calcOrm);$('ormReps').addEventListener('input',calcOrm);$('tm').addEventListener('input',calc531);$('week').addEventListener('change',calc531);$('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);
 calcOrm();calc531();calcPlates();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});

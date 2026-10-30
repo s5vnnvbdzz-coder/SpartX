@@ -168,7 +168,7 @@ function startSession(){if(sessionActive){switchScreen('activeWorkout');return;}
 function import531IntoWorkout(d){
  if(!d||!Array.isArray(d.sets)||!d.exercise)return false;
  if(!sessionActive){$('workoutName').value=d.exercise+' · 5/3/1';startSession();}
- const imported={name:d.exercise,rest:120,notes:'Imported from SPARTANX Tools · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')',sets:d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))};
+ const imported={name:d.exercise,rest:120,notes:'Imported from SPARTANX Tools · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')',sets:[...(Array.isArray(d.warmupSets)?d.warmupSets:[]).map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Warm-up',done:false})),...d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))]};
  work.unshift(imported);beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();return true;
 }
 window.spartanxImport531=import531IntoWorkout;

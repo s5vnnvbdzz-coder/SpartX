@@ -118,16 +118,10 @@ function renderPlateDiagram(loaded){
  const collarRight=370;
  svg.innerHTML=
   '<rect x="20" y="54" width="400" height="8" rx="4" fill="#aeb7c0"/>'+
-  '<rect x="20" y="48" width="50" height="20" rx="5" fill="#77818b"/>'+
-  '<rect x="370" y="48" width="50" height="20" rx="5" fill="#77818b"/>'+
   '<rect x="70" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
   '<rect x="270" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
   '<rect x="170" y="47" width="100" height="22" rx="6" fill="#737d87"/>'+
-  left+right+
-  '<rect x="'+collarLeft.toFixed(2)+'" y="39" width="7" height="38" rx="2" fill="#c8f169" stroke="#e2ff9a" stroke-width="1.5"/>'+
-  '<rect x="'+collarRight.toFixed(2)+'" y="39" width="7" height="38" rx="2" fill="#c8f169" stroke="#e2ff9a" stroke-width="1.5"/>'+
-  '<rect x="15" y="44" width="6" height="28" rx="2" fill="#555e68"/>'+
-  '<rect x="419" y="44" width="6" height="28" rx="2" fill="#555e68"/>';
+  left+right;
  $('plateDiagramCaption').textContent=loaded.length?loaded.map(p=>p.count+' × '+fmt(p.size)+' kg').join(' · ')+' per side':'No plates required — bar only';
 }
 function calcPlates(){const target=+$('target').value,bar=+$('bar').value;const out=$('plates');out.innerHTML='';if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';renderPlateDiagram([]);return;}let rem=(target-bar)/2,loaded=[];$('plateTotal').textContent=fmt(rem)+' kg per side';const sizes=[25,20,15,10,5,2.5,1.25].filter(p=>settings.plates[p]);sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(p)+' kg';chip.style.backgroundColor=plateColors[p].fill;chip.style.color=plateColors[p].text;out.appendChild(chip);loaded.push({size:p,count:n});rem=+(rem-n*p).toFixed(4);}});renderPlateDiagram(loaded);$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(rem)+' kg per side. Enable more plate sizes in settings or check the target/bar weight.':'Plates required per side, using your enabled plate sizes.';}

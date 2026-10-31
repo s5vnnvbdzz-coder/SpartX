@@ -21,7 +21,9 @@ header{position:sticky;top:0;background:#101114f2;backdrop-filter:blur(12px);pad
 .brand{font-size:22px;font-weight:950;letter-spacing:3px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:1.7px;margin-top:3px}
 main{max-width:760px;margin:auto;padding:16px 16px 30px}
 .eyebrow{font-size:11px;color:var(--lime);font-weight:850;letter-spacing:1.6px}
-h1{font-size:29px;margin:7px 0 5px}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.page-title-row h1{flex:1}h2{font-size:18px;margin:0}
+h1{font-size:29px;margin:7px 0 5px}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.page-title-row h1{flex:1}
+.page-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}.rearrange-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;border:1px solid var(--line);background:#252a30;color:var(--txt);font-size:22px;line-height:1;border-radius:10px;cursor:pointer}.rearrange-btn[aria-pressed="true"]{background:var(--lime);color:#18200d;border-color:var(--lime)}.reorder-hint{display:none;color:var(--muted);font-size:11px;margin:5px 0 12px}.rearranging .reorder-hint{display:block}.reorder-controls{display:none;align-items:center;gap:6px;margin-left:auto}.rearranging .reorder-controls{display:flex}.rearranging section.card{border-style:dashed;border-color:#68764a}.reorder-controls button{width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:#252a30;color:var(--txt);font-size:16px;line-height:1}.reorder-controls button:disabled{opacity:.3;cursor:default}
+h2{font-size:18px;margin:0}
 .intro{color:var(--muted);margin:0 0 19px;line-height:1.5}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0}
 .card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}.card-head h2{flex:1}.gear-btn{display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:5;width:38px;height:38px;padding:0;border:1px solid var(--line);background:#252a30;color:var(--txt);font-size:20px;border-radius:10px;text-decoration:none;cursor:pointer}.settings-page{display:none;max-width:700px;min-height:calc(100vh - env(safe-area-inset-top));margin:0 auto;padding:22px 16px 40px}.settings-page.active{display:block}body.settings-open>header{display:none}body.settings-open>footer{display:none}#toolsNav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:space-around;align-items:center;background:#171a1ef5;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom))}#toolsNav a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-size:18px;font-weight:800;padding:5px}#toolsNav a span{display:block;font-size:10px}#toolsNav a.active{color:var(--lime)}body.spartanx-light #toolsNav{background:#ffffffed;border-color:var(--line)}.settings-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.back-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:11px;padding:8px 10px;font-size:12px;font-weight:800;text-decoration:none;white-space:nowrap}.setting-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 0;border-bottom:1px solid var(--line)}.setting-row:last-child{border-bottom:0}.setting-copy strong{display:block;font-size:14px}.setting-copy small{display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:4px}.switch{position:relative;width:48px;height:28px;flex:0 0 48px}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:20px;background:#454b53;transition:.2s;cursor:pointer}.switch span:before{content:'';position:absolute;width:20px;height:20px;left:4px;top:4px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked+span{background:var(--lime)}.switch input:checked+span:before{transform:translateX(20px);background:#18200d}.plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.plate-setting{display:flex;align-items:center;gap:8px;background:#101316;border:1px solid var(--line);padding:10px;border-radius:10px;font-size:13px}.plate-dot{width:13px;height:13px;border-radius:4px;flex:0 0 13px}.warmup{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.warmup-title{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.8px;margin-bottom:5px}.warmup .calc-row strong{color:#dce7f3}
@@ -44,10 +46,10 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></header>
 <main>
 <div class="eyebrow">NUMBERS DON'T LIE</div>
-<div class="page-title-row"><h1>Training Tools</h1><a class="gear-btn" href="./settings.html" aria-label="Open settings" title="Settings">⚙</a></div>
+<div class="page-title-row"><h1>Training Tools</h1><div class="page-actions"><button class="rearrange-btn" type="button" aria-label="Rearrange tools" title="Rearrange tools" aria-pressed="false">☰</button><a class="gear-btn" href="./settings.html" aria-label="Open settings" title="Settings">⚙</a></div></div>
 
 
-<section class="card" aria-labelledby="ormTitle">
+<section class="card" data-tool-id="orm" aria-labelledby="ormTitle">
 <div class="card-head"><h2 id="ormTitle">1RM Calculator</h2></div>
 <div class="fields">
 <div class="field"><label for="ormWeight">Weight (kg)</label><input id="ormWeight" type="number" min="0" step="0.5" placeholder="e.g. 100" inputmode="decimal"></div>
@@ -57,7 +59,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="hint">Most useful for sets of 1–10 reps. This is an estimate, not a tested max.</div>
 </section>
 
-<section class="card" aria-labelledby="tmFinderTitle">
+<section class="card" data-tool-id="training-max" aria-labelledby="tmFinderTitle">
 <div class="card-head"><h2 id="tmFinderTitle">Training Max</h2></div>
 <div class="field"><label for="tmFinderOneRm">One-rep max (kg)</label><input id="tmFinderOneRm" type="number" min="0" step="0.5" placeholder="e.g. 160" inputmode="decimal"></div>
 <div class="result" id="tmFinderResult">—</div>
@@ -65,7 +67,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="hint">Your training max is 90% of your one-rep max, calculated as 1RM × 0.90.</div>
 </section>
 
-<section class="card" aria-labelledby="531Title">
+<section class="card" data-tool-id="531" aria-labelledby="531Title">
 <div class="card-head"><h2 id="531Title">5/3/1 Working Weights</h2></div>
 <div class="fields">
 <div class="field"><label for="tm">Training max (kg)</label><input id="tm" type="number" min="0" step="2.5" placeholder="e.g. 145" inputmode="decimal"></div>
@@ -75,7 +77,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="hint">Weights are rounded to the nearest 2.5 kg. Percentages are based on your training max.</div><div class="warmup" id="warmupOutput" hidden></div>
 </section>
 
-<section class="card" aria-labelledby="plateTitle">
+<section class="card" data-tool-id="plates" aria-labelledby="plateTitle">
 <div class="card-head"><div class="tool-icon">▤</div><h2 id="plateTitle">Plate Calculator</h2></div>
 <div class="fields">
 <div class="field"><label for="target">Target bar weight (kg)</label><input id="target" type="number" min="0" step="2.5" placeholder="e.g. 180" inputmode="decimal"></div>
@@ -89,6 +91,50 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <nav id="toolsNav" aria-label="Main navigation"><a href="../#tools" class="active">⌗<span>TOOLS</span></a><a href="../#home">🏋<span>WORKOUT</span></a><a href="../#profile">♙<span>PROFILE</span></a></nav><footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
 <script>
 const $=id=>document.getElementById(id);
+
+function initToolRearrange(root){
+ const titleRow=root.querySelector('.page-title-row');
+ const cards=[...root.querySelectorAll('section.card[data-tool-id]')];
+ if(!titleRow||!cards.length)return;
+ const actions=titleRow.querySelector('.page-actions');
+ const toggle=actions&&actions.querySelector('.rearrange-btn');
+ if(!toggle)return;
+ const hint=document.createElement('div');hint.className='reorder-hint';hint.textContent='Use the arrows on each tool to change its position. Tap the menu icon again when finished.';
+ titleRow.insertAdjacentElement('afterend',hint);
+ const key='spartxToolsCardOrderV1';
+ let order=[];try{order=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+ const byId=new Map(cards.map(card=>[card.dataset.toolId,card]));
+ order.filter(id=>byId.has(id)).forEach(id=>root.querySelector('main')?.appendChild(byId.get(id))||root.appendChild(byId.get(id)));
+ cards.forEach(card=>{
+  const head=card.querySelector('.card-head');if(!head)return;
+  const controls=document.createElement('div');controls.className='reorder-controls';
+  const up=document.createElement('button');up.type='button';up.textContent='↑';up.setAttribute('aria-label','Move '+card.querySelector('h2').textContent+' up');up.title='Move up';
+  const down=document.createElement('button');down.type='button';down.textContent='↓';down.setAttribute('aria-label','Move '+card.querySelector('h2').textContent+' down');down.title='Move down';
+  up.addEventListener('click',()=>move(card,-1));down.addEventListener('click',()=>move(card,1));
+  controls.append(up,down);head.appendChild(controls);
+ });
+ function currentCards(){return [...root.querySelectorAll('section.card[data-tool-id]')];}
+ function refresh(){
+  const list=currentCards();
+  list.forEach((card,i)=>{const buttons=card.querySelectorAll('.reorder-controls button');buttons[0].disabled=i===0;buttons[1].disabled=i===list.length-1;});
+  try{localStorage.setItem(key,JSON.stringify(list.map(card=>card.dataset.toolId)));}catch(e){}
+ }
+ function move(card,direction){
+  const list=currentCards(),index=list.indexOf(card),target=list[index+direction];if(!target)return;
+  if(direction<0)target.before(card);else target.after(card);
+  refresh();
+ }
+ toggle.addEventListener('click',()=>{
+  const active=root.classList.toggle('rearranging');
+  toggle.setAttribute('aria-pressed',String(active));
+  toggle.title=active?'Finish rearranging':'Rearrange tools';
+  toggle.setAttribute('aria-label',active?'Finish rearranging tools':'Rearrange tools');
+  refresh();
+ });
+ refresh();
+}
+
+initToolRearrange(document.querySelector('main'));
 $('ormResult').textContent='—';$('plateTotal').textContent='—';$('plates').replaceChildren();$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';
 const plateColors={25:{fill:'#d62828',text:'#ffffff'},20:{fill:'#1769aa',text:'#ffffff'},15:{fill:'#f4d03f',text:'#171717'},10:{fill:'#238b45',text:'#ffffff'},5:{fill:'#f1f3f5',text:'#171717'},2.5:{fill:'#f28c28',text:'#171717'},1.25:{fill:'#7e57c2',text:'#ffffff'}};
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});

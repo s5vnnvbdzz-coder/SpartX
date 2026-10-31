@@ -22,7 +22,7 @@ header{padding:calc(18px + env(safe-area-inset-top)) 18px 15px;border-bottom:1px
 main{max-width:700px;margin:auto;padding:20px 16px 30px}
 .eyebrow{font-size:11px;color:var(--lime);font-weight:850;letter-spacing:1.6px}
 h1{font-size:29px;margin:7px 0 5px}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.page-title-row h1{flex:1}
-.page-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}.rearrange-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;border:1px solid var(--line);background:#252a30;color:var(--txt);font-size:22px;line-height:1;border-radius:10px;cursor:pointer}.rearrange-btn[aria-pressed="true"]{background:var(--lime);color:#18200d;border-color:var(--lime)}.reorder-hint{display:none;color:var(--muted);font-size:11px;margin:5px 0 12px}.rearranging .reorder-hint{display:block}.reorder-controls{display:none;align-items:center;gap:6px;margin-left:auto}.rearranging .reorder-controls{display:flex}.rearranging section.card{border-style:dashed;border-color:#68764a}.reorder-controls button{width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:#252a30;color:var(--txt);font-size:16px;line-height:1}.reorder-controls button:disabled{opacity:.3;cursor:default}
+.page-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 h2{font-size:18px;margin:0}
 .intro{color:var(--muted);margin:0 0 19px;line-height:1.5}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0}
@@ -46,10 +46,10 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sub">TOOLS</div></header>
 <main>
 <div class="eyebrow">NUMBERS DON'T LIE</div>
-<div class="page-title-row"><h1>Training Tools</h1><div class="page-actions"><button class="rearrange-btn" type="button" aria-label="Rearrange tools" title="Rearrange tools" aria-pressed="false">☰</button><a class="gear-btn" href="./embedded-settings.html" aria-label="Open settings" title="Settings">⚙</a></div></div>
+<div class="page-title-row"><h1>Training Tools</h1><div class="page-actions"><a class="gear-btn" href="./embedded-settings.html" aria-label="Open settings" title="Settings">⚙</a></div></div>
 
 
-<section class="card" data-tool-id="orm" aria-labelledby="ormTitle">
+<section class="card" aria-labelledby="ormTitle">
 <div class="card-head"><h2 id="ormTitle">1RM Calculator</h2></div>
 <div class="fields">
 <div class="field"><label for="ormWeight">Weight (kg)</label><input id="ormWeight" type="number" min="0" step="0.5" placeholder="e.g. 100" inputmode="decimal"></div>
@@ -59,7 +59,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="hint">Most useful for sets of 1–10 reps. This is an estimate, not a tested max.</div>
 </section>
 
-<section class="card" data-tool-id="training-max" aria-labelledby="tmFinderTitle">
+<section class="card" aria-labelledby="tmFinderTitle">
 <div class="card-head"><h2 id="tmFinderTitle">Training Max</h2></div>
 <div class="field"><label for="tmFinderOneRm">One-rep max (kg)</label><input id="tmFinderOneRm" type="number" min="0" step="0.5" placeholder="e.g. 160" inputmode="decimal"></div>
 <div class="result" id="tmFinderResult">—</div>
@@ -67,7 +67,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="hint">Your training max is 90% of your one-rep max, calculated as 1RM × 0.90.</div>
 </section>
 
-<section class="card" data-tool-id="531" aria-labelledby="531Title">
+<section class="card" aria-labelledby="531Title">
 <div class="card-head"><h2 id="531Title">5/3/1 Working Weights</h2></div>
 <div class="fields">
 <div class="field"><label for="tm">Training max (kg)</label><input id="tm" type="number" min="0" step="2.5" placeholder="e.g. 145" inputmode="decimal"></div>
@@ -77,7 +77,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="hint">Weights are rounded to the nearest 2.5 kg. Percentages are based on your training max.</div><div class="warmup" id="warmupOutput" hidden></div>
 </section>
 
-<section class="card" data-tool-id="plates" aria-labelledby="plateTitle">
+<section class="card" aria-labelledby="plateTitle">
 <div class="card-head"><div class="tool-icon">▤</div><h2 id="plateTitle">Plate Calculator</h2></div>
 <div class="fields">
 <div class="field"><label for="target">Target bar weight (kg)</label><input id="target" type="number" min="0" step="2.5" placeholder="e.g. 180" inputmode="decimal"></div>
@@ -92,68 +92,6 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <script>
 const $=id=>document.getElementById(id);
 
-function initToolRearrange(root){
- if(!root)return;
- const titleRow=root.querySelector('.page-title-row');
- const cards=[...root.querySelectorAll('section.card[data-tool-id]')];
- if(!titleRow||!cards.length)return;
- const toggle=titleRow.querySelector('.rearrange-btn');
- if(!toggle)return;
- const container=cards[0].parentElement;
- const hint=document.createElement('div');
- hint.className='reorder-hint';
- hint.textContent='Use the arrows on each tool to change its position. Tap the menu icon again when finished.';
- titleRow.insertAdjacentElement('afterend',hint);
- const key='spartxToolsCardOrderV1';
- let order=[];
- try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))order=saved;}catch(e){}
- const byId=new Map(cards.map(card=>[card.dataset.toolId,card]));
- order.filter(id=>byId.has(id)).forEach(id=>container.appendChild(byId.get(id)));
- cards.forEach(card=>{
-  const head=card.querySelector('.card-head');
-  if(!head)return;
-  const controls=document.createElement('div');
-  controls.className='reorder-controls';
-  const up=document.createElement('button');
-  const down=document.createElement('button');
-  up.type=down.type='button';
-  up.textContent='↑';down.textContent='↓';
-  up.title='Move up';down.title='Move down';
-  const heading=card.querySelector('h2')?.textContent||'tool';
-  up.setAttribute('aria-label','Move '+heading+' up');
-  down.setAttribute('aria-label','Move '+heading+' down');
-  up.addEventListener('click',()=>move(card,-1));
-  down.addEventListener('click',()=>move(card,1));
-  controls.append(up,down);
-  head.appendChild(controls);
- });
- function list(){return [...container.querySelectorAll('section.card[data-tool-id]')];}
- function refresh(){
-  const items=list();
-  items.forEach((card,i)=>{
-   const buttons=card.querySelectorAll('.reorder-controls button');
-   buttons[0].disabled=i===0;
-   buttons[1].disabled=i===items.length-1;
-  });
-  try{localStorage.setItem(key,JSON.stringify(items.map(card=>card.dataset.toolId)));}catch(e){}
- }
- function move(card,delta){
-  const items=list(),index=items.indexOf(card),target=items[index+delta];
-  if(!target)return;
-  if(delta<0)target.before(card);else target.after(card);
-  refresh();
- }
- toggle.addEventListener('click',()=>{
-  const active=root.classList.toggle('rearranging');
-  toggle.setAttribute('aria-pressed',String(active));
-  toggle.title=active?'Finish rearranging':'Rearrange tools';
-  toggle.setAttribute('aria-label',active?'Finish rearranging tools':'Rearrange tools');
-  refresh();
- });
- refresh();
-}
-
-try{initToolRearrange(document.querySelector('main'));}catch(error){console.warn('Tool rearranging unavailable:',error);}
 const plateColors={25:{fill:'#d62828',text:'#ffffff'},20:{fill:'#1769aa',text:'#ffffff'},15:{fill:'#f4d03f',text:'#171717'},10:{fill:'#238b45',text:'#ffffff'},5:{fill:'#f1f3f5',text:'#171717'},2.5:{fill:'#f28c28',text:'#171717'},1.25:{fill:'#7e57c2',text:'#ffffff'}};
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 function calcOrm(){const w=+$('ormWeight').value,r=Math.max(1,Math.min(12,+$('ormReps').value||1));$('ormResult').textContent=w>0?fmt(w*(1+r/30))+' kg':'—';}

@@ -79,6 +79,7 @@ function apply531ToWorkout(){
 $('apply531').addEventListener('click',apply531ToWorkout);
 $('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);
 calcOrm();calc531();calcPlates();
+window.addEventListener('spartx:preferencesChanged',e=>{const next=e.detail?.weight||'kg',old=unitPrefs.weight||'kg';if(next!==old){const factor=next==='lb'?2.2046226218:1/2.2046226218;['ormWeight','tm','target','bar'].forEach(id=>{const el=$(id);if(el.value!=='')el.value=fmt(+el.value*factor)});unitPrefs.weight=next;saveCalculatorInputs();}const labels=[['ormWeight','Weight ('+unit()+')'],['tm','Training max ('+unit()+')'],['target','Target bar weight ('+unit()+')'],['bar','Bar weight ('+unit()+')']];labels.forEach(([id,value])=>{const label=shadow.querySelector('label[for="'+id+'"]');if(label)label.textContent=value});calcOrm();calc531();calcPlates();});
 
 })();
 })();

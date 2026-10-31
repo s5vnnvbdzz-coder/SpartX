@@ -55,8 +55,8 @@ function calcPlates(){const target=+$('target').value,bar=+$('bar').value;const 
 $('plateDiagramWrap').style.display=settings.diagram?'block':'none';
 // Keep calculator entries while navigating to Settings and back in the same app session.
 const calculatorInputIds=['ormWeight','ormReps','tm','week','target','bar'];
-function saveCalculatorInputs(){try{const values={};calculatorInputIds.forEach(id=>{values[id]=$(id).value;});sessionStorage.setItem('spartxToolsInputs',JSON.stringify(values));}catch(e){}}
-try{const savedInputs=JSON.parse(sessionStorage.getItem('spartxToolsInputs')||'null');if(savedInputs){calculatorInputIds.forEach(id=>{if(Object.prototype.hasOwnProperty.call(savedInputs,id))$(id).value=savedInputs[id];});}}catch(e){}
+function saveCalculatorInputs(){try{const values={};calculatorInputIds.forEach(id=>{values[id]=$(id).value;});localStorage.setItem('spartxToolsInputs',JSON.stringify(values));}catch(e){}}
+try{const savedInputs=JSON.parse(localStorage.getItem('spartxToolsInputs')||'null');if(savedInputs){calculatorInputIds.forEach(id=>{if(Object.prototype.hasOwnProperty.call(savedInputs,id))$(id).value=savedInputs[id];});}}catch(e){}
 calculatorInputIds.forEach(id=>$(id).addEventListener('input',saveCalculatorInputs));
 calculatorInputIds.forEach(id=>$(id).addEventListener('change',saveCalculatorInputs));
 window.addEventListener('pagehide',saveCalculatorInputs);

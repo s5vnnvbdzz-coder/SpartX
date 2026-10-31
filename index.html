@@ -63,7 +63,7 @@
 .profile-identity{padding:18px;position:relative}.profile-top{display:flex;align-items:center;gap:15px;padding-right:34px}.profile-avatar{width:94px;height:94px;flex:0 0 94px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#252b30;border:2px solid #49543a;color:var(--lime);font-size:42px}.profile-avatar img{width:100%;height:100%;object-fit:cover}.profile-main{min-width:0;flex:1}.profile-main h2{font-size:22px;margin:0 0 5px;overflow-wrap:anywhere}.profile-workouts{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin:0 0 7px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.profile-workouts .profile-workout-count{font-size:22px;line-height:1.1}.profile-bio{font-size:13px;line-height:1.45;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.profile-action-buttons{position:absolute;top:12px;right:12px;display:flex;gap:7px}.profile-edit-button,.profile-settings-button{position:static;display:grid;place-items:center;width:34px;height:34px;min-width:34px;padding:0;margin:0;border-radius:9px}.profile-edit-button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.profile-workout-count{font-size:28px;font-weight:900;color:var(--lime);font-variant-numeric:tabular-nums}.profile-edit-photo{display:flex;align-items:center;gap:14px;margin:12px 0 18px}.profile-avatar-large{width:76px;height:76px;flex-basis:76px;font-size:32px}.profile-photo-picker{display:inline-flex;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--txt);font-size:12px;margin:0;cursor:pointer}
 
 body.spartanx-light{--bg:#f3f5f7;--panel:#fff;--panel2:#e9edf0;--line:#d4dbe1;--txt:#18212a;--muted:#66727d;background:var(--bg);color:var(--txt);color-scheme:light}body.spartanx-light header,body.spartanx-light #trackerNav{background:#ffffffed;border-color:var(--line)}body.spartanx-light input,body.spartanx-light select,body.spartanx-light textarea{background:#fff;color:var(--txt);border-color:var(--line)}body.spartanx-light .exercise-card,body.spartanx-light .stat,body.spartanx-light .rank-item,body.spartanx-light .library-record,body.spartanx-light .session-clock-card,body.spartanx-light .session-summary-bar,body.spartanx-light .rest-panel,body.spartanx-light .detail-panel{background:#fff;border-color:var(--line);color:var(--txt)}body.spartanx-light .set-type-picker,body.spartanx-light .add-set-button,body.spartanx-light .minimized-session{background:#e9edf0!important;color:var(--txt)!important;border-color:var(--line)!important}body.spartanx-light .detail-overlay{background:#dfe4e9ef}body.spartanx-light .exercise-title{color:#54751c}body.spartanx-light .previous-value{color:#69747e}body.spartanx-light .set-entry.is-complete{background:#e2f1d7}body.spartanx-light .profile-avatar{background:#e6ebef;border-color:#c5ced6}body.spartanx-light .profile-action-buttons button{background:#e9edf0;color:var(--txt)}body.spartanx-light .exercise-notes{color:var(--txt)}
-</style></head>
+.history-metric-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 18px}.history-metric-tabs button{min-height:43px;font-size:11px;white-space:normal}.history-metric-tabs button.selected{background:var(--lime);color:#111;border-color:var(--lime)}.history-chart-card{padding:12px}.history-chart-wrap svg{width:100%;height:auto;display:block}</style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
 <main>
@@ -85,11 +85,10 @@ body.spartanx-light{--bg:#f3f5f7;--panel:#fff;--panel2:#e9edf0;--line:#d4dbe1;--
 <div class="card" style="text-align:center;padding:13px;margin-top:12px"><button id="discardWorkout" type="button" style="width:100%;background:transparent;color:#ff5b5b;border:0;padding:5px;font-weight:800">DISCARD WORKOUT</button></div>
 </section>
 <section id="exerciseHistoryScreen" class="screen">
-<div class="row between"><div><div class="eyebrow">PERFORMANCE TRACKING</div><h1 id="exerciseHistoryTitle">Exercise history</h1></div><button class="back-button" id="closeExerciseHistory">← Back</button></div>
-<p class="muted tiny" id="exerciseHistorySubtitle">Your personal records and progress over time.</p>
-<div class="pr-detail-grid" id="exerciseHistoryRecords"></div>
-<div id="exerciseHistoryCharts"></div>
-<div class="card" id="exerciseHistorySessions"></div>
+<div class="row between"><div><div class="eyebrow">PERFORMANCE SUMMARY</div><h1 id="exerciseHistoryTitle">Exercise summary</h1></div><button class="back-button" id="closeExerciseHistory">← Back</button></div>
+<p class="muted tiny" id="exerciseHistorySubtitle">Your progress for this exercise.</p>
+<div class="card" style="padding:13px"><div class="row between"><span class="eyebrow" id="exerciseMetricLabel">HEAVIEST WEIGHT</span><span class="tiny muted" id="exerciseMetricUnit">kg</span></div><div class="result" id="exerciseMetricValue" style="font-size:30px;margin:7px 0 12px">—</div><div id="exerciseHistoryCharts"></div></div>
+<div id="exerciseMetricTabs" class="history-metric-tabs" role="tablist" aria-label="Exercise metrics"></div>
 </section>
 <section id="exerciseLibraryScreen" class="screen">
 <div class="row between"><div><div class="eyebrow">BUILD YOUR SESSION</div><h1>Add exercise</h1></div><button class="back-button" id="closeExerciseLibrary">← Back</button></div>
@@ -232,28 +231,60 @@ function exerciseHistoryData(name){
  return sessions;
 }
 function historyChart(title,unit,points,valueKey,format){
- const max=Math.max(1,...points.map(p=>p[valueKey]||0)),w=320,h=154,left=34,right=12,top=14,bottom=30,innerW=w-left-right,innerH=h-top-bottom;
+ const max=Math.max(1,...points.map(p=>p[valueKey]||0)),w=340,h=190,left=38,right=12,top=14,bottom=34,innerW=w-left-right,innerH=h-top-bottom;
  const coords=points.map((p,i)=>({x:points.length===1?left+innerW/2:left+i*innerW/(points.length-1),y:top+innerH-(p[valueKey]||0)/max*innerH,p}));
  const path=coords.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' ');
  const labels=coords.map((p,i)=>i===0||i===coords.length-1||i===Math.floor((coords.length-1)/2)?'<text x="'+p.x.toFixed(1)+'" y="'+(h-8)+'" text-anchor="middle" class="history-axis">'+new Date(p.p.date).toLocaleDateString(undefined,{day:'numeric',month:'short'})+'</text>':'').join('');
- const dots=coords.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.5" class="history-dot"><title>'+new Date(p.p.date).toLocaleDateString()+' · '+format(p.p[valueKey])+'</title></circle>').join('');
- return '<article class="card history-chart-card"><div class="row between"><h2>'+title+'</h2><span class="tiny muted">'+unit+'</span></div>'+(points.length?'<div class="history-chart-wrap"><svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+title+' progress chart"><line x1="'+left+'" y1="'+(top+innerH)+'" x2="'+(w-right)+'" y2="'+(top+innerH)+'" class="history-axis-line"/><line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+innerH)+'" class="history-axis-line"/><path d="'+path+'" class="history-line"/>'+dots+labels+'</svg></div><div class="history-chart-foot"><span>First logged</span><strong>'+format(points[points.length-1][valueKey])+'</strong><span>Latest session</span></div>':'<p class="muted tiny">Complete and save a workout containing this exercise to build your graph.</p>')+'</article>';
+ const dots=coords.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4" class="history-dot"><title>'+new Date(p.p.date).toLocaleDateString()+' · '+format(p.p[valueKey])+'</title></circle>').join('');
+ return points.length?'<div class="history-chart-wrap"><svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+title+' progress chart"><line x1="'+left+'" y1="'+(top+innerH)+'" x2="'+(w-right)+'" y2="'+(top+innerH)+'" class="history-axis-line"/><line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+innerH)+'" class="history-axis-line"/><path d="'+path+'" class="history-line"/>'+dots+labels+'</svg></div>':'<p class="muted tiny" style="padding:18px 0;text-align:center">No logged sessions yet. Complete this exercise to start your graph.</p>';
+}
+const EXERCISE_METRICS=[
+ {id:'heaviest',label:'Heaviest weight',unit:'weight',scope:'all'},
+ {id:'e1rm',label:'1RM',unit:'weight',scope:'session'},
+ {id:'setVolume',label:'Best set volume',unit:'kg × reps',scope:'session'},
+ {id:'sessionVolume',label:'Session volume',unit:'volume',scope:'session'},
+ {id:'totalReps',label:'Total reps',unit:'reps',scope:'session'}
+];
+let activeExerciseMetric='heaviest';
+function metricValue(points,metric){
+ if(metric.id==='heaviest')return Math.max(0,...points.flatMap(p=>p.sets.map(x=>+x.weight||0)));
+ if(metric.id==='e1rm')return Math.max(0,...points.flatMap(p=>p.sets.map(x=>(+x.weight||0)*(1+(+x.reps||0)/30))));
+ if(metric.id==='setVolume')return Math.max(0,...points.map(p=>p.bestSetVolume));
+ if(metric.id==='sessionVolume')return Math.max(0,...points.map(p=>p.volume));
+ return Math.max(0,...points.map(p=>p.totalReps));
 }
 function renderExerciseHistory(name){
  const points=exerciseHistoryData(name),allSets=points.flatMap(p=>p.sets);
- const bestSet=allSets.reduce((a,b)=>!a||b.weight*b.reps>a.weight*a.reps?b:a,null);
- const bestReps=allSets.reduce((a,b)=>!a||b.reps>a.reps?b:a,null);
- const bestSession=points.reduce((a,b)=>!a||b.volume>a.volume?b:a,null);
  $('exerciseHistoryTitle').textContent=name;
  $('exerciseHistorySubtitle').textContent=points.length+' logged session'+(points.length===1?'':'s')+' · '+allSets.length+' completed sets';
- $('exerciseHistoryRecords').innerHTML=[['BEST SET VOLUME',bestSet?kg(bestSet.weight*bestSet.reps)+' · '+bestSet.weight+' kg × '+bestSet.reps:'—'],['BEST SET REPS',bestReps?bestReps.reps+' reps · '+bestReps.weight+' kg':'—'],['BEST SESSION VOLUME',bestSession?kg(bestSession.volume):'—'],['TOTAL VOLUME',allSets.length?kg(allSets.reduce((a,x)=>a+x.weight*x.reps,0)):'—']].map(x=>'<div class="library-record"><span>'+x[0]+'</span><strong>'+x[1]+'</strong></div>').join('');
- $('exerciseHistoryCharts').innerHTML=historyChart('Best set volume','kg × reps',points,'bestSetVolume',v=>kg(v))+
-  historyChart('Best set reps','reps',points,'bestReps',v=>String(v)+' reps')+
-  historyChart('Session volume','kg total',points,'volume',v=>kg(v));
- $('exerciseHistorySessions').innerHTML='<h2>Session history</h2>'+(points.length?points.slice().reverse().map(p=>'<div class="library-record"><span>'+new Date(p.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})+'<br><small class="muted">'+p.sets.length+' sets · Best '+p.bestReps+' reps @ '+p.bestRepsWeight+' kg</small></span><strong>'+kg(p.volume)+'</strong></div>').join(''):'<p class="muted tiny">No saved sessions for this exercise yet. Your stats will appear here after your first completed workout.</p>');
+ $('exerciseMetricTabs').innerHTML=EXERCISE_METRICS.map(m=>'<button type="button" class="secondary small '+(activeExerciseMetric===m.id?'selected':'')+'" data-exercise-metric="'+m.id+'" role="tab" aria-selected="'+(activeExerciseMetric===m.id)+'">'+m.label+'</button>').join('');
+ renderExerciseMetric(points,activeExerciseMetric);
 }
+function renderExerciseMetric(points,id){
+ const metric=EXERCISE_METRICS.find(m=>m.id===id)||EXERCISE_METRICS[0];
+ let values=[];
+ if(metric.id==='heaviest'){
+  const maxWeight=Math.max(0,...points.flatMap(p=>p.sets.map(x=>+x.weight||0)));
+  values=points.map(p=>({...p,metricValue:Math.max(0,...p.sets.map(x=>+x.weight||0))}));
+  $('exerciseMetricValue').textContent=maxWeight?kg(maxWeight):'—';
+  $('exerciseMetricLabel').textContent='ALL-TIME HEAVIEST WEIGHT';
+ }else if(metric.id==='e1rm'){
+  values=points.map(p=>({...p,metricValue:Math.max(0,...p.sets.map(x=>(+x.weight||0)*(1+(+x.reps||0)/30)))}));
+  $('exerciseMetricValue').textContent=values.length?kg(Math.max(...values.map(p=>p.metricValue))):'—';
+  $('exerciseMetricLabel').textContent='BEST PREDICTED 1RM';
+ }else{
+  const key=metric.id==='setVolume'?'bestSetVolume':metric.id==='sessionVolume'?'volume':'totalReps';
+  values=points.map(p=>({...p,metricValue:p[key]}));
+  const best=Math.max(0,...values.map(p=>p.metricValue||0));
+  $('exerciseMetricValue').textContent=best?(metric.id==='totalReps'?best.toLocaleString()+' reps':metric.id==='sessionVolume'?kg(best):best.toLocaleString()+' kg × reps'):'—';
+  $('exerciseMetricLabel').textContent='BEST '+metric.label.toUpperCase();
+ }
+ $('exerciseMetricUnit').textContent=metric.id==='totalReps'?'reps':metric.id==='setVolume'?'kg × reps':preferences.weight==='lb'?'lbs':'kg';
+ $('exerciseHistoryCharts').innerHTML=historyChart(metric.label,$('exerciseMetricUnit').textContent,values,'metricValue',v=>metric.id==='totalReps'?String(v)+' reps':kg(v));
+}
+$('exerciseMetricTabs').addEventListener('click',e=>{const b=e.target.closest('[data-exercise-metric]');if(!b)return;activeExerciseMetric=b.dataset.exerciseMetric;$('exerciseMetricTabs').querySelectorAll('button').forEach(x=>{const on=x===b;x.classList.toggle('selected',on);x.setAttribute('aria-selected',String(on));});const pts=exerciseHistoryData($('exerciseHistoryTitle').textContent);renderExerciseMetric(pts,activeExerciseMetric);});
 let exerciseHistoryReturn='activeWorkout';
-window.showExercisePR=name=>{exerciseHistoryReturn=document.querySelector('.screen.active')?.id||'activeWorkout';renderExerciseHistory(name);switchScreen('exerciseHistoryScreen')};
+window.showExercisePR=name=>{exerciseHistoryReturn=document.querySelector('.screen.active')?.id||'activeWorkout';activeExerciseMetric='heaviest';renderExerciseHistory(name);switchScreen('exerciseHistoryScreen')};
 $('closeExerciseHistory').onclick=()=>{if(exerciseHistoryReturn==='exerciseStatsScreen')renderExerciseStats();switchScreen(exerciseHistoryReturn);};
 function openLibrary(){libraryCategory='All';$('librarySearch').value='';renderLibrary();switchScreen('exerciseLibraryScreen');}
 function renderLibrary(){const cats=['All',...Object.keys(categories)];$('libraryCategories').innerHTML=cats.map(cat=>'<button type="button" class="secondary small '+(libraryCategory===cat?'selected':'')+'" onclick="chooseLibraryCategory('+JSON.stringify(cat)+')">'+cat+'</button>').join('');const q=$('librarySearch').value.trim().toLocaleLowerCase();const names=exerciseNames.filter(n=>(libraryCategory==='All'||categories[libraryCategory].includes(n))&&n.toLocaleLowerCase().includes(q));$('libraryList').innerHTML=names.map(n=>'<div class="library-item"><div style="flex:1"><div class="library-item-name">'+esc(n)+'</div></div><button type="button" class="pr-icon" data-pr-exercise="'+esc(n)+'" aria-label="View personal records">🏆</button><button type="button" data-add-exercise="'+esc(n)+'">＋ Add</button></div>').join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';}

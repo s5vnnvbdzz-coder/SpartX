@@ -29,17 +29,18 @@ main{max-width:760px;margin:auto;padding:16px 16px 40px}.eyebrow{font-size:11px;
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
 <main>
 <div class="top"><div class="top-copy"><div class="eyebrow">PERSONALISE YOUR TOOLS</div><h1>Settings</h1></div><a class="back-button" id="settingsBack" href="./index.html">← Back</a></div>
-<section class="card"><h2>Working weights</h2><div class="row"><div class="copy"><strong>Suggested warm-up</strong><small>Show ramp-up sets calculated from your selected training max.</small></div><label class="switch"><input type="checkbox" id="warmupToggle"><span></span></label></div></section>
+<section class="card"><h2>Working weights</h2><div class="row"><div class="copy"><strong>Suggested warm-up</strong><small>Show ramp-up sets calculated from your selected training max.</small></div><label class="switch"><input type="checkbox" id="warmupToggle"><span></span></label></div><div class="row"><div class="copy"><strong>Training max finder</strong><small>Show or hide the calculator that converts your 1RM into a 90% training max.</small></div><label class="switch"><input type="checkbox" id="trainingMaxFinderToggle"><span></span></label></div></section>
 <section class="card"><h2>Plate calculator</h2><div class="row"><div class="copy"><strong>Barbell diagram</strong><small>Show or hide the visual plate layout.</small></div><label class="switch"><input type="checkbox" id="diagramToggle"><span></span></label></div><div class="copy" style="margin-top:16px"><strong>Available plates</strong><small>Turn off any plate sizes you do not have. The calculator will only use enabled plates.</small></div><div class="plate-settings" id="plateSettings"></div></section>
 </main>
 <nav id="settingsNav" aria-label="Main navigation"><a href="../#tools">⌗<span>TOOLS</span></a><a href="../#home">🏋<span>WORKOUT</span></a><a href="../#profile">♙<span>PROFILE</span></a></nav><footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
 <script>
-if(new URLSearchParams(location.search).get("return")==="tracker"){document.body.classList.add("tracker-return");document.getElementById("settingsBack").href="../#tools";}const defaults={warmup:true,diagram:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
+if(new URLSearchParams(location.search).get("return")==="tracker"){document.body.classList.add("tracker-return");document.getElementById("settingsBack").href="../#tools";}const defaults={warmup:true,diagram:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
 let settings={...defaults,plates:{...defaults.plates}};
 try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...defaults.plates,...(saved.plates||{})}};}catch(e){}
 function save(){try{localStorage.setItem('spartxToolsSettings',JSON.stringify(settings));}catch(e){}}
 const colors={25:'#d62828',20:'#1769aa',15:'#f4d03f',10:'#238b45',5:'#f1f3f5',2.5:'#f28c28',1.25:'#7e57c2'};
 const warm=document.getElementById('warmupToggle'),diagram=document.getElementById('diagramToggle'),list=document.getElementById('plateSettings');
+const trainingMaxFinder=document.getElementById('trainingMaxFinderToggle');trainingMaxFinder.checked=settings.trainingMaxFinder!==false;trainingMaxFinder.addEventListener('change',()=>{settings.trainingMaxFinder=trainingMaxFinder.checked;save();});
 warm.checked=!!settings.warmup;diagram.checked=!!settings.diagram;
 warm.addEventListener('change',()=>{settings.warmup=warm.checked;save();});
 diagram.addEventListener('change',()=>{settings.diagram=diagram.checked;save();});

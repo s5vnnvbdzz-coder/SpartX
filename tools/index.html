@@ -93,35 +93,54 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 const $=id=>document.getElementById(id);
 
 function initToolRearrange(root){
+ if(!root)return;
  const titleRow=root.querySelector('.page-title-row');
  const cards=[...root.querySelectorAll('section.card[data-tool-id]')];
  if(!titleRow||!cards.length)return;
- const actions=titleRow.querySelector('.page-actions');
- const toggle=actions&&actions.querySelector('.rearrange-btn');
+ const toggle=titleRow.querySelector('.rearrange-btn');
  if(!toggle)return;
- const hint=document.createElement('div');hint.className='reorder-hint';hint.textContent='Use the arrows on each tool to change its position. Tap the menu icon again when finished.';
+ const container=cards[0].parentElement;
+ const hint=document.createElement('div');
+ hint.className='reorder-hint';
+ hint.textContent='Use the arrows on each tool to change its position. Tap the menu icon again when finished.';
  titleRow.insertAdjacentElement('afterend',hint);
  const key='spartxToolsCardOrderV1';
- let order=[];try{order=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+ let order=[];
+ try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))order=saved;}catch(e){}
  const byId=new Map(cards.map(card=>[card.dataset.toolId,card]));
- order.filter(id=>byId.has(id)).forEach(id=>root.querySelector('main')?.appendChild(byId.get(id))||root.appendChild(byId.get(id)));
+ order.filter(id=>byId.has(id)).forEach(id=>container.appendChild(byId.get(id)));
  cards.forEach(card=>{
-  const head=card.querySelector('.card-head');if(!head)return;
-  const controls=document.createElement('div');controls.className='reorder-controls';
-  const up=document.createElement('button');up.type='button';up.textContent='↑';up.setAttribute('aria-label','Move '+card.querySelector('h2').textContent+' up');up.title='Move up';
-  const down=document.createElement('button');down.type='button';down.textContent='↓';down.setAttribute('aria-label','Move '+card.querySelector('h2').textContent+' down');down.title='Move down';
-  up.addEventListener('click',()=>move(card,-1));down.addEventListener('click',()=>move(card,1));
-  controls.append(up,down);head.appendChild(controls);
+  const head=card.querySelector('.card-head');
+  if(!head)return;
+  const controls=document.createElement('div');
+  controls.className='reorder-controls';
+  const up=document.createElement('button');
+  const down=document.createElement('button');
+  up.type=down.type='button';
+  up.textContent='↑';down.textContent='↓';
+  up.title='Move up';down.title='Move down';
+  const heading=card.querySelector('h2')?.textContent||'tool';
+  up.setAttribute('aria-label','Move '+heading+' up');
+  down.setAttribute('aria-label','Move '+heading+' down');
+  up.addEventListener('click',()=>move(card,-1));
+  down.addEventListener('click',()=>move(card,1));
+  controls.append(up,down);
+  head.appendChild(controls);
  });
- function currentCards(){return [...root.querySelectorAll('section.card[data-tool-id]')];}
+ function list(){return [...container.querySelectorAll('section.card[data-tool-id]')];}
  function refresh(){
-  const list=currentCards();
-  list.forEach((card,i)=>{const buttons=card.querySelectorAll('.reorder-controls button');buttons[0].disabled=i===0;buttons[1].disabled=i===list.length-1;});
-  try{localStorage.setItem(key,JSON.stringify(list.map(card=>card.dataset.toolId)));}catch(e){}
+  const items=list();
+  items.forEach((card,i)=>{
+   const buttons=card.querySelectorAll('.reorder-controls button');
+   buttons[0].disabled=i===0;
+   buttons[1].disabled=i===items.length-1;
+  });
+  try{localStorage.setItem(key,JSON.stringify(items.map(card=>card.dataset.toolId)));}catch(e){}
  }
- function move(card,direction){
-  const list=currentCards(),index=list.indexOf(card),target=list[index+direction];if(!target)return;
-  if(direction<0)target.before(card);else target.after(card);
+ function move(card,delta){
+  const items=list(),index=items.indexOf(card),target=items[index+delta];
+  if(!target)return;
+  if(delta<0)target.before(card);else target.after(card);
   refresh();
  }
  toggle.addEventListener('click',()=>{
@@ -134,7 +153,7 @@ function initToolRearrange(root){
  refresh();
 }
 
-initToolRearrange(document.querySelector('main'));
+try{initToolRearrange(document.querySelector('main'));}catch(error){console.warn('Tool rearranging unavailable:',error);}
 $('ormResult').textContent='—';$('plateTotal').textContent='—';$('plates').replaceChildren();$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';
 const plateColors={25:{fill:'#d62828',text:'#ffffff'},20:{fill:'#1769aa',text:'#ffffff'},15:{fill:'#f4d03f',text:'#171717'},10:{fill:'#238b45',text:'#ffffff'},5:{fill:'#f1f3f5',text:'#171717'},2.5:{fill:'#f28c28',text:'#171717'},1.25:{fill:'#7e57c2',text:'#ffffff'}};
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});

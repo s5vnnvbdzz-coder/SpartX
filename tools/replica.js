@@ -10,7 +10,7 @@ $('ormResult').textContent='—';$('plateTotal').textContent='—';$('plates').r
 const plateColors={25:{fill:'#d62828',text:'#ffffff'},20:{fill:'#1769aa',text:'#ffffff'},15:{fill:'#f4d03f',text:'#171717'},10:{fill:'#238b45',text:'#ffffff'},5:{fill:'#f1f3f5',text:'#171717'},2.5:{fill:'#f28c28',text:'#171717'},1.25:{fill:'#7e57c2',text:'#ffffff'}};
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});let unitPrefs={weight:'kg'};try{unitPrefs={...unitPrefs,...JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}')}}catch(e){}const fromKg=n=>unitPrefs.weight==='lb'?n*2.2046226218:n,toKg=n=>unitPrefs.weight==='lb'?n/2.2046226218:n,unit=()=>unitPrefs.weight==='lb'?'lbs':'kg';
 function calcOrm(){const w=toKg(+$('ormWeight').value),r=Math.max(1,Math.min(12,+$('ormReps').value||1));$('ormResult').textContent=w>0?fmt(fromKg(w*(1+r/30)))+' '+unit():'—';}
-function calcTrainingMaxFinder(){const oneRm=toKg(+$('tmFinderOneRm').value);$('tmFinderResult').textContent=oneRm>0?fmt(fromKg(oneRm/.9))+' '+unit():'—';}
+function calcTrainingMaxFinder(){const oneRm=toKg(+$('tmFinderOneRm').value);$('tmFinderResult').textContent=oneRm>0?fmt(fromKg(oneRm*.9))+' '+unit():'—';}
 
 const defaultSettings={warmup:true,diagram:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
 let settings={...defaultSettings,plates:{...defaultSettings.plates}};

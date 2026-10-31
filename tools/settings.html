@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#30343a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SPARTANX Tools">
+<meta name="apple-mobile-web-app-title" content="SpartanX Tools">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
-<title>SPARTANX Tools · Settings</title>
+<title>SpartanX Tools · Settings</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d0f;--panel:#171a1e;--line:#30363e;--txt:#f3f4f6;--muted:#9ba3ad;--lime:#c8f169}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--txt);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:0 0 calc(88px + env(safe-area-inset-bottom))}
@@ -32,7 +32,7 @@ main{max-width:760px;margin:auto;padding:16px 16px 40px}.eyebrow{font-size:11px;
 <section class="card"><h2>Working weights</h2><div class="row"><div class="copy"><strong>Suggested warm-up</strong><small>Show ramp-up sets calculated from your selected training max.</small></div><label class="switch"><input type="checkbox" id="warmupToggle"><span></span></label></div><div class="row"><div class="copy"><strong>Training max finder</strong><small>Show or hide the calculator that converts your 1RM into a 90% training max.</small></div><label class="switch"><input type="checkbox" id="trainingMaxFinderToggle"><span></span></label></div></section>
 <section class="card"><h2>Plate calculator</h2><div class="row"><div class="copy"><strong>Barbell diagram</strong><small>Show or hide the visual plate layout.</small></div><label class="switch"><input type="checkbox" id="diagramToggle"><span></span></label></div><div class="copy" style="margin-top:16px"><strong>Available plates</strong><small>Turn off any plate sizes you do not have. The calculator will only use enabled plates.</small></div><div class="plate-settings" id="plateSettings"></div></section>
 </main>
-<nav id="settingsNav" aria-label="Main navigation"><a href="../#tools">⌗<span>TOOLS</span></a><a href="../#home">🏋<span>WORKOUT</span></a><a href="../#profile">♙<span>PROFILE</span></a></nav><footer>SPARTANX TOOLS · TRAIN SMARTER</footer>
+<nav id="settingsNav" aria-label="Main navigation"><a href="../#tools">⌗<span>TOOLS</span></a><a href="../#home">🏋<span>WORKOUT</span></a><a href="../#profile">♙<span>PROFILE</span></a></nav><footer>SpartanX TOOLS · TRAIN SMARTER</footer>
 <script>
 if(new URLSearchParams(location.search).get("return")==="tracker"){document.body.classList.add("tracker-return");document.getElementById("settingsBack").href="../#tools";}const defaults={warmup:true,diagram:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
 let settings={...defaults,plates:{...defaults.plates}};

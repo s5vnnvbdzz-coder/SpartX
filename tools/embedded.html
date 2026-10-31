@@ -70,7 +70,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="card-head"><div class="tool-icon">▤</div><h2 id="plateTitle">Plate calculator</h2></div>
 <div class="fields">
 <div class="field"><label for="target">Target bar weight (kg)</label><input id="target" type="number" min="0" step="2.5" placeholder="e.g. 180" inputmode="decimal"></div>
-<div class="field"><label for="bar">Bar weight (kg)</label><input id="bar" type="number" min="0" step="0.5" placeholder="e.g. 20" inputmode="decimal"></div>
+<div class="field"><label for="bar">Bar weight (kg)</label><input id="bar" type="number" min="0" step="0.5" value="20" placeholder="e.g. 20" inputmode="decimal"></div>
 </div>
 <div class="result" id="plateTotal">80 kg per side</div>
 <div class="plate-output" id="plates"></div><div class="plate-diagram-wrap" id="plateDiagramWrap"><svg id="plateDiagram" viewBox="0 0 440 116" role="img" aria-label="Diagram showing the plates loaded on each side of the barbell"></svg><div class="plate-diagram-caption" id="plateDiagramCaption">Plate layout updates with your target weight.</div></div>
@@ -129,7 +129,7 @@ $('plateDiagramWrap').style.display=settings.diagram?'block':'none';
 // Keep calculator entries while navigating to Settings and back in the same app session.
 const calculatorInputIds=['ormWeight','ormReps','tm','week','target','bar'];
 function saveCalculatorInputs(){try{const values={};calculatorInputIds.forEach(id=>{values[id]=$(id).value;});sessionStorage.setItem('spartxToolsInputs',JSON.stringify(values));}catch(e){}}
-try{const savedInputs=JSON.parse(sessionStorage.getItem('spartxToolsInputs')||'null');if(savedInputs){calculatorInputIds.forEach(id=>{if(Object.prototype.hasOwnProperty.call(savedInputs,id))$(id).value=savedInputs[id];});}}catch(e){}
+try{const savedInputs=JSON.parse(sessionStorage.getItem('spartxToolsInputs')||'null');if(savedInputs){calculatorInputIds.forEach(id=>{if(Object.prototype.hasOwnProperty.call(savedInputs,id))$(id).value=savedInputs[id];});if(!savedInputs.bar) $('bar').value='20';}}catch(e){}
 calculatorInputIds.forEach(id=>$(id).addEventListener('input',saveCalculatorInputs));
 calculatorInputIds.forEach(id=>$(id).addEventListener('change',saveCalculatorInputs));
 window.addEventListener('pagehide',saveCalculatorInputs);

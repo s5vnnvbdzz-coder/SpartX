@@ -102,7 +102,7 @@ const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('
 function persist(){localStorage.setItem('spartx_db',JSON.stringify(db));}
 function kg(n){return Number(n).toLocaleString(undefined,{maximumFractionDigits:1})+' kg'}
 $('today').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-function stats(){let all=db.sessions.flatMap(s=>s.exercises.flatMap(e=>e.sets));$('sessions').textContent=db.sessions.length;$('sets').textContent=all.length;$('volume').textContent=kg(all.reduce((a,s)=>a+s.weight*s.reps,0));$('best').textContent=all.length?kg(Math.max(...all.map(s=>s.weight*(1+s.reps/30)))):'—';renderSpartanRanks();renderLatestSessionRank();}
+function stats(){let all=db.sessions.flatMap(s=>s.exercises.flatMap(e=>e.sets));$('sessions').textContent=db.sessions.length;$('sets').textContent=all.length;$('volume').textContent=kg(all.reduce((a,s)=>a+s.weight*s.reps,0));$('best').textContent=all.length?kg(Math.max(...all.map(s=>s.weight*(1+s.reps/30)))):'—';renderProfile();renderSpartanRanks();renderLatestSessionRank();}
 
 // SPARTANX strength standards: original bodyweight-relative benchmarks.
 const SPARTANX_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];

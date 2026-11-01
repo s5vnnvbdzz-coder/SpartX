@@ -58,7 +58,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
 <main>
-<div class="page-top"><div class="page-top-copy"><div class="eyebrow">PLAN WITH PURPOSE</div><h1>5/3/1 Cycle Planner</h1></div><a class="back-button" href="./index.html">← Back</a></div>
+<div class="page-top"><div class="page-top-copy"><div class="eyebrow">PLAN WITH PURPOSE</div><h1>5/3/1 Cycle Planner</h1></div><a class="back-button" id="plannerBack" href="./index.html">← Back</a></div>
 <p class="intro">Build a progressive 4, 8 or 12-week block from your Training Max. Save it to revisit your working weights whenever you need them.</p>
 
 <div id="setupPlaceholder"></div>
@@ -187,6 +187,7 @@ $('savedList').addEventListener('click',e=>{
  if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){closeEditForm();}renderSaved();}}
 });
 $('closeEdit').addEventListener('click',closeEditForm);$('cancelEdit').addEventListener('click',closeEditForm);$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditForm();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditForm();});
+if(new URLSearchParams(location.search).get('embedded')==='1'){$('plannerBack').textContent='← Back to Tools';$('plannerBack').addEventListener('click',e=>{e.preventDefault();parent.postMessage({type:'spartx:closeCyclePlanner'},location.origin);});}
 restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;$('setupCard').hidden=false;renderSaved();
 document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));
 })();

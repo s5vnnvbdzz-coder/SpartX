@@ -1,4 +1,4 @@
-const CACHE='spartanx-v83';
+const CACHE='spartanx-v84';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./tools/replica.js','./tools/settings.html','./tools/531-cycle.html'];
 self.addEventListener('install',event=>{
   event.waitUntil(

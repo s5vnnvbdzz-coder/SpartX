@@ -9,7 +9,7 @@ const plannerOverlay=$('cyclePlannerOverlay'),plannerFrame=$('cyclePlannerFrame'
 function syncPlannerTheme(){try{const prefs=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}');if(plannerFrame.contentWindow)plannerFrame.contentWindow.postMessage({type:'spartx:applyTheme',theme:prefs.theme||'dark'},location.origin);}catch(e){}}
 plannerFrame.addEventListener('load',syncPlannerTheme);
 function closePlanner(){plannerOverlay.classList.remove('open');plannerOverlay.setAttribute('aria-hidden','true');document.body.style.overflow='';}
-$('openCyclePlanner').addEventListener('click',()=>{if(plannerFrame.getAttribute('src')==='about:blank')plannerFrame.src='./tools/531-cycle.html?embedded=1';syncPlannerTheme();plannerOverlay.classList.add('open');plannerOverlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';});
+$('openCyclePlanner').addEventListener('click',()=>{if(plannerFrame.getAttribute('src')==='about:blank'){let plannerTheme='dark';try{plannerTheme=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}').theme||'dark';}catch(e){}plannerFrame.src='./tools/531-cycle.html?embedded=1&theme='+encodeURIComponent(plannerTheme);}syncPlannerTheme();plannerOverlay.classList.add('open');plannerOverlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';});
 
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:closeCyclePlanner')closePlanner();});
 

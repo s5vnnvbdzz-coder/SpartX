@@ -7,7 +7,7 @@ shadow.innerHTML="<style>:host{color-scheme:dark;--bg:#0b0d0f;--panel:#171a1e;--
 const $=id=>shadow.getElementById(id);
 const plannerOverlay=$('cyclePlannerOverlay'),plannerFrame=$('cyclePlannerFrame');
 function closePlanner(){plannerOverlay.classList.remove('open');plannerOverlay.setAttribute('aria-hidden','true');document.body.style.overflow='';}
-$('openCyclePlanner').addEventListener('click',()=>{if(plannerFrame.src==='about:blank')plannerFrame.src='./tools/531-cycle.html?embedded=1';plannerOverlay.classList.add('open');plannerOverlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';});
+$('openCyclePlanner').addEventListener('click',()=>{if(plannerFrame.getAttribute('src')==='about:blank')plannerFrame.src='./tools/531-cycle.html?embedded=1';plannerOverlay.classList.add('open');plannerOverlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';});
 $('closeCyclePlanner').addEventListener('click',closePlanner);
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:closeCyclePlanner')closePlanner();});
 

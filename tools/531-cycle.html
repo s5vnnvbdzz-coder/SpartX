@@ -30,7 +30,7 @@ button{border:0;border-radius:10px;padding:12px 14px;background:var(--lime);colo
 button.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
 button.danger{background:#342022;color:#ffb8b8;border:1px solid #60383b}
 button.small{padding:8px 10px;font-size:12px}
-.segment{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.segment button{background:#101316;color:var(--muted);border:1px solid var(--line);padding:11px 5px}.segment button.active{background:var(--lime);color:#11150b;border-color:var(--lime)}
+.segment{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:100%;min-width:0}.segment button{min-width:0;white-space:nowrap;font-size:12px;background:#101316;color:var(--muted);border:1px solid var(--line);padding:11px 3px}.segment button.active{background:var(--lime);color:#11150b;border-color:var(--lime)}
 .hint{font-size:11px;color:var(--muted);line-height:1.5}
 .preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
 .stat{background:#101316;border:1px solid #282f35;border-radius:11px;padding:11px;min-width:0}.stat span{display:block;font-size:10px;color:var(--muted)}.stat strong{display:block;font-size:18px;color:var(--lime);margin-top:5px;overflow-wrap:anywhere}
@@ -82,7 +82,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="card-head"><h2>Your programme</h2><span class="pill" id="programmeStatus">GENERATED</span></div>
 <div class="cycle-top"><div><div class="cycle-name" id="programmeName">Bench Press</div><div class="cycle-meta" id="programmeMeta"></div></div><div class="pill" id="programmeLength">4 WEEKS</div></div>
 <div class="cycle-stats"><div class="stat"><span>Starting TM</span><strong id="startTM">—</strong></div><div class="stat"><span>Final cycle TM</span><strong id="finalTM">—</strong></div><div class="stat"><span>Four-week blocks</span><strong id="blockCount">—</strong></div></div>
-<div class="cycle-actions"><button type="button" id="saveCycle">SAVE CYCLE</button><button type="button" class="secondary" id="editCycle">EDIT SETUP</button></div>
+<div class="cycle-actions"><button type="button" id="saveCycle">SAVE CYCLE</button></div>
 <button type="button" class="expand-btn" id="expandCycle">VIEW ENTIRE CYCLE ↓</button>
 <div class="cycle-detail" id="cycleDetail"></div>
 <div class="status" id="saveStatus" aria-live="polite"></div>
@@ -99,7 +99,7 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 const $=id=>document.getElementById(id);
 const STORAGE_KEY='spartanx_531_saved_cycles_v1';
 const DRAFT_KEY='spartanx_531_cycle_draft_v1';
-let weeks=4,generated=null,expanded=false;
+let weeks=4,generated=null,expanded=false,editingId=null;
 const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:1});
 const round=n=>Math.round(n/2.5)*2.5;
 const schemes=[
@@ -157,7 +157,7 @@ $('bbb').addEventListener('change',()=>{$('bbbOptions').hidden=!$('bbb').checked
 $('generate').addEventListener('click',()=>{
  const tm=+$('tm').value,inc=+$('increase').value;
  if(!(tm>0)||tm>1000||inc<0||inc>50){alert('Enter a valid Training Max and a TM increase of 0 kg or more.');return;}
- generated=buildCycle(getDraft());renderProgramme(generated);saveDraft();
+ generated=buildCycle(getDraft());\n if(editingId){const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);if(idx>=0){generated.id=editingId;generated.created=items[idx].created;items[idx]=JSON.parse(JSON.stringify(generated));if(writeSaved(items)){renderSaved();renderProgramme(generated,true);$('saveStatus').textContent='Saved cycle updated successfully.';editingId=null;$('generate').textContent='GENERATE CYCLE';}}else{editingId=null;renderProgramme(generated);}}else{renderProgramme(generated);}\n saveDraft();
 });
 $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});
 $('editCycle').addEventListener('click',()=>{$('setupCard').scrollIntoView({behavior:'smooth',block:'start'});});

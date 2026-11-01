@@ -418,6 +418,9 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  const ignore=el=>el&&el.closest&&el.closest('input,textarea,select,button,a,[contenteditable="true"],.set-table,.library-categories');
  document.addEventListener('touchstart',e=>{
   if(e.touches.length!==1||window.scrollY>2||document.documentElement.scrollTop>2)return;
+  // Only begin the gesture near the top edge, not from a swipe anywhere
+  // in the page while the document happens to be at scroll position zero.
+  if(e.touches[0].clientY>110)return;
   if(ignore(e.target))return;
   startY=e.touches[0].clientY;startX=e.touches[0].clientX;pulling=true;armed=false;
  },{passive:true});

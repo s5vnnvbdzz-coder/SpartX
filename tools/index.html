@@ -157,6 +157,22 @@ window.addEventListener('pagehide',saveCalculatorInputs);
 // Select the existing value when a numeric field receives focus, so a new entry replaces it.
 document.querySelectorAll('input[type="number"]').forEach(input=>input.addEventListener('focus',()=>input.select()));
 $('tmFinderOneRm').addEventListener('input',calcTrainingMaxFinder);$('tmFinderRound').addEventListener('change',calcTrainingMaxFinder);['ormWeight','ormReps'].forEach(id=>$(id).addEventListener('input',calcOrm));$('tm').addEventListener('input',calc531);$('week').addEventListener('change',calc531);['target','bar'].forEach(id=>$(id).addEventListener('input',calcPlates));
+// Each standalone tool card can be collapsed independently; state is remembered on this device.
+(function setupToolCardCollapse(){
+ const cards=[...document.querySelectorAll('main > .card')];
+ let states={};try{states=JSON.parse(localStorage.getItem('spartxStandaloneToolCardStates')||'{}')||{};}catch(e){}
+ cards.forEach((card,index)=>{
+  const head=card.querySelector('.card-head');if(!head)return;
+  const key=card.id||card.getAttribute('aria-labelledby')||('standalone-tool-'+index);
+  const button=document.createElement('button');button.type='button';button.className='card-collapse';
+  const name=head.querySelector('h2')?.textContent||'tool';
+  button.setAttribute('aria-controls',key+'-content');
+  const content=document.createElement('div');content.id=key+'-content';content.className='card-content';
+  while(head.nextSibling)content.appendChild(head.nextSibling);card.appendChild(content);
+  const apply=collapsed=>{card.classList.toggle('is-collapsed',collapsed);button.textContent=collapsed?'+':'−';button.title=collapsed?'Expand card':'Minimise card';button.setAttribute('aria-label',(collapsed?'Expand ':'Minimise ')+name);button.setAttribute('aria-expanded',String(!collapsed));states[key]=collapsed;try{localStorage.setItem('spartxStandaloneToolCardStates',JSON.stringify(states));}catch(e){}};
+  head.appendChild(button);apply(states[key]===true);button.addEventListener('click',()=>apply(!card.classList.contains('is-collapsed')));
+ });
+})();
 calcOrm();calcTrainingMaxFinder();calc531();calcPlates();
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});

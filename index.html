@@ -74,7 +74,11 @@ body.spartanx-red .card{background:linear-gradient(145deg,#1b1b1e,#111113);borde
 body.spartanx-red button:not(.secondary){background:#e51d28;color:#fff}
 body.spartanx-red button.secondary{background:#252326;border-color:#484044}
 body.spartanx-red .eyebrow,body.spartanx-red .brand span,body.spartanx-red #trackerNav button.active{color:#ff3943}
-body.spartanx-red .rank-progress-track{background:#383236}\nbody.spartanx-red .performance-tabs button.selected{background:#ef2029;color:#fff;border-color:#ef2029}\nbody.spartanx-red .set-type-picker{border-color:#5a3035}\nbody.spartanx-red .set-type-display{color:#ff3943}\nbody.spartanx-red .rest-label{color:#ff3943}
+body.spartanx-red .rank-progress-track{background:#383236}
+body.spartanx-red .performance-tabs button.selected{background:#ef2029;color:#fff;border-color:#ef2029}
+body.spartanx-red .set-type-picker{border-color:#5a3035}
+body.spartanx-red .set-type-display{color:#ff3943}
+body.spartanx-red .rest-label{color:#ff3943}
 .spartan-rank-card{overflow:hidden;background:linear-gradient(145deg,#1c1c20,#101012)}
 .rank-xp-total{font-size:12px;font-weight:900;color:var(--lime);background:var(--panel2);padding:7px 10px;border-radius:20px}
 .rank-current-row{display:flex;align-items:center;gap:14px;margin:15px 0 12px}
@@ -105,6 +109,9 @@ body.spartanx-red .rank-progress-track{background:#383236}\nbody.spartanx-red .p
 .profile-badge strong{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .profile-badge small{display:block;font-size:9px;color:var(--muted);margin-top:3px}
 @media(max-width:390px){.rank-tier img{height:40px}.rank-tier span{font-size:8px}.badge-grid{gap:6px}.badge-art{height:56px}}
+#trackerNav{position:fixed!important;inset:auto 0 0 0!important;z-index:2147483647!important;display:flex!important;justify-content:space-around;align-items:stretch;background:#171a1ef5;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));pointer-events:auto!important;touch-action:manipulation;transform:none!important;-webkit-transform:none!important;will-change:auto}
+#trackerNav button{position:relative;z-index:1;display:block;flex:1;min-height:48px;margin:0;padding:6px 3px;background:transparent;color:var(--muted);font-size:10px;line-height:1.2;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto!important}
+body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
 </style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -262,7 +269,8 @@ function renderSpartanProgress(){
  const unlocked=badges.filter(b=>b.unlocked).length;$('badgeCount').textContent=unlocked+' / 8';
  $('profileBadgeGrid').innerHTML=badges.map(b=>b.locked?'<div class="profile-badge locked" aria-label="Locked future badge"><div class="badge-art"><svg class="badge-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><strong>Locked</strong><small>Coming soon</small></div>':'<div class="profile-badge unlocked"><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><strong>'+b.name+'</strong><small>Unlocked</small></div>').join('');
 }
-\nfunction renderPerformanceChart(){
+
+function renderPerformanceChart(){
  const now=new Date(),days=[];
  for(let i=6;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);days.push({date:d,key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),duration:0,volume:0,reps:0});}
  const byDay=new Map(days.map(d=>[d.key,d]));
@@ -352,7 +360,17 @@ document.addEventListener('input',e=>{if(e.target.matches('main input,main texta
 document.addEventListener('change',e=>{if(e.target.matches('main input,main textarea,main select'))saveDraft();});
 window.addEventListener('pagehide',saveDraft);setInterval(saveDraft,700);
 function switchScreen(id){if(window.spartanxClearDrag)window.spartanxClearDrag();if(['tools','home','workout','profile'].includes(id)){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}try{localStorage.setItem('spartx_last_screen',id);}catch(e){}try{if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);}catch(e){}document.body.classList.toggle('tools-screen-active',id==='tools');document.querySelectorAll('.screen').forEach(screen=>{screen.classList.remove('drag-preview','dragging','drag-settle');screen.style.transform='';screen.classList.toggle('active',screen.id===id);});document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));updateMinimizedSession();}function swipeBack(){if(screenHistory.length){const target=screenHistory.pop();const current=document.querySelector('.screen.active')?.id;if(current&&target!==current){try{localStorage.setItem('spartx_last_screen',target);}catch(e){}try{if(location.hash!=='#'+target)history.replaceState(null,'','#'+target);}catch(e){}document.body.classList.toggle('tools-screen-active',target==='tools');document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===target));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===target));updateMinimizedSession();}}}
-document.getElementById('trackerNav').addEventListener('click',function(e){const button=e.target.closest('button[data-screen]');if(!button)return;e.preventDefault();switchScreen(button.dataset.screen);});
+const trackerNav=document.getElementById('trackerNav');
+if(trackerNav){
+ trackerNav.addEventListener('click',function(e){
+  const button=e.target.closest('#trackerNav button[data-screen]');
+  if(!button)return;
+  e.preventDefault();
+  const target=button.dataset.screen;
+  if(!document.getElementById(target))return;
+  switchScreen(target);
+ },{passive:false});
+}
 function defaultWorkoutName(date=new Date()){const hour=date.getHours();if(hour>=5&&hour<12)return 'Morning Workout';if(hour>=12&&hour<17)return 'Afternoon Workout';return 'Evening Workout';}
 function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();}
 function renderSavedRoutines(){let a=Array.isArray(db.routines)?db.routines:[];const count=a.length+'/5';if($('routineCount'))$('routineCount').textContent=count;if($('homeRoutineCount'))$('homeRoutineCount').textContent=count;if($('homeRoutineSummary'))$('homeRoutineSummary').textContent='View created routines ('+a.length+')';const html=a.length?a.map((r,i)=>'<div class="listitem row between"><div><strong>'+esc(r.name)+'</strong><div class="tiny muted">'+r.exercises.length+' exercises</div></div><button class="small" data-start-routine="'+i+'">START</button></div>').join(''):'<p class="muted tiny">No routines created yet.</p>';if($('savedRoutineList'))$('savedRoutineList').innerHTML=html;if($('homeRoutineList'))$('homeRoutineList').innerHTML=html;}

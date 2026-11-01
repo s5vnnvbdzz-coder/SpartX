@@ -55,15 +55,14 @@ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.typ
  (function setupToolReordering(){
   const main=shadow.querySelector('main'),toggle=$('reorderMenuButton'),bar=$('reorderMenuBar');
   if(!main||!toggle||!bar)return;
-  const getCards=()=>[...main.children].filter(el=>el.classList?.contains('card'));
+  const getCards=()=>Array.from(main.children).filter(el=>el.classList&&el.classList.contains('card'));
   const keyFor=(card,index)=>card.id||card.getAttribute('aria-labelledby')||('tool-card-'+index);
   let originalOrder=[],activeCard=null,pointerId=null;
   const currentOrder=()=>getCards().map((card,index)=>keyFor(card,index));
   function setMode(on){
-   main.classList.toggle('reorder-mode',on);bar.classList.toggle('active',on);
-   toggle.hidden=on;
+   main.classList.toggle('reorder-mode',on);bar.classList.toggle('active',on);toggle.hidden=on;
    getCards().forEach(card=>card.classList.toggle('reorder-enabled',on));
-   bar.querySelector('.reorder-message').textContent=on?'Drag a highlighted card to change its position.':'';
+   bar.querySelector('.reorder-message').textContent=on?'Press and drag any highlighted card to change its position.':'';
   }
   function restoreOrder(order){
    const cards=getCards(),map=new Map(cards.map((card,index)=>[keyFor(card,index),card]));
@@ -72,40 +71,46 @@ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.typ
   }
   try{const stored=JSON.parse(localStorage.getItem('spartxToolsCardOrder')||'[]');if(Array.isArray(stored)&&stored.length)restoreOrder(stored);}catch(e){}
   toggle.addEventListener('click',()=>{originalOrder=currentOrder();setMode(true);});
-  $('cancelToolOrder').addEventListener('click',()=>{restoreOrder(originalOrder);setMode(false);});
+  $('cancelToolOrder').addEventListener('click',()=>{finishDrag();restoreOrder(originalOrder);setMode(false);});
   $('saveToolOrder').addEventListener('click',()=>{
+   finishDrag();
    try{localStorage.setItem('spartxToolsCardOrder',JSON.stringify(currentOrder()));}catch(e){}
    setMode(false);
   });
+  function finishDrag(){
+   if(!activeCard)return;
+   activeCard.classList.remove('reorder-active');
+   try{if(main.hasPointerCapture(pointerId))main.releasePointerCapture(pointerId);}catch(e){}
+   activeCard=null;pointerId=null;
+  }
+  // Capture the pointer on MAIN, not on the card being moved. This keeps
+  // pointermove events flowing while cards are reinserted in the DOM.
   main.addEventListener('pointerdown',e=>{
-   if(!main.classList.contains('reorder-mode')||e.button!==0)return;
-   const card=e.target.closest('.card');
+   if(!main.classList.contains('reorder-mode')||activeCard)return;
+   const card=e.target instanceof Element?e.target.closest('.card'):null;
    if(!card||card.parentElement!==main||e.target.closest('button,a,input,select,textarea,label'))return;
+   if(e.pointerType==='mouse'&&e.button!==0)return;
    e.preventDefault();
    if(window.getSelection)window.getSelection().removeAllRanges();
    activeCard=card;pointerId=e.pointerId;
    card.classList.add('reorder-active');
-   try{card.setPointerCapture(pointerId);}catch(err){}
-  });
+   try{main.setPointerCapture(pointerId);}catch(err){}
+  },true);
   main.addEventListener('pointermove',e=>{
    if(!activeCard||e.pointerId!==pointerId)return;
    e.preventDefault();
    const cards=getCards().filter(card=>card!==activeCard);
-   let inserted=false;
+   let before=null;
    for(const card of cards){
     const rect=card.getBoundingClientRect();
-    if(e.clientY<rect.top+rect.height/2){main.insertBefore(activeCard,card);inserted=true;break;}
+    if(e.clientY<rect.top+rect.height/2){before=card;break;}
    }
-   if(!inserted)main.appendChild(activeCard);
-  });
-  const finish=()=>{
-   if(!activeCard)return;
-   activeCard.classList.remove('reorder-active');
-   activeCard=null;pointerId=null;
-  };
-  main.addEventListener('pointerup',finish);
-  main.addEventListener('pointercancel',finish);
-  main.addEventListener('lostpointercapture',finish);
+   if(before)main.insertBefore(activeCard,before);
+   else main.appendChild(activeCard);
+  },true);
+  main.addEventListener('pointerup',e=>{if(activeCard&&e.pointerId===pointerId)finishDrag();},true);
+  main.addEventListener('pointercancel',e=>{if(activeCard&&e.pointerId===pointerId)finishDrag();},true);
+  main.addEventListener('lostpointercapture',()=>{if(activeCard)finishDrag();},true);
   setMode(false);
  })();
 

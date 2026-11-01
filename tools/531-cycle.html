@@ -62,7 +62,8 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <h1>5/3/1 Cycle Planner</h1>
 <p class="intro">Build a progressive 4, 8 or 12-week block from your Training Max. Save it to revisit your working weights whenever you need them.</p>
 
-<div id="setupPlaceholder"></div>\n<section class="card" id="setupCard">
+<div id="setupPlaceholder"></div>
+<section class="card" id="setupCard">
 <div class="card-head"><h2>Build your cycle</h2><span class="pill">SETUP</span></div>
 <div class="fields">
 <div class="field"><label for="lift">Main lift</label><select id="lift"><option>Bench Press</option><option>Back Squat</option><option>Deadlift</option><option>Overhead Press</option></select></div>
@@ -150,7 +151,9 @@ function renderSaved(){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
-function syncBbbOptions(){$('bbbOptions').hidden=!$('bbb').checked;}\nfunction openEditModal(){ $('editModalBody').appendChild($('setupCard')); $('editModal').hidden=false; document.body.style.overflow='hidden'; }\nfunction closeEditModal(){ $('setupPlaceholder').after($('setupCard')); $('editModal').hidden=true; document.body.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
+function syncBbbOptions(){$('bbbOptions').hidden=!$('bbb').checked;}
+function openEditModal(){ $('editModalBody').appendChild($('setupCard')); $('editModal').hidden=false; document.body.style.overflow='hidden'; }
+function closeEditModal(){ $('setupPlaceholder').after($('setupCard')); $('editModal').hidden=true; document.body.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
 $('bbb').addEventListener('change',()=>{syncBbbOptions();saveDraft();});
 ['lift','tm','increase','bbbPct'].forEach(id=>$(id).addEventListener('input',saveDraft));
 $('generate').addEventListener('click',()=>{
@@ -176,7 +179,10 @@ $('savedList').addEventListener('click',e=>{
  if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=[4,8,12].includes(+item.weeks)?+item.weeks:4;$('bbb').checked=!!item.bbb;$('bbbPct').value=String([50,60,70].includes(+item.bbbPct)?item.bbbPct:60);syncBbbOptions();setLength();$('generate').textContent='SAVE CHANGES';saveDraft();openEditModal();}}
  if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){editingId=null;$('generate').textContent='GENERATE CYCLE';}renderSaved();}}
 });
-$('closeEdit').addEventListener('click',closeEditModal);\n$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditModal();});\ndocument.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditModal();});\nrestoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;renderSaved();
+$('closeEdit').addEventListener('click',closeEditModal);
+$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditModal();});
+restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;renderSaved();
 document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));
 })();
 </script>

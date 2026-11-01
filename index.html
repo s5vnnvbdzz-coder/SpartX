@@ -51,7 +51,8 @@
 .session-stats{margin-bottom:14px}.muscle-card{padding:14px}.muscle-diagram{display:flex;justify-content:center;align-items:center;gap:18px;min-height:220px}
 .muscle-diagram svg{height:210px;width:auto;max-width:48%}.muscle-shape{fill:#333b42;stroke:#68727b;stroke-width:1.5}.muscle-hot{fill:#c8f169;stroke:#e2ff9a;stroke-width:1.5}
 .muscle-legend{font-size:11px;color:var(--muted);text-align:center;margin-top:7px}
-.library-search{margin:12px 0}.library-categories{display:flex;gap:7px;overflow-x:auto;padding:3px 0 12px}.library-categories button{white-space:nowrap;flex:0 0 auto}.library-categories button.selected{background:var(--lime);color:#111}
+.library-search{margin:12px 0}body.spartanx-red .library-pick,body.spartanx-red .library-categories button,body.spartanx-red .library-item button{background:rgba(39,40,43,.62)!important;color:#e8e6e7!important;border:1px solid rgba(145,139,143,.22)!important}
+.library-categories{display:flex;gap:7px;overflow-x:auto;padding:3px 0 12px}.library-categories button{white-space:nowrap;flex:0 0 auto}.library-categories button.selected{background:var(--lime);color:#111}
 .library-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 2px;border-bottom:1px solid var(--line)}.library-pick{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:4px;padding:8px 4px;background:transparent;color:var(--txt);text-align:left;border-radius:8px}.library-pick:active{background:var(--panel2)}.library-item[data-add-exercise]{cursor:pointer;min-height:54px;-webkit-tap-highlight-color:transparent}.library-item[data-add-exercise]:active{background:var(--panel2)}.library-info-button{width:20px;height:20px;min-width:20px;flex:0 0 20px;padding:0!important;border-radius:50%!important;font-size:12px!important;font-weight:900;line-height:18px;background:transparent!important;border:1px solid #59643d!important;color:var(--lime)!important}
 .library-item-name{font-weight:750}.library-item-meta{font-size:10px;color:var(--muted);margin-top:4px}.library-item button{padding:8px 12px}
 .library-records{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}
@@ -71,8 +72,10 @@ body.spartanx-red{--bg:#09090b;--panel:#151518;--panel2:#242428;--line:#393438;-
 body.spartanx-red header{background:linear-gradient(100deg,#111113f5,#242326f2);border-color:#403437}
 body.spartanx-red #trackerNav{background:linear-gradient(90deg,#141416f7,#242326f7);border-color:#403437}
 body.spartanx-red .card,body.spartanx-red .exercise-card,body.spartanx-red .detail-panel,body.spartanx-red .custom-exercise-box{background:linear-gradient(225deg,rgba(125,20,29,.42) 0%,rgba(65,65,69,.88) 24%,#242326 48%,#171719 82%);border-color:#514044}
-body.spartanx-red button:not(.secondary){background:#e51d28;color:#fff}
-body.spartanx-red button.secondary{background:#252326;border-color:#484044}
+body.spartanx-red button:not(#trackerNav button){background:rgba(39,40,43,.62)!important;color:#e8e6e7!important;border:1px solid rgba(145,139,143,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+body.spartanx-red button:not(#trackerNav button):active{background:rgba(52,52,56,.82)!important}
+body.spartanx-red #trackerNav button{background:transparent!important;border:0!important;box-shadow:none!important}
+body.spartanx-red button.secondary{background:rgba(39,40,43,.62)!important;border-color:rgba(145,139,143,.22)!important}
 body.spartanx-red .eyebrow,body.spartanx-red .brand span,body.spartanx-red #trackerNav button.active{color:#ff3943}
 body.spartanx-red .rank-progress-track{background:#383236}
 body.spartanx-red .performance-tabs button.selected{background:#ef2029;color:#fff;border-color:#ef2029}

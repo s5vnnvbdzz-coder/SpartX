@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090a0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AscensionX">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<title>AscensionX — Strength Method</title>
+<style>
+:root{
+ --bg:#08090c;--panel:#121419;--panel2:#1b1e25;--panel3:#222630;
+ --line:#30343e;--text:#f4f4f6;--muted:#969ba7;
+ --red:#ed1c2e;--red2:#ff3445;--redDeep:#7d101b;
+ --green:#59c98b;--amber:#e8b65d;--radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% -18%,#292b32 0,#111319 36%,var(--bg) 76%);background-attachment:fixed;color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit}
+button{border:0;border-radius:12px;padding:12px 15px;background:linear-gradient(135deg,var(--red2),#c81020);color:white;font-weight:850;cursor:pointer;box-shadow:0 5px 18px #ed1c2e22}
+button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line);box-shadow:none}
+button.ghost{background:transparent;color:var(--muted);box-shadow:none;padding:8px}
+button.danger{background:#3a171d;color:#ff9aa3;border:1px solid #67232c;box-shadow:none}
+button:disabled{opacity:.4;cursor:not-allowed}
+input,select,textarea{background:#0d0f14;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:12px;width:100%;min-width:0;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+header{position:sticky;top:0;z-index:20;padding:calc(14px + env(safe-area-inset-top)) 18px 13px;display:flex;align-items:center;justify-content:space-between;background:#0b0c10eF;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff0b}
+.brand{font-weight:950;letter-spacing:2.5px;font-size:19px}.brand span{color:var(--red2)}
+.sub{font-size:9px;color:var(--muted);letter-spacing:1.8px;margin-top:3px}
+main{max-width:780px;margin:auto;padding:18px 16px 30px}
+.screen{display:none}.screen.active{display:block}
+h1{font-size:29px;letter-spacing:-.9px;margin:6px 0 5px}h2{font-size:18px;margin:0 0 13px}h3{font-size:15px;margin:0}
+.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted);line-height:1.5}
+.eyebrow{font-size:10px;letter-spacing:1.7px;color:var(--red2);font-weight:900;text-transform:uppercase}
+.card{background:linear-gradient(145deg,#171a20,#111318);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:13px 0;box-shadow:0 12px 32px #0003}
+.hero{padding:19px;border-radius:19px;background:radial-gradient(ellipse at 90% 10%,#5c111d66,transparent 52%),linear-gradient(135deg,#252830,#111318 72%);border:1px solid #46404a;margin:14px 0;position:relative;overflow:hidden}
+.hero:after{content:"AX";position:absolute;right:12px;bottom:-28px;font-weight:1000;font-size:115px;letter-spacing:-10px;color:#ffffff08;pointer-events:none}
+.hero .big{font-size:36px;font-weight:950;letter-spacing:-1.4px;margin:6px 0}
+.mutedline{color:var(--muted);font-size:10px;letter-spacing:1.3px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.wrap{flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{background:linear-gradient(145deg,#222630,#191c23);border:1px solid #30343e;border-radius:14px;padding:13px;min-width:0}
+.stat span{font-size:10px;color:var(--muted);letter-spacing:.9px;text-transform:uppercase}
+.stat strong{display:block;font-size:23px;margin-top:5px;letter-spacing:-.5px}
+.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;font-size:10px;color:var(--muted);white-space:nowrap}
+.pill.red{color:#ff6672;border-color:#7d2630;background:#35151b}.pill.good{color:#75d9a1;border-color:#286144;background:#14291f}.pill.warn{color:var(--amber);border-color:#6b542e;background:#2b2418}
+.progress{height:8px;border-radius:99px;background:#30333b;overflow:hidden}.progress>i{display:block;height:100%;background:linear-gradient(90deg,#a70e1d,var(--red2));border-radius:99px}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.fields{display:flex;gap:10px;margin:10px 0}.field{flex:1;min-width:0}
+.listitem{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #30343e}.listitem:last-child{border:0}
+.weekgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.weektile{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:11px 8px;text-align:center;cursor:pointer}
+.weektile strong{display:block;font-size:17px}.weektile small{font-size:10px;color:var(--muted)}
+.weektile.current{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red),0 0 16px #ed1c2e22}
+.weektile.done{background:#21171b;border-color:#742630}
+.seg{display:flex;background:#0d0f14;border:1px solid var(--line);padding:4px;border-radius:12px;gap:4px}
+.seg button{flex:1;background:transparent;color:var(--muted);padding:9px 5px;font-size:12px;box-shadow:none}
+.seg button.active{background:#292d36;color:#fff;border:1px solid #454a56}
+.settable{width:100%;border-collapse:collapse;font-size:12px}
+.settable th{color:var(--muted);font-size:10px;text-align:left;font-weight:700;padding:8px 5px;border-bottom:1px solid var(--line)}
+.settable td{padding:8px 4px;border-bottom:1px solid #292d366b;vertical-align:middle}
+.settable input{padding:9px 5px;text-align:center;font-size:13px}
+.settable tr:last-child td{border:0}
+.settable .donecell{text-align:center}
+.check{width:20px;height:20px;accent-color:var(--red)}
+.full{width:100%}.small{padding:8px 10px;font-size:12px}
+.note{background:#29171b;border:1px solid #67303a;border-radius:12px;padding:12px;color:#f2c9cd;font-size:12px;line-height:1.5}
+.warning{background:#2b2418;border:1px solid #59482a;border-radius:12px;padding:12px;color:#f0d7a6;font-size:12px;line-height:1.5}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#111318f5;backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 7px calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:space-around}
+nav button{background:none;color:var(--muted);padding:7px 3px;font-size:10px;display:flex;flex-direction:column;gap:4px;align-items:center;flex:1;box-shadow:none}
+nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#f4f4f6;color:#15161a;padding:11px 16px;border-radius:99px;font-weight:850;font-size:13px;z-index:50;display:none;white-space:nowrap;box-shadow:0 8px 30px #0008}
+.barwrap{height:145px;display:flex;align-items:end;gap:7px;border-bottom:1px solid var(--line);padding:10px 4px 0}
+.bar{flex:1;min-width:8px;background:linear-gradient(180deg,var(--red2),#8e101d);border-radius:5px 5px 0 0;position:relative;opacity:.9}
+.bar small{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
+.hidden{display:none!important}
+@media(min-width:620px){main{padding-top:25px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.weekgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+ <button class="ghost" style="text-align:left;padding:0;background:none;box-shadow:none" onclick="showScreen('home')" aria-label="Open dashboard"><div class="brand">ASCENSION<span>X</span></div><div class="sub">THE STRENGTH METHOD · BUILD BEYOND</div></button>
+ <span class="pill red" id="headerStatus">NO ACTIVE CYCLE</span>
+</header>
+<main>
+<section id="home" class="screen">
+ <div class="eyebrow">TRAINING HQ</div><h1>Ascension dashboard</h1><p class="muted tiny" id="todayDate"></p>
+ <div class="grid">
+  <div class="stat"><span>Active cycle</span><strong id="dashCycle">—</strong></div>
+  <div class="stat"><span>Current week</span><strong id="dashWeek">—</strong></div>
+  <div class="stat"><span>Sessions logged</span><strong id="dashSessions">0</strong></div>
+  <div class="stat"><span>Best estimated 1RM</span><strong id="dashE1rm">—</strong></div>
+ </div>
+ <div class="hero" id="homeHero">
+  <div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div>
+  <div class="tiny">Build a six-week strength cycle, record your work and let performance guide the next step.</div>
+  <button style="margin-top:15px" onclick="showScreen('profile')">Set up your lifts</button>
+ </div>
+ <div class="card">
+  <div class="row between"><div><h2 style="margin:0">Cycle progress</h2><div class="tiny" id="cycleProgressText">Create a cycle to begin.</div></div><span class="pill red" id="cycleProgressPct">0%</span></div><button class="secondary small" style="margin-top:10px" onclick="showScreen('cycle')">View full cycle</button>
+  <div class="progress" style="margin-top:12px"><i id="cycleProgressBar" style="width:0%"></i></div>
+  <div class="weekgrid" id="homeWeeks" style="margin-top:14px"></div>
+ </div>
+ <div class="card">
+  <div class="row between"><h2 style="margin:0">Next session</h2><span class="pill">MAIN LIFTS</span></div>
+  <div id="nextSession" class="tiny" style="margin-top:10px">Set up your training maxes to generate your first session.</div>
+  <button class="full" style="margin-top:13px" onclick="showScreen('workout')">Open workout</button>
+ </div>
+ <div class="card"><h2>Method principles</h2><div class="listitem"><span>01 · Progressive intensity</span><span class="tiny">↑ load</span></div><div class="listitem"><span>02 · Descending reps</span><span class="tiny">↓ reps</span></div><div class="listitem"><span>03 · Managed volume</span><span class="tiny">↓ sets</span></div><div class="listitem"><span>04 · Performance-led progression</span><span class="tiny">Earn it</span></div></div>
+</section>
+
+<section id="workout" class="screen active">
+ <div class="eyebrow">EXECUTE THE PLAN</div><div class="row between"><h1>Workout</h1><button class="ghost small" onclick="showScreen('home')">Dashboard ↗</button></div><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
+ <div class="card">
+  <div class="fields">
+   <div class="field"><label>Lift</label><select id="liftSelect" onchange="renderWorkout()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+   <div class="field"><label>Cycle week</label><select id="workWeek" onchange="renderWorkout()"><option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option><option value="4">Week 4</option><option value="5">Week 5</option><option value="6">Week 6 · Deload</option></select></div>
+  </div>
+  <div id="workoutPrescription"></div>
+ </div>
+ <div id="workoutLogger"></div>
+</section>
+
+<section id="cycle" class="screen">
+ <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h1>Cycle overview</h1><button class="ghost small" onclick="showScreen('home')">← Back to home</button>
+ <div class="card"><div class="row between"><div><h2 style="margin:0">Ascension Strength</h2><div class="tiny">Six-week linear intensification wave</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">One prescribed top set followed by back-off volume. Repetitions fall and intensity rises through Week 5. Week 6 consolidates and reduces fatigue.</p></div>
+ <div class="card"><h2>Weekly prescriptions</h2><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
+ <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
+ <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
+</section>
+
+<section id="progress" class="screen">
+ <div class="eyebrow">MEASURE THE CLIMB</div><h1>Progress</h1>
+ <div class="grid">
+  <div class="stat"><span>Total volume</span><strong id="totalVolume">0 kg</strong></div>
+  <div class="stat"><span>Sets logged</span><strong id="totalSets">0</strong></div>
+  <div class="stat"><span>Best logged weight</span><strong id="bestWeight">—</strong></div>
+  <div class="stat"><span>Estimated 1RM</span><strong id="bestEstimate">—</strong></div>
+ </div>
+ <div class="card"><h2>Estimated strength trend</h2><div class="tiny">Epley estimates from logged top sets. Use as a trend indicator, not a tested maximum.</div><div id="trendGraph" class="barwrap"></div><p id="trendCaption" class="tiny" style="margin-top:28px">Log your first workout to build your trend.</p></div>
+ <div class="card"><h2>Training history</h2><div id="historyList" class="tiny">No sessions recorded yet.</div></div>
+ <div class="card"><h2>End-of-cycle review</h2><div id="cycleReview" class="tiny">Complete your training sessions to receive a progression recommendation.</div></div>
+</section>
+
+<section id="tools" class="screen">
+ <div class="eyebrow">NUMBERS THAT MATTER</div><h1>Strength tools</h1>
+ <div class="card"><h2>Training Max calculator</h2><div class="fields"><div class="field"><label>Tested / estimated 1RM (kg)</label><input id="calcMax" type="number" value="160" step="0.5"></div><div class="field"><label>TM percentage</label><select id="tmPercent"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95" selected>95%</option></select></div></div><div class="stat"><span>Calculated Training Max</span><strong id="tmResult">152.5 kg</strong></div><p class="tiny">AscensionX starts at 95% of estimated 1RM. You can change this in Profile.</p></div>
+ <div class="card"><h2>Plate calculator</h2><div class="fields"><div class="field"><label>Target weight (kg)</label><input id="plateTarget" type="number" value="140" step="0.5"></div><div class="field"><label>Bar weight (kg)</label><select id="barWeight"><option>20</option><option>15</option><option>10</option></select></div></div><button class="small" onclick="calculatePlates()">Calculate plates</button><div id="plateResult" style="margin-top:12px"></div><p class="tiny">Matching plates on each side. Assumes 25, 20, 15, 10, 5, 2.5 and 1.25 kg plates.</p></div>
+ <div class="card"><h2>About the method</h2><p class="tiny">AscensionX is an experimental six-week percentage-based strength template inspired by established programming principles. It is not an established or scientifically validated programme. Use sensible loads, record honest effort and adjust for pain, fatigue and technique.</p></div>
+</section>
+
+<section id="profile" class="screen">
+ <div class="eyebrow">YOUR TRAINING PROFILE</div><h1>Profile & setup</h1>
+ <div class="card"><h2>Starting strength levels</h2><p class="tiny">Enter your current 1RM or a conservative estimated 1RM. The app calculates a Training Max from it. These values are editable at any time.</p>
+  <div class="fields"><div class="field"><label>Back Squat 1RM (kg)</label><input id="maxSquat" type="number" step="0.5"></div><div class="field"><label>Bench Press 1RM (kg)</label><input id="maxBench" type="number" step="0.5"></div></div>
+  <div class="fields"><div class="field"><label>Deadlift 1RM (kg)</label><input id="maxDeadlift" type="number" step="0.5"></div><div class="field"><label>Overhead Press 1RM (kg)</label><input id="maxOHP" type="number" step="0.5"></div></div>
+  <div class="fields"><div class="field"><label>Training Max (%)</label><select id="profileTm"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95" selected>95%</option></select></div><div class="field"><label>Barbell rounding</label><select id="rounding"><option value="2.5" selected>2.5 kg</option><option value="1.25">1.25 kg</option><option value="0.5">0.5 kg</option></select></div></div>
+  <button class="full" onclick="saveProfile()">Save training profile</button>
+ </div>
+ <div class="card"><h2>Cycle controls</h2><div class="tiny" id="profileCycleStatus">No cycle created.</div><button class="full" style="margin-top:12px" onclick="createCycle()">Generate / reset six-week cycle</button><div class="fields" style="margin-top:10px"><button class="secondary field" onclick="showScreen('cycle')">View cycle</button><button class="secondary field" onclick="showScreen('progress')">View progress</button></div><p class="tiny" style="margin-top:10px">Generating a new cycle replaces the current cycle prescription. Your saved workout history is retained.</p></div>
+ <div class="card"><h2>Data & backup</h2><p class="tiny">Your profile and training log are saved locally in this browser on this device. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · VERSION 1.0 · LOCAL STORAGE</div></div>
+</section>
+</main>
+<nav aria-label="Main navigation">
+ <button data-screen="tools"><b>◈</b>Tools</button>
+ <button class="active" data-screen="workout"><b>▣</b>Workout</button>
+ <button data-screen="profile"><b>♙</b>Profile</button>
+</nav>
+<div id="toast" class="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='ascensionx_strength_v1';
+const LIFTS=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+const PLAN=[
+ {week:1,name:'Volume foundation',topPct:72.5,topReps:6,backPct:67.5,backSets:3,backReps:6,rpe:7},
+ {week:2,name:'Volume progression',topPct:77.5,topReps:5,backPct:72.5,backSets:4,backReps:5,rpe:7},
+ {week:3,name:'Strength development',topPct:82.5,topReps:4,backPct:77.5,backSets:4,backReps:4,rpe:7.5},
+ {week:4,name:'Intensification',topPct:87.5,topReps:3,backPct:82.5,backSets:3,backReps:3,rpe:8},
+ {week:5,name:'Heavy strength',topPct:92.5,topReps:2,backPct:87.5,backSets:3,backReps:2,rpe:8.5},
+ {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
+];
+let state=load();
+function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5},cycle:{created:null,currentWeek:1},logs:[],draft:null}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!('draft' in x))x.draft=null;return x}}catch(e){}return defaults()}
+function persist(shouldRender=true){try{localStorage.setItem(KEY,JSON.stringify(state));if(shouldRender)renderAll();return true}catch(e){toast('Could not save data. Export a backup and free browser storage.');return false}}
+function toast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
+function roundTo(n,step=state.profile.rounding||2.5){return Math.round(n/step)*step}
+function kg(n){return Number(n).toLocaleString(undefined,{maximumFractionDigits:1})+' kg'}
+function e1rm(w,r){return r>0?w*(1+r/30):0}
+function tm(lift){return roundTo((Number(state.profile.max[lift])||0)*state.profile.tmPct/100)}
+function prescribed(lift,week){const p=PLAN[week-1],base=tm(lift);return {p,topLoad:roundTo(base*p.topPct/100),backLoad:p.backPct===null?null:roundTo(base*p.backPct/100)}}
+function saveProfile(){
+ const vals={'Back Squat':$('maxSquat').value,'Bench Press':$('maxBench').value,'Deadlift':$('maxDeadlift').value,'Overhead Press':$('maxOHP').value};
+ if(Object.values(vals).some(v=>!Number.isFinite(+v)||+v<=0)){toast('Enter a valid 1RM for all four lifts');return}
+ state.profile.max=Object.fromEntries(Object.entries(vals).map(([k,v])=>[k,+v]));
+ state.profile.tmPct=+$('profileTm').value;state.profile.rounding=+$('rounding').value;
+ persist();toast('Training profile saved');
+}
+function createCycle(){if(!confirm('Generate a fresh six-week Ascension cycle? Existing workout history will be retained.'))return;state.cycle={created:new Date().toISOString(),currentWeek:1};persist();toast('Six-week cycle generated');$('workWeek').value=1;showScreen('workout')}
+function showScreen(id,addHistory=true){
+ const target=$(id);if(!target)return;
+ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id||(['cycle','progress'].includes(id)&&b.dataset.screen==='profile')||(id==='home'&&b.dataset.screen==='workout')));
+ if(id==='workout')renderWorkout();if(id==='cycle')renderCycle();if(id==='progress')renderProgress();
+ if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
+window.addEventListener('popstate',e=>showScreen(e.state?.screen||'workout',false));
+function renderProfile(){ $('maxSquat').value=state.profile.max['Back Squat'];$('maxBench').value=state.profile.max['Bench Press'];$('maxDeadlift').value=state.profile.max['Deadlift'];$('maxOHP').value=state.profile.max['Overhead Press'];$('profileTm').value=state.profile.tmPct;$('rounding').value=state.profile.rounding;$('profileCycleStatus').textContent=state.cycle.created?'Cycle created '+new Date(state.cycle.created).toLocaleDateString()+'. Current week '+state.cycle.currentWeek+'.':'No cycle created yet.'}
+function renderDashboard(){
+ $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $('headerStatus').textContent=state.cycle.created?'WEEK '+state.cycle.currentWeek+' / 6':'NO ACTIVE CYCLE';
+ $('dashCycle').textContent=state.cycle.created?'6 weeks':'—';$('dashWeek').textContent=state.cycle.created?state.cycle.currentWeek+'/6':'—';$('dashSessions').textContent=state.logs.length;
+ const best=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));$('dashE1rm').textContent=best?Math.round(best)+' kg':'—';
+ const done=state.logs.filter(l=>l.week===state.cycle.currentWeek).length, pct=state.cycle.created?Math.round(done/4*100):0;
+ $('cycleProgressText').textContent=state.cycle.created?done+' of 4 main lift sessions logged for week '+state.cycle.currentWeek+'.':'Create a cycle to begin.';
+ $('cycleProgressPct').textContent=pct+'%';$('cycleProgressBar').style.width=pct+'%';
+ $('homeWeeks').innerHTML=PLAN.map(p=>`<div class="weektile ${p.week===state.cycle.currentWeek?'current':''} ${state.logs.filter(l=>l.week===p.week).length===4?'done':''}" onclick="setWeek(${p.week})"><strong>W${p.week}</strong><small>${p.deload?'Deload':p.topReps+' reps'}</small></div>`).join('');
+ const next=LIFTS.find(l=>!state.logs.some(x=>x.week===state.cycle.currentWeek&&x.lift===l));
+ $('nextSession').innerHTML=state.cycle.created?(next?`<strong>${next}</strong><br><span class="muted">Week ${state.cycle.currentWeek} · ${PLAN[state.cycle.currentWeek-1].name}</span>`:'All four main lifts logged for this week. Review your work or move to the next week.'):'Set up your training maxes to generate your first session.';
+ $('homeHero').innerHTML=state.cycle.created?`<div class="mutedline">CURRENT ASCENSION CYCLE</div><div class="big">Week ${state.cycle.currentWeek}<span style="color:var(--red2)"> / 6</span></div><div class="tiny">${PLAN[state.cycle.currentWeek-1].name} · ${PLAN[state.cycle.currentWeek-1].deload?'Recovery and consolidation':'Build strength through controlled progression'}</div><button style="margin-top:15px" onclick="showScreen('workout')">Continue training</button>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Build a six-week strength cycle, record your work and let performance guide the next step.</div><button style="margin-top:15px" onclick="showScreen('profile')">Set up your lifts</button>`;
+}
+function setWeek(w){state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
+function renderWorkout(){
+ if(!$('liftSelect'))return;
+ const lift=$('liftSelect').value,week=+$('workWeek').value||state.cycle.currentWeek||1,info=prescribed(lift,week),p=info.p;
+ const existing=state.logs.find(x=>x.lift===lift&&x.week===week);
+ $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
+ <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
+ <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${p.topPct}% of TM · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${p.backPct}% of TM</div>`:''}</div>
+ <div class="tiny"><strong>Warm-up suggestion:</strong> ${[40,55,65,75].map((x,i)=>`${x}% × ${[5,3,2,1][i]}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
+ $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
+}
+function renderLogger(lift,week,info){
+ const p=info.p,mainSets=p.deload?3:1,rows=[];
+ for(let i=0;i<mainSets;i++)rows.push({label:p.deload?'Deload '+(i+1):'Top set',weight:info.topLoad,reps:p.topReps});
+ for(let i=0;i<p.backSets;i++)rows.push({label:'Back-off '+(i+1),weight:info.backLoad,reps:p.backReps});
+ const draft=state.draft&&state.draft.lift===lift&&state.draft.week===week?state.draft:null;
+ let table=rows.map((r,i)=>{const d=draft?.sets?.[i];return `<tr><td>${r.label}</td><td><input id="actualW${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" step="0.5" value="${d?.weight??r.weight}"></td><td><input id="actualR${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" min="0" max="30" value="${d?.reps??r.reps}"></td><td><input id="actualE${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" min="1" max="10" step="0.5" placeholder="—" value="${d?.rpe??''}"></td><td class="donecell"><input class="check" id="done${i}" data-draft="1" onchange="saveWorkoutDraft('${lift}',${week},${rows.length})" type="checkbox" ${d? (d.done?'checked':''):'checked'}></td></tr>`}).join('');
+ const html=`<div class="card"><div class="row between"><h2 style="margin:0">Log your sets</h2><span class="pill">${rows.length} WORKING SETS</span></div><p class="tiny" style="margin:8px 0 12px">Edit actual weight and reps if needed. Tick each completed set and record RPE where useful. Entries save automatically on this device.</p><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Set</th><th>kg</th><th>Reps</th><th>RPE</th><th>✓</th></tr></thead><tbody>${table}</tbody></table></div><div class="field" style="margin-top:12px"><label>Session notes (optional)</label><textarea id="sessionNotes" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" rows="2" placeholder="Technique, readiness, bar speed, anything worth tracking…">${draft?.notes||''}</textarea></div><button class="full" style="margin-top:12px" onclick="saveWorkout('${lift}',${week},${rows.length})">Save workout</button></div>`;
+ return html;
+}
+function renderSaved(log){return `<div class="card"><div class="row between"><h2 style="margin:0">Session saved</h2><span class="pill good">LOGGED</span></div><p class="tiny">${new Date(log.date).toLocaleString()} · ${log.sets.length} working sets</p><div class="stat"><span>Top / main performance</span><strong>${kg(log.topWeight)} × ${log.topReps}</strong></div><p class="tiny" style="margin-top:10px">${log.notes||'No session notes.'}</p><button class="secondary full" style="margin-top:10px" onclick="editWorkout('${log.lift}',${log.week})">Edit saved session</button></div>`}
+function saveWorkoutDraft(lift,week,count){
+ const sets=[];for(let i=0;i<count;i++){const w=$('actualW'+i),r=$('actualR'+i),e=$('actualE'+i),d=$('done'+i);if(!w||!r||!e||!d)return;sets.push({weight:w.value,reps:r.value,rpe:e.value,done:d.checked})}
+ state.draft={lift,week,sets,notes:$('sessionNotes')?.value||'',updatedAt:new Date().toISOString()};persist(false);
+}
+function saveWorkout(lift,week,count){
+ const sets=[];for(let i=0;i<count;i++){const weight=+$('actualW'+i).value,reps=+$('actualR'+i).value,rpe=$('actualE'+i).value===''?null:+$('actualE'+i).value,done=$('done'+i).checked;if(!Number.isFinite(weight)||weight<=0||!Number.isFinite(reps)||reps<0){toast('Check your set entries');return}sets.push({label:i===0?(PLAN[week-1].deload?'Deload 1':'Top set'):'Back-off '+i,weight,reps,rpe,done})}
+ const top=sets[0],info=prescribed(lift,week),allDone=sets.every(s=>s.done&&s.reps>= (s.label==='Top set'?info.p.topReps:info.p.deload?5:info.p.backReps));
+ const avgRpe=sets.map(s=>s.rpe).filter(x=>x!==null);const mean=avgRpe.length?avgRpe.reduce((a,b)=>a+b,0)/avgRpe.length:null;
+ const success=allDone&&(mean===null||mean<=info.p.rpe);
+ const log={id:Date.now(),date:new Date().toISOString(),lift,week,sets,topWeight:top.weight,topReps:top.reps,volume:sets.reduce((a,s)=>a+s.weight*s.reps,0),notes:$('sessionNotes')?.value||'',success,avgRpe:mean};
+ state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));state.logs.push(log);state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));state.draft=null;persist();toast(success?'Workout saved · targets hit':'Workout saved · review performance');
+}
+function editWorkout(lift,week){const old=state.logs.find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
+function renderCycle(){
+ $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');
+ renderCycleLoads();
+}
+function renderCycleLoads(){
+ const lift=$('cycleLift').value;
+ $('cycleLoads').innerHTML=`<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr></thead><tbody>${PLAN.map(p=>{const x=prescribed(lift,p.week);return `<tr><td>W${p.week}</td><td>${kg(tm(lift))}</td><td>${kg(x.topLoad)} · ${p.deload?'3×5':`1×${p.topReps}`}</td><td>${x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps}</td></tr>`}).join('')}</tbody></table></div>`;
+}
+function renderProgress(){
+ const sets=state.logs.flatMap(l=>l.sets),volume=sets.reduce((a,s)=>a+s.weight*s.reps,0),bestW=Math.max(0,...sets.map(s=>s.weight)),bestE=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));
+ $('totalVolume').textContent=Math.round(volume).toLocaleString()+' kg';$('totalSets').textContent=sets.length;$('bestWeight').textContent=bestW?kg(bestW):'—';$('bestEstimate').textContent=bestE?kg(bestE):'—';
+ const vals=state.logs.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));const max=Math.max(1,...vals.map(l=>e1rm(l.topWeight,l.topReps)));
+ $('trendGraph').innerHTML=vals.length?vals.slice(-12).map(l=>`<div class="bar" style="height:${Math.max(5,e1rm(l.topWeight,l.topReps)/max*100)}%"><small>${l.lift.split(' ')[0].slice(0,3)}</small></div>`).join(''):'';
+ $('trendCaption').textContent=vals.length?'Recent top-set E1RM estimates. Compare like-for-like lifts and rep ranges.':'Log your first workout to build your trend.';
+ $('historyList').innerHTML=vals.length?vals.slice().reverse().map(l=>`<div class="listitem"><div><strong>${l.lift} · Week ${l.week}</strong><div class="tiny">${new Date(l.date).toLocaleDateString()} · ${l.sets.length} sets · ${Math.round(l.volume).toLocaleString()} kg volume</div></div><span class="pill ${l.success?'good':'warn'}">${l.success?'TARGET HIT':'REVIEW'}</span></div>`).join(''):'No sessions recorded yet.';
+ const completed=state.logs.filter(l=>l.week===6).length;
+ $('cycleReview').innerHTML=state.logs.length?`<strong>${state.logs.length} sessions logged.</strong><br>${completed?'Week 6 sessions are being recorded. Review the full cycle before changing your TM.':'When the cycle is complete, review rep completion, RPE, technique and recovery. The initial rule is +2.5 kg upper body / +2.5–5 kg lower body if all targets were met comfortably; hold if effort overshot; reduce 2.5–5% after repeated missed work.'}`:'Complete your training sessions to receive a progression recommendation.';
+}
+function renderAll(){renderDashboard();renderProfile();renderCycle();renderProgress();renderWorkout();updateToolCalc()}
+function updateToolCalc(){const v=+$('calcMax').value,p=+$('tmPercent').value;$('tmResult').textContent=kg(roundTo(v*p/100));}
+$('calcMax').addEventListener('input',updateToolCalc);$('tmPercent').addEventListener('change',updateToolCalc);
+function calculatePlates(){
+ const target=+$('plateTarget').value,bar=+$('barWeight').value;let rem=(target-bar)/2;if(rem<0){$('plateResult').textContent='Target must be at least the bar weight.';return}
+ const plates=[25,20,15,10,5,2.5,1.25],out=[];for(const p of plates){const n=Math.floor((rem+1e-8)/p);if(n){out.push(n+' × '+p+' kg');rem-=n*p}}
+ $('plateResult').innerHTML=rem>.01?`<span class="pill warn">Not achievable with listed plates</span>`:`<strong>${out.join(' + ')||'No plates'} per side</strong>`;
+}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ascensionx-backup.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exported')}
+$('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(await e.target.files[0].text());if(!obj.profile||!obj.profile.max||!obj.cycle||!Array.isArray(obj.logs))throw Error();if(!obj.profile.max['Back Squat']||!obj.profile.max['Bench Press']||!obj.profile.max['Deadlift']||!obj.profile.max['Overhead Press'])throw Error();if(!('draft' in obj))obj.draft=null;state=obj;if(!persist())throw Error();toast('Backup imported')}catch(err){toast('Could not read that backup')}e.target.value=''});
+function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
+function init(){
+ $('workWeek').value=state.cycle.currentWeek||1;
+ renderAll();showScreen('workout',false);history.replaceState({screen:'workout'},'',location.pathname+location.search+'#workout');
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
+init();
+</script>
+</body>
+</html>

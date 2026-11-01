@@ -149,11 +149,19 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
  <div class="card"><h2>End-of-cycle review</h2><div id="cycleReview" class="tiny">Complete your training sessions to receive a progression recommendation.</div></div>
 </section>
 
-<section id="tools" class="screen">
- <div class="eyebrow">NUMBERS THAT MATTER</div><h1>Strength tools</h1>
- <div class="card"><h2>Training Max calculator</h2><div class="fields"><div class="field"><label>Tested / estimated 1RM (kg)</label><input id="calcMax" type="number" value="160" step="0.5"></div><div class="field"><label>TM percentage</label><select id="tmPercent"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95" selected>95%</option></select></div></div><div class="stat"><span>Calculated Training Max</span><strong id="tmResult">152.5 kg</strong></div><p class="tiny">AscensionX starts at 95% of estimated 1RM. You can change this in Profile.</p></div>
- <div class="card"><h2>Plate calculator</h2><div class="fields"><div class="field"><label>Target weight (kg)</label><input id="plateTarget" type="number" value="140" step="0.5"></div><div class="field"><label>Bar weight (kg)</label><select id="barWeight"><option>20</option><option>15</option><option>10</option></select></div></div><button class="small" onclick="calculatePlates()">Calculate plates</button><div id="plateResult" style="margin-top:12px"></div><p class="tiny">Matching plates on each side. Assumes 25, 20, 15, 10, 5, 2.5 and 1.25 kg plates.</p></div>
- <div class="card"><h2>About the method</h2><p class="tiny">AscensionX is an experimental six-week percentage-based strength template inspired by established programming principles. It is not an established or scientifically validated programme. Use sensible loads, record honest effort and adjust for pain, fatigue and technique.</p></div>
+<section id="metrics" class="screen">
+ <div class="eyebrow">TRACK THE DETAILS</div><h1>Metrics</h1>
+ <p class="tiny muted">Record bodyweight and measurements over time. Entries are saved on this device alongside your training profile and workout history.</p>
+ <div class="card"><h2>New measurement</h2>
+  <div class="fields"><div class="field"><label>Date</label><input id="metricDate" type="date"></div><div class="field"><label>Bodyweight (kg)</label><input id="metricWeight" type="number" min="0" step="0.1" placeholder="e.g. 89.5"></div></div>
+  <div class="fields"><div class="field"><label>Body fat (%)</label><input id="metricFat" type="number" min="0" max="70" step="0.1" placeholder="Optional"></div><div class="field"><label>Waist (cm)</label><input id="metricWaist" type="number" min="0" step="0.1" placeholder="Optional"></div></div>
+  <div class="fields"><div class="field"><label>Chest (cm)</label><input id="metricChest" type="number" min="0" step="0.1" placeholder="Optional"></div><div class="field"><label>Upper arm (cm)</label><input id="metricArm" type="number" min="0" step="0.1" placeholder="Optional"></div></div>
+  <div class="fields"><div class="field"><label>Thigh (cm)</label><input id="metricThigh" type="number" min="0" step="0.1" placeholder="Optional"></div><div class="field"><label>Calf (cm)</label><input id="metricCalf" type="number" min="0" step="0.1" placeholder="Optional"></div></div>
+  <button class="full" onclick="saveMetrics()">Save measurements</button>
+ </div>
+ <div class="card"><div class="row between"><h2 style="margin:0">Latest measurements</h2><span class="pill red" id="metricLatestDate">NO ENTRIES</span></div><div class="grid" id="metricLatest" style="margin-top:12px"><div class="tiny">Add your first measurement above.</div></div></div>
+ <div class="card"><h2>Bodyweight trend</h2><div class="tiny">Your latest 12 recorded bodyweight entries.</div><div id="metricWeightGraph" class="barwrap"></div><p id="metricWeightCaption" class="tiny" style="margin-top:28px">Log measurements to start your trend.</p></div>
+ <div class="card"><h2>Measurement history</h2><div id="metricHistory" class="tiny">No measurements recorded yet.</div></div>
 </section>
 
 <section id="profile" class="screen">
@@ -162,15 +170,18 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
   <div class="fields"><div class="field"><label>Back Squat 1RM (kg)</label><input id="maxSquat" type="number" step="0.5"></div><div class="field"><label>Bench Press 1RM (kg)</label><input id="maxBench" type="number" step="0.5"></div></div>
   <div class="fields"><div class="field"><label>Deadlift 1RM (kg)</label><input id="maxDeadlift" type="number" step="0.5"></div><div class="field"><label>Overhead Press 1RM (kg)</label><input id="maxOHP" type="number" step="0.5"></div></div>
   <div class="fields"><div class="field"><label>Training Max (%)</label><select id="profileTm"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95" selected>95%</option></select></div><div class="field"><label>Barbell rounding</label><select id="rounding"><option value="2.5" selected>2.5 kg</option><option value="1.25">1.25 kg</option><option value="0.5">0.5 kg</option></select></div></div>
-  <button class="full" onclick="saveProfile()">Save training profile</button>
+  <button class="full" onclick="saveProfile()">Save Profile</button>
  </div>
  <div class="card"><h2>Cycle controls</h2><div class="tiny" id="profileCycleStatus">No cycle created.</div><button class="full" style="margin-top:12px" onclick="createCycle()">Generate / reset six-week cycle</button><div class="fields" style="margin-top:10px"><button class="secondary field" onclick="showScreen('cycle')">View cycle</button><button class="secondary field" onclick="showScreen('progress')">View progress</button></div><p class="tiny" style="margin-top:10px">Generating a new cycle replaces the current cycle prescription. Your saved workout history is retained.</p></div>
  <div class="card"><h2>Data & backup</h2><p class="tiny">Your profile and training log are saved locally in this browser on this device. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · VERSION 1.0 · LOCAL STORAGE</div></div>
 </section>
 </main>
 <nav aria-label="Main navigation">
- <button data-screen="tools"><b>◈</b>Tools</button>
+ <button data-screen="home"><b>⌂</b>Dashboard</button>
  <button class="active" data-screen="workout"><b>▣</b>Workout</button>
+ <button data-screen="progress"><b>▥</b>Progress</button>
+ <button data-screen="cycle"><b>▦</b>Cycle</button>
+ <button data-screen="metrics"><b>◉</b>Metrics</button>
  <button data-screen="profile"><b>♙</b>Profile</button>
 </nav>
 <div id="toast" class="toast"></div>
@@ -187,8 +198,8 @@ const PLAN=[
  {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
 ];
 let state=load();
-function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5},cycle:{created:null,currentWeek:1},logs:[],draft:null}}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!('draft' in x))x.draft=null;return x}}catch(e){}return defaults()}
+function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5},cycle:{created:null,currentWeek:1},logs:[],metrics:[],draft:null}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];return x}}catch(e){}return defaults()}
 function persist(shouldRender=true){try{localStorage.setItem(KEY,JSON.stringify(state));if(shouldRender)renderAll();return true}catch(e){toast('Could not save data. Export a backup and free browser storage.');return false}}
 function toast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
 function roundTo(n,step=state.profile.rounding||2.5){return Math.round(n/step)*step}
@@ -201,14 +212,14 @@ function saveProfile(){
  if(Object.values(vals).some(v=>!Number.isFinite(+v)||+v<=0)){toast('Enter a valid 1RM for all four lifts');return}
  state.profile.max=Object.fromEntries(Object.entries(vals).map(([k,v])=>[k,+v]));
  state.profile.tmPct=+$('profileTm').value;state.profile.rounding=+$('rounding').value;
- persist();toast('Training profile saved');
+ persist();toast('Profile saved');
 }
 function createCycle(){if(!confirm('Generate a fresh six-week Ascension cycle? Existing workout history will be retained.'))return;state.cycle={created:new Date().toISOString(),currentWeek:1};persist();toast('Six-week cycle generated');$('workWeek').value=1;showScreen('workout')}
 function showScreen(id,addHistory=true){
  const target=$(id);if(!target)return;
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
- document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id||(['cycle','progress'].includes(id)&&b.dataset.screen==='profile')||(id==='home'&&b.dataset.screen==='workout')));
- if(id==='workout')renderWorkout();if(id==='cycle')renderCycle();if(id==='progress')renderProgress();
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
+ if(id==='workout')renderWorkout();if(id==='cycle')renderCycle();if(id==='progress')renderProgress();if(id==='metrics')renderMetrics();
  if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
  window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -280,19 +291,35 @@ function renderProgress(){
  const completed=state.logs.filter(l=>l.week===6).length;
  $('cycleReview').innerHTML=state.logs.length?`<strong>${state.logs.length} sessions logged.</strong><br>${completed?'Week 6 sessions are being recorded. Review the full cycle before changing your TM.':'When the cycle is complete, review rep completion, RPE, technique and recovery. The initial rule is +2.5 kg upper body / +2.5–5 kg lower body if all targets were met comfortably; hold if effort overshot; reduce 2.5–5% after repeated missed work.'}`:'Complete your training sessions to receive a progression recommendation.';
 }
-function renderAll(){renderDashboard();renderProfile();renderCycle();renderProgress();renderWorkout();updateToolCalc()}
-function updateToolCalc(){const v=+$('calcMax').value,p=+$('tmPercent').value;$('tmResult').textContent=kg(roundTo(v*p/100));}
-$('calcMax').addEventListener('input',updateToolCalc);$('tmPercent').addEventListener('change',updateToolCalc);
-function calculatePlates(){
- const target=+$('plateTarget').value,bar=+$('barWeight').value;let rem=(target-bar)/2;if(rem<0){$('plateResult').textContent='Target must be at least the bar weight.';return}
- const plates=[25,20,15,10,5,2.5,1.25],out=[];for(const p of plates){const n=Math.floor((rem+1e-8)/p);if(n){out.push(n+' × '+p+' kg');rem-=n*p}}
- $('plateResult').innerHTML=rem>.01?`<span class="pill warn">Not achievable with listed plates</span>`:`<strong>${out.join(' + ')||'No plates'} per side</strong>`;
+function renderAll(){renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
+function metricValue(v,unit){return v===null||v===undefined||v===""?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:1})+unit}
+function saveMetrics(){
+ const fields={weight:"metricWeight",fat:"metricFat",waist:"metricWaist",chest:"metricChest",arm:"metricArm",thigh:"metricThigh",calf:"metricCalf"};
+ const entry={date:$("metricDate").value||new Date().toISOString().slice(0,10)};
+ Object.entries(fields).forEach(([key,id])=>{const raw=$(id).value;entry[key]=raw===""?null:Number(raw)});
+ if(Object.values(fields).every(id=>$(id).value==="")){toast("Enter at least one measurement");return}
+ if(Object.values(fields).some(id=>$(id).value!==""&&(!Number.isFinite(+$(id).value)||+$(id).value<0))){toast("Check your measurement values");return}
+ state.metrics=Array.isArray(state.metrics)?state.metrics:[];state.metrics.push(entry);state.metrics.sort((a,b)=>a.date.localeCompare(b.date));
+ if(!persist())return;
+ Object.values(fields).forEach(id=>$(id).value="");$("metricDate").value=new Date().toISOString().slice(0,10);toast("Measurements saved");
+}
+function renderMetrics(){
+ if(!$("metricLatest"))return;
+ const entries=(state.metrics||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)),latest=entries[entries.length-1];
+ const defs=[["Bodyweight","weight"," kg"],["Body fat","fat","%"],["Waist","waist"," cm"],["Chest","chest"," cm"],["Upper arm","arm"," cm"],["Thigh","thigh"," cm"],["Calf","calf"," cm"]];
+ $("metricDate").value=$("metricDate").value||new Date().toISOString().slice(0,10);
+ $("metricLatestDate").textContent=latest?new Date(latest.date+"T12:00:00").toLocaleDateString():"NO ENTRIES";
+ $("metricLatest").innerHTML=latest?defs.map(([label,key,unit])=>"<div class=\"stat\"><span>"+label+"</span><strong>"+metricValue(latest[key],unit)+"</strong></div>").join(""):"<div class=\"tiny\">Add your first measurement above.</div>";
+ const weights=entries.filter(x=>x.weight!==null&&Number.isFinite(Number(x.weight))).slice(-12),max=Math.max(1,...weights.map(x=>x.weight));
+ $("metricWeightGraph").innerHTML=weights.map(x=>"<div class=\"bar\" style=\"height:"+Math.max(5,x.weight/max*100)+"%\"><small>"+new Date(x.date+"T12:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"})+"</small></div>").join("");
+ $("metricWeightCaption").textContent=weights.length?weights[0].weight+" kg → "+weights[weights.length-1].weight+" kg across "+weights.length+" recent entries.":"Log bodyweight to start your trend."; 
+ $("metricHistory").innerHTML=entries.length?entries.slice().reverse().map(x=>"<div class=\"listitem\"><div><strong>"+new Date(x.date+"T12:00:00").toLocaleDateString()+"</strong><div class=\"tiny\">BW "+metricValue(x.weight," kg")+" · BF "+metricValue(x.fat,"%")+" · Waist "+metricValue(x.waist," cm")+"</div><div class=\"tiny\">Chest "+metricValue(x.chest," cm")+" · Arm "+metricValue(x.arm," cm")+" · Thigh "+metricValue(x.thigh," cm")+" · Calf "+metricValue(x.calf," cm")+"</div></div></div>").join(""):"No measurements recorded yet.";
 }
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ascensionx-backup.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exported')}
 $('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(await e.target.files[0].text());if(!obj.profile||!obj.profile.max||!obj.cycle||!Array.isArray(obj.logs))throw Error();if(!obj.profile.max['Back Squat']||!obj.profile.max['Bench Press']||!obj.profile.max['Deadlift']||!obj.profile.max['Overhead Press'])throw Error();if(!('draft' in obj))obj.draft=null;state=obj;if(!persist())throw Error();toast('Backup imported')}catch(err){toast('Could not read that backup')}e.target.value=''});
 function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
 function init(){
- $('workWeek').value=state.cycle.currentWeek||1;
+ $('workWeek').value=state.cycle.currentWeek||1;$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('workout',false);history.replaceState({screen:'workout'},'',location.pathname+location.search+'#workout');
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }

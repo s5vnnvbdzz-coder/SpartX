@@ -68,10 +68,8 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div class="field"><label for="lift">Main lift</label><select id="lift"><option>Bench Press</option><option>Back Squat</option><option>Deadlift</option><option>Overhead Press</option></select></div>
 <div class="field"><label for="tm">Starting Training Max (kg)</label><input id="tm" type="number" min="2.5" step="2.5" value="140" inputmode="decimal"></div>
 </div>
-<div class="fields">
-<div class="field"><label for="increase">TM increase each 4-week cycle (kg)</label><input id="increase" type="number" min="0" step="2.5" value="2.5" inputmode="decimal"></div>
-<div class="field"><label>Cycle length</label><div class="segment" id="lengthChoices"><button type="button" data-weeks="4" class="active">4 weeks</button><button type="button" data-weeks="8">8 weeks</button><button type="button" data-weeks="12">12 weeks</button></div></div>
-</div>
+<div class="fields"><div class="field"><label for="increase">TM increase each 4-week cycle (kg)</label><input id="increase" type="number" min="0" step="2.5" value="2.5" inputmode="decimal"></div></div>
+<div class="field" style="margin:12px 0"><label>Cycle length</label><div class="segment" id="lengthChoices"><button type="button" data-weeks="4" class="active">4 weeks</button><button type="button" data-weeks="8">8 weeks</button><button type="button" data-weeks="12">12 weeks</button></div></div>
 <div class="switch-row"><div><strong>Boring But Big (BBB)</strong><small>Add 5 × 10 assistance after the main work. Skipped during deloads.</small></div><label class="switch"><input id="bbb" type="checkbox"><span></span></label></div>
 <div class="fields" id="bbbOptions" hidden><div class="field"><label for="bbbPct">BBB percentage of TM</label><select id="bbbPct"><option value="50">50%</option><option value="60" selected>60%</option><option value="70">70%</option></select></div><div class="field"><label>BBB volume</label><input value="5 sets × 10 reps" disabled></div></div>
 <div class="hint">Main work uses standard 5/3/1 percentages. Every new four-week cycle adds your chosen TM increase. All weights round to the nearest 2.5 kg.</div>
@@ -148,7 +146,7 @@ function renderSaved(){
  const items=readSaved();$('savedCount').textContent=items.length+' SAVED';
  if(!items.length){$('savedList').className='empty';$('savedList').textContent='Your saved programmes will appear here.';return;}
  $('savedList').className='';
- $('savedList').innerHTML=items.map(item=>'<div class="saved-item"><div class="saved-head"><div><strong>'+escapeHtml(item.name)+'</strong><div class="saved-meta">'+item.weeks+' weeks · Starting TM '+fmt(item.startTM)+' kg · '+(item.bbb?'BBB '+item.bbbPct+'%':'Standard 5/3/1')+'<br>Saved '+new Date(item.created).toLocaleDateString()+'</div></div></div><div class="saved-actions"><button type="button" class="small" data-load="'+item.id+'">OPEN CYCLE</button><button type="button" class="small secondary" data-delete="'+item.id+'">DELETE</button></div></div>').join('');
+ $('savedList').innerHTML=items.map(item=>'<div class="saved-item"><div class="saved-head"><div><strong>'+escapeHtml(item.name)+'</strong><div class="saved-meta">'+item.weeks+' weeks · Starting TM '+fmt(item.startTM)+' kg · '+(item.bbb?'BBB '+item.bbbPct+'%':'Standard 5/3/1')+'<br>Saved '+new Date(item.created).toLocaleDateString()+'</div></div></div><div class="saved-actions"><button type="button" class="small" data-load="'+item.id+'">OPEN</button><button type="button" class="small secondary" data-edit="'+item.id+'">EDIT</button><button type="button" class="small danger" data-delete="'+item.id+'">DELETE</button></div></div>').join('');
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
@@ -157,19 +155,20 @@ $('bbb').addEventListener('change',()=>{$('bbbOptions').hidden=!$('bbb').checked
 $('generate').addEventListener('click',()=>{
  const tm=+$('tm').value,inc=+$('increase').value;
  if(!(tm>0)||tm>1000||inc<0||inc>50){alert('Enter a valid Training Max and a TM increase of 0 kg or more.');return;}
- generated=buildCycle(getDraft());\n if(editingId){const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);if(idx>=0){generated.id=editingId;generated.created=items[idx].created;items[idx]=JSON.parse(JSON.stringify(generated));if(writeSaved(items)){renderSaved();renderProgramme(generated,true);$('saveStatus').textContent='Saved cycle updated successfully.';editingId=null;$('generate').textContent='GENERATE CYCLE';}}else{editingId=null;renderProgramme(generated);}}else{renderProgramme(generated);}\n saveDraft();
+ generated=buildCycle(getDraft());\n if(editingId){const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);if(idx>=0){generated.id=editingId;generated.created=items[idx].created;items[idx]=JSON.parse(JSON.stringify(generated));if(writeSaved(items)){renderSaved();renderProgramme(generated,true);$('saveStatus').textContent='Saved cycle updated successfully.';editingId=null;$('generate').textContent='GENERATE CYCLE';}}else{editingId=null;renderProgramme(generated);}}else{renderProgramme(generated);}
+ saveDraft();
 });
 $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});
-$('editCycle').addEventListener('click',()=>{$('setupCard').scrollIntoView({behavior:'smooth',block:'start'});});
 $('saveCycle').addEventListener('click',()=>{
  if(!generated)return;
  const items=readSaved();const copy=JSON.parse(JSON.stringify(generated));copy.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);copy.created=new Date().toISOString();
  items.unshift(copy);if(writeSaved(items)){renderSaved();$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';$('programmeStatus').textContent='SAVED';$('saveCycle').textContent='SAVE ANOTHER COPY';}
 });
 $('savedList').addEventListener('click',e=>{
- const load=e.target.closest('[data-load]'),del=e.target.closest('[data-delete]');
- if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item)renderProgramme(item,true);}
- if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items))renderSaved();}
+ const load=e.target.closest('[data-load]'),edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');
+ if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item){editingId=null;$('generate').textContent='GENERATE CYCLE';renderProgramme(item,true);}}
+ if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=item.weeks;$('bbb').checked=!!item.bbb;$('bbbPct').value=String(item.bbbPct||60);$('bbbOptions').hidden=!item.bbb;setLength();$('generate').textContent='UPDATE SAVED CYCLE';saveDraft();$('setupCard').scrollIntoView({behavior:'smooth',block:'start'});}}
+ if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){editingId=null;$('generate').textContent='GENERATE CYCLE';}renderSaved();}}
 });
 restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;renderSaved();
 document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));

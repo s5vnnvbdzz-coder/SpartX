@@ -160,7 +160,7 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
 function syncBbbOptions(){$('bbbOptions').hidden=!$('bbb').checked;}
 function openEditForm(){ $('editModalBody').appendChild($('setupCard')); $('setupCard').hidden=false; $('generate').textContent='SAVE CHANGES'; $('editModal').hidden=false; document.body.style.overflow='hidden'; $('tm').focus(); }
-function closeEditForm(){ $('setupPlaceholder').after($('setupCard')); $('setupCard').hidden=true; $('editModal').hidden=true; document.body.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
+function closeEditForm(){ $('setupPlaceholder').after($('setupCard')); $('setupCard').hidden=false; $('editModal').hidden=true; document.body.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
 $('bbb').addEventListener('change',()=>{syncBbbOptions();saveDraft();});
 ['lift','tm','increase','bbbPct'].forEach(id=>$(id).addEventListener('input',saveDraft));
 $('generate').addEventListener('click',()=>{

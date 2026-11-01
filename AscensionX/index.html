@@ -31,6 +31,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 input,select,textarea{background:#0d0f14;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:12px;width:100%;min-width:0;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--red)}
 label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+.iconbtn{width:38px;height:38px;min-width:38px;padding:0;border-radius:12px;background:#191b22;border:1px solid var(--line);color:var(--text);font-size:19px;display:grid;place-items:center;box-shadow:none}
 header{position:sticky;top:0;z-index:20;padding:calc(14px + env(safe-area-inset-top)) 18px 13px;display:flex;align-items:center;justify-content:space-between;background:#0b0c10eF;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff0b}
 .brand{font-weight:950;letter-spacing:2.5px;font-size:19px}.brand span{color:var(--red2)}
 .sub{font-size:9px;color:var(--muted);letter-spacing:1.8px;margin-top:3px}
@@ -87,7 +88,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 <body>
 <header>
  <button class="ghost" style="text-align:left;padding:0;background:none;box-shadow:none" onclick="showScreen('home')" aria-label="Open dashboard"><div class="brand">ASCENSION<span>X</span></div><div class="sub">THE STRENGTH METHOD · BUILD BEYOND</div></button>
- <span class="pill red" id="headerStatus">NO ACTIVE CYCLE</span>
+ <div class="row" style="gap:9px"><span class="pill red" id="headerStatus">NO ACTIVE CYCLE</span><button class="iconbtn" onclick="showScreen('profile')" aria-label="Profile and setup" title="Profile and setup">⚙</button></div>
 </header>
 <main>
 <section id="home" class="screen">
@@ -172,6 +173,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
   <div class="fields"><div class="field"><label>Training Max (%)</label><select id="profileTm"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95" selected>95%</option></select></div><div class="field"><label>Barbell rounding</label><select id="rounding"><option value="2.5" selected>2.5 kg</option><option value="1.25">1.25 kg</option><option value="0.5">0.5 kg</option></select></div></div>
   <button class="full" onclick="saveProfile()">Save Profile</button>
  </div>
+ <div class="card"><div class="row between"><div><h2 style="margin:0">Body & training metrics</h2><p class="tiny" style="margin:7px 0 0">Bodyweight, body composition and measurements over time.</p></div><button class="secondary small" onclick="showScreen('metrics')">Open metrics ↗</button></div></div>
  <div class="card"><h2>Cycle controls</h2><div class="tiny" id="profileCycleStatus">No cycle created.</div><button class="full" style="margin-top:12px" onclick="createCycle()">Generate / reset six-week cycle</button><div class="fields" style="margin-top:10px"><button class="secondary field" onclick="showScreen('cycle')">View cycle</button><button class="secondary field" onclick="showScreen('progress')">View progress</button></div><p class="tiny" style="margin-top:10px">Generating a new cycle replaces the current cycle prescription. Your saved workout history is retained.</p></div>
  <div class="card"><h2>Data & backup</h2><p class="tiny">Your profile and training log are saved locally in this browser on this device. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · VERSION 1.0 · LOCAL STORAGE</div></div>
 </section>
@@ -181,7 +183,6 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
  <button class="active" data-screen="workout"><b>▣</b>Workout</button>
  <button data-screen="progress"><b>▥</b>Progress</button>
  <button data-screen="cycle"><b>▦</b>Cycle</button>
- <button data-screen="metrics"><b>◉</b>Metrics</button>
  <button data-screen="profile"><b>♙</b>Profile</button>
 </nav>
 <div id="toast" class="toast"></div>

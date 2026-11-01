@@ -135,7 +135,7 @@ function buildCycle(config){
 }
 function renderProgramme(data,isSaved=false){
  generated=data;$('programmeCard').classList.add('visible');$('programmeName').textContent=data.name;$('programmeMeta').textContent='TM +'+fmt(data.increase)+' kg every four weeks · '+(data.bbb?'BBB '+data.bbbPct+'%':'Standard 5/3/1');$('programmeLength').textContent=data.weeks+' WEEKS';$('startTM').textContent=fmt(data.startTM)+' kg';$('finalTM').textContent=fmt(data.cycles[data.cycles.length-1].tm)+' kg';$('blockCount').textContent=data.cycles.length;$('programmeStatus').textContent=isSaved?'SAVED CYCLE':'GENERATED';$('saveStatus').textContent=isSaved?'Loaded from saved cycles.':'';expanded=false;$('cycleDetail').classList.remove('open');$('expandCycle').textContent='VIEW ENTIRE CYCLE ↓';$('saveCycle').textContent=isSaved?'SAVE AS NEW CYCLE':'SAVE CYCLE';renderDetails(data);$('programmeCard').scrollIntoView({behavior:'smooth',block:'start'});}
-function renderDetails(data){
+function cycleDetailsHtml(data){
  let html='';
  data.cycles.forEach(c=>{
   html+='<div class="block-title">BLOCK '+c.number+' · TRAINING MAX '+fmt(c.tm)+' KG</div>';
@@ -147,15 +147,16 @@ function renderDetails(data){
    html+='</div>';
   });
  });
- $('cycleDetail').innerHTML=html;
+ return html;
 }
+function renderDetails(data){$('cycleDetail').innerHTML=cycleDetailsHtml(data);}
 function readSaved(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return Array.isArray(d)?d:[];}catch(e){return[];}}
 function writeSaved(items){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items));return true;}catch(e){$('saveStatus').textContent='Could not save. Check device storage settings.';return false;}}
 function renderSaved(){
  const items=readSaved();$('savedCount').textContent=items.length+' SAVED';
  if(!items.length){$('savedList').className='empty';$('savedList').textContent='Your saved programmes will appear here.';return;}
  $('savedList').className='';
- $('savedList').innerHTML=items.map(item=>'<div class="saved-item"><div class="saved-head"><div><strong>'+escapeHtml(item.name)+'</strong><div class="saved-meta">'+item.weeks+' weeks · Starting TM '+fmt(item.startTM)+' kg · '+(item.bbb?'BBB '+item.bbbPct+'%':'Standard 5/3/1')+'<br>Saved '+new Date(item.created).toLocaleDateString()+'</div></div></div><div class="saved-actions"><button type="button" class="small" data-load="'+item.id+'">OPEN</button><button type="button" class="small secondary" data-edit="'+item.id+'">EDIT</button><button type="button" class="small danger" data-delete="'+item.id+'">DELETE</button></div></div>').join('');
+ $('savedList').innerHTML=items.map(item=>'<div class="saved-item"><div class="saved-head"><div><strong>'+escapeHtml(item.name)+'</strong><div class="saved-meta">'+item.weeks+' weeks · Starting TM '+fmt(item.startTM)+' kg · '+(item.bbb?'BBB '+item.bbbPct+'%':'Standard 5/3/1')+'<br>Saved '+new Date(item.created).toLocaleDateString()+'</div></div></div><div class="saved-actions"><button type="button" class="small" data-load="'+item.id+'">OPEN</button><button type="button" class="small secondary" data-edit="'+item.id+'">EDIT</button><button type="button" class="small danger" data-delete="'+item.id+'">DELETE</button></div><div class="cycle-detail saved-cycle-detail" data-detail="'+item.id+'"></div></div>').join('');
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
@@ -183,7 +184,7 @@ $('saveCycle').addEventListener('click',()=>{
 });
 $('savedList').addEventListener('click',e=>{
  const load=e.target.closest('[data-load]'),edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');
- if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item){editingId=null;$('generate').textContent='GENERATE CYCLE';renderProgramme(item,true);}}
+ if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item){const detail=$('savedList').querySelector('[data-detail="'+item.id+'"]');const isOpen=detail.classList.contains('open');detail.innerHTML=isOpen?'':cycleDetailsHtml(item);detail.classList.toggle('open',!isOpen);load.textContent=isOpen?'OPEN':'CLOSE';}}
  if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=[4,8,12].includes(+item.weeks)?+item.weeks:4;$('bbb').checked=!!item.bbb;$('bbbPct').value=String([50,60,70].includes(+item.bbbPct)?item.bbbPct:60);syncBbbOptions();setLength();saveDraft();openEditForm();}}
  if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){closeEditForm();}renderSaved();}}
 });

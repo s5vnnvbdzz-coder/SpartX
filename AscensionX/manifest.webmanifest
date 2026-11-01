@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "AscensionX — Strength Method",
+  "short_name": "AscensionX",
+  "description": "A six-week strength progression and workout logging app.",
+  "start_url": "./index.html#workout",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08090c",
+  "theme_color": "#090a0d",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ]
+}

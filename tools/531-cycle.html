@@ -62,7 +62,6 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <h1>5/3/1 Cycle Planner</h1>
 <p class="intro">Build a progressive 4, 8 or 12-week block from your Training Max. Save it to revisit your working weights whenever you need them.</p>
 
-<div id="setupPlaceholder"></div>
 <section class="card" id="setupCard">
 <div class="card-head"><h2>Build your cycle</h2><span class="pill">SETUP</span></div>
 <div class="fields">
@@ -152,8 +151,8 @@ function renderSaved(){
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
 function syncBbbOptions(){$('bbbOptions').hidden=!$('bbb').checked;}
-function openEditModal(){ $('editModalBody').appendChild($('setupCard')); $('editModal').hidden=false; document.body.style.overflow='hidden'; }
-function closeEditModal(){ $('setupPlaceholder').after($('setupCard')); $('editModal').hidden=true; document.body.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
+function openEditForm(){ $('setupCard').hidden=false; $('generate').textContent='SAVE CHANGES'; $('setupCard').scrollIntoView({behavior:'smooth',block:'start'}); }
+function closeEditForm(){ $('setupCard').hidden=true; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
 $('bbb').addEventListener('change',()=>{syncBbbOptions();saveDraft();});
 ['lift','tm','increase','bbbPct'].forEach(id=>$(id).addEventListener('input',saveDraft));
 $('generate').addEventListener('click',()=>{
@@ -162,27 +161,24 @@ $('generate').addEventListener('click',()=>{
  generated=buildCycle(getDraft());
  if(editingId){
   const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);
-  if(idx<0){alert('This saved cycle could not be found. It may have been deleted.');closeEditModal();return;}
+  if(idx<0){alert('This saved cycle could not be found. It may have been deleted.');closeEditForm();return;}
   generated.id=editingId;generated.created=items[idx].created;items[idx]=JSON.parse(JSON.stringify(generated));
-  if(writeSaved(items)){renderSaved();saveDraft();closeEditModal();}
+  if(writeSaved(items)){renderSaved();saveDraft();$('programmeCard').classList.remove('visible');closeEditForm();}
  }else{renderProgramme(generated);saveDraft();}
 });
 $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});
 $('saveCycle').addEventListener('click',()=>{
  if(!generated)return;
  const items=readSaved();const copy=JSON.parse(JSON.stringify(generated));copy.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);copy.created=new Date().toISOString();
- items.unshift(copy);if(writeSaved(items)){renderSaved();$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';$('programmeStatus').textContent='SAVED';$('saveCycle').textContent='SAVE ANOTHER COPY';}
+ items.unshift(copy);if(writeSaved(items)){renderSaved();$('programmeCard').classList.remove('visible');$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';}
 });
 $('savedList').addEventListener('click',e=>{
  const load=e.target.closest('[data-load]'),edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');
  if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item){editingId=null;$('generate').textContent='GENERATE CYCLE';renderProgramme(item,true);}}
- if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=[4,8,12].includes(+item.weeks)?+item.weeks:4;$('bbb').checked=!!item.bbb;$('bbbPct').value=String([50,60,70].includes(+item.bbbPct)?item.bbbPct:60);syncBbbOptions();setLength();$('generate').textContent='SAVE CHANGES';saveDraft();openEditModal();}}
- if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){editingId=null;$('generate').textContent='GENERATE CYCLE';}renderSaved();}}
+ if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=[4,8,12].includes(+item.weeks)?+item.weeks:4;$('bbb').checked=!!item.bbb;$('bbbPct').value=String([50,60,70].includes(+item.bbbPct)?item.bbbPct:60);syncBbbOptions();setLength();saveDraft();openEditForm();}}
+ if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){closeEditForm();}renderSaved();}}
 });
-$('closeEdit').addEventListener('click',closeEditModal);
-$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditModal();});
-restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;renderSaved();
+restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;$('setupCard').hidden=false;renderSaved();
 document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));
 })();
 </script>

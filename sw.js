@@ -1,5 +1,5 @@
-const CACHE='spartanx-v85';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./tools/replica.js','./tools/settings.html','./tools/531-cycle.html'];
+const CACHE='spartanx-v86';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./tools/replica.js','./tools/settings.html','./tools/531-cycle.html','./ranks/mortal.svg','./ranks/spartan.svg','./ranks/hero.svg','./ranks/demigod.svg','./ranks/titan.svg','./ranks/olympian.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(
     caches.open(CACHE)

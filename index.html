@@ -74,7 +74,7 @@ body.spartanx-red .card{background:linear-gradient(145deg,#1b1b1e,#111113);borde
 body.spartanx-red button:not(.secondary){background:#e51d28;color:#fff}
 body.spartanx-red button.secondary{background:#252326;border-color:#484044}
 body.spartanx-red .eyebrow,body.spartanx-red .brand span,body.spartanx-red #trackerNav button.active{color:#ff3943}
-body.spartanx-red .rank-progress-track{background:#383236}
+body.spartanx-red .rank-progress-track{background:#383236}\nbody.spartanx-red .performance-tabs button.selected{background:#ef2029;color:#fff;border-color:#ef2029}\nbody.spartanx-red .set-type-picker{border-color:#5a3035}\nbody.spartanx-red .set-type-display{color:#ff3943}\nbody.spartanx-red .rest-label{color:#ff3943}
 .spartan-rank-card{overflow:hidden;background:linear-gradient(145deg,#1c1c20,#101012)}
 .rank-xp-total{font-size:12px;font-weight:900;color:var(--lime);background:var(--panel2);padding:7px 10px;border-radius:20px}
 .rank-current-row{display:flex;align-items:center;gap:14px;margin:15px 0 12px}
@@ -101,7 +101,7 @@ body.spartanx-red .rank-progress-track{background:#383236}
 .profile-badge{min-width:0;text-align:center;padding:9px 4px 8px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,#222328,#111215)}
 .profile-badge.unlocked{border-color:#5b4549}.profile-badge.locked{opacity:.42}
 .badge-art{height:66px;display:grid;place-items:center}.badge-art img{width:100%;height:100%;max-width:76px;object-fit:contain}
-.badge-lock{font-size:28px;color:#92969c}
+.badge-lock{width:29px;height:29px;color:#92969c}
 .profile-badge strong{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .profile-badge small{display:block;font-size:9px;color:var(--muted);margin-top:3px}
 @media(max-width:390px){.rank-tier img{height:40px}.rank-tier span{font-size:8px}.badge-grid{gap:6px}.badge-art{height:56px}}
@@ -259,10 +259,8 @@ function renderSpartanProgress(){
  $('homeRankTiers').innerHTML=SPARTANX_PROGRESS_RANKS.map((r,i)=>'<div class="rank-tier '+(i<=state.index?'earned':'')+(i===state.index?' current':'')+'"><img src="./ranks/'+r.file+'" alt=""><span>'+r.name+'</span></div>').join('');
  const badges=SPARTANX_PROGRESS_RANKS.map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.index}));
  badges.push({locked:true},{locked:true});
- $('badgeCount').textContent+='';
- $('badgeCount').textContent+='';
  const unlocked=badges.filter(b=>b.unlocked).length;$('badgeCount').textContent=unlocked+' / 8';
- $('profileBadgeGrid').innerHTML=badges.map(b=>b.locked?'<div class="profile-badge locked" aria-label="Locked future badge"><div class="badge-art"><span class="badge-lock">🔒</span></div><strong>Locked</strong><small>Coming soon</small></div>':'<div class="profile-badge unlocked"><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><strong>'+b.name+'</strong><small>Unlocked</small></div>').join('');
+ $('profileBadgeGrid').innerHTML=badges.map(b=>b.locked?'<div class="profile-badge locked" aria-label="Locked future badge"><div class="badge-art"><svg class="badge-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><strong>Locked</strong><small>Coming soon</small></div>':'<div class="profile-badge unlocked"><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><strong>'+b.name+'</strong><small>Unlocked</small></div>').join('');
 }
 \nfunction renderPerformanceChart(){
  const now=new Date(),days=[];

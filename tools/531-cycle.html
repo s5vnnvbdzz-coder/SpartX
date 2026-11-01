@@ -92,6 +92,13 @@ footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;paddi
 <div id="savedList" class="empty">Your saved programmes will appear here.</div>
 </section>
 </main>
+<div class="edit-modal" id="editModal" hidden>
+ <div class="edit-dialog" role="dialog" aria-modal="true" aria-labelledby="editDialogTitle">
+  <div class="edit-dialog-head"><strong id="editDialogTitle">EDIT SAVED CYCLE</strong><button type="button" class="secondary small" id="closeEdit">✕</button></div>
+  <div id="editModalBody"></div>
+  <button type="button" class="secondary primary" id="cancelEdit">CANCEL</button>
+ </div>
+</div>
 <footer>SPARTANX · TRAIN SMARTER</footer>
 <script>
 (()=>{

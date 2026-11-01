@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SpartanX 531">
+<meta name="description" content="Build, save and review your SpartanX 5/3/1 training cycles.">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>SpartanX — 5/3/1 Cycle Planner</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d0f;--panel:#171a1e;--panel2:#22272d;--line:#30363e;--txt:#f3f4f6;--muted:#9ba3ad;--lime:#c8f169}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:35px}
+header{position:sticky;top:0;z-index:5;background:#101114f2;backdrop-filter:blur(12px);padding:calc(15px + env(safe-area-inset-top)) 18px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:22px;font-weight:950;letter-spacing:3px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:1.7px;margin-top:3px}
+main{max-width:760px;margin:auto;padding:18px 16px 35px}.eyebrow{font-size:11px;color:var(--lime);font-weight:850;letter-spacing:1.6px}
+h1{font-size:28px;margin:7px 0 5px;line-height:1.15}h2{font-size:18px;margin:0}h3{font-size:14px;margin:0}
+.intro{color:var(--muted);line-height:1.5;margin:0 0 18px;font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.fields{display:flex;gap:10px;margin:11px 0}.field{flex:1;min-width:0}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+input,select,button{font:inherit}input,select{width:100%;min-width:0;background:#0f1215;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px}
+input:focus,select:focus{outline:1px solid var(--lime);border-color:var(--lime)}
+button{border:0;border-radius:10px;padding:12px 14px;background:var(--lime);color:#11150b;font-weight:850;cursor:pointer}
+button.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+button.danger{background:#342022;color:#ffb8b8;border:1px solid #60383b}
+button.small{padding:8px 10px;font-size:12px}
+.segment{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.segment button{background:#101316;color:var(--muted);border:1px solid var(--line);padding:11px 5px}.segment button.active{background:var(--lime);color:#11150b;border-color:var(--lime)}
+.hint{font-size:11px;color:var(--muted);line-height:1.5}
+.preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+.stat{background:#101316;border:1px solid #282f35;border-radius:11px;padding:11px;min-width:0}.stat span{display:block;font-size:10px;color:var(--muted)}.stat strong{display:block;font-size:18px;color:var(--lime);margin-top:5px;overflow-wrap:anywhere}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line);margin-top:14px}
+.switch-row strong{font-size:13px;display:block}.switch-row small{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+.switch{width:46px;height:26px;position:relative;flex:0 0 46px}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:20px;background:#454b53;cursor:pointer}.switch span:before{content:'';position:absolute;left:4px;top:4px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.18s}.switch input:checked+span{background:var(--lime)}.switch input:checked+span:before{transform:translateX(20px);background:#18200d}
+.primary{width:100%;margin-top:14px;padding:15px;font-size:14px;letter-spacing:.4px}
+.programme{display:none}.programme.visible{display:block}
+.cycle-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.cycle-name{font-weight:850;font-size:17px}.pill{font-size:10px;color:var(--lime);background:#29321c;border:1px solid #46552d;padding:5px 8px;border-radius:20px;white-space:nowrap}
+.cycle-meta{font-size:11px;color:var(--muted);margin-top:5px}
+.cycle-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}
+.cycle-actions{display:flex;gap:8px;flex-wrap:wrap}.cycle-actions button{flex:1}
+.expand-btn{width:100%;background:#20262b;color:var(--txt);border:1px solid var(--line);margin-top:9px}
+.cycle-detail{display:none;margin-top:14px}.cycle-detail.open{display:block}
+.block-title{font-size:12px;font-weight:850;letter-spacing:1px;color:var(--lime);margin:18px 0 8px}
+.week-card{background:#101316;border:1px solid #2b3238;border-radius:12px;padding:12px;margin:8px 0}
+.week-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}.week-head strong{font-size:13px}.week-head span{font-size:11px;color:var(--muted)}
+.set-line{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-top:1px solid #252b30;font-size:12px}.set-line strong{color:var(--lime);font-size:13px;white-space:nowrap}
+.saved-item{padding:13px 0;border-bottom:1px solid var(--line)}.saved-item:last-child{border:0;padding-bottom:0}.saved-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.saved-head strong{font-size:14px}.saved-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}.saved-actions{display:flex;gap:7px;margin-top:10px}.saved-actions button{flex:1}
+.empty{color:var(--muted);font-size:13px;padding:8px 0}.status{min-height:16px;color:var(--lime);font-size:11px;margin-top:8px}
+footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:15px}
+@media(max-width:430px){main{padding:16px 13px 28px}.card{padding:14px}.fields{gap:8px}.cycle-stats{gap:5px}.stat{padding:9px}.stat strong{font-size:16px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sub">531 CYCLE PLANNER</div></header>
+<main>
+<div class="eyebrow">PLAN WITH PURPOSE</div>
+<h1>5/3/1 Cycle Planner</h1>
+<p class="intro">Build a progressive 4, 8 or 12-week block from your Training Max. Save it to revisit your working weights whenever you need them.</p>
+
+<section class="card" id="setupCard">
+<div class="card-head"><h2>Build your cycle</h2><span class="pill">SETUP</span></div>
+<div class="fields">
+<div class="field"><label for="lift">Main lift</label><select id="lift"><option>Bench Press</option><option>Back Squat</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+<div class="field"><label for="tm">Starting Training Max (kg)</label><input id="tm" type="number" min="2.5" step="2.5" value="140" inputmode="decimal"></div>
+</div>
+<div class="fields">
+<div class="field"><label for="increase">TM increase each 4-week cycle (kg)</label><input id="increase" type="number" min="0" step="2.5" value="2.5" inputmode="decimal"></div>
+<div class="field"><label>Cycle length</label><div class="segment" id="lengthChoices"><button type="button" data-weeks="4" class="active">4 weeks</button><button type="button" data-weeks="8">8 weeks</button><button type="button" data-weeks="12">12 weeks</button></div></div>
+</div>
+<div class="switch-row"><div><strong>Boring But Big (BBB)</strong><small>Add 5 × 10 assistance after the main work. Skipped during deloads.</small></div><label class="switch"><input id="bbb" type="checkbox"><span></span></label></div>
+<div class="fields" id="bbbOptions" hidden><div class="field"><label for="bbbPct">BBB percentage of TM</label><select id="bbbPct"><option value="50">50%</option><option value="60" selected>60%</option><option value="70">70%</option></select></div><div class="field"><label>BBB volume</label><input value="5 sets × 10 reps" disabled></div></div>
+<div class="hint">Main work uses standard 5/3/1 percentages. Every new four-week cycle adds your chosen TM increase. All weights round to the nearest 2.5 kg.</div>
+<button type="button" class="primary" id="generate">GENERATE CYCLE</button>
+</section>
+
+<section class="card programme" id="programmeCard">
+<div class="card-head"><h2>Your programme</h2><span class="pill" id="programmeStatus">GENERATED</span></div>
+<div class="cycle-top"><div><div class="cycle-name" id="programmeName">Bench Press</div><div class="cycle-meta" id="programmeMeta"></div></div><div class="pill" id="programmeLength">4 WEEKS</div></div>
+<div class="cycle-stats"><div class="stat"><span>Starting TM</span><strong id="startTM">—</strong></div><div class="stat"><span>Final cycle TM</span><strong id="finalTM">—</strong></div><div class="stat"><span>Four-week blocks</span><strong id="blockCount">—</strong></div></div>
+<div class="cycle-actions"><button type="button" id="saveCycle">SAVE CYCLE</button><button type="button" class="secondary" id="editCycle">EDIT SETUP</button></div>
+<button type="button" class="expand-btn" id="expandCycle">VIEW ENTIRE CYCLE ↓</button>
+<div class="cycle-detail" id="cycleDetail"></div>
+<div class="status" id="saveStatus" aria-live="polite"></div>
+</section>
+
+<section class="card" id="savedCard">
+<div class="card-head"><h2>Saved cycles</h2><span class="pill" id="savedCount">0 SAVED</span></div>
+<div id="savedList" class="empty">Your saved programmes will appear here.</div>
+</section>
+</main>
+<footer>SPARTANX · TRAIN SMARTER</footer>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const STORAGE_KEY='spartanx_531_saved_cycles_v1';
+const DRAFT_KEY='spartanx_531_cycle_draft_v1';
+let weeks=4,generated=null,expanded=false;
+const fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:1});
+const round=n=>Math.round(n/2.5)*2.5;
+const schemes=[
+ {name:'Week 1 · 5s',p:[.65,.75,.85],r:['5','5','5+']},
+ {name:'Week 2 · 3s',p:[.70,.80,.90],r:['3','3','3+']},
+ {name:'Week 3 · 5/3/1',p:[.75,.85,.95],r:['5','3','1+']},
+ {name:'Week 4 · Deload',p:[.45,.55,.65],r:['5','5','5']}
+];
+function getDraft(){return {lift:$('lift').value,tm:$('tm').value,increase:$('increase').value,weeks,bbb:$('bbb').checked,bbbPct:$('bbbPct').value};}
+function saveDraft(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(getDraft()));}catch(e){}}
+function restoreDraft(){try{const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(!d)return;if(d.lift)$('lift').value=d.lift;if(d.tm)$('tm').value=d.tm;if(d.increase!==undefined)$('increase').value=d.increase;if(d.weeks)weeks=[4,8,12].includes(+d.weeks)?+d.weeks:4;$('bbb').checked=!!d.bbb;if(d.bbbPct)$('bbbPct').value=d.bbbPct;}catch(e){}}
+function setLength(){document.querySelectorAll('#lengthChoices button').forEach(b=>b.classList.toggle('active',+b.dataset.weeks===weeks));}
+function buildCycle(config){
+ const blocks=config.weeks/4,cycles=[];
+ for(let block=0;block<blocks;block++){
+  const tm=round(+config.tm+block*(+config.increase));
+  const cycleWeeks=[];
+  schemes.forEach((scheme,i)=>{
+   const sets=scheme.p.map((p,j)=>({pct:p,rep:scheme.r[j],weight:round(tm*p)}));
+   const bbb=!!config.bbb&&i!==3?{pct:+config.bbbPct,sets:5,reps:10,weight:round(tm*(+config.bbbPct/100))}:null;
+   cycleWeeks.push({number:block*4+i+1,name:scheme.name,tm,sets,bbb});
+  });
+  cycles.push({number:block+1,tm,weeks:cycleWeeks});
+ }
+ return {id:null,name:config.lift+' · '+config.weeks+' weeks',lift:config.lift,created:new Date().toISOString(),startTM:+config.tm,increase:+config.increase,weeks:config.weeks,bbb:config.bbb,bbbPct:+config.bbbPct,cycles};
+}
+function renderProgramme(data,isSaved=false){
+ generated=data;$('programmeCard').classList.add('visible');$('programmeName').textContent=data.name;$('programmeMeta').textContent='TM +'+fmt(data.increase)+' kg every four weeks · '+(data.bbb?'BBB '+data.bbbPct+'%':'Standard 5/3/1');$('programmeLength').textContent=data.weeks+' WEEKS';$('startTM').textContent=fmt(data.startTM)+' kg';$('finalTM').textContent=fmt(data.cycles[data.cycles.length-1].tm)+' kg';$('blockCount').textContent=data.cycles.length;$('programmeStatus').textContent=isSaved?'SAVED CYCLE':'GENERATED';$('saveStatus').textContent=isSaved?'Loaded from saved cycles.':'';expanded=false;$('cycleDetail').classList.remove('open');$('expandCycle').textContent='VIEW ENTIRE CYCLE ↓';$('saveCycle').textContent=isSaved?'SAVE AS NEW CYCLE':'SAVE CYCLE';renderDetails(data);$('programmeCard').scrollIntoView({behavior:'smooth',block:'start'});}
+function renderDetails(data){
+ let html='';
+ data.cycles.forEach(c=>{
+  html+='<div class="block-title">BLOCK '+c.number+' · TRAINING MAX '+fmt(c.tm)+' KG</div>';
+  c.weeks.forEach(w=>{
+   html+='<div class="week-card"><div class="week-head"><strong>'+w.name+'</strong><span>Week '+w.number+' · TM '+fmt(w.tm)+' kg</span></div>';
+   w.sets.forEach((s,i)=>{html+='<div class="set-line"><span>Set '+(i+1)+' · '+Math.round(s.pct*100)+'% · '+s.rep+' reps</span><strong>'+fmt(s.weight)+' kg</strong></div>';});
+   if(w.bbb)html+='<div class="set-line"><span>BBB · '+w.bbb.pct+'% · 5 × 10</span><strong>'+fmt(w.bbb.weight)+' kg</strong></div>';
+   else if(data.bbb&&w.name.includes('Deload'))html+='<div class="hint" style="padding-top:8px">BBB omitted during deload.</div>';
+   html+='</div>';
+  });
+ });
+ $('cycleDetail').innerHTML=html;
+}
+function readSaved(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return Array.isArray(d)?d:[];}catch(e){return[];}}
+function writeSaved(items){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items));return true;}catch(e){$('saveStatus').textContent='Could not save. Check device storage settings.';return false;}}
+function renderSaved(){
+ const items=readSaved();$('savedCount').textContent=items.length+' SAVED';
+ if(!items.length){$('savedList').className='empty';$('savedList').textContent='Your saved programmes will appear here.';return;}
+ $('savedList').className='';
+ $('savedList').innerHTML=items.map(item=>'<div class="saved-item"><div class="saved-head"><div><strong>'+escapeHtml(item.name)+'</strong><div class="saved-meta">'+item.weeks+' weeks · Starting TM '+fmt(item.startTM)+' kg · '+(item.bbb?'BBB '+item.bbbPct+'%':'Standard 5/3/1')+'<br>Saved '+new Date(item.created).toLocaleDateString()+'</div></div></div><div class="saved-actions"><button type="button" class="small" data-load="'+item.id+'">OPEN CYCLE</button><button type="button" class="small secondary" data-delete="'+item.id+'">DELETE</button></div></div>').join('');
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+$('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
+$('bbb').addEventListener('change',()=>{$('bbbOptions').hidden=!$('bbb').checked;saveDraft();});
+['lift','tm','increase','bbbPct'].forEach(id=>$(id).addEventListener('input',saveDraft));
+$('generate').addEventListener('click',()=>{
+ const tm=+$('tm').value,inc=+$('increase').value;
+ if(!(tm>0)||tm>1000||inc<0||inc>50){alert('Enter a valid Training Max and a TM increase of 0 kg or more.');return;}
+ generated=buildCycle(getDraft());renderProgramme(generated);saveDraft();
+});
+$('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});
+$('editCycle').addEventListener('click',()=>{$('setupCard').scrollIntoView({behavior:'smooth',block:'start'});});
+$('saveCycle').addEventListener('click',()=>{
+ if(!generated)return;
+ const items=readSaved();const copy=JSON.parse(JSON.stringify(generated));copy.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);copy.created=new Date().toISOString();
+ items.unshift(copy);if(writeSaved(items)){renderSaved();$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';$('programmeStatus').textContent='SAVED';$('saveCycle').textContent='SAVE ANOTHER COPY';}
+});
+$('savedList').addEventListener('click',e=>{
+ const load=e.target.closest('[data-load]'),del=e.target.closest('[data-delete]');
+ if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item)renderProgramme(item,true);}
+ if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items))renderSaved();}
+});
+restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;renderSaved();
+document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));
+})();
+</script>
+</body>
+</html>

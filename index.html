@@ -112,7 +112,7 @@ body.spartanx-red .rest-label{color:#ff3943}
 #trackerNav{position:fixed!important;inset:auto 0 0 0!important;z-index:2147483647!important;display:flex!important;justify-content:space-around;align-items:stretch;background:#171a1ef5;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));pointer-events:auto!important;touch-action:manipulation;transform:none!important;-webkit-transform:none!important;will-change:auto}
 #trackerNav button{position:relative;z-index:1;display:block;flex:1;min-height:48px;margin:0;padding:6px 3px;background:transparent;color:var(--muted);font-size:10px;line-height:1.2;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto!important}
 body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
-</style></head>
+.feed-flex-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 7px 3px 4px;border:1px solid var(--line);border-radius:20px;background:var(--panel2);width:max-content;max-width:100%;font-size:10px;font-weight:800;color:var(--lime)}.feed-flex-badge img{width:22px;height:22px;object-fit:contain}.profile-badge.unlocked{font:inherit;color:inherit;cursor:pointer;width:100%;appearance:none;-webkit-appearance:none}.profile-badge.unlocked.selected{border-color:var(--lime);box-shadow:0 0 0 1px var(--lime),0 0 12px #c8f16922}.profile-badge.unlocked:focus-visible{outline:2px solid var(--lime);outline-offset:2px}body.spartanx-red .profile-badge.unlocked.selected{border-color:#ef2029;box-shadow:0 0 0 1px #ef2029,0 0 12px #ef202922}</style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
 <main>
@@ -188,7 +188,9 @@ function renderWorkoutFeed(){
   }).length;
   const rows=exercises.map((ex,i)=>'<div class="feed-exercise"><span class="feed-exercise-mark">'+String(i+1).padStart(2,'0')+'</span><div class="feed-exercise-copy"><strong>'+esc(ex.name||'Exercise')+'</strong><div class="feed-sets">'+(ex.sets||[]).length+' '+((ex.sets||[]).length===1?'set':'sets')+'</div></div></div>');
   const visible=rows.slice(0,3).join(''),extra=rows.slice(3).join('');
-  return '<article class="card workout-feed-card"><div class="feed-profile-row"><div class="feed-avatar">'+avatar+'</div><div class="feed-profile-copy"><strong>'+esc(displayName)+'</strong><span>'+esc(dateText)+(validDate?' · '+esc(date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})):'')+'</span></div><div class="feed-menu-wrap"><button type="button" class="feed-more" data-feed-menu aria-label="Workout options" aria-expanded="false">•••</button><div class="feed-menu hidden"><button type="button" class="feed-edit" data-feed-edit="'+esc(String(session.id))+'">Edit workout</button><button type="button" class="feed-delete" data-feed-delete="'+esc(String(session.id))+'">Delete workout</button></div></div></div><h3 class="feed-title">'+esc(session.name||'Workout')+'</h3><div class="feed-meta"><div class="feed-stat"><span>TIME</span><strong>'+durationText+'</strong></div><div class="feed-stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="feed-stat"><span>RECORDS</span><strong>🏅 '+records+'</strong></div></div><div class="feed-exercises">'+visible+(extra?'<div class="feed-extra hidden">'+extra+'</div>':'')+'</div>'+(extra?'<button type="button" class="feed-expand" data-feed-toggle>See '+(exercises.length-3)+' more exercises</button>':'')+'</article>';
+  const flexBadge=getSelectedFlexBadge();
+  const flexMarkup=flexBadge?'<span class="feed-flex-badge" title="'+esc(flexBadge.name)+' badge"><img src="./ranks/'+flexBadge.file+'" alt=""><span>'+esc(flexBadge.name)+'</span></span>':'';
+  return '<article class="card workout-feed-card"><div class="feed-profile-row"><div class="feed-avatar">'+avatar+'</div><div class="feed-profile-copy"><strong>'+esc(displayName)+'</strong><span>'+esc(dateText)+(validDate?' · '+esc(date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})):'')+'</span>'+flexMarkup+'</div><div class="feed-menu-wrap"><button type="button" class="feed-more" data-feed-menu aria-label="Workout options" aria-expanded="false">•••</button><div class="feed-menu hidden"><button type="button" class="feed-edit" data-feed-edit="'+esc(String(session.id))+'">Edit workout</button><button type="button" class="feed-delete" data-feed-delete="'+esc(String(session.id))+'">Delete workout</button></div></div></div><h3 class="feed-title">'+esc(session.name||'Workout')+'</h3><div class="feed-meta"><div class="feed-stat"><span>TIME</span><strong>'+durationText+'</strong></div><div class="feed-stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="feed-stat"><span>RECORDS</span><strong>🏅 '+records+'</strong></div></div><div class="feed-exercises">'+visible+(extra?'<div class="feed-extra hidden">'+extra+'</div>':'')+'</div>'+(extra?'<button type="button" class="feed-expand" data-feed-toggle>See '+(exercises.length-3)+' more exercises</button>':'')+'</article>';
  }).join('');
 }
 $('workoutFeed').addEventListener('click',e=>{
@@ -267,8 +269,24 @@ function renderSpartanProgress(){
  const badges=SPARTANX_PROGRESS_RANKS.map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.index}));
  badges.push({locked:true},{locked:true});
  const unlocked=badges.filter(b=>b.unlocked).length;$('badgeCount').textContent=unlocked+' / 8';
- $('profileBadgeGrid').innerHTML=badges.map(b=>{const locked=b.locked||!b.unlocked;return locked?'<div class="profile-badge locked" aria-label="'+(b.name||'Future')+' badge locked"><div class="badge-art"><svg class="badge-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><strong>'+(b.name||'Future badge')+'</strong><small>'+(b.locked?'Coming soon':'Rank not reached')+'</small></div>':'<div class="profile-badge unlocked"><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><strong>'+b.name+'</strong><small>Unlocked</small></div>';}).join('');
+ $('profileBadgeGrid').innerHTML=badges.map(b=>{const locked=b.locked||!b.unlocked,selected=!locked&&getSelectedFlexBadge()?.name===b.name;return locked?'<div class="profile-badge locked" aria-label="'+(b.name||'Future')+' badge locked"><div class="badge-art"><svg class="badge-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><strong>'+(b.name||'Future badge')+'</strong><small>'+(b.locked?'Coming soon':'Rank not reached')+'</small></div>':'<button type="button" class="profile-badge unlocked '+(selected?'selected':'')+'" data-select-flex-badge="'+b.name+'" aria-pressed="'+selected+'"><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><strong>'+b.name+'</strong><small>'+(selected?'Displayed on feed':'Tap to display')+'</small></button>';}).join('');
 }
+
+
+const FLEX_BADGE_KEY='spartx_selected_flex_badge_v1';
+function getSelectedFlexBadge(){
+ const state=getWorkoutRank();let selected='';
+ try{selected=localStorage.getItem(FLEX_BADGE_KEY)||''}catch(e){}
+ const eligible=SPARTANX_PROGRESS_RANKS.filter((r,i)=>i<=state.index);
+ return eligible.find(r=>r.name===selected)||eligible[eligible.length-1]||null;
+}
+$('profileBadgeGrid').addEventListener('click',e=>{
+ const button=e.target.closest('[data-select-flex-badge]');if(!button)return;
+ const state=getWorkoutRank(),rank=SPARTANX_PROGRESS_RANKS.findIndex(r=>r.name===button.dataset.selectFlexBadge);
+ if(rank<0||rank>state.index)return;
+ try{localStorage.setItem(FLEX_BADGE_KEY,button.dataset.selectFlexBadge)}catch(e){}
+ renderSpartanProgress();renderWorkoutFeed();
+});
 
 function renderPerformanceChart(){
  const now=new Date(),days=[];

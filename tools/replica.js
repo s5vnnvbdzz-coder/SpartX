@@ -84,6 +84,7 @@ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.typ
    order.forEach(key=>{const card=map.get(key);if(card){main.appendChild(card);map.delete(key);}});
    map.forEach(card=>main.appendChild(card));
   }
+  try{const stored=JSON.parse(localStorage.getItem('spartxToolsCardOrder')||'[]');if(Array.isArray(stored)&&stored.length)restoreOrder(stored);}catch(e){}
   toggle.addEventListener('click',()=>{
    originalOrder=currentOrder();setMode(true);
   });

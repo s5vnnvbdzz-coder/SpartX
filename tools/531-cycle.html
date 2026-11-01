@@ -155,7 +155,8 @@ $('bbb').addEventListener('change',()=>{$('bbbOptions').hidden=!$('bbb').checked
 $('generate').addEventListener('click',()=>{
  const tm=+$('tm').value,inc=+$('increase').value;
  if(!(tm>0)||tm>1000||inc<0||inc>50){alert('Enter a valid Training Max and a TM increase of 0 kg or more.');return;}
- generated=buildCycle(getDraft());\n if(editingId){const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);if(idx>=0){generated.id=editingId;generated.created=items[idx].created;items[idx]=JSON.parse(JSON.stringify(generated));if(writeSaved(items)){renderSaved();renderProgramme(generated,true);$('saveStatus').textContent='Saved cycle updated successfully.';editingId=null;$('generate').textContent='GENERATE CYCLE';}}else{editingId=null;renderProgramme(generated);}}else{renderProgramme(generated);}
+ generated=buildCycle(getDraft());
+ if(editingId){const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);if(idx>=0){generated.id=editingId;generated.created=items[idx].created;items[idx]=JSON.parse(JSON.stringify(generated));if(writeSaved(items)){renderSaved();renderProgramme(generated,true);$('saveStatus').textContent='Saved cycle updated successfully.';editingId=null;$('generate').textContent='GENERATE CYCLE';}}else{editingId=null;renderProgramme(generated);}}else{renderProgramme(generated);}
  saveDraft();
 });
 $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});

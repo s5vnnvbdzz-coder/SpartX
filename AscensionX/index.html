@@ -128,7 +128,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
  <div class="eyebrow">EXECUTE THE PLAN</div><div class="row between"><h1>Workout</h1><button class="ghost small" onclick="showScreen('home')">Dashboard ↗</button></div><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
  <div class="card">
   <div class="fields">
-   <div class="field"><label>Lift</label><select id="liftSelect" onchange="renderWorkout()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+   <div class="field"><label>Lift</label><select id="liftSelect" onchange="syncWorkoutLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
    <div class="field"><label>Cycle week</label><select id="workWeek" onchange="renderWorkout()"><option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option><option value="4">Week 4</option><option value="5">Week 5</option><option value="6">Week 6 · Deload</option></select></div>
   </div>
   <div id="workoutPrescription"></div>
@@ -138,8 +138,8 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 
 <section id="cycle" class="screen">
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h1>Cycle overview</h1><button class="ghost small" onclick="showScreen('home')">← Back to home</button>
- <div class="card"><div class="row between"><div><h2 style="margin:0">Ascension Strength</h2><div class="tiny">Six-week linear intensification wave</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">One prescribed top set followed by back-off volume. Repetitions fall and intensity rises through Week 5. Week 6 consolidates and reduces fatigue.</p></div>
- <div class="card"><h2>Weekly prescriptions</h2><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
+ <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button class="full" style="margin-top:12px" onclick="createCycle()">Create / reset selected cycle</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
+ <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
  <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
  <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
 </section>
@@ -196,6 +196,9 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 const $=id=>document.getElementById(id);
 const KEY='ascensionx_strength_v1';
 const LIFTS=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+const EXERCISE_LABELS={'Back Squat':'Back Squat','Bench Press':'Bench Press','Deadlift':'Deadlift','Overhead Press':'Overhead Press'};
+function selectedLifts(){return Array.isArray(state.cycle.exercises)?state.cycle.exercises.filter(x=>LIFTS.includes(x)):LIFTS.slice()}
+function currentWeekFor(lift){return Math.min(6,Math.max(1,Number(state.cycle.weeks?.[lift]||state.cycle.currentWeek||1)))}
 const PLAN=[
  {week:1,name:'Volume foundation',topPct:72.5,topReps:6,backPct:67.5,backSets:3,backReps:6,rpe:7},
  {week:2,name:'Volume progression',topPct:77.5,topReps:5,backPct:72.5,backSets:4,backReps:5,rpe:7},
@@ -205,8 +208,8 @@ const PLAN=[
  {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
 ];
 let state=load();
-function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1},logs:[],metrics:[],draft:null}}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!x.profile.unit)x.profile.unit='kg';if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];return x}}catch(e){}return defaults()}
+function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1]))},logs:[],metrics:[],draft:null}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!Array.isArray(x.cycle.exercises))x.cycle.exercises=LIFTS.slice();if(!x.cycle.weeks)x.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(x.cycle.currentWeek)||1]));if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!x.profile.unit)x.profile.unit='kg';if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];return x}}catch(e){}return defaults()}
 function persist(shouldRender=true){try{localStorage.setItem(KEY,JSON.stringify(state));if(shouldRender)renderAll();return true}catch(e){toast('Could not save data. Export a backup and free browser storage.');return false}}
 function toast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
 function roundTo(n,step=state.profile.rounding||2.5){return Math.round(n/step)*step}
@@ -229,7 +232,13 @@ function saveProfile(){
  state.profile.tmPct=+$('profileTm').value;state.profile.rounding=+$('rounding').value;
  persist();toast('Profile saved');
 }
-function createCycle(){if(!confirm('Generate a fresh six-week Ascension cycle? Existing workout history will be retained.'))return;state.cycle={created:new Date().toISOString(),currentWeek:1};persist();toast('Six-week cycle generated');$('workWeek').value=1;showScreen('workout')}
+function createCycle(){
+ const chosen=[...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].map(x=>x.value);
+ if(!chosen.length){toast('Select at least one exercise');return}
+ if(!confirm('Create a six-week cycle for '+chosen.join(', ')+ '? Existing workout history will be retained.'))return;
+ state.cycle={created:new Date().toISOString(),currentWeek:1,exercises:chosen,weeks:Object.fromEntries(chosen.map(x=>[x,1]))};
+ state.draft=null;persist();$('liftSelect').value=chosen[0];$('workWeek').value=1;toast('Exercise-specific cycle created');showScreen('workout');
+}
 function showScreen(id,addHistory=true){
  const target=$(id);if(!target)return;
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
@@ -244,24 +253,30 @@ function showScreen(id,addHistory=true){
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 window.addEventListener('popstate',e=>showScreen(e.state?.screen||'workout',false));
-function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max['Back Squat'])).toFixed(1);$('maxBench').value=Number(toDisplay(state.profile.max['Bench Press'])).toFixed(1);$('maxDeadlift').value=Number(toDisplay(state.profile.max['Deadlift'])).toFixed(1);$('maxOHP').value=Number(toDisplay(state.profile.max['Overhead Press'])).toFixed(1);$('profileTm').value=state.profile.tmPct;$('rounding').value=state.profile.rounding;document.querySelectorAll('#profile label').forEach(l=>{if(/1RM/.test(l.textContent))l.textContent=l.textContent.replace(/\(kg\)/,'('+unit()+')')});[...$('rounding').options].forEach(o=>o.textContent=Number(toDisplay(+o.value)).toLocaleString(undefined,{maximumFractionDigits:2})+' '+unit());$('profileCycleStatus').textContent=state.cycle.created?'Cycle created '+new Date(state.cycle.created).toLocaleDateString()+'. Current week '+state.cycle.currentWeek+'.':'No cycle created yet.'}
+function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max['Back Squat'])).toFixed(1);$('maxBench').value=Number(toDisplay(state.profile.max['Bench Press'])).toFixed(1);$('maxDeadlift').value=Number(toDisplay(state.profile.max['Deadlift'])).toFixed(1);$('maxOHP').value=Number(toDisplay(state.profile.max['Overhead Press'])).toFixed(1);$('profileTm').value=state.profile.tmPct;$('rounding').value=state.profile.rounding;document.querySelectorAll('#profile label').forEach(l=>{if(/1RM/.test(l.textContent))l.textContent=l.textContent.replace(/\(kg\)/,'('+unit()+')')});[...$('rounding').options].forEach(o=>o.textContent=Number(toDisplay(+o.value)).toLocaleString(undefined,{maximumFractionDigits:2})+' '+unit());$('profileCycleStatus').textContent=state.cycle.created?'Cycle created '+new Date(state.cycle.created).toLocaleDateString()+'. '+selectedLifts().length+' exercises selected.':'No cycle created yet.'}
 function renderDashboard(){
  $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- $('headerStatus').textContent=state.cycle.created?'WEEK '+state.cycle.currentWeek+' / 6':'NO ACTIVE CYCLE';
- $('dashCycle').textContent=state.cycle.created?'6 weeks':'—';$('dashWeek').textContent=state.cycle.created?state.cycle.currentWeek+'/6':'—';$('dashSessions').textContent=state.logs.length;
+ const active=selectedLifts(),weeks=active.map(currentWeekFor),avgWeek=weeks.length?weeks.reduce((a,b)=>a+b,0)/weeks.length:1;
+ $('headerStatus').textContent=state.cycle.created?active.length+' EXERCISES ACTIVE':'NO ACTIVE CYCLE';
+ $('dashCycle').textContent=state.cycle.created?'6 weeks':'—';$('dashWeek').textContent=state.cycle.created?Math.round(avgWeek*10)/10+'/6 avg':'—';$('dashSessions').textContent=state.logs.length;
  const best=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));$('dashE1rm').textContent=best?kg(best):'—';
- const done=state.logs.filter(l=>l.week===state.cycle.currentWeek).length, pct=state.cycle.created?Math.round(done/4*100):0;
- $('cycleProgressText').textContent=state.cycle.created?done+' of 4 main lift sessions logged for week '+state.cycle.currentWeek+'.':'Create a cycle to begin.';
+ const pct=state.cycle.created?Math.round(weeks.reduce((a,w)=>a+(w-1)/6,0)/Math.max(1,weeks.length)*100):0;
+ $('cycleProgressText').textContent=state.cycle.created?active.map(l=>l+' · W'+currentWeekFor(l)).join('  |  '):'Create a cycle to begin.';
  $('cycleProgressPct').textContent=pct+'%';$('cycleProgressBar').style.width=pct+'%';
- $('homeWeeks').innerHTML=PLAN.map(p=>`<div class="weektile ${p.week===state.cycle.currentWeek?'current':''} ${state.logs.filter(l=>l.week===p.week).length===4?'done':''}" onclick="setWeek(${p.week})"><strong>W${p.week}</strong><small>${p.deload?'Deload':p.topReps+' reps'}</small></div>`).join('');
- const next=LIFTS.find(l=>!state.logs.some(x=>x.week===state.cycle.currentWeek&&x.lift===l));
- $('nextSession').innerHTML=state.cycle.created?(next?`<strong>${next}</strong><br><span class="muted">Week ${state.cycle.currentWeek} · ${PLAN[state.cycle.currentWeek-1].name}</span>`:'All four main lifts logged for this week. Review your work or move to the next week.'):'Set up your training maxes to generate your first session.';
- $('homeHero').innerHTML=state.cycle.created?`<div class="mutedline">CURRENT ASCENSION CYCLE</div><div class="big">Week ${state.cycle.currentWeek}<span style="color:var(--red2)"> / 6</span></div><div class="tiny">${PLAN[state.cycle.currentWeek-1].name} · ${PLAN[state.cycle.currentWeek-1].deload?'Recovery and consolidation':'Build strength through controlled progression'}</div><button style="margin-top:15px" onclick="showScreen('workout')">Continue training</button>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Build a six-week strength cycle, record your work and let performance guide the next step.</div><button style="margin-top:15px" onclick="showScreen('profile')">Set up your lifts</button>`;
+ $('homeWeeks').innerHTML=PLAN.map(p=>{const finished=active.length&&active.every(l=>currentWeekFor(l)>p.week||(currentWeekFor(l)===6&&p.week===6&&state.logs.some(x=>x.lift===l&&x.week===6&&x.setsComplete)));return `<div class="weektile ${active.some(l=>currentWeekFor(l)===p.week)?'current':''} ${finished?'done':''}" onclick="setWeek(${p.week})"><strong>W${p.week}</strong><small>${p.deload?'Deload':p.topReps+' reps'}</small></div>`}).join('');
+ const next=active.find(l=>!state.logs.some(x=>x.week===currentWeekFor(l)&&x.lift===l));
+ $('nextSession').innerHTML=state.cycle.created?(next?`<strong>${next}</strong><br><span class="muted">Week ${currentWeekFor(next)} · ${PLAN[currentWeekFor(next)-1].name}</span>`:'All selected exercises have a session logged for their current week.'):'Select your compound exercises to build a cycle.';
+ $('homeHero').innerHTML=state.cycle.created?`<div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><button style="margin-top:15px" onclick="showScreen('workout')">Continue training</button>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
 }
-function setWeek(w){state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
+function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
+function syncWorkoutLift(){const lift=$('liftSelect').value;$('workWeek').value=currentWeekFor(lift);renderWorkout()}
 function renderWorkout(){
  if(!$('liftSelect'))return;
- const lift=$('liftSelect').value,week=+$('workWeek').value||state.cycle.currentWeek||1,info=prescribed(lift,week),p=info.p;
+ const active=selectedLifts(),chosen=$('liftSelect').value;
+ $('liftSelect').innerHTML=(active.length?active:LIFTS).map(l=>'<option>'+l+'</option>').join('');
+ if(!(active.length?active:LIFTS).includes(chosen))$('liftSelect').value=(active.length?active:LIFTS)[0];
+
+ const lift=$('liftSelect').value,week=+$('workWeek').value||currentWeekFor(lift),info=prescribed(lift,week),p=info.p;
  const existing=state.logs.find(x=>x.lift===lift&&x.week===week);
  $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
  <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
@@ -290,16 +305,20 @@ function saveWorkout(lift,week,count){
  const success=allDone&&(mean===null||mean<=info.p.rpe);
  const log={id:Date.now(),date:new Date().toISOString(),lift,week,sets,topWeight:top.weight,topReps:top.reps,volume:sets.reduce((a,s)=>a+s.weight*s.reps,0),notes:$('sessionNotes')?.value||'',success,avgRpe:mean,setsComplete:allDone};
  state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));state.logs.push(log);state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));state.draft=null;
- const weekComplete=LIFTS.every(name=>{const session=state.logs.find(x=>x.lift===name&&x.week===week);if(!session)return false;if(session.setsComplete===true)return true;const prescription=PLAN[week-1];return Array.isArray(session.sets)&&session.sets.length>0&&session.sets.every((set,index)=>set.done&&Number(set.reps)>=(prescription.deload?5:index===0?prescription.topReps:prescription.backReps));});
+ const exerciseComplete=allDone&&selectedLifts().includes(lift);
  let progressionMessage='';
- if(weekComplete&&week===state.cycle.currentWeek){
-  if(week<PLAN.length){state.cycle.currentWeek=week+1;$('workWeek').value=state.cycle.currentWeek;progressionMessage=' · Week '+state.cycle.currentWeek+' unlocked';}
-  else{progressionMessage=' · Six-week cycle complete';}
+ if(exerciseComplete&&week===currentWeekFor(lift)){
+  state.cycle.weeks=state.cycle.weeks||{};
+  if(week<PLAN.length){state.cycle.weeks[lift]=week+1;state.cycle.currentWeek=week+1;$('workWeek').value=week+1;progressionMessage=' · '+lift+' advanced to Week '+(week+1);}
+  else{progressionMessage=' · '+lift+' six-week cycle complete';}
  }
  persist();toast((success?'Workout saved · targets hit':'Workout saved · review performance')+progressionMessage);
 }
 function editWorkout(lift,week){const old=state.logs.find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
 function renderCycle(){
+ const selected=selectedLifts();
+ $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" style="display:block">Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" ${selected.includes(l)?'checked':''}></label>`).join('');
+ $('cycleBuilderStatus').textContent=state.cycle.created?'Active: '+selected.map(l=>l+' (Week '+currentWeekFor(l)+')').join(' · '):'No active cycle. Select one or more exercises, then create your cycle.';
  $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');
  renderCycleLoads();
 }
@@ -314,7 +333,7 @@ function renderProgress(){
  $('trendGraph').innerHTML=vals.length?vals.slice(-12).map(l=>`<div class="bar" style="height:${Math.max(5,e1rm(l.topWeight,l.topReps)/max*100)}%"><small>${l.lift.split(' ')[0].slice(0,3)}</small></div>`).join(''):'';
  $('trendCaption').textContent=vals.length?'Recent top-set E1RM estimates. Compare like-for-like lifts and rep ranges.':'Log your first workout to build your trend.';
  $('historyList').innerHTML=vals.length?vals.slice().reverse().map(l=>`<div class="listitem"><div><strong>${l.lift} · Week ${l.week}</strong><div class="tiny">${new Date(l.date).toLocaleDateString()} · ${l.sets.length} sets · ${Math.round(toDisplay(l.volume)).toLocaleString()} ${unit()} volume</div></div><span class="pill ${l.success?'good':'warn'}">${l.success?'TARGET HIT':'REVIEW'}</span></div>`).join(''):'No sessions recorded yet.';
- const completed=state.logs.filter(l=>l.week===6).length;
+ const completed=state.logs.filter(l=>l.week===6&&selectedLifts().includes(l.lift)).length;
  $('cycleReview').innerHTML=state.logs.length?`<strong>${state.logs.length} sessions logged.</strong><br>${completed?'Week 6 sessions are being recorded. Review the full cycle before changing your TM.':'When the cycle is complete, review rep completion, RPE, technique and recovery. The initial rule is +2.5 kg upper body / +2.5–5 kg lower body if all targets were met comfortably; hold if effort overshot; reduce 2.5–5% after repeated missed work.'}`:'Complete your training sessions to receive a progression recommendation.';
 }
 function renderAll(){renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
@@ -346,7 +365,7 @@ function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'
 $('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(await e.target.files[0].text());if(!obj.profile||!obj.profile.max||!obj.cycle||!Array.isArray(obj.logs))throw Error();if(!obj.profile.max['Back Squat']||!obj.profile.max['Bench Press']||!obj.profile.max['Deadlift']||!obj.profile.max['Overhead Press'])throw Error();if(!('draft' in obj))obj.draft=null;state=obj;if(!persist())throw Error();toast('Backup imported')}catch(err){toast('Could not read that backup')}e.target.value=''});
 function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
 function init(){
- $('workWeek').value=state.cycle.currentWeek||1;$('metricDate').value=new Date().toISOString().slice(0,10);
+ $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('workout',false);history.replaceState({screen:'workout'},'',location.pathname+location.search+'#workout');
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }

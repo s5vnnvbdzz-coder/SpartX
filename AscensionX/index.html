@@ -339,6 +339,10 @@ function setupProfileCollapse(){
   const title=heading?.textContent.trim()|| (card.querySelector('.eyebrow')?.textContent.trim()==='YOUR ASCENSION'?'Your Ascension':'Profile card');
   const body=document.createElement('div');body.className='profile-collapse-body';
   while(card.firstChild)body.appendChild(card.firstChild);
+  // The collapsible header supplies the title; remove the original duplicate.
+  if(heading)heading.remove();
+  // The rank card previously used an eyebrow as its title.
+  if(title==='Your Ascension'){const eyebrow=body.querySelector('.eyebrow');if(eyebrow&&eyebrow.textContent.trim()==='YOUR ASCENSION')eyebrow.remove();}
   const head=document.createElement('div');head.className='profile-collapse-head';
   const label=document.createElement('h2');label.textContent=title;
   const btn=document.createElement('button');btn.type='button';btn.className='profile-collapse-toggle';

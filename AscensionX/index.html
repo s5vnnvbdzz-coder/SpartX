@@ -130,7 +130,7 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
 nav .nav-barbell{height:26px;display:grid;place-items:center}nav .nav-rank{height:27px;display:grid;place-items:center}nav .nav-rank img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 3px var(--red2))}
 /* Very slow theme-coloured chasing highlight along the footer top edge */
 nav{position:fixed;isolation:isolate}
-nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--red2) 10%,transparent) 35%,color-mix(in srgb,var(--red2) 52%,transparent) 50%,color-mix(in srgb,var(--red2) 10%,transparent) 65%,transparent 100%);background-size:42% 100%;background-repeat:no-repeat;animation:ascFooterChase 16s linear infinite;opacity:.65;filter:drop-shadow(0 0 3px var(--red2))}
+nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--red2) 10%,transparent) 35%,color-mix(in srgb,var(--red2) 52%,transparent) 50%,color-mix(in srgb,var(--red2) 10%,transparent) 65%,transparent 100%);background-size:42% 100%;background-repeat:no-repeat;animation:ascFooterChase 10s linear infinite;opacity:.65;filter:drop-shadow(0 0 3px var(--red2))}
 @keyframes ascFooterChase{from{background-position:-75% 0}to{background-position:175% 0}}
 @media(prefers-reduced-motion:reduce){nav::before{animation:none;background-position:center}}
 </style>

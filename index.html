@@ -248,6 +248,11 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
 @keyframes sx-flame-flicker{0%{opacity:.42;filter:blur(8px)}35%{opacity:.9;filter:blur(13px)}65%{opacity:.58;filter:blur(9px)}100%{opacity:.95;filter:blur(16px)}}
 @media(max-width:430px){.sx-gamer-card{gap:2px;padding:13px 7px}.sx-gamer-emblem{width:124px;height:140px;flex-basis:124px;transform:none;margin:0}.sx-gamer-emblem>img{width:150px;height:150px;left:-13px;top:-4px}.sx-gamer-avatar{width:56px;height:56px;left:34px;top:42px}.sx-gamer-info{min-width:0}.sx-gamer-line{gap:3px}}
 @media(prefers-reduced-motion:reduce){.sx-gamer-card::before,.sx-gamer-card::after{animation:none}}
+</style><style>
+/* Profile card test: static border, no flame, Olympian emblem preview. */
+.sx-gamer-card{box-shadow:none!important;border:1px solid color-mix(in srgb,var(--lime) 38%,transparent)!important;overflow:hidden}
+.sx-gamer-card::before,.sx-gamer-card::after{content:none!important;animation:none!important;display:none!important}
+.sx-gamer-emblem>img{animation:none!important;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--lime) 35%,transparent))!important}
 </style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -306,7 +311,7 @@ queueMicrotask(()=>{const t=$('toggleProfileCards');if(t)t.checked=profileCardsE
 function profileCardsEnabled(){return localStorage.getItem(PROFILE_CARD_PREF)==='true'}
 function buildGamingProfileCard(profile,name,photo){
  const state=getWorkoutRank(),p=profile||{};
- const rank=state.current,flag=p.countryPublic===true?(p.country||p.countryOfOrigin||''):'';
+ const rank={...state.current,file:'olympian.svg'},flag=p.countryPublic===true?(p.country||p.countryOfOrigin||''):'';
  const lifts=['squat','bench','deadlift'].map(kind=>({kind,weight:getCompoundBest(kind)})).sort((a,b)=>b.weight-a.weight);
  const best=lifts[0],bestText=best.weight?best.kind.toUpperCase()+' · '+kg(best.weight):'No compound PR yet';
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';

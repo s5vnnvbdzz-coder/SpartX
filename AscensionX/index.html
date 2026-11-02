@@ -35,21 +35,21 @@ label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
 header{position:sticky;top:0;z-index:20;padding:calc(14px + env(safe-area-inset-top)) 18px 13px;display:flex;align-items:center;justify-content:space-between;background:#0b0c10eF;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff0b}
 .brand{font-weight:950;letter-spacing:2.5px;font-size:19px}.brand span{color:var(--red2)}
 .sub{font-size:9px;color:var(--muted);letter-spacing:1.8px;margin-top:3px}
-main{max-width:780px;margin:auto;padding:18px 16px 30px}
+main{width:100%;max-width:780px;min-width:0;margin:auto;padding:18px 16px 30px} main>*{min-width:0;max-width:100%}
 .screen{display:none}.screen.active{display:block}
 h1{font-size:29px;letter-spacing:-.9px;margin:6px 0 5px}h2{font-size:18px;margin:0 0 13px}h3{font-size:15px;margin:0}
 .muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted);line-height:1.5}
 .eyebrow{font-size:10px;letter-spacing:1.7px;color:var(--red2);font-weight:900;text-transform:uppercase}
-.card{background:linear-gradient(145deg,#171a20,#111318);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:13px 0;box-shadow:0 12px 32px #0003}
+.card{width:100%;min-width:0;max-width:100%;overflow-wrap:anywhere;background:linear-gradient(145deg,#171a20,#111318);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:13px 0;box-shadow:0 12px 32px #0003}
 .hero{padding:19px;border-radius:19px;background:radial-gradient(ellipse at 90% 10%,#5c111d66,transparent 52%),linear-gradient(135deg,#252830,#111318 72%);border:1px solid #46404a;margin:14px 0;position:relative;overflow:hidden}
 .hero:after{content:"AX";position:absolute;right:12px;bottom:-28px;font-weight:1000;font-size:115px;letter-spacing:-10px;color:#ffffff08;pointer-events:none}
 .hero .big{font-size:36px;font-weight:950;letter-spacing:-1.4px;margin:6px 0}
 .mutedline{color:var(--muted);font-size:10px;letter-spacing:1.3px;text-transform:uppercase}
-.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.wrap{flex-wrap:wrap}
+.row{display:flex;align-items:center;gap:10px;min-width:0}.row>*{min-width:0}.between{justify-content:space-between}.wrap{flex-wrap:wrap}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .stat{background:linear-gradient(145deg,#222630,#191c23);border:1px solid #30343e;border-radius:14px;padding:13px;min-width:0}
 .stat span{font-size:10px;color:var(--muted);letter-spacing:.9px;text-transform:uppercase}
-.stat strong{display:block;font-size:23px;margin-top:5px;letter-spacing:-.5px}
+.stat strong{display:block;font-size:clamp(15px,4.5vw,23px);margin-top:5px;letter-spacing:-.5px;overflow-wrap:anywhere}
 .pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;font-size:10px;color:var(--muted);white-space:nowrap}
 .pill.red{color:#ff6672;border-color:#7d2630;background:#35151b}.pill.good{color:#75d9a1;border-color:#286144;background:#14291f}.pill.warn{color:var(--amber);border-color:#6b542e;background:#2b2418}
 .progress{height:8px;border-radius:99px;background:#30333b;overflow:hidden}.progress>i{display:block;height:100%;background:linear-gradient(90deg,#a70e1d,var(--red2));border-radius:99px}
@@ -288,7 +288,9 @@ function syncWorkoutLift(){const lift=$('liftSelect').value;$('workWeek').value=
 function renderWorkout(){
  if(!$('liftSelect'))return;
  const active=selectedLifts(),chosen=$('liftSelect').value;
- $('liftSelect').innerHTML=(active.length?active:LIFTS).map(l=>'<option>'+l+'</option>').join('');
+ const allowed=active.length?active:LIFTS;
+ // Preserve native select options while the user interacts with the iOS picker.
+ if([...$('liftSelect').options].map(o=>o.value).join('|')!==allowed.join('|'))$('liftSelect').innerHTML=allowed.map(l=>'<option value="'+l+'">'+l+'</option>').join('');
  if(!(active.length?active:LIFTS).includes(chosen))$('liftSelect').value=(active.length?active:LIFTS)[0];
 
  const lift=$('liftSelect').value,week=+$('workWeek').value||currentWeekFor(lift),info=prescribed(lift,week),p=info.p;
@@ -296,7 +298,7 @@ function renderWorkout(){
  $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
  <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
  <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${p.topPct}% of TM · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${p.backPct}% of TM</div>`:''}</div>
- <div class="tiny"><strong>Warm-up suggestion:</strong> ${[40,55,65,75].map((x,i)=>`${x}% × ${[5,3,2,1][i]}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
+ <div class="tiny"><strong>Warm-up suggestion:</strong> ${[40,55,65,75].map((x,i)=>`${x}% (${kg(roundTo(tm(lift)*x/100))}) × ${[5,3,2,1][i]}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
 }
 function renderLogger(lift,week,info){

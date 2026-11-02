@@ -288,8 +288,15 @@ function saveWorkout(lift,week,count){
  const top=sets[0],info=prescribed(lift,week),allDone=sets.every(s=>s.done&&s.reps>= (s.label==='Top set'?info.p.topReps:info.p.deload?5:info.p.backReps));
  const avgRpe=sets.map(s=>s.rpe).filter(x=>x!==null);const mean=avgRpe.length?avgRpe.reduce((a,b)=>a+b,0)/avgRpe.length:null;
  const success=allDone&&(mean===null||mean<=info.p.rpe);
- const log={id:Date.now(),date:new Date().toISOString(),lift,week,sets,topWeight:top.weight,topReps:top.reps,volume:sets.reduce((a,s)=>a+s.weight*s.reps,0),notes:$('sessionNotes')?.value||'',success,avgRpe:mean};
- state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));state.logs.push(log);state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));state.draft=null;persist();toast(success?'Workout saved · targets hit':'Workout saved · review performance');
+ const log={id:Date.now(),date:new Date().toISOString(),lift,week,sets,topWeight:top.weight,topReps:top.reps,volume:sets.reduce((a,s)=>a+s.weight*s.reps,0),notes:$('sessionNotes')?.value||'',success,avgRpe:mean,setsComplete:allDone};
+ state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));state.logs.push(log);state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));state.draft=null;
+ const weekComplete=LIFTS.every(name=>{const session=state.logs.find(x=>x.lift===name&&x.week===week);if(!session)return false;if(session.setsComplete===true)return true;const prescription=PLAN[week-1];return Array.isArray(session.sets)&&session.sets.length>0&&session.sets.every((set,index)=>set.done&&Number(set.reps)>=(prescription.deload?5:index===0?prescription.topReps:prescription.backReps));});
+ let progressionMessage='';
+ if(weekComplete&&week===state.cycle.currentWeek){
+  if(week<PLAN.length){state.cycle.currentWeek=week+1;$('workWeek').value=state.cycle.currentWeek;progressionMessage=' · Week '+state.cycle.currentWeek+' unlocked';}
+  else{progressionMessage=' · Six-week cycle complete';}
+ }
+ persist();toast((success?'Workout saved · targets hit':'Workout saved · review performance')+progressionMessage);
 }
 function editWorkout(lift,week){const old=state.logs.find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
 function renderCycle(){

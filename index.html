@@ -253,6 +253,17 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
 .sx-gamer-card{box-shadow:none!important;border:1px solid color-mix(in srgb,var(--lime) 38%,transparent)!important;overflow:hidden}
 .sx-gamer-card::before,.sx-gamer-card::after{content:none!important;animation:none!important;display:none!important}
 .sx-gamer-emblem>img{animation:none!important;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--lime) 35%,transparent))!important}
+</style><style>
+/* Olympian profile portrait: insignia is the portrait's external frame. */
+.sx-gamer-card{position:relative!important;isolation:isolate;overflow:visible!important;min-height:160px!important;margin:24px 1px 17px 14px!important;padding:18px 12px 14px 133px!important;display:flex!important;align-items:center!important;border:1px solid color-mix(in srgb,var(--lime) 40%,transparent)!important;border-radius:13px!important;background:linear-gradient(115deg,#101216,#1b1d21)!important;box-shadow:0 0 12px color-mix(in srgb,var(--lime) 9%,transparent)!important}
+.sx-gamer-card::before{content:""!important;display:block!important;position:absolute!important;inset:-2px!important;border-radius:inherit!important;padding:2px!important;background:conic-gradient(from var(--sx-angle),transparent 0deg,transparent 235deg,color-mix(in srgb,var(--lime) 30%,transparent) 260deg,var(--lime) 292deg,#fff 305deg,var(--lime) 318deg,transparent 348deg)!important;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;-webkit-mask-composite:xor!important;mask-composite:exclude!important;pointer-events:none!important;animation:sx-border-trace 4s linear infinite!important;filter:drop-shadow(0 0 5px var(--lime))!important;z-index:1!important}
+.sx-gamer-card::after{display:none!important;content:none!important}
+.sx-gamer-emblem{position:absolute!important;left:-27px!important;top:50%!important;transform:translateY(-50%)!important;width:168px!important;height:168px!important;margin:0!important;z-index:3!important;overflow:visible!important;flex:none!important;pointer-events:none}
+.sx-gamer-emblem>img{position:absolute!important;inset:0!important;width:168px!important;height:168px!important;max-width:none!important;object-fit:contain!important;animation:none!important;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--lime) 45%,transparent))!important}
+.sx-gamer-avatar{position:absolute!important;left:48px!important;top:49px!important;width:72px!important;height:72px!important;border:2px solid var(--lime)!important;border-radius:50%!important;z-index:2!important;box-shadow:0 0 0 3px #15181b,0 0 8px color-mix(in srgb,var(--lime) 35%,transparent)!important}
+.sx-gamer-info{width:100%!important;flex:1!important;min-width:0!important}
+@media(max-width:430px){.sx-gamer-card{padding-left:109px!important;margin-left:10px!important;min-height:151px!important}.sx-gamer-emblem{left:-29px!important;width:145px!important;height:145px!important;transform:translateY(-50%)!important}.sx-gamer-emblem>img{width:145px!important;height:145px!important;left:0!important;top:0!important}.sx-gamer-avatar{width:62px!important;height:62px!important;left:41px!important;top:42px!important}.sx-gamer-top>strong{font-size:13px!important}}
+@media(prefers-reduced-motion:reduce){.sx-gamer-card::before{animation:none!important}}
 </style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>

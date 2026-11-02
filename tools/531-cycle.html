@@ -193,7 +193,7 @@ $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail
 $('saveCycle').addEventListener('click',()=>{
  if(!generated)return;
  const items=readSaved();const copy=JSON.parse(JSON.stringify(generated));copy.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);copy.created=new Date().toISOString();
- copy.completedWeeks=[];items.unshift(copy);if(writeSaved(items)){renderSaved();if(parent!==window)parent.postMessage({type:'spartx:cycleUpdated'},location.origin);$('programmeCard').classList.remove('visible');$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';}
+ copy.completedWeeks=[];items.unshift(copy);if(writeSaved(items)){renderSaved();if(parent!==window){parent.postMessage({type:'spartx:cycleUpdated'},location.origin);parent.postMessage({type:'spartx:cycleSaved'},location.origin);}$('programmeCard').classList.remove('visible');$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';}
 });
 $('savedList').addEventListener('click',e=>{
  const load=e.target.closest('[data-load]'),edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');

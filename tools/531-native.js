@@ -90,7 +90,7 @@ $('savedList').addEventListener('click',e=>{
 });
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)renderSaved()});window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:cycleUpdated')renderSaved()});
 $('closeEdit').addEventListener('click',closeEditForm);$('cancelEdit').addEventListener('click',closeEditForm);$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditForm();});shadow.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditForm();});
-$('plannerBack').addEventListener('click',()=>window.spartanxOpenTools());
+$('plannerBack').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(typeof window.spartanxOpenTools==='function')window.spartanxOpenTools();else document.querySelector('#trackerNav [data-screen="tools"]')?.click();});
 restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;$('setupCard').hidden=false;renderSaved();
 shadow.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));
 })();

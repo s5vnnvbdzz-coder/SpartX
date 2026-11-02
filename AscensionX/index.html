@@ -128,12 +128,17 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
 #profile .profile-collapsed .profile-collapse-head{margin-bottom:0}
 .asc-profile-card{display:flex;align-items:center;gap:13px;margin:0 0 14px;padding:12px;border:1px solid color-mix(in srgb,var(--red2) 42%,var(--line));border-radius:13px;background:radial-gradient(ellipse at 90% 0%,color-mix(in srgb,var(--red2) 13%,transparent),transparent 70%),var(--panel2)}.asc-emblem{width:91px;height:94px;flex:0 0 91px;position:relative;display:grid;place-items:center}.asc-emblem img{width:95px;height:95px;object-fit:contain;filter:drop-shadow(0 0 7px var(--red2))}.asc-avatar{position:absolute;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1px solid var(--red2);background:var(--panel);color:var(--text);font-size:25px}.asc-profile-info{flex:1;min-width:0}.asc-profile-info .rank-row{flex-wrap:wrap}.asc-profile-info .tiny{margin-top:7px}
 nav .nav-barbell{height:26px;display:grid;place-items:center}nav .nav-rank{height:27px;display:grid;place-items:center}nav .nav-rank img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 3px var(--red2))}
+/* Very slow theme-coloured chasing highlight along the footer top edge */
+nav{position:fixed;isolation:isolate}
+nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--red2) 10%,transparent) 35%,color-mix(in srgb,var(--red2) 52%,transparent) 50%,color-mix(in srgb,var(--red2) 10%,transparent) 65%,transparent 100%);background-size:42% 100%;background-repeat:no-repeat;animation:ascFooterChase 16s linear infinite;opacity:.65;filter:drop-shadow(0 0 3px var(--red2))}
+@keyframes ascFooterChase{from{background-position:-75% 0}to{background-position:175% 0}}
+@media(prefers-reduced-motion:reduce){nav::before{animation:none;background-position:center}}
 </style>
 </head>
 <body>
 <header>
  <button class="ghost" style="text-align:left;padding:0;background:none;box-shadow:none" onclick="showScreen('home')" aria-label="Open dashboard"><div class="brand">ASCENSION<span>X</span></div><div class="sub">THE STRENGTH METHOD · BUILD BEYOND</div></button>
- <div class="row" style="gap:9px"><span class="pill red" id="headerStatus">NO ACTIVE CYCLE</span><button class="iconbtn" onclick="openSettings()" aria-label="Settings" title="Settings">⚙</button></div>
+ <div class="row" style="gap:9px"><button class="iconbtn" onclick="openSettings()" aria-label="Settings" title="Settings">⚙</button></div>
 </header>
 <div id="setPopupBackdrop" class="set-popup-backdrop" onclick="if(event.target===this)closeSetPopup()"><div class="set-popup" role="dialog" aria-modal="true" aria-labelledby="setPopupTitle"><div class="row between"><h2 id="setPopupTitle" style="margin:0">Set value</h2><button class="ghost" onclick="closeSetPopup()" aria-label="Close">✕</button></div><div id="setPopupContent"></div><div class="set-popup-actions"><button class="secondary" onclick="closeSetPopup()">Cancel</button><button onclick="applySetPopup()">Apply</button></div></div></div>
 <div id="cycleConfirmBackdrop" class="cycle-confirm-backdrop" role="presentation"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleConfirmTitle"><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleConfirmTitle" style="margin:9px 0">Start your cycle?</h2><p class="tiny" id="cycleConfirmSummary"></p><div class="cycle-confirm-actions"><button class="secondary" onclick="discardCycleConfirmation()">Discard</button><button onclick="confirmCycleStart()">Start</button></div></section></div>
@@ -363,7 +368,7 @@ function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max
 function renderDashboard(){
  $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const active=selectedLifts(),weeks=active.map(currentWeekFor),avgWeek=weeks.length?weeks.reduce((a,b)=>a+b,0)/weeks.length:1;
- $('headerStatus').textContent=state.cycle.created?active.length+' EXERCISES ACTIVE':'NO ACTIVE CYCLE';
+
  $('dashCycle').textContent=state.cycle.created?'6 weeks':'—';$('dashWeek').textContent=state.cycle.created?Math.round(avgWeek*10)/10+'/6 avg':'—';$('dashSessions').textContent=state.logs.length;
  const best=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));$('dashE1rm').textContent=best?kg(best):'—';
  const pct=state.cycle.created?Math.round(weeks.reduce((total,w,i)=>{const lift=active[i],finished=state.logs.some(x=>x.lift===lift&&x.week===6&&x.setsComplete===true);return total+(finished?6:w-1)/6},0)/Math.max(1,weeks.length)*100):0;

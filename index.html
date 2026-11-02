@@ -267,14 +267,51 @@ function renderWorkoutFeed(){
   const visible=rows.slice(0,3).join(''),extra=rows.slice(3).join('');
   const flexBadge=getSelectedFlexBadge();
   const flexMarkup=flexBadge?'<img class="feed-flex-badge" src="./ranks/'+flexBadge.file+'" alt="'+esc(flexBadge.name)+' rank" title="'+esc(flexBadge.name)+'">':'';
-  return '<article class="card workout-feed-card"><div class="feed-profile-row"><div class="feed-avatar">'+avatar+'</div><div class="feed-profile-copy"><strong>'+esc(displayName)+'</strong>'+flexMarkup+'</div><div class="feed-menu-wrap"><button type="button" class="feed-more" data-feed-menu aria-label="Workout options" aria-expanded="false">•••</button><div class="feed-menu hidden"><button type="button" class="feed-edit" data-feed-edit="'+esc(String(session.id))+'">Edit workout</button><button type="button" class="feed-delete" data-feed-delete="'+esc(String(session.id))+'">Delete workout</button></div></div></div><div class="feed-title-row"><h3 class="feed-title">'+esc(session.name||'Workout')+'</h3><span class="feed-date-time">'+esc(dateText)+(validDate?' · '+esc(date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})):'')+'</span></div><div class="feed-meta"><div class="feed-stat"><span>TIME</span><strong>'+durationText+'</strong></div><div class="feed-stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="feed-stat"><span>RECORDS</span><strong>🏅 '+records+'</strong></div></div><div class="feed-exercises">'+visible+(extra?'<div class="feed-extra hidden">'+extra+'</div>':'')+'</div>'+(extra?'<button type="button" class="feed-expand" data-feed-toggle>See '+(exercises.length-3)+' more exercises</button>':'')+'</article>';
+  return '<article class="card workout-feed-card"><div class="feed-profile-row"><div class="feed-avatar">'+avatar+'</div><div class="feed-profile-copy"><strong>'+esc(displayName)+'</strong>'+flexMarkup+'</div><div class="feed-menu-wrap"><button type="button" class="feed-more" data-feed-menu aria-label="Workout options" aria-expanded="false">•••</button><div class="feed-menu hidden"><button type="button" data-feed-copy="'"+esc(String(session.id))+"'">Copy workout</button><button type="button" data-feed-share="'"+esc(String(session.id))+"'">Share workout</button><button type="button" class="feed-edit" data-feed-edit="'+esc(String(session.id))+'">Edit workout</button><button type="button" class="feed-delete" data-feed-delete="'+esc(String(session.id))+'">Delete workout</button></div></div></div><div class="feed-title-row"><h3 class="feed-title">'+esc(session.name||'Workout')+'</h3><span class="feed-date-time">'+esc(dateText)+(validDate?' · '+esc(date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})):'')+'</span></div><div class="feed-meta"><div class="feed-stat"><span>TIME</span><strong>'+durationText+'</strong></div><div class="feed-stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="feed-stat"><span>RECORDS</span><strong>🏅 '+records+'</strong></div></div><div class="feed-exercises">'+visible+(extra?'<div class="feed-extra hidden">'+extra+'</div>':'')+'</div>'+(extra?'<button type="button" class="feed-expand" data-feed-toggle>See '+(exercises.length-3)+' more exercises</button>':'')+'</article>';
  }).join('');
 }
-$('workoutFeed').addEventListener('click',e=>{
+$('workoutFeed').addEventListener('click',async e=>{
  const menuButton=e.target.closest('[data-feed-menu]');
  if(menuButton){const wrap=menuButton.closest('.feed-menu-wrap'),menu=wrap.querySelector('.feed-menu'),open=!menu.classList.contains('hidden');$('workoutFeed').querySelectorAll('.feed-menu').forEach(x=>x.classList.add('hidden'));$('workoutFeed').querySelectorAll('[data-feed-menu]').forEach(x=>x.setAttribute('aria-expanded','false'));if(!open){menu.classList.remove('hidden');menuButton.setAttribute('aria-expanded','true');}return;}
  const editButton=e.target.closest('[data-feed-edit]');
  if(editButton){const id=editButton.dataset.feedEdit,session=db.sessions.find(s=>String(s.id)===id);if(!session)return;if(sessionActive&&!confirm('You have an active workout. Replace it with this edit session?'))return;if(sessionActive)resetSession();editingSessionId=session.id;editingSessionMeta={date:session.date,duration:Math.max(0,+session.duration||0)};work=(session.exercises||[]).map(ex=>({name:ex.name||'Exercise',rest:120,notes:ex.notes||'',sets:(ex.sets||[]).map(set=>({weight:String(set.weight??''),reps:String(set.reps??''),rpe:set.rpe==null?'':String(set.rpe),type:set.type||'Working Set',done:true}))}));sessionActive=true;sessionStarted=null;clearInterval(sessionTicker);$('activeWorkoutName').textContent=session.name||'Workout';$('sessionClock').textContent='00:00:00';beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return;}
+ const copyButton=e.target.closest('[data-feed-copy]');
+ if(copyButton){
+  const session=db.sessions.find(item=>String(item.id)===copyButton.dataset.feedCopy);if(!session)return;
+  if(sessionActive&&!confirm('You have an active workout. Replace it with this copied workout?'))return;
+  if(sessionActive)resetSession();
+  editingSessionId=null;editingSessionMeta=null;activeCycle=null;
+  work=(session.exercises||[]).map(ex=>({name:ex.name||'Exercise',rest:120,notes:ex.notes||'',sets:(ex.sets||[]).map(set=>({weight:String(set.weight??''),reps:String(set.reps??''),rpe:set.rpe==null?'':String(set.rpe),type:set.type||'Working Set',done:false}))}));
+  sessionActive=true;sessionStarted=Date.now();clearInterval(sessionTicker);
+  $('activeWorkoutName').textContent=session.name||'Workout';$('sessionClock').textContent='00:00:00';
+  beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return;
+ }
+ const shareButton=e.target.closest('[data-feed-share]');
+ if(shareButton){
+  const session=db.sessions.find(item=>String(item.id)===shareButton.dataset.feedShare);if(!session)return;
+  const date=new Date(session.date),dateText=Number.isNaN(date.getTime())?'Date unavailable':date.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  const duration=Math.max(0,+session.duration||0),hours=Math.floor(duration/3600),minutes=Math.floor((duration%3600)/60);
+  const durationText=hours?hours+'h '+minutes+'m':minutes+'m';
+  const exercises=(session.exercises||[]).map((ex,index)=>{
+   const sets=(ex.sets||[]).map(set=>{
+    const parts=[];if(set.weight!==''&&set.weight!=null)parts.push(kg(+set.weight));if(set.reps!==''&&set.reps!=null)parts.push(String(set.reps)+' reps');if(set.rpe!==''&&set.rpe!=null)parts.push('RPE '+set.rpe);return parts.join(' × ');
+   }).filter(Boolean);
+   return (index+1)+'. '+(ex.name||'Exercise')+(sets.length?'\n   '+sets.join('  |  '):'\n   '+(ex.sets||[]).length+' sets');
+  });
+  const volume=(+session.volume|| (session.exercises||[]).flatMap(ex=>ex.sets||[]).reduce((sum,set)=>sum+(+set.weight||0)*(+set.reps||0),0));
+  const overview=['SPARTANX WORKOUT',session.name||'Workout',dateText,'Duration: '+durationText,'Volume: '+kg(volume),'','EXERCISES',...exercises].join('\n');
+  try{
+   if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(overview);
+   else throw new Error('Clipboard unavailable');
+   alert('Workout overview copied. You can now paste and share it.');
+  }catch(err){
+   const field=document.createElement('textarea');field.value=overview;field.setAttribute('readonly','');field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();
+   const copied=document.execCommand('copy');field.remove();
+   if(copied)alert('Workout overview copied. You can now paste and share it.');
+   else{window.prompt('Copy your workout overview:',overview);}
+  }
+  return;
+ }
  const deleteButton=e.target.closest('[data-feed-delete]');
  if(deleteButton){const id=deleteButton.dataset.feedDelete,index=db.sessions.findIndex(s=>String(s.id)===id);if(index<0){renderWorkoutFeed();return;}const session=db.sessions[index],name=session.name||'Workout';if(!confirm('Delete "'+name+'" permanently? All workout data, including its exercise history and contribution to your stats, will be removed.'))return;db.sessions.splice(index,1);persist();stats();renderTrainingStats();return;}
  const button=e.target.closest('[data-feed-toggle]');if(!button){if(!e.target.closest('.feed-menu-wrap'))$('workoutFeed').querySelectorAll('.feed-menu').forEach(x=>x.classList.add('hidden'));return;}const extra=button.parentElement.querySelector('.feed-extra');if(!extra)return;const expanded=!extra.classList.contains('hidden');extra.classList.toggle('hidden',expanded);button.textContent=expanded?'See '+extra.children.length+' more exercises':'Show fewer exercises';
@@ -615,5 +652,5 @@ $('workoutCalendarOverlay').addEventListener('click',e=>{if(e.target===$('workou
 $('calendarPrev').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderWorkoutCalendar()};
 $('calendarNext').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderWorkoutCalendar()};
 $('workoutCalendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-calendar-date]');if(b){selectedCalendarDate=b.dataset.calendarDate;renderWorkoutCalendar()}});
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=94',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=sessionActive?'activeWorkout':(validScreens.has(hashScreen)?hashScreen:'home');switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=95',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=sessionActive?'activeWorkout':(validScreens.has(hashScreen)?hashScreen:'home');switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./tools/replica.js"></script></body></html>

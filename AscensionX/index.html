@@ -138,7 +138,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 
 <section id="cycle" class="screen">
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h1>Cycle overview</h1><button class="ghost small" onclick="showScreen('home')">← Back to home</button>
- <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button class="full" style="margin-top:12px" onclick="createCycle()">Create / reset selected cycle</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
+ <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
  <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
  <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
  <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
@@ -232,12 +232,27 @@ function saveProfile(){
  state.profile.tmPct=+$('profileTm').value;state.profile.rounding=+$('rounding').value;
  persist();toast('Profile saved');
 }
-function createCycle(){
+function saveCycleSelection(){
  const chosen=[...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].map(x=>x.value);
  if(!chosen.length){toast('Select at least one exercise');return}
- if(!confirm('Create a six-week cycle for '+chosen.join(', ')+ '? Existing workout history will be retained.'))return;
- state.cycle={created:new Date().toISOString(),currentWeek:1,exercises:chosen,weeks:Object.fromEntries(chosen.map(x=>[x,1]))};
- state.draft=null;persist();$('liftSelect').value=chosen[0];$('workWeek').value=1;toast('Exercise-specific cycle created');showScreen('workout');
+ const existing=!!state.cycle.created;
+ if(existing&&chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x))){toast('No changes to save');return}
+ const added=chosen.filter(x=>!selectedLifts().includes(x));
+ const removed=selectedLifts().filter(x=>!chosen.includes(x));
+ const prompt=existing
+  ? 'Update your active cycle?'+(added.length?'\n\nNew exercises start at Week 1.':'')+(removed.length?'\n\nRemoved exercises leave the active cycle, but their workout history will be kept.':'')
+  : 'Create a six-week cycle for '+chosen.join(', ')+'?';
+ if(!confirm(prompt))return;
+ const weeks={...(state.cycle.weeks||{})};
+ chosen.forEach(x=>{if(!weeks[x])weeks[x]=1});
+ state.cycle={...state.cycle,created:state.cycle.created||new Date().toISOString(),currentWeek:1,exercises:chosen,weeks};
+ if(state.draft&&!chosen.includes(state.draft.lift))state.draft=null;
+ const current=$('liftSelect').value;
+ const next=chosen.includes(current)?current:chosen[0];
+ persist();
+ $('liftSelect').value=next;$('workWeek').value=currentWeekFor(next);
+ renderWorkout();renderCycle();renderDashboard();renderProfile();
+ toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
 function showScreen(id,addHistory=true){
  const target=$(id);if(!target)return;
@@ -319,6 +334,7 @@ function renderCycle(){
  const selected=selectedLifts();
  $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" style="display:block">Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" ${selected.includes(l)?'checked':''}></label>`).join('');
  $('cycleBuilderStatus').textContent=state.cycle.created?'Active: '+selected.map(l=>l+' (Week '+currentWeekFor(l)+')').join(' · '):'No active cycle. Select one or more exercises, then create your cycle.';
+ $('saveCycleSelectionBtn').textContent=state.cycle.created?'Save cycle changes':'Create six-week cycle';
  $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');
  renderCycleLoads();
 }

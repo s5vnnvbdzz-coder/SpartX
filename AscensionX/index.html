@@ -157,19 +157,6 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 
 
 
-<section id="progress" class="screen">
- <div class="eyebrow">MEASURE THE CLIMB</div><h1>Progress</h1>
- <div class="grid">
-  <div class="stat"><span>Total volume</span><strong id="totalVolume">0 kg</strong></div>
-  <div class="stat"><span>Sets logged</span><strong id="totalSets">0</strong></div>
-  <div class="stat"><span>Best logged weight</span><strong id="bestWeight">—</strong></div>
-  <div class="stat"><span>Estimated 1RM</span><strong id="bestEstimate">—</strong></div>
- </div>
- <div class="card"><h2>Estimated strength trend</h2><div class="tiny">Epley estimates from logged top sets. Use as a trend indicator, not a tested maximum.</div><div id="trendGraph" class="barwrap"></div><p id="trendCaption" class="tiny" style="margin-top:28px">Log your first workout to build your trend.</p></div>
- <div class="card"><h2>Training history</h2><div id="historyList" class="tiny">No sessions recorded yet.</div></div>
- <div class="card"><h2>End-of-cycle review</h2><div id="cycleReview" class="tiny">Complete your training sessions to receive a progression recommendation.</div></div>
-</section>
-
 <section id="metrics" class="screen">
  <div class="row between"><div><div class="eyebrow">TRACK THE DETAILS</div><h1>Metrics</h1></div><button class="secondary small" onclick="exitMetrics()">← Back to profile</button></div>
  <p class="tiny muted">Record bodyweight and measurements over time. Entries are saved on this device alongside your training profile and workout history.</p>
@@ -187,6 +174,20 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 
 <section id="profile" class="screen">
  <div class="eyebrow">YOUR TRAINING PROFILE</div><h1>Profile & setup</h1>
+ <div id="profileProgress">
+ <div class="eyebrow">MEASURE THE CLIMB</div><h2>Training Progress</h2>
+ <div class="grid">
+  <div class="stat"><span>Total volume</span><strong id="totalVolume">0 kg</strong></div>
+  <div class="stat"><span>Sets logged</span><strong id="totalSets">0</strong></div>
+  <div class="stat"><span>Best logged weight</span><strong id="bestWeight">—</strong></div>
+  <div class="stat"><span>Estimated 1RM</span><strong id="bestEstimate">—</strong></div>
+ </div>
+ <div class="card"><h2>Estimated strength trend</h2><div class="tiny">Epley estimates from logged top sets. Use as a trend indicator, not a tested maximum.</div><div id="trendGraph" class="barwrap"></div><p id="trendCaption" class="tiny" style="margin-top:28px">Log your first workout to build your trend.</p></div>
+ <div class="card"><h2>Training history</h2><div id="historyList" class="tiny">No sessions recorded yet.</div></div>
+ <div class="card"><h2>End-of-cycle review</h2><div id="cycleReview" class="tiny">Complete your training sessions to receive a progression recommendation.</div></div>
+</div>
+
+
  <div class="card"><h2>Starting strength levels</h2><p class="tiny">Enter your current 1RM or a conservative estimated 1RM. The app calculates a Training Max from it. These values are editable at any time.</p>
   <div class="fields"><div class="field"><label>Back Squat 1RM (kg)</label><input id="maxSquat" type="number" step="0.5"></div><div class="field"><label>Bench Press 1RM (kg)</label><input id="maxBench" type="number" step="0.5"></div></div>
   <div class="fields"><div class="field"><label>Deadlift 1RM (kg)</label><input id="maxDeadlift" type="number" step="0.5"></div><div class="field"><label>Overhead Press 1RM (kg)</label><input id="maxOHP" type="number" step="0.5"></div></div>
@@ -200,7 +201,6 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 <nav aria-label="Main navigation">
  <button data-screen="home"><b>⌂</b>Home</button>
  <button class="active" data-screen="workout"><b>▣</b>Workout</button>
- <button data-screen="progress"><b>▥</b>Progress</button>
  <button data-screen="profile"><b>♙</b>Profile</button>
 </nav>
 <div id="toast" class="toast"></div>
@@ -276,11 +276,11 @@ function applyCycleSelection(chosen,existing){
  toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
 function toggleCycleDetails(){const panel=$('cycleDetails'),button=$('cycleExpandButton');if(!panel||!button)return;const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-expanded',String(opening));button.textContent=opening?'Hide full cycle':'View full cycle';if(opening)renderCycle()}
-function showScreen(id,addHistory=true){
+function showScreen(id,addHistory=true){if(id==='progress')id='profile';
  const target=$(id);if(!target)return;
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
- if(id==='cycle'){id='home';const panel=$('cycleDetails');if(panel){panel.hidden=false;$('cycleExpandButton').textContent='Hide full cycle';$('cycleExpandButton').setAttribute('aria-expanded','true')}renderCycle()}if(id==='workout')renderWorkout();if(id==='progress')renderProgress();if(id==='metrics')renderMetrics();
+ if(id==='cycle'){id='home';const panel=$('cycleDetails');if(panel){panel.hidden=false;$('cycleExpandButton').textContent='Hide full cycle';$('cycleExpandButton').setAttribute('aria-expanded','true')}renderCycle()}if(id==='workout')renderWorkout();if(id==='profile')renderProgress();if(id==='metrics')renderMetrics();
  if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
  // Release focus from the screen-switching control and reset the document scroll reliably on iOS Safari/PWA.
  if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();

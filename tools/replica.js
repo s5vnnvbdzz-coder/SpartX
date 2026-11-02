@@ -11,7 +11,18 @@ plannerFrame.addEventListener('load',syncPlannerTheme);
 function closePlanner(){plannerOverlay.classList.remove('open');plannerOverlay.setAttribute('aria-hidden','true');document.body.style.overflow='';}
 $('openCyclePlanner').addEventListener('click',()=>{if(plannerFrame.getAttribute('src')==='about:blank'){let plannerTheme='dark';try{plannerTheme=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}').theme||'dark';}catch(e){}plannerFrame.src='./tools/531-cycle.html?embedded=1&theme='+encodeURIComponent(plannerTheme);}syncPlannerTheme();plannerOverlay.classList.add('open');plannerOverlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';});
 
-window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:closeCyclePlanner')closePlanner();});
+window.addEventListener('message',e=>{
+ if(e.origin!==location.origin)return;
+ if(e.data?.type==='spartx:closeCyclePlanner')closePlanner();
+ if(e.data?.type==='spartx:cycleSaved'){
+  closePlanner();
+  document.documentElement.style.overflowY='auto';
+  document.body.style.overflow='';
+  document.body.style.overflowY='auto';
+  document.querySelector('#trackerNav [data-screen="home"]')?.click();
+  requestAnimationFrame(()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);});
+ }
+});
 
  
 // Every Training Tools card can be minimised independently. Remember each choice on this device.

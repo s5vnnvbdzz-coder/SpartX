@@ -89,6 +89,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 .set-control .rpe-value{display:flex;align-items:center;justify-content:center;gap:3px;border-color:transparent;background:transparent;box-shadow:none}.set-control .rpe-value svg{color:var(--red);flex-shrink:0}.rpe-popup-icon{text-align:center;color:var(--red);margin-top:18px}.rpe-popup-value{text-align:center;font-size:54px;font-weight:900;color:var(--red)}.rpe-popup-description{text-align:center;min-height:26px}.rpe-popup-scale input{width:100%;accent-color:var(--red)}.rpe-popup-ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 .settable .set-control .set-value{width:100%;min-width:0;min-height:38px;font-size:16px;font-weight:750}.settable .set-control .rpe-value{width:100%;min-height:38px}.settable th,.settable td{text-align:center}.settable td:first-child{text-align:left}.number-pad-keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.number-pad-keys button,.number-pad-actions button{min-height:52px;background:rgba(110,115,120,.12);border:1px solid #444954;border-radius:11px;color:var(--text);font-size:22px;font-weight:700}.number-pad-actions button{color:var(--red);font-size:26px}.number-pad-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(60px,1fr);gap:10px}.number-pad-actions{display:grid;grid-template-rows:repeat(3,1fr);gap:7px}.number-pad-display{text-align:center;color:var(--red);font-size:36px;font-weight:850;min-height:55px}.number-pad-heading{text-align:center;color:var(--muted);font-size:12px;letter-spacing:1.3px;font-weight:800;margin-top:12px}
 .settable .inline-set-label{font-size:11px;font-weight:750;color:var(--muted);white-space:nowrap}.settable .set-control{gap:4px}.settable .set-control .set-value{flex:1}.settable .rpe-inline{display:flex;align-items:center;gap:4px}.settable .rpe-inline .rpe-value{flex:1;min-width:0}.settable .inline-set-label{flex-shrink:0}@media(max-width:430px){.settable .inline-set-label{font-size:10px}.settable .set-control .set-value{font-size:14px;padding:6px 2px}}
+.cycle-details[hidden]{display:none!important}.cycle-details{margin-top:12px}.cycle-details>.card{margin-top:12px}
 </style>
 </head>
 <body>
@@ -120,10 +121,17 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
   <button style="margin-top:15px" onclick="showScreen('profile')">Set up your lifts</button>
  </div>
  <div class="card">
-  <div class="row between"><div><h2 style="margin:0">Cycle progress</h2><div class="tiny" id="cycleProgressText">Create a cycle to begin.</div></div><span class="pill red" id="cycleProgressPct">0%</span></div><button class="secondary small" style="margin-top:10px" onclick="showScreen('cycle')">View full cycle</button>
+  <div class="row between"><div><h2 style="margin:0">Cycle progress</h2><div class="tiny" id="cycleProgressText">Create a cycle to begin.</div></div><span class="pill red" id="cycleProgressPct">0%</span></div><button class="secondary small" style="margin-top:10px" id="cycleExpandButton" aria-expanded="false" aria-controls="cycleDetails" onclick="toggleCycleDetails()">View full cycle</button>
   <div class="progress" style="margin-top:12px"><i id="cycleProgressBar" style="width:0%"></i></div>
   <div class="weekgrid" id="homeWeeks" style="margin-top:14px"></div>
  </div>
+ <div id="cycleDetails" class="cycle-details" hidden>
+ <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
+ <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
+ <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
+ <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
+ <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
+</div>
  <div class="card">
   <div class="row between"><h2 style="margin:0">Next session</h2><span class="pill">MAIN LIFTS</span></div>
   <div id="nextSession" class="tiny" style="margin-top:10px">Set up your training maxes to generate your first session.</div>
@@ -133,7 +141,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 </section>
 
 <section id="workout" class="screen active">
- <div class="eyebrow">EXECUTE THE PLAN</div><div class="row between"><h1>Workout</h1><button class="ghost small" onclick="showScreen('home')">Dashboard ↗</button></div><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
+ <div class="eyebrow">EXECUTE THE PLAN</div><h1>Workout</h1><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
  <div class="card">
   <div class="fields">
    <div class="field"><label>Lift</label><select id="liftSelect" onchange="syncWorkoutLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
@@ -146,13 +154,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 </section>
 <div id="restTimerBar" class="rest-timer" aria-live="off"><span>REST <strong id="restTimerValue">03:00</strong></span><div class="rest-timer-actions"><button class="ghost small" onclick="adjustRestTimer(-15)">−15s</button><button class="ghost small" onclick="adjustRestTimer(15)">+15s</button><button class="ghost small" onclick="stopRestTimer()">✕</button></div></div>
 
-<section id="cycle" class="screen">
- <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h1>Cycle overview</h1><button class="ghost small" onclick="showScreen('home')">← Back to home</button>
- <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
- <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
- <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
- <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
-</section>
+
 
 <section id="progress" class="screen">
  <div class="eyebrow">MEASURE THE CLIMB</div><h1>Progress</h1>
@@ -198,7 +200,6 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
  <button data-screen="home"><b>⌂</b>Home</button>
  <button class="active" data-screen="workout"><b>▣</b>Workout</button>
  <button data-screen="progress"><b>▥</b>Progress</button>
- <button data-screen="cycle"><b>▦</b>Cycle</button>
  <button data-screen="profile"><b>♙</b>Profile</button>
 </nav>
 <div id="toast" class="toast"></div>
@@ -273,11 +274,12 @@ function applyCycleSelection(chosen,existing){
  renderWorkout();renderCycle();renderDashboard();renderProfile();
  toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
+function toggleCycleDetails(){const panel=$('cycleDetails'),button=$('cycleExpandButton');if(!panel||!button)return;const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-expanded',String(opening));button.textContent=opening?'Hide full cycle':'View full cycle';if(opening)renderCycle()}
 function showScreen(id,addHistory=true){
  const target=$(id);if(!target)return;
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
- if(id==='workout')renderWorkout();if(id==='cycle')renderCycle();if(id==='progress')renderProgress();if(id==='metrics')renderMetrics();
+ if(id==='cycle'){id='home';const panel=$('cycleDetails');if(panel){panel.hidden=false;$('cycleExpandButton').textContent='Hide full cycle';$('cycleExpandButton').setAttribute('aria-expanded','true')}renderCycle()}if(id==='workout')renderWorkout();if(id==='progress')renderProgress();if(id==='metrics')renderMetrics();
  if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
  // Release focus from the screen-switching control and reset the document scroll reliably on iOS Safari/PWA.
  if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();

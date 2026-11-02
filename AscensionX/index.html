@@ -102,6 +102,21 @@ body[data-theme="light"]{--bg:#e9ebef;--panel:#fff;--panel2:#e2e6ed;--panel3:#d5
 body[data-theme="light"] input,body[data-theme="light"] select{background:#f4f5f7;color:var(--text)}
 .theme-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.theme-choices button{font-size:12px;padding:10px 5px}.theme-choices button.selected{outline:2px solid var(--red2);outline-offset:1px}
 .rank-progress{height:9px;border-radius:20px;background:var(--panel2);overflow:hidden;margin:12px 0 8px}.rank-progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--redDeep),var(--red2));transition:width .25s}.rank-row{display:flex;justify-content:space-between;align-items:center;gap:12px}.rank-row strong{font-size:19px}.rank-tiers{font-size:11px;color:var(--muted);line-height:1.8}
+
+/* Restrained neutral buttons for alternative themes; Dark and Spartan Red unchanged */
+body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-theme="athena"]) button:not(.ghost):not(.danger):not(.iconbtn):not(.weektile){
+ background:rgba(31,34,41,.72);color:#f2f2f4;border:1px solid rgba(164,169,181,.20);box-shadow:none;
+}
+body[data-theme="light"] button:not(.ghost):not(.danger):not(.iconbtn):not(.weektile){
+ background:rgba(40,45,54,.88);color:#fff;border-color:rgba(30,35,44,.20);
+}
+body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-theme="athena"]) button.secondary{
+ background:rgba(82,88,100,.10);color:var(--text);border:1px solid var(--line);
+}
+body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-theme="athena"]) button.selected,
+body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-theme="athena"]) .unit-choice button.active{
+ border-color:var(--red2);box-shadow:inset 0 0 0 1px var(--red2);
+}
 </style>
 </head>
 <body>

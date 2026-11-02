@@ -73,20 +73,20 @@ $('generate').addEventListener('click',()=>{
   const items=readSaved(),idx=items.findIndex(x=>x.id===editingId);
   if(idx<0){alert('This saved cycle could not be found. It may have been deleted.');closeEditForm();return;}
   generated.id=editingId;generated.created=items[idx].created;generated.completedWeeks=(items[idx].completedWeeks||[]).filter(n=>n<=generated.weeks);items[idx]=JSON.parse(JSON.stringify(generated));
-  if(writeSaved(items)){renderSaved();if(parent!==window)window.dispatchEvent(new Event('spartx:cycleUpdated'));saveDraft();$('programmeCard').classList.remove('visible');closeEditForm();}
+  if(writeSaved(items)){renderSaved();window.dispatchEvent(new Event('spartx:cycleUpdated'));saveDraft();$('programmeCard').classList.remove('visible');closeEditForm();}
  }else{renderProgramme(generated);saveDraft();}
 });
 $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});
 $('saveCycle').addEventListener('click',()=>{
  if(!generated)return;
  const items=readSaved();const copy=JSON.parse(JSON.stringify(generated));copy.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);copy.created=new Date().toISOString();
- copy.completedWeeks=[];items.unshift(copy);if(writeSaved(items)){renderSaved();if(parent!==window){window.dispatchEvent(new Event('spartx:cycleUpdated'));window.dispatchEvent(new Event('spartx:cycleSaved'));}$('programmeCard').classList.remove('visible');$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';}
+ copy.completedWeeks=[];items.unshift(copy);if(writeSaved(items)){renderSaved();{window.dispatchEvent(new Event('spartx:cycleUpdated'));window.dispatchEvent(new Event('spartx:cycleSaved'));}$('programmeCard').classList.remove('visible');$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';}
 });
 $('savedList').addEventListener('click',e=>{
  const load=e.target.closest('[data-load]'),edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');
  if(load){const item=readSaved().find(x=>x.id===load.dataset.load);if(item){const detail=$('savedList').querySelector('[data-detail="'+item.id+'"]');const isOpen=detail.classList.contains('open');detail.innerHTML=isOpen?'':cycleDetailsHtml(item);detail.classList.toggle('open',!isOpen);load.textContent=isOpen?'OPEN':'CLOSE';}}
  if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=[4,8,12].includes(+item.weeks)?+item.weeks:4;$('bbb').checked=!!item.bbb;$('bbbPct').value=String([50,60,70].includes(+item.bbbPct)?item.bbbPct:60);syncBbbOptions();setLength();saveDraft();openEditForm();}}
- if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){closeEditForm();}renderSaved();if(parent!==window)window.dispatchEvent(new Event('spartx:cycleUpdated'));}}
+ if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){closeEditForm();}renderSaved();window.dispatchEvent(new Event('spartx:cycleUpdated'));}}
 });
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)renderSaved()});window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:cycleUpdated')renderSaved()});
 $('closeEdit').addEventListener('click',closeEditForm);$('cancelEdit').addEventListener('click',closeEditForm);$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditForm();});shadow.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditForm();});

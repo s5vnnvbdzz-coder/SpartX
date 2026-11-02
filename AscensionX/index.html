@@ -91,6 +91,17 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 .settable .inline-set-label{font-size:11px;font-weight:750;color:var(--muted);white-space:nowrap}.settable .set-control{gap:4px}.settable .set-control .set-value{flex:1}.settable .rpe-inline{display:flex;align-items:center;gap:4px}.settable .rpe-inline .rpe-value{flex:1;min-width:0}.settable .inline-set-label{flex-shrink:0}@media(max-width:430px){.settable .inline-set-label{font-size:10px}.settable .set-control .set-value{font-size:14px;padding:6px 2px}}
 .cycle-details[hidden]{display:none!important}.cycle-details{margin-top:12px}.cycle-details>.card{margin-top:12px}.cycle-details{padding-top:14px}
 #homeWeeks.weekgrid{display:block}.cycle-lift-row{display:block;width:100%;margin-top:14px}.cycle-lift-row .weekgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%}.cycle-lift-name{font-size:13px;font-weight:800;margin-bottom:7px}.cycle-lift-row .weektile{cursor:default;user-select:none;padding:10px 3px}.cycle-lift-row .weekgrid{gap:5px}.home-hero-actions{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap}.home-hero-actions button{flex:1;min-width:120px}
+
+/* AscensionX themes: aligned with SpartanX dark, red, bronze, gold and blue palettes */
+body[data-theme="dark"]{--bg:#08090c;--panel:#121419;--panel2:#1b1e25;--red:#ed1c2e;--red2:#ff3445;--redDeep:#7d101b}
+body[data-theme="spartan"]{--bg:#090a0d;--panel:#161318;--panel2:#211b21;--red:#ae1728;--red2:#c52a3a;--redDeep:#650e1c}
+body[data-theme="bronze"]{--bg:#0d0b0a;--panel:#1b1714;--panel2:#28201b;--red:#a56b3c;--red2:#c38b58;--redDeep:#684020}
+body[data-theme="gold"]{--bg:#0c0b09;--panel:#1a1813;--panel2:#27231a;--red:#b7953e;--red2:#d3b360;--redDeep:#6b501c}
+body[data-theme="athena"]{--bg:#090d13;--panel:#111b29;--panel2:#1b2a3b;--red:#386eab;--red2:#679bd5;--redDeep:#203e66}
+body[data-theme="light"]{--bg:#e9ebef;--panel:#fff;--panel2:#e2e6ed;--panel3:#d5dae3;--line:#c6cbd5;--text:#20242c;--muted:#5d6675;--red:#aa2435;--red2:#c43849;--redDeep:#781d2a}
+body[data-theme="light"] input,body[data-theme="light"] select{background:#f4f5f7;color:var(--text)}
+.theme-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.theme-choices button{font-size:12px;padding:10px 5px}.theme-choices button.selected{outline:2px solid var(--red2);outline-offset:1px}
+.rank-progress{height:9px;border-radius:20px;background:var(--panel2);overflow:hidden;margin:12px 0 8px}.rank-progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--redDeep),var(--red2));transition:width .25s}.rank-row{display:flex;justify-content:space-between;align-items:center;gap:12px}.rank-row strong{font-size:19px}.rank-tiers{font-size:11px;color:var(--muted);line-height:1.8}
 </style>
 </head>
 <body>
@@ -103,6 +114,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 <div id="settingsBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeSettings()">
  <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
   <div class="modal-head row between"><div><div class="eyebrow">ASCENSIONX</div><h2 id="settingsTitle" style="margin:4px 0 0">Settings</h2></div><button class="iconbtn" onclick="closeSettings()" aria-label="Close settings">×</button></div>
+  <div class="card"><h2>Appearance</h2><p class="tiny">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div></div>
   <div class="card"><h2>Weight units</h2><p class="tiny">Choose how weights are displayed and entered throughout the app. Your saved training data stays accurate when switching units.</p><div class="unit-choice"><button id="unitKg" class="secondary" onclick="setUnit('kg')">Kilograms (kg)</button><button id="unitLbs" class="secondary" onclick="setUnit('lbs')">Pounds (lbs)</button></div></div>
   <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · VERSION 1.0 · LOCAL STORAGE</div></div>
  </section>
@@ -184,6 +196,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 </div>
 
 
+ <div class="card"><div class="eyebrow">YOUR ASCENSION</div><div class="rank-row"><strong id="ascRankName">Mortal</strong><span class="pill red" id="ascRankXp">0 XP</span></div><div class="rank-progress"><i id="ascRankBar" style="width:0%"></i></div><div class="tiny" id="ascRankNext">3 XP to next rank</div><div class="rank-tiers">Mortal · Spartan · Hero · Demigod · Titan · Olympian</div><p class="tiny" style="margin:9px 0 0">Earn XP by completing and saving training sessions. Every 3 XP advances your rank.</p></div>
  <div class="card"><h2>Starting strength levels</h2><p class="tiny">Enter your current 1RM or a conservative estimated 1RM. The app calculates a Training Max from it. These values are editable at any time.</p>
   <div class="fields"><div class="field"><label>Back Squat 1RM (kg)</label><input id="maxSquat" type="number" step="0.5"></div><div class="field"><label>Bench Press 1RM (kg)</label><input id="maxBench" type="number" step="0.5"></div></div>
   <div class="fields"><div class="field"><label>Deadlift 1RM (kg)</label><input id="maxDeadlift" type="number" step="0.5"></div><div class="field"><label>Overhead Press 1RM (kg)</label><input id="maxOHP" type="number" step="0.5"></div></div>
@@ -216,7 +229,7 @@ const PLAN=[
  {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
 ];
 let state=load();
-function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1]))},logs:[],metrics:[],draft:null}}
+function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1]))},logs:[],metrics:[],draft:null,theme:'dark'}}
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!Array.isArray(x.cycle.exercises))x.cycle.exercises=LIFTS.slice();if(!x.cycle.weeks)x.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(x.cycle.currentWeek)||1]));if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!x.profile.unit)x.profile.unit='kg';if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];return x}}catch(e){}return defaults()}
 function persist(shouldRender=true){try{localStorage.setItem(KEY,JSON.stringify(state));if(shouldRender)renderAll();return true}catch(e){toast('Could not save data. Export a backup and free browser storage.');return false}}
 function toast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
@@ -225,10 +238,14 @@ function unit(){return state.profile.unit==='lbs'?'lbs':'kg'}
 function toDisplay(n){return Number(n)*(unit()==='lbs'?2.2046226218:1)}
 function fromDisplay(n){return Number(n)/(unit()==='lbs'?2.2046226218:1)}
 function kg(n){return Number(toDisplay(n)).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit()}
+const ASC_THEMES=[['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['bronze','Bronze'],['gold','Gold'],['athena','Athena Blue']];
+const ASC_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
+function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;document.body.dataset.theme=theme;persist(false);renderSettings()}
+function renderAscRank(){const xp=state.logs.length;const level=Math.min(ASC_RANKS.length-1,Math.floor(xp/3));$('ascRankName').textContent=ASC_RANKS[level];$('ascRankXp').textContent=xp+' XP';$('ascRankBar').style.width=(level===ASC_RANKS.length-1?100:(xp%3)/3*100)+'%';$('ascRankNext').textContent=level===ASC_RANKS.length-1?'Highest rank achieved':(3-xp%3)+' XP to '+ASC_RANKS[level+1]}
 function openSettings(){$('settingsBackdrop').classList.add('open');renderSettings()}
 function closeSettings(){$('settingsBackdrop').classList.remove('open')}
 function setUnit(u){if(!['kg','lbs'].includes(u))return;state.profile.unit=u;persist(false);renderSettings();renderAll()}
-function renderSettings(){$('unitKg').classList.toggle('active',unit()==='kg');$('unitLbs').classList.toggle('active',unit()==='lbs');$('unitKg').classList.toggle('secondary',unit()!=='kg');$('unitLbs').classList.toggle('secondary',unit()!=='lbs')}
+function renderSettings(){$('themeChoices').innerHTML=ASC_THEMES.map(([id,name])=>'<button class="secondary '+(state.theme===id?'selected':'')+'" onclick="setAscTheme(\''+id+'\')">'+name+'</button>').join('');$('unitKg').classList.toggle('active',unit()==='kg');$('unitLbs').classList.toggle('active',unit()==='lbs');$('unitKg').classList.toggle('secondary',unit()!=='kg');$('unitLbs').classList.toggle('secondary',unit()!=='lbs')}
 function exitMetrics(){showScreen('profile')}
 function e1rm(w,r){return r>0?w*(1+r/30):0}
 function tm(lift){return roundTo((Number(state.profile.max[lift])||0)*state.profile.tmPct/100)}
@@ -410,7 +427,7 @@ function renderProgress(){
  const completed=state.logs.filter(l=>l.week===6&&selectedLifts().includes(l.lift)).length;
  $('cycleReview').innerHTML=state.logs.length?`<strong>${state.logs.length} sessions logged.</strong><br>${completed?'Week 6 sessions are being recorded. Review the full cycle before changing your TM.':'When the cycle is complete, review rep completion, RPE, technique and recovery. The initial rule is +2.5 kg upper body / +2.5–5 kg lower body if all targets were met comfortably; hold if effort overshot; reduce 2.5–5% after repeated missed work.'}`:'Complete your training sessions to receive a progression recommendation.';
 }
-function renderAll(){renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
+function renderAll(){document.body.dataset.theme=state.theme||'dark';renderAscRank();renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
 function metricValue(v,unit){return v===null||v===undefined||v===""?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:1})+unit}
 function saveMetrics(){
  const fields={weight:"metricWeight",fat:"metricFat",waist:"metricWaist",chest:"metricChest",arm:"metricArm",thigh:"metricThigh",calf:"metricCalf"};
@@ -439,6 +456,7 @@ function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'
 $('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(await e.target.files[0].text());if(!obj.profile||!obj.profile.max||!obj.cycle||!Array.isArray(obj.logs))throw Error();if(!obj.profile.max['Back Squat']||!obj.profile.max['Bench Press']||!obj.profile.max['Deadlift']||!obj.profile.max['Overhead Press'])throw Error();if(!('draft' in obj))obj.draft=null;state=obj;if(!Array.isArray(state.cycle.exercises))state.cycle.exercises=LIFTS.slice();if(!state.cycle.weeks)state.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(state.cycle.currentWeek)||1]));if(!persist())throw Error();toast('Backup imported')}catch(err){toast('Could not read that backup')}e.target.value=''});
 function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
 function init(){
+ document.body.dataset.theme=state.theme||'dark';
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});

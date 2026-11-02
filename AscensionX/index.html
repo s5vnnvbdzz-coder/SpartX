@@ -118,6 +118,14 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
  border-color:var(--red2);box-shadow:inset 0 0 0 1px var(--red2);
 }
 .cycle-info-button{width:28px;height:28px;min-width:28px;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(120,125,140,.13)!important;color:var(--text)!important;border:1px solid var(--line)!important;box-shadow:none!important;font-size:14px;font-weight:800;font-style:italic}.cycle-info-button:hover{border-color:var(--red2)!important}
+
+/* Independently collapsible Profile & Setup cards */
+#profile .profile-collapse-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+#profile .profile-collapse-head h2{margin:0}
+#profile .profile-collapse-toggle{flex:none;width:31px;height:31px;min-width:31px;padding:0;border-radius:9px;background:rgba(105,111,125,.10);border:1px solid var(--line);color:var(--text);box-shadow:none;font-size:19px;line-height:1}
+#profile .profile-collapse-body[hidden]{display:none!important}
+#profile .profile-collapsed{padding-bottom:13px}
+#profile .profile-collapsed .profile-collapse-head{margin-bottom:0}
 </style>
 </head>
 <body>
@@ -199,7 +207,7 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
 </section>
 
 <section id="profile" class="screen">
- <div class="eyebrow">YOUR TRAINING PROFILE</div><h1>Profile & setup</h1>
+ <div class="eyebrow">YOUR TRAINING PROFILE</div><h1>Profile & Setup</h1>
  <div id="profileProgress">
  <div class="eyebrow">MEASURE THE CLIMB</div><h2>Training Progress</h2>
  <div class="grid">
@@ -322,6 +330,26 @@ function showScreen(id,addHistory=true){if(id==='progress')id='profile';
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 window.addEventListener('popstate',e=>showScreen(e.state?.screen||'workout',false));
+function setupProfileCollapse(){
+ const cards=[...document.querySelectorAll('#profile .card')];
+ cards.forEach((card,i)=>{
+  if(card.dataset.collapseReady)return;
+  card.dataset.collapseReady='true';
+  const heading=card.querySelector('h2');
+  const title=heading?.textContent.trim()|| (card.querySelector('.eyebrow')?.textContent.trim()==='YOUR ASCENSION'?'Your Ascension':'Profile card');
+  const body=document.createElement('div');body.className='profile-collapse-body';
+  while(card.firstChild)body.appendChild(card.firstChild);
+  const head=document.createElement('div');head.className='profile-collapse-head';
+  const label=document.createElement('h2');label.textContent=title;
+  const btn=document.createElement('button');btn.type='button';btn.className='profile-collapse-toggle';
+  btn.setAttribute('aria-label','Minimise '+title);
+  const key='ascensionx-profile-card-'+i;
+  let closed=false;try{closed=localStorage.getItem(key)==='closed'}catch(e){}
+  function update(){body.hidden=closed;card.classList.toggle('profile-collapsed',closed);btn.textContent=closed?'+':'−';btn.setAttribute('aria-expanded',String(!closed));btn.setAttribute('aria-label',(closed?'Expand ':'Minimise ')+title)}
+  btn.addEventListener('click',()=>{closed=!closed;update();try{localStorage.setItem(key,closed?'closed':'open')}catch(e){}});
+  head.append(label,btn);card.append(head,body);update();
+ });
+}
 function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max['Back Squat'])).toFixed(1);$('maxBench').value=Number(toDisplay(state.profile.max['Bench Press'])).toFixed(1);$('maxDeadlift').value=Number(toDisplay(state.profile.max['Deadlift'])).toFixed(1);$('maxOHP').value=Number(toDisplay(state.profile.max['Overhead Press'])).toFixed(1);$('profileTm').value=state.profile.tmPct;$('rounding').value=state.profile.rounding;document.querySelectorAll('#profile label').forEach(l=>{if(/1RM/.test(l.textContent))l.textContent=l.textContent.replace(/\(kg\)/,'('+unit()+')')});[...$('rounding').options].forEach(o=>o.textContent=Number(toDisplay(+o.value)).toLocaleString(undefined,{maximumFractionDigits:2})+' '+unit());}
 function renderDashboard(){
  $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -476,6 +504,7 @@ function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'
 $('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(await e.target.files[0].text());if(!obj.profile||!obj.profile.max||!obj.cycle||!Array.isArray(obj.logs))throw Error();if(!obj.profile.max['Back Squat']||!obj.profile.max['Bench Press']||!obj.profile.max['Deadlift']||!obj.profile.max['Overhead Press'])throw Error();if(!('draft' in obj))obj.draft=null;state=obj;if(!Array.isArray(state.cycle.exercises))state.cycle.exercises=LIFTS.slice();if(!state.cycle.weeks)state.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(state.cycle.currentWeek)||1]));if(!persist())throw Error();toast('Backup imported')}catch(err){toast('Could not read that backup')}e.target.value=''});
 function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
 function init(){
+ setupProfileCollapse();
  document.body.dataset.theme=state.theme||'dark';
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');

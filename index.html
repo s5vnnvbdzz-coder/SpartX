@@ -276,6 +276,15 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}
 .sx-gamer-top{flex-wrap:wrap!important}
 @media(max-width:430px){.sx-gamer-card{padding:15px 118px 12px 9px!important;min-height:162px!important;margin-right:7px!important}.sx-gamer-emblem{right:-23px!important;top:-30px!important;width:140px!important;height:140px!important}.sx-gamer-emblem>img{width:140px!important;height:140px!important}.sx-gamer-avatar{width:59px!important;height:59px!important;left:40px!important;top:41px!important}.sx-gamer-card::after{width:154px!important;height:154px!important;right:-30px!important;top:-37px!important}.sx-gamer-line{display:block!important}.sx-gamer-line small{display:block!important}.sx-gamer-line span{display:block!important;text-align:left!important}}
 @media(prefers-reduced-motion:reduce){.sx-gamer-card::before,.sx-gamer-card::after{animation:none!important}}
+</style><style>
+/* Test revision: current actual rank, larger top-left emblem, no emblem-shaped halo. */
+.sx-gamer-card{position:relative!important;display:flex!important;align-items:center!important;min-height:185px!important;padding:17px 13px 15px 158px!important;margin:25px 2px 17px 15px!important;overflow:visible!important;isolation:isolate!important}
+.sx-gamer-emblem{position:absolute!important;left:-37px!important;right:auto!important;top:-35px!important;width:186px!important;height:186px!important;transform:none!important;z-index:3!important}
+.sx-gamer-emblem>img{position:absolute!important;inset:0!important;width:186px!important;height:186px!important;max-width:none!important;object-fit:contain!important;animation:none!important}
+.sx-gamer-avatar{position:absolute!important;left:55px!important;top:55px!important;width:76px!important;height:76px!important;z-index:4!important}
+.sx-gamer-card::after{content:none!important;display:none!important;animation:none!important}
+.sx-gamer-info{width:100%!important;min-width:0!important;flex:1!important}
+@media(max-width:430px){.sx-gamer-card{padding:16px 8px 12px 123px!important;min-height:169px!important;margin-left:10px!important}.sx-gamer-emblem{left:-33px!important;right:auto!important;top:-30px!important;width:156px!important;height:156px!important;transform:none!important}.sx-gamer-emblem>img{width:156px!important;height:156px!important}.sx-gamer-avatar{width:64px!important;height:64px!important;left:46px!important;top:46px!important}}
 </style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -334,7 +343,7 @@ queueMicrotask(()=>{const t=$('toggleProfileCards');if(t)t.checked=profileCardsE
 function profileCardsEnabled(){return localStorage.getItem(PROFILE_CARD_PREF)==='true'}
 function buildGamingProfileCard(profile,name,photo){
  const state=getWorkoutRank(),p=profile||{};
- const rank={...state.current,file:'olympian.svg'},flag=p.countryPublic===true?(p.country||p.countryOfOrigin||''):'';
+ const rank=state.current,flag=p.countryPublic===true?(p.country||p.countryOfOrigin||''):'';
  const lifts=['squat','bench','deadlift'].map(kind=>({kind,weight:getCompoundBest(kind)})).sort((a,b)=>b.weight-a.weight);
  const best=lifts[0],bestText=best.weight?best.kind.toUpperCase()+' · '+kg(best.weight):'No compound PR yet';
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';

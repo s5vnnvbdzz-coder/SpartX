@@ -292,8 +292,14 @@ const REST_OPTIONS=[...Array.from({length:8},(_,i)=>(i+1)*15),...Array.from({len
 function restDuration(){const value=Number(state.restSeconds)||180;return REST_OPTIONS.reduce((best,x)=>Math.abs(x-value)<Math.abs(best-value)?x:best,180)}
 function updateRestTime(value){state.restSeconds=REST_OPTIONS.includes(+value)?+value:restDuration();$('restSeconds').value=state.restSeconds;persist(false)}
 function renderRestOptions(){const select=$('restSeconds');if(!select)return;if(select.options.length!==REST_OPTIONS.length)select.innerHTML=REST_OPTIONS.map(x=>'<option value="'+x+'">'+Math.floor(x/60)+':'+String(x%60).padStart(2,'0')+'</option>').join('');select.value=restDuration()}
-function showRestTimer(){const remaining=Math.max(0,Math.ceil((restTimerDeadline-Date.now())/1000));const bar=$('restTimerBar');if(!remaining){stopRestTimer();return}bar.classList.add('visible');$('restTimerValue').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0')}
-function startRestTimer(){stopRestTimer();restTimerDeadline=Date.now()+restDuration()*1000;showRestTimer();restTimerInterval=setInterval(showRestTimer,250)}
+let restAudioContext=null;
+function unlockRestAudio(){try{const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(!AudioContextClass)return;if(!restAudioContext)restAudioContext=new AudioContextClass();if(restAudioContext.state==='suspended')restAudioContext.resume().catch(()=>{});}catch(e){}}
+function playSwordClash(){try{const ctx=restAudioContext;if(!ctx||ctx.state!=='running')return;const start=ctx.currentTime;const master=ctx.createGain();master.gain.value=0.42;master.connect(ctx.destination);
+ // Two closely spaced metallic strikes with inharmonic partials and a short ringing decay.
+ [0,0.16].forEach((delay,strike)=>{const t=start+delay;[720,1117,1793,2641,3877].forEach((freq,i)=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=i%2?'triangle':'sine';osc.frequency.setValueAtTime(freq*(strike?1.07:1),t);osc.frequency.exponentialRampToValueAtTime(freq*(strike?0.92:0.95),t+0.18);gain.gain.setValueAtTime(0.0001,t);gain.gain.exponentialRampToValueAtTime(0.19/(i+1),t+0.006);gain.gain.exponentialRampToValueAtTime(0.0001,t+0.65-i*0.075);osc.connect(gain);gain.connect(master);osc.start(t);osc.stop(t+0.75)})});
+ }catch(e){}}
+function showRestTimer(){const remaining=Math.max(0,Math.ceil((restTimerDeadline-Date.now())/1000));const bar=$('restTimerBar');if(!remaining){if(restTimerDeadline)playSwordClash();stopRestTimer();return}bar.classList.add('visible');$('restTimerValue').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0')}
+function startRestTimer(){unlockRestAudio();stopRestTimer();restTimerDeadline=Date.now()+restDuration()*1000;showRestTimer();restTimerInterval=setInterval(showRestTimer,250)}
 function stopRestTimer(){if(restTimerInterval)clearInterval(restTimerInterval);restTimerInterval=null;restTimerDeadline=0;$('restTimerBar')?.classList.remove('visible')}
 function adjustRestTimer(delta){if(!restTimerDeadline)return;restTimerDeadline=Math.max(Date.now()+1000,restTimerDeadline+delta*1000);showRestTimer()}
 function toggleCompletedSet(lift,week,count,index){saveWorkoutDraft(lift,week,count);if($('done'+index)?.checked)startRestTimer()}

@@ -108,7 +108,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
  </section>
 </div>
 <main>
-<section id="home" class="screen">
+<section id="home" class="screen active">
  <div class="eyebrow">TRAINING HQ</div><h1>Ascension dashboard</h1><p class="muted tiny" id="todayDate"></p>
  <div class="grid">
   <div class="stat"><span>Active cycle</span><strong id="dashCycle">—</strong></div>
@@ -137,7 +137,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
  <div class="card"><h2>Method principles</h2><div class="listitem"><span>01 · Progressive intensity</span><span class="tiny">↑ load</span></div><div class="listitem"><span>02 · Descending reps</span><span class="tiny">↓ reps</span></div><div class="listitem"><span>03 · Managed volume</span><span class="tiny">↓ sets</span></div><div class="listitem"><span>04 · Performance-led progression</span><span class="tiny">Earn it</span></div></div>
 </section>
 
-<section id="workout" class="screen active">
+<section id="workout" class="screen">
  <div class="eyebrow">EXECUTE THE PLAN</div><h1>Workout</h1><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
  <div class="card">
   <div class="fields">
@@ -195,8 +195,8 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 </section>
 </main>
 <nav aria-label="Main navigation">
- <button data-screen="home"><b>⌂</b>Home</button>
- <button class="active" data-screen="workout"><b>▣</b>Workout</button>
+ <button class="active" data-screen="home"><b>⌂</b>Home</button>
+ <button data-screen="workout"><b>▣</b>Workout</button>
  <button data-screen="profile"><b>♙</b>Profile</button>
 </nav>
 <div id="toast" class="toast"></div>
@@ -438,7 +438,7 @@ $('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(awa
 function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
 function init(){
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
- renderAll();showScreen('workout',false);history.replaceState({screen:'workout'},'',location.pathname+location.search+'#workout');
+ renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});

@@ -50,6 +50,18 @@ body.spartanx-olympian-female #settingsNav a.active{color:#f6d4ed!important;box-
 body.spartanx-olympian-female .eyebrow,body.spartanx-olympian-female .brand span{color:#e8b4dd!important}
 body.spartanx-olympian-female .back-button,body.spartanx-olympian-female button{background:#292033!important;border:1px solid #916995!important;color:#f6e9f4!important}
 body.spartanx-olympian-female select,body.spartanx-olympian-female input{background:#211829!important;border-color:#916995!important;color:#f7edf6!important}
+body.sx-halloween{--bg:#120b14;--panel:#261326;--panel2:#3a2031;--line:#72435b;--txt:#f6f5ee;--muted:#c0b9b3;--lime:#ff872b;background:linear-gradient(145deg,#120b14,#261326,#120b14);}
+body.sx-halloween .card,body.sx-halloween .week-card{background:linear-gradient(225deg,color-mix(in srgb,#ff872b 12%,#3a2031),#261326 55%,#120b14);border-color:#72435b}
+body.sx-halloween button{background:#3a2031;border:1px solid #72435b;color:#f6f5ee}
+body.sx-halloween .eyebrow,body.sx-halloween .result{color:#ff872b}
+body.sx-christmas{--bg:#091b19;--panel:#142d29;--panel2:#22423c;--line:#4c8174;--txt:#f6f5ee;--muted:#c0b9b3;--lime:#e8c66b;background:linear-gradient(145deg,#091b19,#142d29,#091b19);}
+body.sx-christmas .card,body.sx-christmas .week-card{background:linear-gradient(225deg,color-mix(in srgb,#e8c66b 12%,#22423c),#142d29 55%,#091b19);border-color:#4c8174}
+body.sx-christmas button{background:#22423c;border:1px solid #4c8174;color:#f6f5ee}
+body.sx-christmas .eyebrow,body.sx-christmas .result{color:#e8c66b}
+body.sx-monster{--bg:#090d09;--panel:#171e13;--panel2:#24311c;--line:#4b7134;--txt:#f6f5ee;--muted:#c0b9b3;--lime:#8fe51b;background:linear-gradient(145deg,#090d09,#171e13,#090d09);}
+body.sx-monster .card,body.sx-monster .week-card{background:linear-gradient(225deg,color-mix(in srgb,#8fe51b 12%,#24311c),#171e13 55%,#090d09);border-color:#4b7134}
+body.sx-monster button{background:#24311c;border:1px solid #4b7134;color:#f6f5ee}
+body.sx-monster .eyebrow,body.sx-monster .result{color:#8fe51b}
 </style>
 </head>
 <body>
@@ -61,7 +73,7 @@ body.spartanx-olympian-female select,body.spartanx-olympian-female input{backgro
 </main>
 <nav id="settingsNav" aria-label="Main navigation"><a href="../#home">⌂<span>HOME</span></a><a href="../#workout">▣<span>WORKOUT</span></a><a class="active" href="../#tools">⌗<span>TOOLS</span></a><a href="../#profile">◉<span>PROFILE</span></a></nav><footer>SpartanX TOOLS · TRAIN SMARTER</footer>
 <script>
-const prefKey='spartx_preferences_v1';let appPrefs={theme:'dark'};try{appPrefs={...appPrefs,...JSON.parse(localStorage.getItem(prefKey)||'{}')}}catch(e){}document.body.classList.toggle('spartanx-red',appPrefs.theme==='spartan-red');document.body.classList.toggle('spartanx-gold',appPrefs.theme==='spartan-gold');document.body.classList.toggle('spartanx-bronze',appPrefs.theme==='spartan-bronze');document.body.classList.toggle('spartanx-blue',appPrefs.theme==='spartan-blue');document.body.classList.toggle('spartanx-amethyst',appPrefs.theme==='spartan-amethyst');document.body.classList.toggle('spartanx-olympian',appPrefs.theme==='spartan-olympian');document.body.classList.toggle('spartanx-olympian-female',appPrefs.theme==='olympian-athena');document.body.classList.toggle('spartanx-amazonian',appPrefs.theme==='amazonian-crimson');document.body.classList.toggle('spartanx-aegis',appPrefs.theme==='athenas-aegis');if(new URLSearchParams(location.search).get("return")==="tracker"){document.body.classList.add("tracker-return");document.getElementById("settingsBack").href="../index.html#tools";}const defaults={warmup:true,diagram:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
+const prefKey='spartx_preferences_v1';let appPrefs={theme:'dark'};try{appPrefs={...appPrefs,...JSON.parse(localStorage.getItem(prefKey)||'{}')}}catch(e){}document.body.classList.toggle('spartanx-red',appPrefs.theme==='spartan-red');document.body.classList.toggle('spartanx-gold',appPrefs.theme==='spartan-gold');document.body.classList.toggle('spartanx-bronze',appPrefs.theme==='spartan-bronze');document.body.classList.toggle('spartanx-blue',appPrefs.theme==='spartan-blue');document.body.classList.toggle('spartanx-amethyst',appPrefs.theme==='spartan-amethyst');document.body.classList.toggle('spartanx-olympian',appPrefs.theme==='spartan-olympian');document.body.classList.toggle('spartanx-olympian-female',appPrefs.theme==='olympian-athena');document.body.classList.toggle('sx-halloween',appPrefs.theme==='sx-halloween');document.body.classList.toggle('sx-christmas',appPrefs.theme==='sx-christmas');document.body.classList.toggle('sx-monster',appPrefs.theme==='sx-monster');document.body.classList.toggle('spartanx-amazonian',appPrefs.theme==='amazonian-crimson');document.body.classList.toggle('spartanx-aegis',appPrefs.theme==='athenas-aegis');if(new URLSearchParams(location.search).get("return")==="tracker"){document.body.classList.add("tracker-return");document.getElementById("settingsBack").href="../index.html#tools";}const defaults={warmup:true,diagram:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
 let settings={...defaults,plates:{...defaults.plates}};
 try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...defaults.plates,...(saved.plates||{})}};}catch(e){}
 function save(){try{localStorage.setItem('spartxToolsSettings',JSON.stringify(settings));}catch(e){}}

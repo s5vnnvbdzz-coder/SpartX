@@ -341,10 +341,11 @@ const RPE_GAUGE="<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"no
 const RPE_DESCRIPTIONS={"6":"4 more reps in the tank","7":"3 more reps in the tank","8":"2 more reps in the tank","9":"1 more rep in the tank","10":"I've got nothing left","6.5":"3–4 more reps in the tank","7.5":"2–3 more reps in the tank","8.5":"1–2 more reps in the tank","9.5":"Unlikely, but maybe 1 more"};
 function updatePopupRpe(value){const n=Math.max(6,Math.min(10,Math.round(Number(value)*2)/2));$('popupRpeValue').textContent=n.toFixed(n%1?1:0);$('popupRpeDescription').textContent=RPE_DESCRIPTIONS[String(n)]||''}
 let activeSetPopup=null;
+let setPadFresh=false;
 function setFieldValue(index,type,value){const input=$('actual'+type+index);if(!input)return;const number=Number(value);if(type==='W')input.value=Math.max(0,Math.round(number*10)/10);else if(type==='R')input.value=Math.max(0,Math.min(100,Math.round(number)));else input.value=value===''?'':Math.max(1,Math.min(10,Math.round(number*2)/2));const label=$(type==='W'?'weightLabel'+index:type==='R'?'repsLabel'+index:'rpeLabel'+index);if(label)label.textContent=input.value||'—';saveCurrentSetDraft()}
 function saveCurrentSetDraft(){const lift=$('liftSelect').value,week=+$('workWeek').value;const count=document.querySelectorAll('[id^="done"]').length;if(count)saveWorkoutDraft(lift,week,count)}
 function stepSetValue(index,type,delta){const input=$('actual'+type+index);if(!input)return;setFieldValue(index,type,(Number(input.value)||0)+delta)}
-function openSetPopup(index,type){activeSetPopup={index,type};const value=$('actual'+type+index).value;$('setPopupTitle').textContent=type==='W'?'':type==='R'?'':'RPE';let content='';
+function openSetPopup(index,type){activeSetPopup={index,type};setPadFresh=type==='W'||type==='R';const value=$('actual'+type+index).value;$('setPopupTitle').textContent=type==='W'?'':type==='R'?'':'RPE';let content='';
  if(type==='W'||type==='R'){content='<div id="padDisplay" class="number-pad-display"></div><div class="number-pad-layout"><div class="number-pad-keys">'+['1','2','3','4','5','6','7','8','9','.','0','⌫'].map((key,n)=>'<button type="button" onclick="pressSetPadKey('+n+')">'+key+'</button>').join('')+'</div><div class="number-pad-actions"><button type="button" onclick="applySetPopup()" aria-label="Done">▦</button><button type="button" onclick="adjustSetPad(1)">+</button><button type="button" onclick="adjustSetPad(-1)">−</button></div></div><input id="popupSetValue" type="hidden" value="'+value+'">'}
 
 
@@ -352,8 +353,8 @@ function openSetPopup(index,type){activeSetPopup={index,type};const value=$('act
  $('setPopupContent').innerHTML=content;$('setPopupBackdrop').classList.add('open');if(type==='E')updatePopupRpe($('popupSetValue').value);else updateSetPadDisplay()}
 function updateSetPadDisplay(){const v=$('popupSetValue');if(!v)return;const shown=v.value||'0';if($('padDisplay'))$('padDisplay').textContent=shown;if(activeSetPopup){const label=$(activeSetPopup.type==='W'?'weightLabel'+activeSetPopup.index:'repsLabel'+activeSetPopup.index);if(label)label.textContent=shown}}
 function pressSetPadKey(index){const keys=['1','2','3','4','5','6','7','8','9','.','0','⌫'];pressSetPad(keys[index])}
-function pressSetPad(key){const el=$('popupSetValue');if(!el)return;let v=el.value;if(key==='⌫')v=v.slice(0,-1);else if(key==='.')v=v.includes('.')?v:v+'.';else v=(v==='0'?key:v+key);el.value=v;updateSetPadDisplay()}
-function adjustSetPad(direction){const el=$('popupSetValue');if(!el||!activeSetPopup)return;const step=activeSetPopup.type==='W'?2.5:1;el.value=String(Math.max(0,Math.round(((Number(el.value)||0)+direction*step)*10)/10));updateSetPadDisplay()}
+function pressSetPad(key){const el=$('popupSetValue');if(!el)return;let v=setPadFresh?'':el.value;setPadFresh=false;if(key==='⌫')v=v.slice(0,-1);else if(key==='.')v=v.includes('.')?v:v+'.';else v=(v==='0'?key:v+key);el.value=v;updateSetPadDisplay()}
+function adjustSetPad(direction){const el=$('popupSetValue');if(!el||!activeSetPopup)return;setPadFresh=false;const step=activeSetPopup.type==='W'?2.5:1;el.value=String(Math.max(0,Math.round(((Number(el.value)||0)+direction*step)*10)/10));updateSetPadDisplay()}
 function calculatePopupWeight(){const pct=Number($('popupPercent').value)||0;const load=roundTo(tm($('liftSelect').value)*pct/100);$('popupSetValue').value=Number(toDisplay(load).toFixed(1))}
 function changePopupNumber(delta){const el=$('popupSetValue');el.value=Math.max(0,Math.min(100,(Number(el.value)||0)+delta))}
 function selectPopupRpe(value){$('popupSetValue').value=value;document.querySelectorAll('.rpe-options button').forEach(b=>b.classList.toggle('selected',Number(b.textContent)===value))}

@@ -369,6 +369,211 @@ body.sx-monster .eyebrow,body.sx-monster .brand span{color:#8fe51b}
 body.sx-monster button:not(#trackerNav button){background:color-mix(in srgb,#24311c 82%,transparent)!important;border:1px solid #4b7134!important;color:#f6f5ee!important}
 body.sx-monster #trackerNav{background:#090d09;border-color:#4b7134}
 body.sx-monster #trackerNav button.active{color:#8fe51b!important}
+ /* =========================================================
+   MONSTER / HALLOWEEN / CHRISTMAS ENHANCEMENTS
+   Paste near the end of index.html before </style></head>
+   ========================================================= */
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes sxMonsterNavPulse{
+  0%,100%{
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb,var(--lime) 12%,transparent),
+      0 0 0 color-mix(in srgb,var(--lime) 0%,transparent);
+  }
+  50%{
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb,var(--lime) 22%,transparent),
+      0 0 10px color-mix(in srgb,var(--lime) 55%,transparent),
+      0 0 18px color-mix(in srgb,var(--lime) 30%,transparent);
+  }
+}
+
+@keyframes sxMonsterAvatarPulse{
+  0%,100%{
+    box-shadow:
+      0 0 0 3px #10140e,
+      0 0 0 5px color-mix(in srgb,var(--lime) 35%,#24311c),
+      0 0 10px color-mix(in srgb,var(--lime) 20%,transparent);
+  }
+  50%{
+    box-shadow:
+      0 0 0 3px #10140e,
+      0 0 0 5px color-mix(in srgb,var(--lime) 70%,#24311c),
+      0 0 20px color-mix(in srgb,var(--lime) 55%,transparent),
+      0 0 34px color-mix(in srgb,var(--lime) 24%,transparent);
+  }
+}
+
+@keyframes sxMonsterBorderChase{
+  from{ --sx-monster-angle: 0deg; }
+  to{ --sx-monster-angle: 360deg; }
+}
+
+/* =========================================================
+   MONSTER THEME
+   ========================================================= */
+
+/* Pulsing nav buttons */
+body.sx-monster #trackerNav button{
+  animation:sxMonsterNavPulse 2.1s ease-in-out infinite;
+}
+body.sx-monster #trackerNav button.active{
+  animation:sxMonsterNavPulse 1.55s ease-in-out infinite;
+  border-color:color-mix(in srgb,var(--lime) 85%,var(--line)) !important;
+}
+
+/* Main profile picture pulse */
+body.sx-monster #profileAvatar{
+  position:relative;
+  border:2px solid var(--lime) !important;
+  animation:sxMonsterAvatarPulse 2.3s ease-in-out infinite;
+}
+
+/* Chasing glow around profile card border */
+body.sx-monster .profile-identity{
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+  border:1px solid color-mix(in srgb,var(--lime) 42%,var(--line)) !important;
+  box-shadow:0 0 14px color-mix(in srgb,var(--lime) 10%,transparent);
+}
+body.sx-monster .profile-identity::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:18px;
+  padding:2px;
+  pointer-events:none;
+  background:
+    conic-gradient(
+      from var(--sx-monster-angle,0deg),
+      transparent 0deg,
+      transparent 220deg,
+      color-mix(in srgb,var(--lime) 18%,transparent) 260deg,
+      var(--lime) 300deg,
+      color-mix(in srgb,var(--lime) 38%,transparent) 325deg,
+      transparent 360deg
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  filter:
+    drop-shadow(0 0 7px color-mix(in srgb,var(--lime) 55%,transparent))
+    drop-shadow(0 0 13px color-mix(in srgb,var(--lime) 24%,transparent));
+  animation:sxMonsterBorderChase 3.2s linear infinite;
+}
+body.sx-monster .profile-identity::after{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius:20px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 50%, color-mix(in srgb,var(--lime) 14%,transparent), transparent 30%),
+    radial-gradient(circle at 85% 50%, color-mix(in srgb,var(--lime) 12%,transparent), transparent 28%);
+  filter:blur(8px);
+  z-index:-1;
+}
+
+/* Optional: if your gamer-card/profile card is used elsewhere */
+body.sx-monster .sx-gamer-card{
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+}
+body.sx-monster .sx-gamer-card::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:16px;
+  padding:2px;
+  pointer-events:none;
+  background:
+    conic-gradient(
+      from var(--sx-monster-angle,0deg),
+      transparent 0deg,
+      transparent 220deg,
+      color-mix(in srgb,var(--lime) 18%,transparent) 260deg,
+      var(--lime) 300deg,
+      color-mix(in srgb,var(--lime) 38%,transparent) 325deg,
+      transparent 360deg
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--lime) 48%,transparent));
+  animation:sxMonsterBorderChase 3.2s linear infinite;
+}
+
+/* =========================================================
+   HALLOWEEN THEME
+   subtle atmospheric background
+   ========================================================= */
+body.sx-halloween{
+  background:
+    radial-gradient(circle at 82% 16%, rgba(255,135,43,.18), transparent 14%),
+    radial-gradient(circle at 18% 22%, rgba(131,73,169,.14), transparent 18%),
+    radial-gradient(circle at 74% 78%, rgba(255,135,43,.08), transparent 22%),
+    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.34)),
+    linear-gradient(150deg,#120b14,#261326 52%,#120b14) !important;
+  background-attachment:fixed !important;
+}
+body.sx-halloween::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 86% 14%, rgba(255,157,59,.12), transparent 7%),
+    radial-gradient(circle at 87% 15%, rgba(255,157,59,.05), transparent 14%),
+    radial-gradient(circle at 10% 100%, rgba(0,0,0,.42), transparent 36%),
+    radial-gradient(circle at 30% 100%, rgba(0,0,0,.28), transparent 28%);
+  opacity:.9;
+}
+
+/* =========================================================
+   CHRISTMAS THEME
+   subtle festive background
+   ========================================================= */
+body.sx-christmas{
+  background:
+    radial-gradient(circle at 15% 12%, rgba(232,198,107,.10), transparent 16%),
+    radial-gradient(circle at 82% 20%, rgba(232,198,107,.09), transparent 14%),
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.05), transparent 22%),
+    linear-gradient(160deg,#091b19,#142d29 45%,#091b19) !important;
+  background-attachment:fixed !important;
+}
+body.sx-christmas::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 10%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+    radial-gradient(circle at 44% 22%, rgba(255,255,255,.08) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 61% 13%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 18%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+    radial-gradient(circle at 90% 8%, rgba(255,255,255,.08) 0 1px, transparent 2px);
+  opacity:.75;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce){
+  body.sx-monster #trackerNav button,
+  body.sx-monster #profileAvatar,
+  body.sx-monster .profile-identity::before,
+  body.sx-monster .sx-gamer-card::before{
+    animation:none !important;
+  }
+}
 </style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>

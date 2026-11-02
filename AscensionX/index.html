@@ -71,7 +71,7 @@ h1{font-size:29px;letter-spacing:-.9px;margin:6px 0 5px}h2{font-size:18px;margin
 .settable tr:last-child td{border:0}
 .settable .donecell{text-align:center}
 .check{width:20px;height:20px;accent-color:var(--red)}
-.full{width:100%}.small{padding:8px 10px;font-size:12px}
+.rest-timer{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:29;max-width:650px;margin:0 auto;display:none;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;background:#11151bdc;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid #777b8566;border-radius:15px;box-shadow:0 8px 30px #0008;font-size:12px;font-weight:800}.rest-timer.visible{display:flex}.rest-timer strong{display:block;font-size:22px;font-variant-numeric:tabular-nums}.rest-timer-actions{display:flex;align-items:center;gap:2px}.rest-timer-actions button{padding:7px 5px;font-size:11px}.full{width:100%}.small{padding:8px 10px;font-size:12px}
 .note{background:#29171b;border:1px solid #67303a;border-radius:12px;padding:12px;color:#f2c9cd;font-size:12px;line-height:1.5}
 .warning{background:#2b2418;border:1px solid #59482a;border-radius:12px;padding:12px;color:#f0d7a6;font-size:12px;line-height:1.5}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#111318f5;backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 7px calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:space-around}
@@ -131,10 +131,12 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
    <div class="field"><label>Lift</label><select id="liftSelect" onchange="syncWorkoutLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
    <div class="field"><label>Cycle week</label><select id="workWeek" onchange="renderWorkout()"><option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option><option value="4">Week 4</option><option value="5">Week 5</option><option value="6">Week 6 · Deload</option></select></div>
   </div>
-  <div id="workoutPrescription"></div>
+  <div class="field" style="margin:12px 0"><label for="restSeconds">Rest between sets (seconds)</label><input id="restSeconds" type="number" min="10" max="900" step="5" value="180" onchange="updateRestTime(this.value)"></div>
+ <div id="workoutPrescription"></div>
  </div>
  <div id="workoutLogger"></div>
 </section>
+<div id="restTimerBar" class="rest-timer" aria-live="off"><span>REST <strong id="restTimerValue">03:00</strong></span><div class="rest-timer-actions"><button class="ghost small" onclick="adjustRestTimer(-15)">−15s</button><button class="ghost small" onclick="adjustRestTimer(15)">+15s</button><button class="ghost small" onclick="stopRestTimer()">✕</button></div></div>
 
 <section id="cycle" class="screen">
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h1>Cycle overview</h1><button class="ghost small" onclick="showScreen('home')">← Back to home</button>
@@ -284,9 +286,18 @@ function renderDashboard(){
  $('homeHero').innerHTML=state.cycle.created?`<div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><button style="margin-top:15px" onclick="showScreen('workout')">Continue training</button>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
 }
 function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
+let restTimerDeadline=0,restTimerInterval=null;
+function restDuration(){return Math.max(10,Math.min(900,Number(state.restSeconds)||180))}
+function updateRestTime(value){state.restSeconds=Math.max(10,Math.min(900,Math.round(Number(value)||180)));$('restSeconds').value=state.restSeconds;persist(false)}
+function showRestTimer(){const remaining=Math.max(0,Math.ceil((restTimerDeadline-Date.now())/1000));const bar=$('restTimerBar');if(!remaining){stopRestTimer();return}bar.classList.add('visible');$('restTimerValue').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0')}
+function startRestTimer(){stopRestTimer();restTimerDeadline=Date.now()+restDuration()*1000;showRestTimer();restTimerInterval=setInterval(showRestTimer,250)}
+function stopRestTimer(){if(restTimerInterval)clearInterval(restTimerInterval);restTimerInterval=null;restTimerDeadline=0;$('restTimerBar')?.classList.remove('visible')}
+function adjustRestTimer(delta){if(!restTimerDeadline)return;restTimerDeadline=Math.max(Date.now()+1000,restTimerDeadline+delta*1000);showRestTimer()}
+function toggleCompletedSet(lift,week,count,index){saveWorkoutDraft(lift,week,count);if($('done'+index)?.checked)startRestTimer()}
 function syncWorkoutLift(){const lift=$('liftSelect').value;$('workWeek').value=currentWeekFor(lift);renderWorkout()}
 function renderWorkout(){
  if(!$('liftSelect'))return;
+ if($('restSeconds')&&document.activeElement!==$('restSeconds'))$('restSeconds').value=restDuration();
  const active=selectedLifts(),chosen=$('liftSelect').value;
  const allowed=active.length?active:LIFTS;
  // Preserve native select options while the user interacts with the iOS picker.
@@ -306,7 +317,7 @@ function renderLogger(lift,week,info){
  for(let i=0;i<mainSets;i++)rows.push({label:p.deload?'Deload '+(i+1):'Top set',weight:info.topLoad,reps:p.topReps});
  for(let i=0;i<p.backSets;i++)rows.push({label:'Back-off '+(i+1),weight:info.backLoad,reps:p.backReps});
  const draft=state.draft&&state.draft.lift===lift&&state.draft.week===week?state.draft:null;
- let table=rows.map((r,i)=>{const d=draft?.sets?.[i];return `<tr><td>${r.label}</td><td><input id="actualW${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" step="0.5" value="${d?.weight!==undefined?toDisplay(d.weight).toFixed(1):toDisplay(r.weight).toFixed(1)}"></td><td><input id="actualR${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" min="0" max="30" value="${d?.reps??r.reps}"></td><td><input id="actualE${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" min="1" max="10" step="0.5" placeholder="—" value="${d?.rpe??''}"></td><td class="donecell"><input class="check" id="done${i}" data-draft="1" onchange="saveWorkoutDraft('${lift}',${week},${rows.length})" type="checkbox" ${d? (d.done?'checked':''):'checked'}></td></tr>`}).join('');
+ let table=rows.map((r,i)=>{const d=draft?.sets?.[i];return `<tr><td>${r.label}</td><td><input id="actualW${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" step="0.5" value="${d?.weight!==undefined?toDisplay(d.weight).toFixed(1):toDisplay(r.weight).toFixed(1)}"></td><td><input id="actualR${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" min="0" max="30" value="${d?.reps??r.reps}"></td><td><input id="actualE${i}" data-draft="1" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" type="number" min="1" max="10" step="0.5" placeholder="—" value="${d?.rpe??''}"></td><td class="donecell"><input class="check" id="done${i}" data-draft="1" onchange="toggleCompletedSet('${lift}',${week},${rows.length},${i})" type="checkbox" ${d?.done?'checked':''}></td></tr>`}).join('');
  const html=`<div class="card"><div class="row between"><h2 style="margin:0">Log your sets</h2><span class="pill">${rows.length} WORKING SETS</span></div><p class="tiny" style="margin:8px 0 12px">Edit actual weight and reps if needed. Tick each completed set and record RPE where useful. Entries save automatically on this device.</p><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Set</th><th>${unit()}</th><th>Reps</th><th>RPE</th><th>✓</th></tr></thead><tbody>${table}</tbody></table></div><div class="field" style="margin-top:12px"><label>Session notes (optional)</label><textarea id="sessionNotes" oninput="saveWorkoutDraft('${lift}',${week},${rows.length})" rows="2" placeholder="Technique, readiness, bar speed, anything worth tracking…">${draft?.notes||''}</textarea></div><button class="full" style="margin-top:12px" onclick="saveWorkout('${lift}',${week},${rows.length})">Save workout</button></div>`;
  return html;
 }
@@ -321,7 +332,7 @@ function saveWorkout(lift,week,count){
  const avgRpe=sets.map(s=>s.rpe).filter(x=>x!==null);const mean=avgRpe.length?avgRpe.reduce((a,b)=>a+b,0)/avgRpe.length:null;
  const success=allDone&&(mean===null||mean<=info.p.rpe);
  const log={id:Date.now(),date:new Date().toISOString(),lift,week,sets,topWeight:top.weight,topReps:top.reps,volume:sets.reduce((a,s)=>a+s.weight*s.reps,0),notes:$('sessionNotes')?.value||'',success,avgRpe:mean,setsComplete:allDone};
- state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));state.logs.push(log);state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));state.draft=null;
+ stopRestTimer();state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));state.logs.push(log);state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));state.draft=null;
  const exerciseComplete=allDone&&selectedLifts().includes(lift);
  let progressionMessage='';
  if(exerciseComplete&&week===currentWeekFor(lift)){

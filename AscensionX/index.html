@@ -30,6 +30,7 @@ button.danger{background:#3a171d;color:#ff9aa3;border:1px solid #67232c;box-shad
 button:disabled{opacity:.4;cursor:not-allowed}
 input,select,textarea{background:#0d0f14;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:12px;width:100%;min-width:0;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--red)}
+@media(max-width:600px){input,select,textarea{font-size:16px}}
 label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
 .iconbtn{width:38px;height:38px;min-width:38px;padding:0;border-radius:12px;background:#191b22;border:1px solid var(--line);color:var(--text);font-size:19px;display:grid;place-items:center;box-shadow:none}
 header{position:sticky;top:0;z-index:20;padding:calc(14px + env(safe-area-inset-top)) 18px 13px;display:flex;align-items:center;justify-content:space-between;background:#0b0c10eF;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff0b}
@@ -67,10 +68,10 @@ h1{font-size:29px;letter-spacing:-.9px;margin:6px 0 5px}h2{font-size:18px;margin
 .settable{width:100%;border-collapse:collapse;font-size:12px}
 .settable th{color:var(--muted);font-size:10px;text-align:left;font-weight:700;padding:8px 5px;border-bottom:1px solid var(--line)}
 .settable td{padding:8px 4px;border-bottom:1px solid #292d366b;vertical-align:middle}
-.settable input{padding:9px 5px;text-align:center;font-size:13px}
+.settable input{padding:9px 5px;text-align:center;font-size:16px}
 .settable tr:last-child td{border:0}
 .settable .donecell{text-align:center}
-.check{width:20px;height:20px;accent-color:var(--red)}
+.check{width:22px;height:22px;min-width:22px;min-height:22px;padding:0;accent-color:var(--red);touch-action:manipulation}
 .rest-timer{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:29;max-width:650px;margin:0 auto;display:none;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;background:#11151bdc;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid #777b8566;border-radius:15px;box-shadow:0 8px 30px #0008;font-size:12px;font-weight:800}.rest-timer.visible{display:flex}.rest-timer strong{display:block;font-size:22px;font-variant-numeric:tabular-nums}.rest-timer-actions{display:flex;align-items:center;gap:2px}.rest-timer-actions button{padding:7px 5px;font-size:11px}.full{width:100%}.small{padding:8px 10px;font-size:12px}
 .note{background:#29171b;border:1px solid #67303a;border-radius:12px;padding:12px;color:#f2c9cd;font-size:12px;line-height:1.5}
 .warning{background:#2b2418;border:1px solid #59482a;border-radius:12px;padding:12px;color:#f0d7a6;font-size:12px;line-height:1.5}

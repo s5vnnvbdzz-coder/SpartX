@@ -344,6 +344,11 @@ body.spartanx-olympian-female button:not(#trackerNav button){background:#292033a
 body.spartanx-olympian-female #trackerNav button:not(.active){color:#cdb3d0!important}
 body.spartanx-olympian-female .set-type-display,body.spartanx-olympian-female .rest-label{color:#e8b4dd!important}
 @media(prefers-reduced-motion:reduce){body.spartanx-olympian-female .sx-gamer-card{animation:none!important}}
+/* Theme-aware side-to-side chasing glow above the fixed navigation */
+#trackerNav{isolation:isolate}
+#trackerNav::after{content:"";position:absolute;top:-2px;left:0;width:100%;height:3px;pointer-events:none;z-index:5;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--lime) 8%,transparent) 30%,var(--lime) 50%,color-mix(in srgb,var(--lime) 8%,transparent) 70%,transparent 100%);background-size:45% 100%;background-repeat:no-repeat;filter:drop-shadow(0 0 5px var(--lime)) drop-shadow(0 0 9px color-mix(in srgb,var(--lime) 55%,transparent));animation:sxNavChase 3.8s ease-in-out infinite alternate}
+@keyframes sxNavChase{from{background-position:-85% 0}to{background-position:185% 0}}
+@media(prefers-reduced-motion:reduce){#trackerNav::after{animation:none;background-position:50% 0}}
 </style></head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>

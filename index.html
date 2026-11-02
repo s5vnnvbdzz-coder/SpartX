@@ -498,10 +498,12 @@ const SPARTANX_PROGRESS_RANKS=[
 {name:'Titan',workouts:12,file:'titan.svg'},
 {name:'Olympian',workouts:15,file:'olympian.svg'}
 ];
+const SPARTANX_FEMALE_RANKS=[{name:'Initiate',workouts:0,file:'female-initiate.svg'},{name:'Huntress',workouts:3,file:'female-huntress.svg'},{name:'Amazon',workouts:6,file:'female-amazon.svg'},{name:'Valkyrie',workouts:9,file:'female-valkyrie.svg'},{name:'Athena',workouts:12,file:'female-athena.svg'},{name:'Olympian',workouts:15,file:'female-olympian.svg'}];
+function activeProgressRanks(){return db.profile?.standard==='female'?SPARTANX_FEMALE_RANKS:SPARTANX_PROGRESS_RANKS;}
 function getWorkoutRank(){
  const sessions=Array.isArray(db.sessions)?db.sessions:[];
  const completedWeeks=new Set(sessions.filter(x=>x.cycleId!=null&&x.cycleWeek!=null).map(x=>String(x.cycleId)+':'+String(x.cycleWeek)));
- const count=sessions.length+completedWeeks.size*3;let index=0;SPARTANX_PROGRESS_RANKS.forEach((r,i)=>{if(count>=r.workouts)index=i;});const current=SPARTANX_PROGRESS_RANKS[index],next=SPARTANX_PROGRESS_RANKS[index+1]||null;return{count,workouts:sessions.length,index,current,next,progress:next?Math.max(0,Math.min(1,(count-current.workouts)/(next.workouts-current.workouts))):1};}
+ const count=sessions.length+completedWeeks.size*3;let index=0;const ranks=activeProgressRanks();ranks.forEach((r,i)=>{if(count>=r.workouts)index=i;});const current=ranks[index],next=ranks[index+1]||null;return{count,workouts:sessions.length,index,current,next,progress:next?Math.max(0,Math.min(1,(count-current.workouts)/(next.workouts-current.workouts))):1};}
 function renderSpartanProgress(){
  const state=getWorkoutRank(),xp=state.count;
  if(!$('homeRankTiers'))return;
@@ -510,8 +512,8 @@ function renderSpartanProgress(){
  $('rankWorkoutCount').textContent=state.workouts+' completed '+(state.workouts===1?'workout':'workouts');
  $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankProgressFrom').textContent=state.current.name;
  $('rankProgressTo').textContent=state.next?'Next: '+state.next.name+' · '+(state.next.workouts-state.count)+' XP to go':'MAXIMUM RANK';
- $('homeRankTiers').innerHTML=SPARTANX_PROGRESS_RANKS.map((r,i)=>'<div class="rank-tier '+(i<=state.index?'earned':'')+(i===state.index?' current':'')+'"><img src="./ranks/'+r.file+'" alt=""><span>'+r.name+'</span></div>').join('');
- const badges=SPARTANX_PROGRESS_RANKS.map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.index}));
+ $('homeRankTiers').innerHTML=activeProgressRanks().map((r,i)=>'<div class="rank-tier '+(i<=state.index?'earned':'')+(i===state.index?' current':'')+'"><img src="./ranks/'+r.file+'" alt=""><span>'+r.name+'</span></div>').join('');
+ const badges=activeProgressRanks().map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.index}));
  badges.push({locked:true},{locked:true});
  const unlocked=badges.filter(b=>b.unlocked).length;$('badgeCount').textContent=unlocked+' / 8';
  $('profileBadgeGrid').innerHTML=badges.map(b=>{const locked=b.locked||!b.unlocked,selected=!locked&&getSelectedFlexBadge()?.name===b.name;return locked?'<div class="profile-badge locked" aria-label="'+(b.name||'Future')+' badge locked"><div class="badge-art"><svg class="badge-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><strong>'+(b.name||'Future badge')+'</strong><small>'+(b.locked?'Coming soon':'Rank not reached')+'</small></div>':'<button type="button" class="profile-badge unlocked '+(selected?'selected':'')+'" data-select-flex-badge="'+b.name+'" aria-pressed="'+selected+'"><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><strong>'+b.name+'</strong><small>'+(selected?'Displayed on feed':'Tap to display')+'</small></button>';}).join('');
@@ -522,12 +524,12 @@ const FLEX_BADGE_KEY='spartx_selected_flex_badge_v1';
 function getSelectedFlexBadge(){
  const state=getWorkoutRank();let selected='';
  try{selected=localStorage.getItem(FLEX_BADGE_KEY)||''}catch(e){}
- const eligible=SPARTANX_PROGRESS_RANKS.filter((r,i)=>i<=state.index);
+ const eligible=activeProgressRanks().filter((r,i)=>i<=state.index);
  return eligible.find(r=>r.name===selected)||eligible[eligible.length-1]||null;
 }
 $('profileBadgeGrid').addEventListener('click',e=>{
  const button=e.target.closest('[data-select-flex-badge]');if(!button)return;
- const state=getWorkoutRank(),rank=SPARTANX_PROGRESS_RANKS.findIndex(r=>r.name===button.dataset.selectFlexBadge);
+ const state=getWorkoutRank(),rank=activeProgressRanks().findIndex(r=>r.name===button.dataset.selectFlexBadge);
  if(rank<0||rank>state.index)return;
  try{localStorage.setItem(FLEX_BADGE_KEY,button.dataset.selectFlexBadge)}catch(e){}
  renderSpartanProgress();renderWorkoutFeed();
@@ -802,5 +804,5 @@ $('workoutCalendarOverlay').addEventListener('click',e=>{if(e.target===$('workou
 $('calendarPrev').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderWorkoutCalendar()};
 $('calendarNext').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderWorkoutCalendar()};
 $('workoutCalendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-calendar-date]');if(b){selectedCalendarDate=b.dataset.calendarDate;renderWorkoutCalendar()}});
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=125',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen='home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=126',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen='home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script></body></html>

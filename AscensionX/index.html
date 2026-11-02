@@ -21,7 +21,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:radial-gradient(ellipse at 50% -18%,#292b32 0,#111319 36%,var(--bg) 76%);background-attachment:fixed;color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+body{min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;margin:0;background:radial-gradient(ellipse at 50% -18%,#292b32 0,#111319 36%,var(--bg) 76%);background-attachment:fixed;color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
 button,input,select,textarea{font:inherit}
 button{border:0;border-radius:12px;padding:12px 15px;background:linear-gradient(135deg,var(--red2),#c81020);color:white;font-weight:850;cursor:pointer;box-shadow:0 5px 18px #ed1c2e22}
 button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line);box-shadow:none}
@@ -236,7 +236,11 @@ function showScreen(id,addHistory=true){
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
  if(id==='workout')renderWorkout();if(id==='cycle')renderCycle();if(id==='progress')renderProgress();if(id==='metrics')renderMetrics();
  if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
- window.scrollTo({top:0,behavior:'smooth'});
+ // Release focus from the screen-switching control and reset the document scroll reliably on iOS Safari/PWA.
+ if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();
+ document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';
+ document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);
+ requestAnimationFrame(()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0)});
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 window.addEventListener('popstate',e=>showScreen(e.state?.screen||'workout',false));

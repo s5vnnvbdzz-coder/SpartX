@@ -117,6 +117,7 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
 body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-theme="athena"]) .unit-choice button.active{
  border-color:var(--red2);box-shadow:inset 0 0 0 1px var(--red2);
 }
+.cycle-info-button{width:28px;height:28px;min-width:28px;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(120,125,140,.13)!important;color:var(--text)!important;border:1px solid var(--line)!important;box-shadow:none!important;font-size:14px;font-weight:800;font-style:italic}.cycle-info-button:hover{border-color:var(--red2)!important}
 </style>
 </head>
 <body>
@@ -126,9 +127,11 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
 </header>
 <div id="setPopupBackdrop" class="set-popup-backdrop" onclick="if(event.target===this)closeSetPopup()"><div class="set-popup" role="dialog" aria-modal="true" aria-labelledby="setPopupTitle"><div class="row between"><h2 id="setPopupTitle" style="margin:0">Set value</h2><button class="ghost" onclick="closeSetPopup()" aria-label="Close">✕</button></div><div id="setPopupContent"></div><div class="set-popup-actions"><button class="secondary" onclick="closeSetPopup()">Cancel</button><button onclick="applySetPopup()">Apply</button></div></div></div>
 <div id="cycleConfirmBackdrop" class="cycle-confirm-backdrop" role="presentation"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleConfirmTitle"><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleConfirmTitle" style="margin:9px 0">Start your cycle?</h2><p class="tiny" id="cycleConfirmSummary"></p><div class="cycle-confirm-actions"><button class="secondary" onclick="discardCycleConfirmation()">Discard</button><button onclick="confirmCycleStart()">Start</button></div></section></div>
+<div id="cycleReviewBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeCycleReview()"><section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="cycleReviewTitle"><div class="modal-head row between"><div><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleReviewTitle" style="margin:4px 0 0">End-of-cycle Review</h2></div><button class="iconbtn" onclick="closeCycleReview()" aria-label="Close review">×</button></div><div class="card"><div id="cycleReview" class="tiny"></div></div><button class="secondary full" onclick="closeCycleReview()">Exit</button></section></div>
 <div id="settingsBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeSettings()">
  <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
   <div class="modal-head row between"><div><div class="eyebrow">ASCENSIONX</div><h2 id="settingsTitle" style="margin:4px 0 0">Settings</h2></div><button class="iconbtn" onclick="closeSettings()" aria-label="Close settings">×</button></div>
+  <div class="card"><h2>Read Me</h2><p class="tiny">Review the six-week cycle and how to adjust your training loads.</p><button class="secondary full" onclick="openCycleReview()">End-of-cycle review</button></div>
   <div class="card"><h2>Appearance</h2><p class="tiny">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div></div>
   <div class="card"><h2>Weight units</h2><p class="tiny">Choose how weights are displayed and entered throughout the app. Your saved training data stays accurate when switching units.</p><div class="unit-choice"><button id="unitKg" class="secondary" onclick="setUnit('kg')">Kilograms (kg)</button><button id="unitLbs" class="secondary" onclick="setUnit('lbs')">Pounds (lbs)</button></div></div>
   <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · VERSION 1.0 · LOCAL STORAGE</div></div>
@@ -207,7 +210,6 @@ body:is([data-theme="light"],[data-theme="bronze"],[data-theme="gold"],[data-the
  </div>
  <div class="card"><h2>Estimated strength trend</h2><div class="tiny">Epley estimates from logged top sets. Use as a trend indicator, not a tested maximum.</div><div id="trendGraph" class="barwrap"></div><p id="trendCaption" class="tiny" style="margin-top:28px">Log your first workout to build your trend.</p></div>
  <div class="card"><h2>Training history</h2><div id="historyList" class="tiny">No sessions recorded yet.</div></div>
- <div class="card"><h2>End-of-cycle review</h2><div id="cycleReview" class="tiny">Complete your training sessions to receive a progression recommendation.</div></div>
 </div>
 
 
@@ -257,6 +259,8 @@ const ASC_THEMES=[['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['
 const ASC_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
 function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;document.body.dataset.theme=theme;persist(false);renderSettings()}
 function renderAscRank(){const xp=state.logs.length;const level=Math.min(ASC_RANKS.length-1,Math.floor(xp/3));$('ascRankName').textContent=ASC_RANKS[level];$('ascRankXp').textContent=xp+' XP';$('ascRankBar').style.width=(level===ASC_RANKS.length-1?100:(xp%3)/3*100)+'%';$('ascRankNext').textContent=level===ASC_RANKS.length-1?'Highest rank achieved':(3-xp%3)+' XP to '+ASC_RANKS[level+1]}
+function openCycleReview(){renderCycleReview();$('cycleReviewBackdrop').classList.add('open')}
+function closeCycleReview(){$('cycleReviewBackdrop').classList.remove('open')}
 function openSettings(){$('settingsBackdrop').classList.add('open');renderSettings()}
 function closeSettings(){$('settingsBackdrop').classList.remove('open')}
 function setUnit(u){if(!['kg','lbs'].includes(u))return;state.profile.unit=u;persist(false);renderSettings();renderAll()}
@@ -329,7 +333,7 @@ function renderDashboard(){
  $('cycleProgressText').textContent=state.cycle.created?active.map(l=>l+' · W'+currentWeekFor(l)).join('  |  '):'Create a cycle to begin.';
  $('cycleProgressPct').textContent=pct+'%';$('cycleProgressBar').style.width=pct+'%';
  $('homeWeeks').innerHTML=state.cycle.created?active.map(lift=>{const week=currentWeekFor(lift);const completed=state.logs.some(x=>x.lift===lift&&x.week===6&&x.setsComplete===true);return '<div class="cycle-lift-row"><div class="cycle-lift-name">'+lift+'</div><div class="weekgrid">'+PLAN.map(p=>{const done=p.week<week||(completed&&p.week===6);return '<div class="weektile '+(p.week===week?'current ':'')+(done?'done':'')+'" aria-label="'+lift+' week '+p.week+(p.week===week?' active':'')+'"><strong>W'+p.week+'</strong></div>'}).join('')+'</div></div>'}).join(''):'<p class="tiny">Create a cycle to see each lift\'s six-week progression.</p>';
- $('homeHero').innerHTML=state.cycle.created?`<div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="showScreen('workout')">Continue training</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
+ $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="showScreen('workout')">Continue training</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
 }
 function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
 let restTimerDeadline=0,restTimerInterval=null;
@@ -418,6 +422,7 @@ function saveWorkout(lift,week,count){
   else{progressionMessage=' · '+lift+' six-week cycle complete';}
  }
  persist();toast((success?'Workout saved · targets hit':'Workout saved · review performance')+progressionMessage);
+ if(week===6&&exerciseComplete)openCycleReview();
 }
 function editWorkout(lift,week){const old=state.logs.find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>!(x.lift===lift&&x.week===week));persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
 function renderCycle(){
@@ -439,9 +444,9 @@ function renderProgress(){
  $('trendGraph').innerHTML=vals.length?vals.slice(-12).map(l=>`<div class="bar" style="height:${Math.max(5,e1rm(l.topWeight,l.topReps)/max*100)}%"><small>${l.lift.split(' ')[0].slice(0,3)}</small></div>`).join(''):'';
  $('trendCaption').textContent=vals.length?'Recent top-set E1RM estimates. Compare like-for-like lifts and rep ranges.':'Log your first workout to build your trend.';
  $('historyList').innerHTML=vals.length?vals.slice().reverse().map(l=>`<div class="listitem"><div><strong>${l.lift} · Week ${l.week}</strong><div class="tiny">${new Date(l.date).toLocaleDateString()} · ${l.sets.length} sets · ${Math.round(toDisplay(l.volume)).toLocaleString()} ${unit()} volume</div></div><span class="pill ${l.success?'good':'warn'}">${l.success?'TARGET HIT':'REVIEW'}</span></div>`).join(''):'No sessions recorded yet.';
- const completed=state.logs.filter(l=>l.week===6&&selectedLifts().includes(l.lift)).length;
- $('cycleReview').innerHTML=state.logs.length?`<strong>${state.logs.length} sessions logged.</strong><br>${completed?'Week 6 sessions are being recorded. Review the full cycle before changing your TM.':'When the cycle is complete, review rep completion, RPE, technique and recovery. The initial rule is +2.5 kg upper body / +2.5–5 kg lower body if all targets were met comfortably; hold if effort overshot; reduce 2.5–5% after repeated missed work.'}`:'Complete your training sessions to receive a progression recommendation.';
+
 }
+function renderCycleReview(){const selected=selectedLifts(),finished=selected.filter(l=>state.logs.some(x=>x.lift===l&&x.week===6&&x.setsComplete===true));const completed=finished.length;const sessions=state.logs.length;$('cycleReview').innerHTML=`<strong>${sessions} sessions logged.</strong><p>${completed?completed+' of '+selected.length+' selected lifts have completed Week 6.':'Complete Week 6 for your selected exercises to finish the cycle.'}</p><p>Review rep completion, RPE, technique and recovery before adjusting your Training Max.</p><p><strong>Progress:</strong> Increase upper-body loads by approximately 2.5 kg and lower-body loads by 2.5–5 kg when all targets were achieved comfortably.</p><p><strong>Hold:</strong> Repeat the current load if effort was higher than planned or recovery was poor.</p><p><strong>Reduce:</strong> Consider lowering loads by 2.5–5% after repeated missed work or technique breakdown.</p>`}
 function renderAll(){document.body.dataset.theme=state.theme||'dark';renderAscRank();renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
 function metricValue(v,unit){return v===null||v===undefined||v===""?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:1})+unit}
 function saveMetrics(){

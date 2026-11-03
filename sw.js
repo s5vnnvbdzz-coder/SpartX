@@ -1,5 +1,5 @@
-const CACHE='spartanx-v159';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./tools/replica.js','./tools/settings.html','./tools/531-cycle.html','./tools/531-native.js','./assets/halloween-forest.svg','./assets/christmas-forest.svg','./ranks/mortal.svg','./ranks/spartan.svg','./ranks/hero.svg','./ranks/demigod.svg','./ranks/titan.svg','./ranks/olympian.svg'];
+const CACHE='spartanx-v161';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./tools/replica.js','./tools/settings.html','./tools/531-cycle.html','./tools/531-native.js','./assets/halloween-forest.svg','./assets/christmas-forest.svg','./ranks/mortal.svg','./ranks/spartan.svg','./ranks/hero.svg','./ranks/demigod.svg','./ranks/titan.svg','./ranks/olympian.svg','./ranks/flags/gb.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(
     caches.open(CACHE)

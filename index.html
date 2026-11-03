@@ -652,12 +652,17 @@ body.spartanx-light #profileCountryInput,body.spartanx-light #profileGenderInput
 .sx-gamer-emblem.sx-portrait-frame-slot>.sx-gamer-avatar{
  position:absolute!important;top:50%!important;left:50%!important;
  width:41%!important;height:41%!important;transform:translate(-50%,-50%)!important;
- z-index:2!important;border:2px solid color-mix(in srgb,var(--lime) 60%,#e6e3e6)!important;
+ z-index:5!important;border:2px solid color-mix(in srgb,var(--lime) 60%,#e6e3e6)!important;
  box-shadow:0 0 0 2px #14161a,0 0 9px color-mix(in srgb,var(--lime) 24%,transparent)!important;
  overflow:hidden!important;
 }
 .sx-gamer-emblem.sx-portrait-frame-slot .sx-gamer-avatar img{display:block;width:100%;height:100%;object-fit:cover}
 
+/* Country flags are images, not system-dependent two-letter flag emoji. */
+.sx-gamer-card .sx-rank-flag{display:inline-flex!important;align-items:center!important;justify-content:flex-end!important;min-width:34px!important;min-height:23px!important;line-height:1!important;}
+.sx-gamer-card .sx-country-flag-image{width:34px!important;height:23px!important;display:block!important;object-fit:contain!important;flex:0 0 34px!important;border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-radius:3px;background:rgba(0,0,0,.12);}
+.sx-gamer-card .sx-country-flag-image[hidden]{display:none!important;}
+.sx-gamer-card .sx-flag-fallback:not([hidden]){display:inline-block;font-size:23px;line-height:1;}
 /* iPhone-safe Edit Profile window. Settings navigation must not cover Save. */
 body.profile-editor-open #trackerNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
 body.profile-editor-open #editProfileOverlay{
@@ -783,6 +788,8 @@ function countryCodeForName(value){
  return match?match.code:(SPARTANX_COUNTRY_ALIASES[v.toLocaleLowerCase('en')]||'');
 }
 function countryFlag(code){const c=countryCodeForName(code);return c?String.fromCodePoint(...Array.from(c,ch=>127397+ch.charCodeAt(0))):'';}
+// Display a visible emoji fallback if an image cannot be loaded (e.g. when offline).
+document.addEventListener('error',event=>{const img=event.target;if(!img||!img.matches?.('img.sx-country-flag-image'))return;img.hidden=true;const fallback=img.nextElementSibling;if(fallback)fallback.hidden=false;},true);
 function populateCountrySelector(){
  const select=$('profileCountryInput');if(!select)return;
  select.innerHTML='<option value="">Select a country (optional)</option>'+SPARTANX_COUNTRIES.map(c=>'<option value="'+c.code+'">'+esc(c.name)+'</option>').join('');
@@ -794,7 +801,9 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const rank=state.current;
  const countryCode=p.countryPublic===true?countryCodeForName(p.countryCode||p.country||p.countryOfOrigin||''):'';
  const country=SPARTANX_COUNTRIES.find(item=>item.code===countryCode);
- const flag=countryCode?'<span class="sx-rank-flag" role="img" aria-label="'+esc(country?.name||countryCode)+'" title="'+esc(country?.name||countryCode)+'">'+countryFlag(countryCode)+'</span>':'';
+ const countryName=country?.name||countryCode;
+ const flagImage=countryCode==='GB'?'./ranks/flags/gb.svg':'https://flagcdn.com/w40/'+countryCode.toLowerCase()+'.png';
+ const flag=countryCode?'<span class="sx-rank-flag" role="img" aria-label="'+esc(countryName)+' flag" title="'+esc(countryName)+'"><img class="sx-country-flag-image" src="'+flagImage+'" width="34" height="23" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="sx-flag-fallback" hidden>'+countryFlag(countryCode)+'</span></span>':'';
  const lifts=['squat','bench','deadlift'].map(kind=>({kind,weight:getCompoundBest(kind)})).sort((a,b)=>b.weight-a.weight);
  const best=lifts[0],bestText=best.weight?best.kind.toUpperCase()+' · '+kg(best.weight):'No compound PR yet';
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';

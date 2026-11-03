@@ -662,7 +662,6 @@ body.spartanx-light #profileCountryInput,body.spartanx-light #profileGenderInput
 .sx-gamer-card .sx-rank-flag{display:inline-flex!important;align-items:center!important;justify-content:flex-end!important;min-width:34px!important;min-height:23px!important;line-height:1!important;}
 .sx-gamer-card .sx-country-flag-image{width:34px!important;height:23px!important;display:block!important;object-fit:contain!important;flex:0 0 34px!important;border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-radius:3px;background:rgba(0,0,0,.12);}
 .sx-gamer-card .sx-country-flag-image[hidden]{display:none!important;}
-.sx-gamer-card .sx-flag-fallback:not([hidden]){display:inline-block;font-size:23px;line-height:1;}
 /* iPhone-safe Edit Profile window. Settings navigation must not cover Save. */
 body.profile-editor-open #trackerNav{display:none!important;visibility:hidden!important;pointer-events:none!important}
 body.profile-editor-open #editProfileOverlay{
@@ -677,15 +676,14 @@ body.profile-editor-open #editProfileOverlay .detail-panel{
  overscroll-behavior:contain;touch-action:pan-y!important;-webkit-overflow-scrolling:touch;
  scroll-padding-bottom:95px;
 }
+/* Save and Cancel remain the final row of the scrollable dialog, without a separate footer. */
 #editProfileOverlay .sx-edit-profile-actions{
- position:sticky!important;bottom:-18px!important;z-index:6!important;
- margin:18px -18px -18px!important;
- padding:12px 18px calc(14px + env(safe-area-inset-bottom,0px))!important;
- background:var(--panel)!important;border-top:1px solid var(--line)!important;
- box-shadow:0 -8px 16px rgba(0,0,0,.18)!important;
+ position:static!important;z-index:auto!important;
+ margin:16px 0 0!important;padding:0 0 4px!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
 }
 #editProfileOverlay .sx-edit-profile-actions button{min-height:47px!important;min-width:0!important;padding:10px 8px!important}
-@media(max-width:390px){#editProfileOverlay .sx-edit-profile-actions{gap:7px!important;padding-left:12px!important;padding-right:12px!important}#editProfileOverlay .sx-edit-profile-actions button{font-size:12px!important}}
+@media(max-width:390px){#editProfileOverlay .sx-edit-profile-actions{gap:7px!important}#editProfileOverlay .sx-edit-profile-actions button{font-size:12px!important}}
 
 /* Live Settings theme preview: consistent with the active choice, including female accounts. */
 #profileSettingsOverlay{background:color-mix(in srgb,var(--bg) 92%,transparent)}
@@ -788,8 +786,12 @@ function countryCodeForName(value){
  return match?match.code:(SPARTANX_COUNTRY_ALIASES[v.toLocaleLowerCase('en')]||'');
 }
 function countryFlag(code){const c=countryCodeForName(code);return c?String.fromCodePoint(...Array.from(c,ch=>127397+ch.charCodeAt(0))):'';}
-// Display a visible emoji fallback if an image cannot be loaded (e.g. when offline).
-document.addEventListener('error',event=>{const img=event.target;if(!img||!img.matches?.('img.sx-country-flag-image'))return;img.hidden=true;const fallback=img.nextElementSibling;if(fallback)fallback.hidden=false;},true);
+// Keep exactly one flag per card. Replace a broken remote image, never append a second flag.
+document.addEventListener('error',event=>{
+ const img=event.target;if(!img||!img.matches?.('img.sx-country-flag-image'))return;
+ const code=img.dataset.countryCode||'';
+ img.replaceWith(document.createTextNode(countryFlag(code)||code));
+},true);
 function populateCountrySelector(){
  const select=$('profileCountryInput');if(!select)return;
  select.innerHTML='<option value="">Select a country (optional)</option>'+SPARTANX_COUNTRIES.map(c=>'<option value="'+c.code+'">'+esc(c.name)+'</option>').join('');
@@ -803,7 +805,7 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const country=SPARTANX_COUNTRIES.find(item=>item.code===countryCode);
  const countryName=country?.name||countryCode;
  const flagImage=countryCode==='GB'?'./ranks/flags/gb.svg':'https://flagcdn.com/w40/'+countryCode.toLowerCase()+'.png';
- const flag=countryCode?'<span class="sx-rank-flag" role="img" aria-label="'+esc(countryName)+' flag" title="'+esc(countryName)+'"><img class="sx-country-flag-image" src="'+flagImage+'" width="34" height="23" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="sx-flag-fallback" hidden>'+countryFlag(countryCode)+'</span></span>':'';
+ const flag=countryCode?'<span class="sx-rank-flag" role="img" aria-label="'+esc(countryName)+' flag" title="'+esc(countryName)+'"><img class="sx-country-flag-image" src="'+flagImage+'" width="34" height="23" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-country-code="'+countryCode+'"></span>':'';
  const lifts=['squat','bench','deadlift'].map(kind=>({kind,weight:getCompoundBest(kind)})).sort((a,b)=>b.weight-a.weight);
  const best=lifts[0],bestText=best.weight?best.kind.toUpperCase()+' · '+kg(best.weight):'No compound PR yet';
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';

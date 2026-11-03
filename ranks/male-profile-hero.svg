@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="presentation" aria-hidden="true">
+ <defs>
+  <linearGradient id="steel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f5db9e"/><stop offset=".23" stop-color="#c8a368"/><stop offset=".55" stop-color="#33271d"/><stop offset=".82" stop-color="#c8a368"/><stop offset="1" stop-color="#f5db9e"/></linearGradient>
+  <radialGradient id="core" cx=".45" cy=".3" r=".86"><stop stop-color="#33271d"/><stop offset=".6" stop-color="#191711"/><stop offset="1" stop-color="#070a0d"/></radialGradient>
+  <linearGradient id="etch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c8a368" stop-opacity=".16"/><stop offset=".5" stop-color="#f5db9e" stop-opacity=".6"/><stop offset="1" stop-color="#c8a368" stop-opacity=".16"/></linearGradient>
+ </defs>
+ <path d="M160 8 224 20 277 56 301 109 312 160 301 211 277 264 224 300 160 312 96 300 43 264 19 211 8 160 19 109 43 56 96 20Z" fill="url(#core)" stroke="#c8a368" stroke-width="8" stroke-linejoin="bevel"/>
+ <path d="M160 20 216 31 268 66 289 114 300 160 289 206 268 254 216 289 160 300 104 289 52 254 31 206 20 160 31 114 52 66 104 31Z" fill="none" stroke="url(#steel)" stroke-width="4" stroke-linejoin="bevel"/>
+ <path d="M160 37 209 47 255 79 274 120 283 160 274 200 255 241 209 273 160 283 111 273 65 241 46 200 37 160 46 120 65 79 111 47Z" fill="url(#core)" stroke="url(#etch)" stroke-width="3"/>
+ <circle cx="160" cy="160" r="105" fill="none" stroke="#f5db9e" stroke-opacity=".22" stroke-width="2"/>
+ <circle cx="160" cy="160" r="94" fill="none" stroke="#c8a368" stroke-opacity=".58" stroke-width="2.5"/>
+ <path d="M160 23 174 39 160 50 146 39Z M160 297 174 281 160 270 146 281Z M23 160 39 146 50 160 39 174Z M297 160 281 146 270 160 281 174Z" fill="url(#steel)" stroke="#f5db9e" stroke-width="1.4" stroke-opacity=".9"/>
+ <path d="M91 69 113 84 109 91 94 84 87 101 75 97 83 81Z M229 69 207 84 211 91 226 84 233 101 245 97 237 81Z M91 251 113 236 109 229 94 236 87 219 75 223 83 239Z M229 251 207 236 211 229 226 236 233 219 245 223 237 239Z" fill="#c8a368" fill-opacity=".4"/>
+ <path d="M93 107Q71 160 93 213M227 107Q249 160 227 213" fill="none" stroke="#f5db9e" stroke-opacity=".25" stroke-width="3"/>
+ <g fill="#f5db9e" opacity=".65"><circle cx="71" cy="71" r="3"/><circle cx="249" cy="71" r="3"/><circle cx="71" cy="249" r="3"/><circle cx="249" cy="249" r="3"/></g>
+</svg>

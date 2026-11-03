@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101013"><title>SpartanX · Rank Frame Preview</title>
+<style>
+:root{color-scheme:dark;--red:#ef2029;--bg:#101013;--panel:#1b1b20;--border:#4d3037;--text:#f3f2f4;--muted:#afb0b9}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 90% 0%,#6c161f55,transparent 34%),#101013;color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+main{max-width:930px;margin:auto;padding:20px 14px 50px}.brand{font-size:22px;font-weight:950;letter-spacing:3px}.brand b{color:var(--red)}
+.eyebrow{color:var(--red);font-size:11px;letter-spacing:2px;font-weight:850;margin-top:12px}
+h1{font-size:27px;margin:8px 0}.intro{color:var(--muted);line-height:1.55;max-width:680px}
+h2{font-size:19px;margin:30px 0 6px}.sub{color:var(--muted);margin:0 0 15px}
+.frame-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.frame-card{position:relative;border:1px solid #503840;border-radius:15px;background:linear-gradient(150deg,#27242b,#16171d 50%,#111316);padding:10px 10px 14px;text-align:center;overflow:hidden;min-width:0}
+.frame-card[data-tier="0"]{--accent:#c5d0d8}.frame-card[data-tier="1"]{--accent:#e78e75}.frame-card[data-tier="2"]{--accent:#f2d69b}
+.frame-card[data-tier="3"]{--accent:#d3b0ee}.frame-card[data-tier="4"]{--accent:#a4d5ff}.frame-card[data-tier="5"]{--accent:#ffdd87}
+.frame-stage{position:relative;width:min(100%,190px);aspect-ratio:1;margin:8px auto 4px}
+.frame-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.frame-back{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--accent) 28%,transparent))}
+.frame-icon{filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 26%,transparent))}
+.avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:2px solid var(--accent);box-shadow:0 0 0 3px #17181b,0 0 10px color-mix(in srgb,var(--accent) 50%,transparent);border-radius:50%;width:40%;height:40%;background:radial-gradient(circle at 50% 26%,#4a4a50,#26262d 60%,#111115);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar svg{width:73%;height:73%;opacity:.64}
+.title{display:block;color:var(--accent);font-size:16px;font-weight:850}.rank{display:block;color:var(--muted);font-size:10px;letter-spacing:1px;margin-top:7px}
+.frame-card.female{border-color:#5d4062;background:linear-gradient(150deg,#31223b,#181320 63%,#121019)}.frame-card.female[data-tier="0"]{--accent:#b6a5ce}
+.frame-card.female[data-tier="1"]{--accent:#c8a6e8}.frame-card.female[data-tier="2"]{--accent:#d2a9dd}
+.frame-card.female[data-tier="3"]{--accent:#d5b8f3}.frame-card.female[data-tier="4"]{--accent:#e7c7a3}.frame-card.female[data-tier="5"]{--accent:#f6d9a0}
+.frame-card.female .frame-stage{width:min(100%,176px)}
+footer{margin-top:25px;color:var(--muted);font-size:12px}
+footer a{color:#e9a5ad}
+@media(max-width:600px){main{padding:15px 10px 40px}.frame-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.frame-card{padding:8px 5px 12px}.frame-stage{width:100%}.title{font-size:14px}.intro{font-size:13px}h1{font-size:24px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><main>
+<div class="brand">SPARTAN<b>X</b></div><div class="eyebrow">DESIGN PREVIEW · 03 NOV 2026</div>
+<h1>Rank frame progression</h1>
+<p class="intro">These previews load the actual rank-frame artwork used by SpartanX. The portrait is a placeholder so you can compare the frame designs. Your app keeps your own photo, current rank emblem and theme effects.</p>
+<h2>Male rank frames</h2><p class="sub">Simple iron to an elaborate Olympian crown. Each promotion changes the silhouette and detailing.</p>
+<div class="frame-grid" id="male"></div>
+<h2>Female rank frames</h2><p class="sub">Original female emblems, now with the unwanted lower curved decorative line removed.</p>
+<div class="frame-grid" id="female"></div>
+<footer><p>Changes are part of the existing SpartanX project. <a href="../">Return to SpartanX</a></p></footer>
+</main>
+<script>
+const avatar='<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="35" r="19" fill="#b8babf"/><path d="M14 91Q15 57 50 59Q85 57 86 91Z" fill="#b8babf"/></svg>';
+function draw(target,labels,female){
+const root=document.getElementById(target);
+root.innerHTML=labels.map((label,i)=>{
+const slug=label.toLowerCase(),rank=female?'female-'+slug:slug,base=female?'female-'+slug+'.svg':'male-profile-'+slug+'.svg';
+const pics=female?'<img class="frame-back" src="./'+base+'" alt="'+label+' rank badge">':'<img class="frame-back" src="./'+base+'" alt="'+label+' frame"><img class="frame-icon" src="./'+rank+'.svg" alt="">';
+return '<article class="frame-card '+(female?'female':'')+'" data-tier="'+i+'"><div class="frame-stage">'+pics+'<div class="avatar">'+avatar+'</div></div><span class="title">'+label+'</span><span class="rank">RANK '+(i+1)+' / 6</span></article>';
+}).join('');
+}
+draw('male',['Mortal','Spartan','Hero','Demigod','Titan','Olympian'],false);
+draw('female',['Initiate','Huntress','Amazon','Valkyrie','Athena','Olympian'],true);
+</script></body></html>

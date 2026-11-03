@@ -13,4 +13,15 @@
     <circle cx="275" cy="160" r="3" fill="#d0d6da"/><circle cx="160" cy="275" r="3" fill="#d0d6da"/><circle cx="45" cy="160" r="3" fill="#d0d6da"/><circle cx="160" cy="45" r="3" fill="#d0d6da"/>
     <path d="M156 36 164 36 169 51 151 51Z M156 284 164 284 169 269 151 269Z" fill="#959fa9" stroke="#d0d6da" stroke-width="1"/>
   
+
+<!-- Gentle centre-out metallic shimmer, repeating every 2.25 seconds -->
+<g class="frame-radiance" pointer-events="none">
+<circle cx="160" cy="160" r="63" fill="none" stroke="#cbd4de" stroke-width="14" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.16;.07;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+<circle cx="160" cy="160" r="63" fill="none" stroke="#cbd4de" stroke-width="2" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.30;.11;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+</g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
 </svg>

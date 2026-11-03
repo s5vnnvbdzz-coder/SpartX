@@ -15,4 +15,15 @@
     <path d="M160 12 185 41 174 64 160 53 146 64 135 41Z" fill="url(#metal)" stroke="#ffe7ab" stroke-width="3"/>
     <path d="M160 28 173 44 160 57 147 44Z" fill="#c6a268" stroke="#ffe7ab" stroke-width="2"/>
     
+
+<!-- Gentle centre-out metallic shimmer, repeating every 2.25 seconds -->
+<g class="frame-radiance" pointer-events="none">
+<circle cx="160" cy="160" r="63" fill="none" stroke="#ffe5a7" stroke-width="14" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.16;.07;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+<circle cx="160" cy="160" r="63" fill="none" stroke="#ffe5a7" stroke-width="2" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.30;.11;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+</g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
 </svg>

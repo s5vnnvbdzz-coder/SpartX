@@ -20,4 +20,15 @@
     <path d="M80 36 104 65 92 93 68 79Z M240 36 216 65 228 93 252 79Z" fill="url(#metal)" stroke="#fff2bc" stroke-width="2"/>
     <circle cx="277" cy="160" r="4" fill="#fff2bc"/><circle cx="242.73" cy="242.73" r="4" fill="#fff2bc"/><circle cx="160" cy="277" r="4" fill="#fff2bc"/><circle cx="77.27" cy="242.73" r="4" fill="#fff2bc"/><circle cx="43" cy="160" r="4" fill="#fff2bc"/><circle cx="77.27" cy="77.27" r="4" fill="#fff2bc"/><circle cx="160" cy="43" r="4" fill="#fff2bc"/><circle cx="242.73" cy="77.27" r="4" fill="#fff2bc"/>
     
+
+<!-- Gentle centre-out metallic shimmer, repeating every 2.25 seconds -->
+<g class="frame-radiance" pointer-events="none">
+<circle cx="160" cy="160" r="63" fill="none" stroke="#fff0ba" stroke-width="14" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.16;.07;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+<circle cx="160" cy="160" r="63" fill="none" stroke="#fff0ba" stroke-width="2" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.30;.11;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+</g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
 </svg>

@@ -14,4 +14,15 @@
     <path d="M160 18 174 44 160 63 146 44Z M17 166 45 151 57 169 41 186Z M303 166 275 151 263 169 279 186Z" fill="#f3d6f0" stroke="#a689d1" stroke-width="2"/>
     <circle cx="239.2" cy="239.2" r="3.5" fill="#f3d6f0"/><circle cx="80.8" cy="239.2" r="3.5" fill="#f3d6f0"/><circle cx="80.8" cy="80.8" r="3.5" fill="#f3d6f0"/><circle cx="239.2" cy="80.8" r="3.5" fill="#f3d6f0"/>
   
+
+<!-- Gentle centre-out metallic shimmer, repeating every 2.25 seconds -->
+<g class="frame-radiance" pointer-events="none">
+<circle cx="160" cy="160" r="63" fill="none" stroke="#d6b9f4" stroke-width="14" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.16;.07;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+<circle cx="160" cy="160" r="63" fill="none" stroke="#d6b9f4" stroke-width="2" opacity="0">
+<animate attributeName="r" values="63;94;144;157;157" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;.30;.11;0;0" keyTimes="0;.16;.48;.68;1" dur="2.25s" repeatCount="indefinite"/></circle>
+</g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
 </svg>

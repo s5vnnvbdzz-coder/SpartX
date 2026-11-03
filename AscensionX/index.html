@@ -83,7 +83,7 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 .bar{flex:1;min-width:8px;background:linear-gradient(180deg,var(--red2),#8e101d);border-radius:5px 5px 0 0;position:relative;opacity:.9}
 .bar small{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
 /* Keep full exercise names readable beneath the estimated strength trend columns on mobile. */
-#trendGraph{overflow-x:auto;gap:12px;padding-bottom:0}
+#trendGraph{overflow-x:auto;overflow-y:hidden;gap:12px;height:177px;padding-bottom:34px}
 #trendGraph .bar{flex:0 0 80px;min-width:80px}
 #trendGraph .bar small{bottom:-28px;width:86px;font-size:10px;line-height:1.2;white-space:normal;text-align:center}
 .settings-backdrop{position:fixed;inset:0;z-index:60;background:#000b;display:none;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 14px 18px;overflow-y:auto}.settings-backdrop.open{display:flex}.settings-modal{width:100%;max-width:520px;max-height:calc(100dvh - 36px - env(safe-area-inset-top));overflow-y:auto;background:linear-gradient(150deg,#1b1e25,#101217);border:1px solid #414550;border-radius:20px;padding:18px;box-shadow:0 24px 80px #000b}.settings-modal .modal-head{position:sticky;top:-18px;z-index:2;background:#171a20f2;margin:-18px -18px 16px;padding:16px 18px;border-bottom:1px solid var(--line);border-radius:20px 20px 0 0}.unit-choice{display:flex;gap:8px}.unit-choice button{flex:1}.unit-choice button.active{outline:2px solid var(--red2);background:linear-gradient(135deg,#8e101d,#4b1119)}.settings-modal .data-card{margin-top:24px;border-top:1px solid var(--line);padding-top:18px}.hidden{display:none!important}

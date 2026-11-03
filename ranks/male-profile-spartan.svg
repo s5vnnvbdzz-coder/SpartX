@@ -1,16 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="presentation" aria-hidden="true">
  <defs>
-  <linearGradient id="steel" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffb38b"/><stop offset=".23" stop-color="#b85e54"/><stop offset=".55" stop-color="#2d1c22"/><stop offset=".82" stop-color="#b85e54"/><stop offset="1" stop-color="#ffb38b"/></linearGradient>
-  <radialGradient id="core" cx=".45" cy=".3" r=".86"><stop stop-color="#2d1c22"/><stop offset=".6" stop-color="#181115"/><stop offset="1" stop-color="#070a0d"/></radialGradient>
-  <linearGradient id="etch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b85e54" stop-opacity=".16"/><stop offset=".5" stop-color="#ffb38b" stop-opacity=".6"/><stop offset="1" stop-color="#b85e54" stop-opacity=".16"/></linearGradient>
+  <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#f1ba8a"/><stop offset=".24" stop-color="#ad594c"/><stop offset=".53" stop-color="#53302b"/><stop offset=".78" stop-color="#ad594c"/><stop offset="1" stop-color="#f1ba8a"/></linearGradient>
+  <radialGradient id="face" cx="45%" cy="37%" r="77%"><stop stop-color="#53302b"/><stop offset=".52" stop-color="#211318"/><stop offset="1" stop-color="#060709"/></radialGradient>
+  <radialGradient id="halo"><stop stop-color="#ad594c" stop-opacity=".25"/><stop offset=".55" stop-color="#ad594c" stop-opacity=".12"/><stop offset="1" stop-color="#ad594c" stop-opacity="0"/></radialGradient>
  </defs>
- <path d="M160 8 224 20 277 56 301 109 312 160 301 211 277 264 224 300 160 312 96 300 43 264 19 211 8 160 19 109 43 56 96 20Z" fill="url(#core)" stroke="#b85e54" stroke-width="8" stroke-linejoin="bevel"/>
- <path d="M160 20 216 31 268 66 289 114 300 160 289 206 268 254 216 289 160 300 104 289 52 254 31 206 20 160 31 114 52 66 104 31Z" fill="none" stroke="url(#steel)" stroke-width="4" stroke-linejoin="bevel"/>
- <path d="M160 37 209 47 255 79 274 120 283 160 274 200 255 241 209 273 160 283 111 273 65 241 46 200 37 160 46 120 65 79 111 47Z" fill="url(#core)" stroke="url(#etch)" stroke-width="3"/>
- <circle cx="160" cy="160" r="105" fill="none" stroke="#ffb38b" stroke-opacity=".22" stroke-width="2"/>
- <circle cx="160" cy="160" r="94" fill="none" stroke="#b85e54" stroke-opacity=".58" stroke-width="2.5"/>
- <path d="M160 23 174 39 160 50 146 39Z M160 297 174 281 160 270 146 281Z M23 160 39 146 50 160 39 174Z M297 160 281 146 270 160 281 174Z" fill="url(#steel)" stroke="#ffb38b" stroke-width="1.4" stroke-opacity=".9"/>
- <path d="M91 69 113 84 109 91 94 84 87 101 75 97 83 81Z M229 69 207 84 211 91 226 84 233 101 245 97 237 81Z M91 251 113 236 109 229 94 236 87 219 75 223 83 239Z M229 251 207 236 211 229 226 236 233 219 245 223 237 239Z" fill="#b85e54" fill-opacity=".4"/>
- <path d="M93 107Q71 160 93 213M227 107Q249 160 227 213" fill="none" stroke="#ffb38b" stroke-opacity=".25" stroke-width="3"/>
- <g fill="#ffb38b" opacity=".65"><circle cx="71" cy="71" r="3"/><circle cx="249" cy="71" r="3"/><circle cx="71" cy="249" r="3"/><circle cx="249" cy="249" r="3"/></g>
+ 
+    <path d="M160 8 189 43 232 26 269 63 285 113 303 162 275 236 224 285 160 311 96 285 45 236 17 162 35 113 51 63 88 26 131 43Z" fill="url(#face)" stroke="#53302b" stroke-width="8" stroke-linejoin="bevel"/>
+    <path d="M160 24 190 57 228 42 258 77 271 122 287 162 264 227 219 270 160 292 101 270 56 227 33 162 49 122 62 77 92 42 130 57Z" fill="none" stroke="url(#metal)" stroke-width="8"/>
+    <path d="M160 55 216 73 252 122 266 165 244 219 204 262 160 282 116 262 76 219 54 165 68 122 104 73Z" fill="url(#face)" stroke="#f1ba8a" stroke-opacity=".55" stroke-width="2.5"/>
+    <path d="M160 2 191 46 178 62 160 46 142 62 129 46Z" fill="url(#metal)" stroke="#f1ba8a" stroke-width="2"/>
+    <path d="M31 101 65 115 46 166 30 148Z M289 101 255 115 274 166 290 148Z" fill="#ad594c" stroke="#f1ba8a" stroke-width="2"/>
+    <path d="M59 224 86 254 73 285 43 242Z M261 224 234 254 247 285 277 242Z" fill="url(#metal)" stroke="#53302b" stroke-width="3"/>
+    <circle cx="160" cy="274" r="4.5" fill="#f1ba8a"/><circle cx="160" cy="46" r="4.5" fill="#f1ba8a"/>
+  
 </svg>

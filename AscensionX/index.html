@@ -82,6 +82,10 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 .barwrap{height:145px;display:flex;align-items:end;gap:7px;border-bottom:1px solid var(--line);padding:10px 4px 0}
 .bar{flex:1;min-width:8px;background:linear-gradient(180deg,var(--red2),#8e101d);border-radius:5px 5px 0 0;position:relative;opacity:.9}
 .bar small{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
+/* Keep full exercise names readable beneath the estimated strength trend columns on mobile. */
+#trendGraph{overflow-x:auto;gap:12px;padding-bottom:0}
+#trendGraph .bar{flex:0 0 80px;min-width:80px}
+#trendGraph .bar small{bottom:-28px;width:86px;font-size:10px;line-height:1.2;white-space:normal;text-align:center}
 .settings-backdrop{position:fixed;inset:0;z-index:60;background:#000b;display:none;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 14px 18px;overflow-y:auto}.settings-backdrop.open{display:flex}.settings-modal{width:100%;max-width:520px;max-height:calc(100dvh - 36px - env(safe-area-inset-top));overflow-y:auto;background:linear-gradient(150deg,#1b1e25,#101217);border:1px solid #414550;border-radius:20px;padding:18px;box-shadow:0 24px 80px #000b}.settings-modal .modal-head{position:sticky;top:-18px;z-index:2;background:#171a20f2;margin:-18px -18px 16px;padding:16px 18px;border-bottom:1px solid var(--line);border-radius:20px 20px 0 0}.unit-choice{display:flex;gap:8px}.unit-choice button{flex:1}.unit-choice button.active{outline:2px solid var(--red2);background:linear-gradient(135deg,#8e101d,#4b1119)}.settings-modal .data-card{margin-top:24px;border-top:1px solid var(--line);padding-top:18px}.hidden{display:none!important}
 @media(min-width:620px){main{padding-top:25px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.weekgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 .cycle-confirm-backdrop{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;padding:20px;background:#000b;backdrop-filter:blur(8px)}.cycle-confirm-backdrop.open{display:flex}.cycle-confirm-dialog{width:100%;max-width:420px;padding:24px;background:linear-gradient(145deg,#22252e,#111318);border:1px solid #6a323b;border-radius:20px;box-shadow:0 20px 65px #000b}.cycle-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
@@ -250,6 +254,7 @@ const $=id=>document.getElementById(id);
 const KEY='ascensionx_strength_v1';
 const LIFTS=['Back Squat','Bench Press','Deadlift','Overhead Press'];
 const EXERCISE_LABELS={'Back Squat':'Back Squat','Bench Press':'Bench Press','Deadlift':'Deadlift','Overhead Press':'Overhead Press'};
+const TREND_LABELS={'Back Squat':'Squat','Bench Press':'Bench Press','Deadlift':'Deadlift','Overhead Press':'Overhead Press'};
 function selectedLifts(){return Array.isArray(state.cycle.exercises)?state.cycle.exercises.filter(x=>LIFTS.includes(x)):LIFTS.slice()}
 function currentWeekFor(lift){return Math.min(6,Math.max(1,Number(state.cycle.weeks?.[lift]||state.cycle.currentWeek||1)))}
 const PLAN=[
@@ -323,7 +328,7 @@ function applyCycleSelection(chosen,existing){
  const next=chosen.includes(current)?current:chosen[0];
  persist();
  $('liftSelect').value=next;$('workWeek').value=currentWeekFor(next);
- renderWorkout();renderCycle();renderDashboard();renderProfile();
+ renderWorkout();renderCycle();renderDashboard();renderProfile();renderProgress();
  toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
 function toggleCycleDetails(){const panel=$('cycleDetails'),button=$('cycleExpandButton');if(!panel||!button)return;const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-expanded',String(opening));button.textContent=opening?'Hide full cycle':'View full cycle';if(opening)renderCycle()}
@@ -483,9 +488,15 @@ function renderCycleLoads(){
 function renderProgress(){
  const sets=state.logs.flatMap(l=>l.sets),volume=sets.reduce((a,s)=>a+s.weight*s.reps,0),bestW=Math.max(0,...sets.map(s=>s.weight)),bestE=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));
  $('totalVolume').textContent=Math.round(toDisplay(volume)).toLocaleString()+' '+unit();$('totalSets').textContent=sets.length;$('bestWeight').textContent=bestW?kg(bestW):'—';$('bestEstimate').textContent=bestE?kg(bestE):'—';
- const vals=state.logs.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));const max=Math.max(1,...vals.map(l=>e1rm(l.topWeight,l.topReps)));
- $('trendGraph').innerHTML=vals.length?vals.slice(-12).map(l=>`<div class="bar" style="height:${Math.max(5,e1rm(l.topWeight,l.topReps)/max*100)}%"><small>${l.lift.split(' ')[0].slice(0,3)}</small></div>`).join(''):'';
- $('trendCaption').textContent=vals.length?'Recent top-set E1RM estimates. Compare like-for-like lifts and rep ranges.':'Log your first workout to build your trend.';
+ const vals=state.logs.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+ const activeLifts=new Set(selectedLifts());
+ const trendLogs=vals.filter(l=>activeLifts.has(l.lift)).slice(-12);
+ const trendMax=Math.max(1,...trendLogs.map(l=>e1rm(l.topWeight,l.topReps)));
+ $('trendGraph').innerHTML=trendLogs.map(l=>{
+  const name=TREND_LABELS[l.lift]||l.lift,estimate=e1rm(l.topWeight,l.topReps);
+  return `<div class="bar" style="height:${Math.max(5,estimate/trendMax*100)}%" title="${name}: ${kg(estimate)} estimated 1RM"><small>${name}</small></div>`;
+ }).join('');
+ $('trendCaption').textContent=trendLogs.length?'Recent top-set E1RM estimates for exercises in your active cycle. Compare like-for-like lifts and rep ranges.':vals.length?'No logged top sets for exercises in your current cycle yet.':'Log your first workout to build your trend.';
  $('historyList').innerHTML=vals.length?vals.slice().reverse().map(l=>`<div class="listitem"><div><strong>${l.lift} · Week ${l.week}</strong><div class="tiny">${new Date(l.date).toLocaleDateString()} · ${l.sets.length} sets · ${Math.round(toDisplay(l.volume)).toLocaleString()} ${unit()} volume</div></div><span class="pill ${l.success?'good':'warn'}">${l.success?'TARGET HIT':'REVIEW'}</span></div>`).join(''):'No sessions recorded yet.';
 
 }

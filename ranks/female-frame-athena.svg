@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-labelledby="title desc">
+<title id="title">SpartanX Athena female rank portrait frame</title>
+<desc id="desc">A transparent portrait frame with athena tier detailing and a centre-out glow every 2.25 seconds. The centre remains transparent for the user's photo.</desc>
+<defs>
+  <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#ffefcc"/><stop offset=".24" stop-color="#d6b489"/><stop offset=".52" stop-color="#8d6950"/><stop offset=".76" stop-color="#d6b489"/><stop offset="1" stop-color="#ffefcc"/></linearGradient>
+  <linearGradient id="metalLight" x1="0%" y1="100%" x2="100%" y2="0%"><stop stop-color="#8d6950"/><stop offset=".48" stop-color="#ffefcc"/><stop offset="1" stop-color="#d6b489"/></linearGradient>
+  <linearGradient id="shimmerMetal" x1="0%" y1="0%" x2="100%" y2="80%"><stop stop-color="#d6b489"/><stop offset=".4" stop-color="#ffefcc"/><stop offset="1" stop-color="#8d6950"/></linearGradient>
+  <radialGradient id="face" cx="42%" cy="27%" r="82%"><stop stop-color="#8d6950"/><stop offset=".49" stop-color="#271d25"/><stop offset="1" stop-color="#09080e"/></radialGradient>
+  <radialGradient id="gem"><stop stop-color="#ffefcc"/><stop offset=".5" stop-color="#f1d0a1"/><stop offset="1" stop-color="#8d6950"/></radialGradient>
+  <radialGradient id="pulseStroke"><stop stop-color="#ffefcc" stop-opacity=".92"/><stop offset=".45" stop-color="#f1d0a1" stop-opacity=".9"/><stop offset="1" stop-color="#d6b489" stop-opacity="0"/></radialGradient>
+  <filter id="softGlow" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="4"/></filter>
+  <clipPath id="portraitHole" clipPathUnits="userSpaceOnUse"><path clip-rule="evenodd" d="M0 0H320V320H0Z M238 160 A78 78 0 1 0 82 160 A78 78 0 1 0 238 160Z"/></clipPath>
+ </defs>
+<style>@media (prefers-reduced-motion: reduce) { .frame-radiance { display: none } }</style>
+<g clip-path="url(#portraitHole)">
+  <path d="M160 7 191 36 213 6 235 50 262 20 271 67 310 80 292 117 318 160 291 202 304 251 256 256 240 304 203 286 160 318 117 286 80 304 64 256 16 251 29 202 2 160 28 117 10 80 49 67 58 20 85 50 107 6 129 36Z" fill="url(#face)" stroke="#8d6950" stroke-width="8"/>
+  <polygon points="160.00,23.00 212.43,33.43 256.87,63.13 286.57,107.57 297.00,160.00 286.57,212.43 256.87,256.87 212.43,286.57 160.00,297.00 107.57,286.57 63.13,256.87 33.43,212.43 23.00,160.00 33.43,107.57 63.13,63.13 107.57,33.43" fill="none" stroke="url(#metal)" stroke-width="6"/>
+  <circle cx="160" cy="160" r="114" fill="none" stroke="#ffefcc" stroke-width="4"/>
+  <circle cx="160" cy="160" r="91" fill="none" stroke="url(#metalLight)" stroke-width="4.3"/>
+  <path d="M96 64 65 17 118 41 160 5 202 41 255 17 224 64 198 53 160 40 122 53Z" fill="url(#metalLight)" stroke="#ffefcc" stroke-width="2.7"/>
+  <path d="M111 46 90 31 127 50 160 17 193 50 230 31 209 46" stroke="#8d6950" stroke-width="3" fill="none"/>
+  <path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(109.3 268.8) rotate(218.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(81.3 250.6) rotate(234.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(59.4 225.4) rotate(250.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(45.2 195.1) rotate(266.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(40.0 162.1) rotate(282.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(44.1 128.9) rotate(298.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(57.1 98.2) rotate(314.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(78.2 72.2) rotate(330.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(105.5 53.1) rotate(346.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/><path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(208.8 50.4) rotate(11.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(237.1 68.1) rotate(27.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(259.5 92.9) rotate(43.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(274.1 122.9) rotate(59.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(279.9 155.8) rotate(75.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(276.4 189.0) rotate(91.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(263.9 220.0) rotate(107.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(243.4 246.3) rotate(123.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-5.7 -6.1 0 -15.9 Q6.1 -6.8 0 0Z" transform="translate(216.3 266.0) rotate(139.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+  <path d="M160 12 176 38 160 62 144 38Z" fill="url(#gem)" stroke="#ffefcc" stroke-width="2"/>
+  <path d="M160.0 23.0 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M252.6 61.4 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M291.0 154.0 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M252.6 246.6 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M160.0 285.0 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M67.4 246.6 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M29.0 154.0 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M67.4 61.4 l3.9 6.0 l-3.9 6.0 l-3.9 -6.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+  <circle cx="160.0" cy="53.0" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="213.5" cy="67.3" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="252.7" cy="106.5" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="267.0" cy="160.0" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="252.7" cy="213.5" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="213.5" cy="252.7" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="160.0" cy="267.0" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="106.5" cy="252.7" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="67.3" cy="213.5" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="53.0" cy="160.0" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="67.3" cy="106.5" r="2.3" fill="url(#shimmerMetal)"/>
+<circle cx="106.5" cy="67.3" r="2.3" fill="url(#shimmerMetal)"/>
+  </g>
+<g clip-path="url(#portraitHole)" class="frame-radiance" pointer-events="none">
+   <circle cx="160" cy="160" r="58" stroke="#ffefcc" fill="none" stroke-width="16" opacity="0" filter="url(#softGlow)"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.26;.10;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+   <circle cx="160" cy="160" r="58" stroke="#ffefcc" fill="none" stroke-width="1.9" opacity="0"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.44;.16;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+ </g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
+</svg>

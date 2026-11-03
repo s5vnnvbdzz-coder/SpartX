@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-labelledby="title desc">
+<title id="title">SpartanX Valkyrie female rank portrait frame</title>
+<desc id="desc">A transparent portrait frame with valkyrie tier detailing and a centre-out glow every 2.25 seconds. The centre remains transparent for the user's photo.</desc>
+<defs>
+  <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#f1f4ff"/><stop offset=".24" stop-color="#a3b0e7"/><stop offset=".52" stop-color="#506aa3"/><stop offset=".76" stop-color="#a3b0e7"/><stop offset="1" stop-color="#f1f4ff"/></linearGradient>
+  <linearGradient id="metalLight" x1="0%" y1="100%" x2="100%" y2="0%"><stop stop-color="#506aa3"/><stop offset=".48" stop-color="#f1f4ff"/><stop offset="1" stop-color="#a3b0e7"/></linearGradient>
+  <linearGradient id="shimmerMetal" x1="0%" y1="0%" x2="100%" y2="80%"><stop stop-color="#a3b0e7"/><stop offset=".4" stop-color="#f1f4ff"/><stop offset="1" stop-color="#506aa3"/></linearGradient>
+  <radialGradient id="face" cx="42%" cy="27%" r="82%"><stop stop-color="#506aa3"/><stop offset=".49" stop-color="#151e34"/><stop offset="1" stop-color="#09080e"/></radialGradient>
+  <radialGradient id="gem"><stop stop-color="#f1f4ff"/><stop offset=".5" stop-color="#b3c9fb"/><stop offset="1" stop-color="#506aa3"/></radialGradient>
+  <radialGradient id="pulseStroke"><stop stop-color="#f1f4ff" stop-opacity=".92"/><stop offset=".45" stop-color="#b3c9fb" stop-opacity=".9"/><stop offset="1" stop-color="#a3b0e7" stop-opacity="0"/></radialGradient>
+  <filter id="softGlow" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="4"/></filter>
+  <clipPath id="portraitHole" clipPathUnits="userSpaceOnUse"><path clip-rule="evenodd" d="M0 0H320V320H0Z M238 160 A78 78 0 1 0 82 160 A78 78 0 1 0 238 160Z"/></clipPath>
+ </defs>
+<style>@media (prefers-reduced-motion: reduce) { .frame-radiance { display: none } }</style>
+<g clip-path="url(#portraitHole)">
+  <path d="M160 4 188 35 211 11 237 40 259 14 270 59 305 49 283 99 318 137 291 164 313 218 279 222 270 282 222 276 160 316 98 276 50 282 41 222 7 218 29 164 2 137 37 99 15 49 50 59 61 14 83 40 109 11 132 35Z" fill="url(#face)" stroke="#506aa3" stroke-width="7.6"/>
+  <polygon points="160.00,29.00 225.50,46.55 273.45,94.50 291.00,160.00 273.45,225.50 225.50,273.45 160.00,291.00 94.50,273.45 46.55,225.50 29.00,160.00 46.55,94.50 94.50,46.55" fill="none" stroke="url(#metal)" stroke-width="7"/>
+  <circle cx="160" cy="160" r="109" fill="none" stroke="url(#metalLight)" stroke-width="3"/>
+  <circle cx="160" cy="160" r="91" fill="none" stroke="#f1f4ff" stroke-width="4"/>
+  <path d="M88 102 Q43 82 7 36 L27 104 8 130 51 146 33 192 81 185 101 231 104 161Z" fill="url(#metal)" stroke="#f1f4ff" stroke-width="2.5"/>
+  <path d="M232 102 Q277 82 313 36 L293 104 312 130 269 146 287 192 239 185 219 231 216 161Z" fill="url(#metal)" stroke="#f1f4ff" stroke-width="2.5"/>
+  <path d="M17 51 66 115 34 115 M15 128 74 154 38 171 M36 192 80 181 M303 51 254 115 286 115 M305 128 246 154 282 171 M284 192 240 181" stroke="#506aa3" stroke-width="5" fill="none"/>
+  <path d="M160 1 191 43 176 68 160 54 144 68 129 43Z" fill="url(#metalLight)" stroke="#f1f4ff" stroke-width="3"/>
+  <path d="M160 15 169 39 160 55 151 39Z" fill="url(#gem)" stroke="#f1f4ff" stroke-width="2"/>
+  <path d="M160 316 187 277 173 255 160 266 147 255 133 277Z" fill="url(#metal)" stroke="#f1f4ff" stroke-width="2"/>
+  <path d="M160.0 33.0 l4.5 7.0 l-4.5 7.0 l-4.5 -7.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M244.9 68.1 l4.5 7.0 l-4.5 7.0 l-4.5 -7.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M244.9 237.9 l4.5 7.0 l-4.5 7.0 l-4.5 -7.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M160.0 273.0 l4.5 7.0 l-4.5 7.0 l-4.5 -7.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M75.1 237.9 l4.5 7.0 l-4.5 7.0 l-4.5 -7.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M75.1 68.1 l4.5 7.0 l-4.5 7.0 l-4.5 -7.0Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+  </g>
+<g clip-path="url(#portraitHole)" class="frame-radiance" pointer-events="none">
+   <circle cx="160" cy="160" r="58" stroke="#f1f4ff" fill="none" stroke-width="16" opacity="0" filter="url(#softGlow)"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.26;.10;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+   <circle cx="160" cy="160" r="58" stroke="#f1f4ff" fill="none" stroke-width="1.9" opacity="0"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.44;.16;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+ </g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
+</svg>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-labelledby="title desc">
+<title id="title">SpartanX Initiate female rank portrait frame</title>
+<desc id="desc">A transparent portrait frame with initiate tier detailing and a centre-out glow every 2.25 seconds. The centre remains transparent for the user's photo.</desc>
+<defs>
+  <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#f0e4ff"/><stop offset=".24" stop-color="#ad95c8"/><stop offset=".52" stop-color="#51416a"/><stop offset=".76" stop-color="#ad95c8"/><stop offset="1" stop-color="#f0e4ff"/></linearGradient>
+  <linearGradient id="metalLight" x1="0%" y1="100%" x2="100%" y2="0%"><stop stop-color="#51416a"/><stop offset=".48" stop-color="#f0e4ff"/><stop offset="1" stop-color="#ad95c8"/></linearGradient>
+  <linearGradient id="shimmerMetal" x1="0%" y1="0%" x2="100%" y2="80%"><stop stop-color="#ad95c8"/><stop offset=".4" stop-color="#f0e4ff"/><stop offset="1" stop-color="#51416a"/></linearGradient>
+  <radialGradient id="face" cx="42%" cy="27%" r="82%"><stop stop-color="#51416a"/><stop offset=".49" stop-color="#1c1728"/><stop offset="1" stop-color="#09080e"/></radialGradient>
+  <radialGradient id="gem"><stop stop-color="#f0e4ff"/><stop offset=".5" stop-color="#bba6d5"/><stop offset="1" stop-color="#51416a"/></radialGradient>
+  <radialGradient id="pulseStroke"><stop stop-color="#f0e4ff" stop-opacity=".92"/><stop offset=".45" stop-color="#bba6d5" stop-opacity=".9"/><stop offset="1" stop-color="#ad95c8" stop-opacity="0"/></radialGradient>
+  <filter id="softGlow" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="4"/></filter>
+  <clipPath id="portraitHole" clipPathUnits="userSpaceOnUse"><path clip-rule="evenodd" d="M0 0H320V320H0Z M238 160 A78 78 0 1 0 82 160 A78 78 0 1 0 238 160Z"/></clipPath>
+ </defs>
+<style>@media (prefers-reduced-motion: reduce) { .frame-radiance { display: none } }</style>
+<g clip-path="url(#portraitHole)">
+  <polygon points="211.66,35.28 284.72,108.34 284.72,211.66 211.66,284.72 108.34,284.72 35.28,211.66 35.28,108.34 108.34,35.28" fill="url(#face)" stroke="#51416a" stroke-width="9" stroke-linejoin="bevel"/>
+  <polygon points="209.37,40.82 279.18,110.63 279.18,209.37 209.37,279.18 110.63,279.18 40.82,209.37 40.82,110.63 110.63,40.82" fill="none" stroke="url(#metal)" stroke-width="5" stroke-linejoin="bevel"/>
+  <circle cx="160" cy="160" r="108" fill="none" stroke="#ad95c8" stroke-width="2" opacity=".65"/>
+  <circle cx="160" cy="160" r="88" fill="none" stroke="url(#metalLight)" stroke-width="5"/>
+  <circle cx="160" cy="160" r="85" fill="none" stroke="#f0e4ff" stroke-width="1" opacity=".6"/>
+  <circle cx="160.0" cy="38.0" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="246.3" cy="73.7" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="282.0" cy="160.0" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="246.3" cy="246.3" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="160.0" cy="282.0" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="73.7" cy="246.3" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="38.0" cy="160.0" r="2.1" fill="url(#shimmerMetal)"/>
+<circle cx="73.7" cy="73.7" r="2.1" fill="url(#shimmerMetal)"/>
+  <path d="M160 27 l7 12 -7 12 -7 -12Z M160 293 l7 -12 -7 -12 -7 12Z" fill="url(#metalLight)" opacity=".7"/>
+  </g>
+<g clip-path="url(#portraitHole)" class="frame-radiance" pointer-events="none">
+   <circle cx="160" cy="160" r="58" stroke="#f0e4ff" fill="none" stroke-width="16" opacity="0" filter="url(#softGlow)"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.26;.10;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+   <circle cx="160" cy="160" r="58" stroke="#f0e4ff" fill="none" stroke-width="1.9" opacity="0"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.44;.16;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+ </g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
+</svg>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-labelledby="title desc">
+<title id="title">SpartanX Olympian female rank portrait frame</title>
+<desc id="desc">A transparent portrait frame with olympian tier detailing and a centre-out glow every 2.25 seconds. The centre remains transparent for the user's photo.</desc>
+<defs>
+  <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#fff4c5"/><stop offset=".24" stop-color="#e8c476"/><stop offset=".52" stop-color="#9a63bb"/><stop offset=".76" stop-color="#e8c476"/><stop offset="1" stop-color="#fff4c5"/></linearGradient>
+  <linearGradient id="metalLight" x1="0%" y1="100%" x2="100%" y2="0%"><stop stop-color="#9a63bb"/><stop offset=".48" stop-color="#fff4c5"/><stop offset="1" stop-color="#e8c476"/></linearGradient>
+  <linearGradient id="shimmerMetal" x1="0%" y1="0%" x2="100%" y2="80%"><stop stop-color="#e8c476"/><stop offset=".4" stop-color="#fff4c5"/><stop offset="1" stop-color="#9a63bb"/></linearGradient>
+  <radialGradient id="face" cx="42%" cy="27%" r="82%"><stop stop-color="#9a63bb"/><stop offset=".49" stop-color="#21182c"/><stop offset="1" stop-color="#09080e"/></radialGradient>
+  <radialGradient id="gem"><stop stop-color="#fff4c5"/><stop offset=".5" stop-color="#efc8fc"/><stop offset="1" stop-color="#9a63bb"/></radialGradient>
+  <radialGradient id="pulseStroke"><stop stop-color="#fff4c5" stop-opacity=".92"/><stop offset=".45" stop-color="#efc8fc" stop-opacity=".9"/><stop offset="1" stop-color="#e8c476" stop-opacity="0"/></radialGradient>
+  <filter id="softGlow" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="4"/></filter>
+  <clipPath id="portraitHole" clipPathUnits="userSpaceOnUse"><path clip-rule="evenodd" d="M0 0H320V320H0Z M238 160 A78 78 0 1 0 82 160 A78 78 0 1 0 238 160Z"/></clipPath>
+ </defs>
+<style>@media (prefers-reduced-motion: reduce) { .frame-radiance { display: none } }</style>
+<g clip-path="url(#portraitHole)">
+  <polygon points="160.00,1.00 181.43,24.69 209.13,8.78 222.20,37.93 253.46,31.37 256.87,63.13 288.63,66.54 282.07,97.80 311.22,110.87 295.31,138.57 319.00,160.00 295.31,181.43 311.22,209.13 282.07,222.20 288.63,253.46 256.87,256.87 253.46,288.63 222.20,282.07 209.13,311.22 181.43,295.31 160.00,319.00 138.57,295.31 110.87,311.22 97.80,282.07 66.54,288.63 63.13,256.87 31.37,253.46 37.93,222.20 8.78,209.13 24.69,181.43 1.00,160.00 24.69,138.57 8.78,110.87 37.93,97.80 31.37,66.54 63.13,63.13 66.54,31.37 97.80,37.93 110.87,8.78 138.57,24.69" fill="url(#metalLight)" stroke="#fff4c5" stroke-width="1.6"/>
+  <polygon points="160.00,11.00 185.17,33.48 217.02,22.34 231.67,52.74 265.36,54.64 267.26,88.33 297.66,102.98 286.52,134.83 309.00,160.00 286.52,185.17 297.66,217.02 267.26,231.67 265.36,265.36 231.67,267.26 217.02,297.66 185.17,286.52 160.00,309.00 134.83,286.52 102.98,297.66 88.33,267.26 54.64,265.36 52.74,231.67 22.34,217.02 33.48,185.17 11.00,160.00 33.48,134.83 22.34,102.98 52.74,88.33 54.64,54.64 88.33,52.74 102.98,22.34 134.83,33.48" fill="url(#face)" stroke="#9a63bb" stroke-width="7"/>
+  <circle cx="160" cy="160" r="137" fill="none" stroke="url(#metal)" stroke-width="8"/>
+  <circle cx="160" cy="160" r="125" fill="none" stroke="#fff4c5" stroke-width="4"/>
+  <circle cx="160" cy="160" r="111" fill="none" stroke="url(#metalLight)" stroke-width="4.2"/>
+  <circle cx="160" cy="160" r="91" fill="none" stroke="#fff4c5" stroke-width="4"/>
+  <path d="M100 76 16 31 45 107 6 144 41 158 16 220 71 220 95 271 126 255 M220 76 304 31 275 107 314 144 279 158 304 220 249 220 225 271 194 255" fill="none" stroke="url(#metalLight)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M101 55 69 5 119 31 160 3 201 31 251 5 219 55 197 46 160 28 123 46Z" fill="url(#metalLight)" stroke="#fff4c5" stroke-width="3"/>
+  <path d="M121 36 105 20 136 38 160 10 184 38 215 20 199 36" fill="none" stroke="#9a63bb" stroke-width="4"/>
+  <path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(101.3 265.8) rotate(218.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(80.6 251.3) rotate(230.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(63.4 232.8) rotate(242.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(50.3 211.1) rotate(254.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(42.1 187.2) rotate(266.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(39.0 162.1) rotate(278.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(41.2 136.9) rotate(290.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(48.6 112.7) rotate(302.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(60.9 90.6) rotate(314.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(77.5 71.5) rotate(326.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(97.7 56.3) rotate(338.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/><path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(203.4 47.0) rotate(12.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(225.9 58.5) rotate(24.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(245.6 74.4) rotate(36.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(261.5 94.1) rotate(48.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(273.0 116.6) rotate(60.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(279.5 141.1) rotate(72.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(280.8 166.3) rotate(84.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(276.9 191.3) rotate(96.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(267.8 214.9) rotate(108.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(254.0 236.1) rotate(120.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(236.1 254.0) rotate(132.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+<path d="M0 0 Q-6.8 -7.2 0 -18.8 Q7.2 -8.1 0 0Z" transform="translate(214.9 267.8) rotate(144.0)" fill="url(#metal)" stroke="url(#metalLight)" stroke-width="1.15"/>
+  <path d="M160 0 180 35 160 60 140 35Z" fill="url(#gem)" stroke="#fff4c5" stroke-width="3"/>
+  <path d="M160 295 179 278 176 305 160 319 144 305 141 278Z" fill="url(#metalLight)" stroke="#fff4c5" stroke-width="2"/>
+  <path d="M160.0 7.8 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M232.5 27.2 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M285.6 80.3 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M305.0 152.8 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M285.6 225.3 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M232.5 278.4 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M160.0 297.8 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M87.5 278.4 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M34.4 225.3 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M15.0 152.8 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M34.4 80.3 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+<path d="M87.5 27.2 l4.7 7.2 l-4.7 7.2 l-4.7 -7.2Z" fill="url(#gem)" stroke="url(#shimmerMetal)" stroke-width="1.3"/>
+  <circle cx="160.0" cy="53.0" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="187.7" cy="56.6" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="213.5" cy="67.3" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="235.7" cy="84.3" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="252.7" cy="106.5" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="263.4" cy="132.3" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="267.0" cy="160.0" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="263.4" cy="187.7" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="252.7" cy="213.5" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="235.7" cy="235.7" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="213.5" cy="252.7" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="187.7" cy="263.4" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="160.0" cy="267.0" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="132.3" cy="263.4" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="106.5" cy="252.7" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="84.3" cy="235.7" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="67.3" cy="213.5" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="56.6" cy="187.7" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="53.0" cy="160.0" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="56.6" cy="132.3" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="67.3" cy="106.5" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="84.3" cy="84.3" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="106.5" cy="67.3" r="1.8" fill="url(#shimmerMetal)"/>
+<circle cx="132.3" cy="56.6" r="1.8" fill="url(#shimmerMetal)"/>
+  <path d="M21 81 48 102 19 129 M299 81 272 102 301 129 M25 235 55 224 40 272 M295 235 265 224 280 272" stroke="#fff4c5" stroke-width="3" fill="none"/>
+  </g>
+<g clip-path="url(#portraitHole)" class="frame-radiance" pointer-events="none">
+   <circle cx="160" cy="160" r="58" stroke="#fff4c5" fill="none" stroke-width="16" opacity="0" filter="url(#softGlow)"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.26;.10;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+   <circle cx="160" cy="160" r="58" stroke="#fff4c5" fill="none" stroke-width="1.9" opacity="0"><animate attributeName="r" values="58;90;145;159;159" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.44;.16;0;0" keyTimes="0;.15;.46;.66;1" dur="2.25s" repeatCount="indefinite"/></circle>
+ </g>
+<style>@media (prefers-reduced-motion:reduce){.frame-radiance{display:none!important}}</style>
+</svg>

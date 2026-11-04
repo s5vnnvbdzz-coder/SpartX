@@ -192,7 +192,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
 </style>
-<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=208">
+<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=209">
 </head>
 <body>
 <header>
@@ -548,7 +548,7 @@ window.addEventListener('message',e=>{
   // Only the verified SpartanX parent can style an embedded AscensionX.
   // Never overwrite state.theme; standalone sessions retain their own choice.
   if(!ascensionEmbeddedBySpartanX)return;
-  const allowed=new Set(["dark","light","spartan-red","spartan-gold","spartan-bronze","spartan-blue","spartan-amethyst","spartan-olympian","olympian-athena","sx-halloween","sx-christmas","sx-monster","premium-monster","sx-obsidian-white","sx-halo","sx-goku","premium-olympus","amazonian-crimson","athenas-aegis"]);
+  const allowed=new Set(["dark","light","spartan-red","spartan-gold","spartan-bronze","spartan-blue","spartan-amethyst","spartan-olympian","olympian-athena","sx-halloween","sx-christmas","sx-monster","premium-monster","sx-obsidian-white","premium-olympus","amazonian-crimson","athenas-aegis"]);
   const theme=allowed.has(e.data.theme)?e.data.theme:'dark';
   document.body.dataset.spartxParentTheme=theme;
   const note=document.getElementById('sxLinkedThemeNote');

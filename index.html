@@ -1205,9 +1205,9 @@ $('numberPadSheet').querySelectorAll('[data-pad-key]').forEach(b=>b.addEventList
 $('numberPadSheet').querySelectorAll('[data-pad-action]').forEach(b=>b.addEventListener('click',()=>{if(!padTarget)return;const delta=padTarget.k===0?2.5:1;const n=Math.max(0,(Number(padText)||0)+(b.dataset.padAction==='plus'?delta:-delta));padText=String(Math.round(n*100)/100);padFresh=false;commitPad();}));
 $('numberPadDone').addEventListener('click',closeNumberPad);
 ['setTypeSheet','rpeSheet','numberPadSheet'].forEach(id=>{const sheet=$(id),handle=sheet?.querySelector('.set-type-sheet-handle'),panel=sheet?.querySelector('.set-type-sheet-panel');if(!handle||!panel)return;let start=0,dragging=false;handle.addEventListener('pointerdown',e=>{start=e.clientY;dragging=true;handle.setPointerCapture(e.pointerId);panel.style.transition='none';});handle.addEventListener('pointermove',e=>{if(!dragging)return;panel.style.transform='translateY('+Math.max(0,e.clientY-start)+'px)';});const end=e=>{if(!dragging)return;dragging=false;const dist=e.clientY-start;panel.style.transition='';panel.style.transform='';if(dist>75){if(id==='setTypeSheet')closeSetTypeSheet();else if(id==='rpeSheet')closeRpeSheet();else closeNumberPad();}};handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);});
-window.setType=(i,j,v)=>{if(v==='X'){window.removeSet(i,j);return;}const s=work[i].sets[j];delete s.marker;s.type=v==='W'?'Warm-up':v==='B'?'Backdown Set':v==='F'?'Failure Set':'Working Set';renderWork();};
+window.setType=(i,j,v)=>{if(v==='X'){window.removeSet(i,j);return;}const s=work[i].sets[j];delete s.marker;s.type=v==='W'?'Warm-up':v==='B'?'Backdown Set':v==='F'?'Failure Set':'Working Set';renderWork();updateFloatingRestTimer();saveDraft();};
 window.setNotes=(i,v)=>{work[i].notes=v};
-window.setRest=(i,v)=>{work[i].rest=+v;if(!exerciseTimers[i]){let el=$('restClock-'+i);if(el)el.textContent=fmtTime(+v)}};
+window.setRest=(i,v)=>{work[i].rest=+v;if(!exerciseTimers[i]){let el=$('restClock-'+i);if(el)el.textContent=fmtTime(+v)}updateFloatingRestTimer();saveDraft();};
 window.addSet=i=>{work[i].sets.push({weight:'',reps:'',rpe:'',type:'Working Set',done:false});renderWork()};
 window.removeSet=(i,j)=>{work[i].sets.splice(j,1);renderWork()};
 let activeRestExercise=null,restPreviewExercise=null;
@@ -1272,6 +1272,7 @@ function updateFloatingRestTimer(){
  const chosen=running?activeRestExercise:(restPreviewExercise!==null&&work[restPreviewExercise]?restPreviewExercise:work.findIndex(ex=>ex.sets?.some(set=>!set.done)));
  const index=chosen>=0?chosen:0,exercise=work[index];
  const plan=running?null:exercise?ascensionRestPlan(index):{seconds:120,phase:''};
+ $('restStart').disabled=!exercise;
  $('floatingRestTime').textContent=fmtTime(running?timer.remaining:plan.seconds);
  $('floatingRestExercise').textContent='REST · '+(exercise?.name||'READY')+(running?(timer.phase?' · '+timer.phase:''):(plan.phase?' · '+plan.phase+' · READY':' · READY'));
 }

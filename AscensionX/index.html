@@ -510,7 +510,8 @@ function ascWarmupPlan(lift,week){
 }
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
- if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;return}
+ if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;processAscensionSpartanCompletionQueue();return}
+ if(e.data?.type==='spartx:ascensionProcessCompletedWorkouts'){processAscensionSpartanCompletionQueue();return}
  if(e.data?.type==='spartx:ascensionImportResult'&&ascSpartanImportPending!==null&&String(e.data.requestId)===ascSpartanImportPending){
   ascSpartanImportPending=null;
   $('ascSpartanImportConfirm').disabled=false;
@@ -547,7 +548,7 @@ function buildAscSpartanWorkout(lift){
  const sets=p.deload
   ?Array.from({length:3},()=>({weight:info.topLoad,reps:p.topReps}))
   :[{weight:info.topLoad,reps:p.topReps},...Array.from({length:p.backSets},()=>({weight:info.backLoad,reps:p.backReps}))];
- return {source:'AscensionX',exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
+ return {source:'AscensionX',cycleId:state.cycle.created,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
 }
 function renderAscSpartanImportPreview(){
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
@@ -567,6 +568,82 @@ function requestAscensionSpartanImport(){
  try{window.parent.postMessage({type:'spartx:ascensionImportWorkout',requestId:ascSpartanImportPending,payload:workout},location.origin)}
  catch(e){ascSpartanImportPending=null;$('ascSpartanImportConfirm').disabled=false;$('ascSpartanImportConfirm').textContent='LOAD INTO SPARTANX';toast('Unable to connect to SpartanX')}
 }
+
+// Persisted completion messages let SpartanX sync even if AscensionX was
+// closed or the PWA reloaded before the workout was finished.
+const ASCENSION_COMPLETION_QUEUE_KEY='spartx_ascension_completion_queue_v1';
+function processAscensionSpartanCompletionQueue(){
+ let pending=[];
+ try{
+  const data=JSON.parse(localStorage.getItem(ASCENSION_COMPLETION_QUEUE_KEY)||'[]');
+  if(Array.isArray(data))pending=data;
+ }catch(e){return}
+ if(!pending.length)return;
+ const processed=new Set();let changed=false,advanced=[];
+ for(const packet of pending){
+  if(!packet||typeof packet.id!=='string'||!packet.id.startsWith('sx:'))continue;
+  if(!state.cycle.created||packet.cycleId!==state.cycle.created){
+   // Obsolete programmes must never change a replacement programme.
+   processed.add(packet.id);continue;
+  }
+  if(!LIFTS.includes(packet.lift)||!selectedLifts().includes(packet.lift)||
+     !Number.isInteger(packet.week)||packet.week<1||packet.week>PLAN.length||
+     !Array.isArray(packet.sets)||!packet.sets.length||packet.sets.length>12||
+     !packet.sets.every(x=>Number.isFinite(Number(x.weight))&&Number(x.weight)>0&&Number.isInteger(Number(x.reps))&&Number(x.reps)>0)){
+   processed.add(packet.id);continue;
+  }
+  if(state.logs.some(log=>String(log.sourceSessionId||'')===String(packet.sourceSessionId)&&log.cycleId===packet.cycleId&&log.lift===packet.lift)){
+   processed.add(packet.id);continue;
+  }
+  const existing=activeCycleLogs().find(x=>x.lift===packet.lift&&x.week===packet.week);
+  if(existing?.setsComplete===true){processed.add(packet.id);continue}
+  const plan=PLAN[packet.week-1],requiredCount=plan.deload?3:1+plan.backSets;
+  const sets=packet.sets.map((x,i)=>({
+   label:plan.deload?'Deload '+(i+1):i===0?'Top set':'Back-off '+i,
+   weight:Number(x.weight),reps:Number(x.reps),
+   rpe:x.rpe===null||x.rpe===''||x.rpe===undefined?null:(Number.isFinite(Number(x.rpe))?Number(x.rpe):null),
+   done:true
+  }));
+  const allDone=packet.setsComplete===true&&sets.length===requiredCount&&
+   sets.every((set,i)=>set.reps>=(plan.deload?5:i===0?plan.topReps:plan.backReps));
+  const scores=sets.map(x=>x.rpe).filter(x=>x!==null);
+  const avgRpe=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;
+  const log={
+   id:Date.now(),date:Number.isFinite(Date.parse(packet.date))?packet.date:new Date().toISOString(),
+   source:'SpartanX',sourceSessionId:String(packet.sourceSessionId),cycleId:packet.cycleId,
+   lift:packet.lift,week:packet.week,sets,topWeight:sets[0].weight,topReps:sets[0].reps,
+   volume:sets.reduce((n,x)=>n+x.weight*x.reps,0),notes:typeof packet.notes==='string'?packet.notes.slice(0,300):'Imported from SpartanX',
+   success:allDone&&(avgRpe===null||avgRpe<=plan.rpe),avgRpe,setsComplete:allDone
+  };
+  const oldLogs=state.logs.slice(),oldWeeks={...(state.cycle.weeks||{})},oldCurrentWeek=state.cycle.currentWeek;
+  state.logs=state.logs.filter(x=>!(x.lift===packet.lift&&x.week===packet.week&&logInActiveCycle(x)));
+  state.logs.push(log);
+  state.logs.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const shouldAdvance=allDone&&packet.week===currentWeekFor(packet.lift);
+  if(shouldAdvance&&packet.week<PLAN.length){
+   state.cycle.weeks={...(state.cycle.weeks||{}),[packet.lift]:packet.week+1};
+   state.cycle.currentWeek=packet.week+1;
+  }
+  if(!persist(false)){
+   state.logs=oldLogs;state.cycle.weeks=oldWeeks;state.cycle.currentWeek=oldCurrentWeek;
+   break; // Keep the failed packet for the next attempt.
+  }
+  processed.add(packet.id);changed=true;
+  if(shouldAdvance)advanced.push(packet.lift+(packet.week<PLAN.length?' → Week '+(packet.week+1):' · Week 6 complete'));
+ }
+ if(processed.size){
+  try{localStorage.setItem(ASCENSION_COMPLETION_QUEUE_KEY,JSON.stringify(pending.filter(p=>!processed.has(p?.id))))}catch(e){}
+ }
+ if(changed){
+  const current=$('liftSelect').value;
+  if(selectedLifts().includes(current))$('workWeek').value=currentWeekFor(current);
+  renderAll();
+  if(advanced.length)toast('AscensionX updated: '+advanced.join(' · '));
+ }
+}
+window.addEventListener('storage',e=>{
+ if(e.key===ASCENSION_COMPLETION_QUEUE_KEY)processAscensionSpartanCompletionQueue();
+});
 
 function renderDashboard(){
  $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -730,7 +807,7 @@ function init(){
  setupProfileCollapse();
  document.body.dataset.theme=state.theme||'dark';
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
- renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
+ renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});

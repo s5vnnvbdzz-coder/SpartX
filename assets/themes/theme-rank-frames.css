@@ -1,0 +1,109 @@
+/* SpartanX / Theme-Aware Rank Portrait Frames
+   Preserves each rank's original SVG geometry, metallic highlights,
+   intrinsic animation and transparent portrait window.
+   Filter only the decorative SVG image; NEVER recolour the user's photo. */
+
+/* Default Dark: pale lime-tinted steel to match the main accent. */
+body {
+ --sx-rank-frame-metal:grayscale(1) sepia(.92) saturate(2.9) hue-rotate(43deg) brightness(1.06) contrast(1.05);
+ --sx-rank-frame-halo:#c8f16950;
+ --sx-rank-frame-halo-size:5px;
+}
+
+/* Core Spartan palette. */
+body.spartanx-light {
+ --sx-rank-frame-metal:grayscale(1) sepia(.83) saturate(2.0) hue-rotate(37deg) brightness(.85) contrast(1.14);
+ --sx-rank-frame-halo:#718f2736;
+ --sx-rank-frame-halo-size:3px;
+}
+body.spartanx-red {
+ --sx-rank-frame-metal:grayscale(1) sepia(.98) saturate(3.7) hue-rotate(-39deg) brightness(1.04) contrast(1.12);
+ --sx-rank-frame-halo:#ef202950;
+}
+body.spartanx-gold {
+ --sx-rank-frame-metal:grayscale(1) sepia(.9) saturate(2.1) hue-rotate(-5deg) brightness(1.08) contrast(1.04);
+ --sx-rank-frame-halo:#b89b5e50;
+}
+body.spartanx-bronze {
+ --sx-rank-frame-metal:grayscale(1) sepia(.94) saturate(1.8) hue-rotate(-13deg) brightness(.99) contrast(1.09);
+ --sx-rank-frame-halo:#a8794f4d;
+}
+body.spartanx-blue {
+ --sx-rank-frame-metal:grayscale(1) sepia(.95) saturate(2.7) hue-rotate(163deg) brightness(1.07) contrast(1.1);
+ --sx-rank-frame-halo:#628bb856;
+}
+body.spartanx-amethyst {
+ --sx-rank-frame-metal:grayscale(1) sepia(.95) saturate(2.8) hue-rotate(231deg) brightness(1.08) contrast(1.07);
+ --sx-rank-frame-halo:#b58ae958;
+}
+
+/* Olympian styles keep a softer precious-metal finish. */
+body.spartanx-olympian {
+ --sx-rank-frame-metal:grayscale(1) sepia(.82) saturate(1.85) hue-rotate(-6deg) brightness(1.14) contrast(1.02);
+ --sx-rank-frame-halo:#d8c49a65;
+ --sx-rank-frame-halo-size:6px;
+}
+body.spartanx-olympian-female {
+ --sx-rank-frame-metal:grayscale(1) sepia(.88) saturate(1.85) hue-rotate(269deg) brightness(1.14) contrast(1.03);
+ --sx-rank-frame-halo:#e8b4dd60;
+ --sx-rank-frame-halo-size:6px;
+}
+
+/* Seasonal & energy packs: warm orange, champagne, and electric green. */
+body.sx-halloween {
+ --sx-rank-frame-metal:grayscale(1) sepia(.97) saturate(3.2) hue-rotate(-17deg) brightness(1.08) contrast(1.1);
+ --sx-rank-frame-halo:#ff872b65;
+}
+body.sx-christmas {
+ --sx-rank-frame-metal:grayscale(1) sepia(.86) saturate(2.2) hue-rotate(-1deg) brightness(1.09) contrast(1.05);
+ --sx-rank-frame-halo:#e8c66b54;
+}
+body.sx-monster,
+body.sx-premium-monster {
+ --sx-rank-frame-metal:grayscale(1) sepia(1) saturate(4) hue-rotate(53deg) brightness(1.15) contrast(1.1);
+ --sx-rank-frame-halo:#a7ff0065;
+ --sx-rank-frame-halo-size:6px;
+}
+body.sx-premium-olympus {
+ --sx-rank-frame-metal:grayscale(1) sepia(.92) saturate(2) hue-rotate(-3deg) brightness(1.16) contrast(1.06);
+ --sx-rank-frame-halo:#ffd37660;
+ --sx-rank-frame-halo-size:6px;
+}
+
+/* Female colourways. The matching applies equally to male or female
+   rank frames when either palette is selected. */
+body.spartanx-amazonian {
+ --sx-rank-frame-metal:grayscale(1) sepia(.96) saturate(3) hue-rotate(298deg) brightness(1.11) contrast(1.06);
+ --sx-rank-frame-halo:#c84b7660;
+}
+body.spartanx-aegis {
+ --sx-rank-frame-metal:grayscale(1) sepia(.95) saturate(2.1) hue-rotate(235deg) brightness(1.16) contrast(1.05);
+ --sx-rank-frame-halo:#c5a0f165;
+}
+
+/* Obsidian White: keep the carefully chosen existing silver appearance. */
+body.sx-obsidian-white {
+ --sx-rank-frame-metal:grayscale(1) brightness(.91);
+ --sx-rank-frame-halo:#ffffff38;
+ --sx-rank-frame-halo-size:5px;
+}
+
+/* Single shared frame rule for all tiers and both frame sets. */
+body .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame {
+ filter:var(--sx-rank-frame-metal)
+   drop-shadow(0 0 var(--sx-rank-frame-halo-size,5px) var(--sx-rank-frame-halo)) !important;
+ transition:filter .2s ease;
+}
+/* Monster's Olympian-specific rule previously locked the frame's filter
+   to neon green. Let the chosen theme palette control it as well. */
+body:is(.sx-monster,.sx-premium-monster)[data-sx-rank-tier="8"]
+ .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame {
+ filter:var(--sx-rank-frame-metal)
+   drop-shadow(0 0 8px var(--sx-rank-frame-halo)) !important;
+}
+
+/* Preserve photo and badge colours; only the decorative frame gets tinted.
+   Disable cross-theme transitions where reduced motion is requested. */
+@media (prefers-reduced-motion:reduce) {
+ body .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame {transition:none!important}
+}

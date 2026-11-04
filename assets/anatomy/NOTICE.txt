@@ -1,0 +1,21 @@
+SpartanX anatomical muscle figures (front/back male/female)
+-------------------------------------------------------------
+Anatomical vector paths and body contours are adapted from:
+  https://github.com/NextSolutionsStudio/anatome
+  Apache License, Version 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+
+The upstream Anatome project credits the muscle path system to
+HichamELBSI/react-native-body-highlighter. SpartanX uses its own DOM/SVG renderer,
+theme styling, primary/secondary selection and data integration.
+
+Exercise thumbnail illustrations are served in-app from the RepDB free dataset:
+  https://github.com/RepDB/exercise-dataset
+  https://repdb.co
+These exercise images are licensed by RepDB for commercial/personal in-app use
+with visible attribution. Their dataset may not be redistributed as a dataset.
+The images are not used for generative AI training or transformation.
+
+The original SpartanX exercise names, workout logs, ranking and muscle
+classification data remain separate from these image assets. No third-party
+user-specific workout data is sent to these providers.

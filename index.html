@@ -867,6 +867,7 @@ body.completed-workout-open #trackerNav{display:none!important}
 @media(max-width:380px){.sx-week-strip{gap:1px}.sx-week-date{width:34px;height:34px}.sx-body-map-panel{padding:8px 2px}}
 @media(prefers-reduced-motion:reduce){.sx-anatomy-region{transition:none}}
 </style>
+<link rel="stylesheet" href="./assets/stats/statistics.css">
 </head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -959,6 +960,7 @@ body.completed-workout-open #trackerNav{display:none!important}
 <div id="workoutSavedOverlay" class="hidden" role="presentation"><div class="workout-saved-dialog" role="dialog" aria-modal="true" aria-labelledby="workoutSavedTitle"><div class="workout-saved-icon">✓</div><div class="eyebrow">SPARTANX · TRAINING LOG</div><h2 id="workoutSavedTitle">Workout saved!</h2><p id="workoutSavedMessage">Your session has been added to your training history.</p><button type="button" id="workoutSavedClose">CONTINUE</button></div></div>
 <div id="rankUnlockedOverlay" class="hidden" role="presentation"><div class="rank-unlocked-dialog" role="dialog" aria-modal="true" aria-labelledby="rankUnlockedTitle"><div class="eyebrow">SPARTANX · RANK ACHIEVED</div><img id="rankUnlockedBadge" class="rank-unlocked-art" src="./ranks/mortal.svg" alt="New rank badge"><h2 id="rankUnlockedTitle">Rank unlocked!</h2><p id="rankUnlockedMessage"></p><button id="rankUnlockedClose" type="button">CLAIM YOUR RANK</button></div></div>
 <script src="./assets/anatomy/body-map.js"></script>
+<script src="./assets/exercises/repdb-thumbnails.js"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -2138,4 +2140,4 @@ $('calendarPrev').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()
 $('calendarNext').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderWorkoutCalendar()};
 $('workoutCalendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-calendar-date]');if(b){selectedCalendarDate=b.dataset.calendarDate;renderWorkoutCalendar()}});
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=182',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script></body></html>
+</script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script></body></html>

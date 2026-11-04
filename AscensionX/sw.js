@@ -1,4 +1,4 @@
-const CACHE = 'ascensionx-shell-v44';
+const CACHE = 'ascensionx-shell-v45';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg','../assets/energy-can.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));

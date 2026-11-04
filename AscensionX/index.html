@@ -196,7 +196,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
     <label for="ascSpartanImportLift">Exercise</label>
     <select id="ascSpartanImportLift" onchange="renderAscSpartanImportPreview()"></select>
     <div id="ascSpartanImportPreview" class="asc-spartan-import-preview" aria-live="polite"></div>
-    <p class="tiny">Sets will be pre-filled, but <strong>none will be marked completed</strong>. Your AscensionX programme progress stays unchanged until you log it there.</p>
+    <p class="tiny">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets in SpartanX</strong> to record the session in AscensionX and advance this lift to the next week. Partial sessions are saved but do not advance.</p>
     <div class="asc-spartan-import-actions">
       <button type="button" class="secondary" onclick="trainInsideAscensionX()">TRAIN IN ASCENSIONX</button>
       <button type="button" id="ascSpartanImportConfirm" onclick="requestAscensionSpartanImport()">LOAD INTO SPARTANX</button>
@@ -212,7 +212,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
   <div class="card"><h2>Read Me</h2><p class="tiny">Review the six-week cycle and how to adjust your training loads.</p><button class="secondary full" onclick="openCycleReview()">End-of-cycle review</button></div>
   <div class="card"><h2>Appearance</h2><p class="tiny">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div></div>
   <div class="card"><h2>Weight units</h2><p class="tiny">Choose how weights are displayed and entered throughout the app. Your saved training data stays accurate when switching units.</p><div class="unit-choice"><button id="unitKg" class="secondary" onclick="setUnit('kg')">Kilograms (kg)</button><button id="unitLbs" class="secondary" onclick="setUnit('lbs')">Pounds (lbs)</button></div></div>
-  <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.1 · PROGRAMME MANAGEMENT · LOCAL STORAGE</div></div>
+  <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.2 · SPARTANX WORKOUT SYNC · LOCAL STORAGE</div></div>
  </section>
 </div>
 <main>

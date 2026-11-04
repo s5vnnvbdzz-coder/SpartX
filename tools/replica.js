@@ -110,6 +110,39 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&ascensionOverlay.classList.contains('open'))closeEmbeddedAscensionX();
 });
 window.spartanxCloseEmbeddedAscensionX=closeEmbeddedAscensionX;
+// Handshake only with the AscensionX iframe owned by this Tools card.
+ascensionEmbedFrame.addEventListener('load',()=>{
+ if(ascensionEmbedFrame.getAttribute('src')==='about:blank')return;
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionEmbedReady'},location.origin)}catch(e){}
+});
+window.addEventListener('message',e=>{
+ if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || !ascensionOverlay.classList.contains('open'))return;
+ if(e.data?.type!=='spartx:ascensionImportWorkout')return;
+ const p=e.data.payload||{},requestId=e.data.requestId;
+ const allowed=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+ const validSet=x=>Number.isFinite(Number(x?.weight))&&Number(x.weight)>0&&Number.isInteger(Number(x?.reps))&&Number(x.reps)>0;
+ const valid=p.source==='AscensionX'&&allowed.includes(p.exercise)&&Number.isInteger(p.week)&&p.week>=1&&p.week<=6&&Number(p.tm)>0&&
+  Array.isArray(p.warmupSets)&&p.warmupSets.length===4&&p.warmupSets.every(validSet)&&
+  Array.isArray(p.sets)&&p.sets.length>0&&p.sets.length<=8&&p.sets.every(validSet);
+ let success=false,message='Check your training max and set targets in AscensionX.';
+ if(valid){
+  try{
+   success=typeof window.spartanxImport531==='function'&&window.spartanxImport531(p);
+   if(!success)message='SpartanX could not start the workout. Try reopening SpartanX.';
+  }catch(err){message='SpartanX could not import this workout. No sets were saved.';}
+ }
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionImportResult',requestId,success,message},location.origin)}catch(e){}
+ if(success){
+  // Return to SpartanX's active workout, not the old Tools scroll position.
+  ascensionReturnScroll=0;
+  closeEmbeddedAscensionX();
+  requestAnimationFrame(()=>{
+   window.scrollTo(0,0);
+   document.getElementById('activeWorkoutName')?.focus({preventScroll:true});
+  });
+ }
+});
+
 
 // Every Training Tools card can be minimised independently. Remember each choice on this device.
 (function setupCollapsibleCards(){

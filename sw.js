@@ -1,4 +1,4 @@
-const CACHE='spartanx-v180';
+const CACHE='spartanx-v181';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./tools/replica.js','./AscensionX/index.html','./AscensionX/icon.svg','./tools/settings.html','./tools/531-cycle.html','./tools/531-native.js','./assets/halloween-forest.svg','./assets/christmas-forest.svg','./assets/energy-can.svg','./ranks/mortal.svg','./ranks/spartan.svg','./ranks/hero.svg','./ranks/demigod.svg','./ranks/titan.svg','./ranks/olympian.svg','./ranks/flags/gb.svg','./social.js','./ranks/male-profile-mortal.svg','./ranks/male-profile-spartan.svg','./ranks/male-profile-hero.svg','./ranks/male-profile-demigod.svg','./ranks/male-profile-titan.svg','./ranks/male-profile-olympian.svg','./ranks/female-frame-initiate.svg','./ranks/female-frame-huntress.svg','./ranks/female-frame-amazon.svg','./ranks/female-frame-valkyrie.svg','./ranks/female-frame-athena.svg','./ranks/female-frame-olympian.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(

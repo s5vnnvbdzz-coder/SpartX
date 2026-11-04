@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Energy Zero neon can emblem">
+<defs>
+ <linearGradient id="can" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#030603"/><stop offset=".18" stop-color="#223024"/><stop offset=".45" stop-color="#050805"/><stop offset=".76" stop-color="#0a130a"/><stop offset="1" stop-color="#030503"/></linearGradient>
+ <linearGradient id="edge" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#9eff10"/><stop offset=".45" stop-color="#3b6b19"/><stop offset="1" stop-color="#a7ff00"/></linearGradient>
+ <filter id="glow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <linearGradient id="light" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dcff98"/><stop offset=".5" stop-color="#a7ff00"/><stop offset="1" stop-color="#467a19"/></linearGradient>
+</defs>
+<circle cx="128" cy="128" r="109" fill="none" stroke="#a7ff00" stroke-opacity=".15" stroke-width="3"/>
+<circle cx="128" cy="128" r="96" fill="none" stroke="#a7ff00" stroke-opacity=".46" stroke-width="2" stroke-dasharray="160 12 48 14" filter="url(#glow)"/>
+<path d="M47 91 97 53 84 94 125 64 108 107" stroke="#8fff00" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".36" filter="url(#glow)"/>
+<path d="m161 168 45-43-11 37 27-18-16 42" stroke="#8fff00" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".27" filter="url(#glow)"/>
+<rect x="93" y="30" width="71" height="197" rx="17" fill="#020502" stroke="#97fa2e" stroke-opacity=".7" stroke-width="2"/>
+<rect x="98" y="42" width="61" height="173" rx="10" fill="url(#can)"/>
+<rect x="95" y="33" width="67" height="14" rx="7" fill="#334536" stroke="#b8f770" stroke-width="1"/>
+<ellipse cx="128" cy="38" rx="24" ry="4" fill="#111c12" stroke="#679c3a" stroke-width="1"/>
+<path d="M102 48v161" stroke="#b9ff4b" stroke-opacity=".25" stroke-width="2"/>
+<path d="M154 51v155" stroke="#baff59" stroke-opacity=".1" stroke-width="2"/>
+<path d="m113 77 15-9-3 37 15-32 10 10-16 49-15 11 2-31-12 17z" fill="url(#light)" filter="url(#glow)"/>
+<path d="M112 157h32" stroke="#b9ff58" stroke-width="2" opacity=".8"/>
+<text x="128" y="170" fill="#f1ffee" font-size="13" font-weight="900" letter-spacing="2" text-anchor="middle" font-family="Arial,sans-serif">ENERGY</text>
+<text x="128" y="187" fill="#a7ff00" font-size="11" font-weight="800" letter-spacing="2" text-anchor="middle" font-family="Arial,sans-serif">ZERO</text>
+<rect x="101" y="204" width="54" height="5" rx="1.5" fill="url(#edge)"/>
+<ellipse cx="128" cy="219" rx="29" ry="6" fill="#121d14" stroke="#9fff48" stroke-opacity=".7" stroke-width="1"/>
+</svg>

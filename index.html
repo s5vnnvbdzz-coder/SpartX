@@ -1597,7 +1597,9 @@ function focusLastWorkoutExercise(){
    return;
   }
   const headerHeight=document.querySelector('header')?.getBoundingClientRect().height||0;
-  const top=Math.max(0,last.getBoundingClientRect().top+window.scrollY-headerHeight-8);
+  const summary=$('sessionSummarySticky');
+  const summaryHeight=summary&&!summary.classList.contains('is-dismissed')?summary.getBoundingClientRect().height:0;
+  const top=Math.max(0,last.getBoundingClientRect().top+window.scrollY-headerHeight-summaryHeight-12);
   window.scrollTo(0,top);
  };
  // Wait until the workout screen is visible and the exercise cards have rendered.

@@ -802,7 +802,20 @@ body:is(.sx-monster,.sx-premium-monster)[data-sx-rank-tier="8"] .sx-gamer-emblem
 @media(prefers-reduced-motion:reduce){body:is(.sx-monster,.sx-premium-monster) #trackerNav button .sx-nav-icon,body:is(.sx-monster,.sx-premium-monster) .sx-gamer-emblem.sx-portrait-frame-slot::after,body:is(.sx-monster,.sx-premium-monster) .sx-gamer-card::before{animation:none!important}}
 
 .sx-start-energy-label{display:flex;align-items:center;gap:6px}.sx-start-zap{width:15px;height:15px;flex-shrink:0;color:var(--lime);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--lime) 42%,transparent))}
-</style></head>
+</style>
+<!-- SpartanX: iPhone-safe completed workout scrolling and visible feed action menus -->
+<style>
+#workoutFeed:has(.feed-menu:not(.hidden)){padding-bottom:220px}
+#workoutFeed .workout-feed-card:has(.feed-menu:not(.hidden)){position:relative;z-index:25}
+#workoutFeed .feed-menu:not(.hidden){z-index:60;max-height:calc(100dvh - 165px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body.completed-workout-open{overflow:hidden!important}
+body.completed-workout-open #trackerNav{display:none!important}
+#completedWorkoutOverlay{overflow:hidden!important;align-items:center!important;overscroll-behavior:contain;touch-action:none;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+#completedWorkoutOverlay>.detail-panel{display:flex!important;flex-direction:column!important;width:min(100%,680px);height:min(83dvh,720px);max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;min-height:0;overflow:hidden!important;overscroll-behavior:contain;touch-action:none}
+#completedWorkoutOverlay>.detail-panel>.row{flex:0 0 auto;padding-bottom:12px;border-bottom:1px solid var(--line)}
+#completedWorkoutDetails{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:8px 2px 12px}
+</style>
+</head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
 <main>
@@ -988,8 +1001,22 @@ function renderWorkoutFeed(){
   return '<article class="card workout-feed-card">'+gamingCard+'<div class="feed-profile-row'+(profileCardsEnabled()?' feed-profile-row--card-active':'')+'">'+(profileCardsEnabled()?'':'<div class="feed-avatar">'+avatar+'</div><div class="feed-profile-copy"><strong>'+esc(displayName)+'</strong>'+flexMarkup+'</div>')+'<div class="feed-menu-wrap"><button type="button" class="feed-more" data-feed-menu aria-label="Workout options" aria-expanded="false">•••</button><div class="feed-menu hidden"><button type="button" data-feed-copy="'+esc(String(session.id))+'">Copy workout</button><button type="button" data-feed-share="'+esc(String(session.id))+'">Share workout</button><button type="button" class="feed-edit" data-feed-edit="'+esc(String(session.id))+'">Edit workout</button><button type="button" class="feed-delete" data-feed-delete="'+esc(String(session.id))+'">Delete workout</button></div></div></div><div class="feed-title-row"><h3 class="feed-title" role="button" tabindex="0" data-feed-view="'+esc(String(session.id))+'" aria-label="View completed workout">'+esc(session.name||'Workout')+'</h3><span class="feed-date-time">'+esc(dateText)+(validDate?' · '+esc(date.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})):'')+'</span></div><div class="feed-meta"><div class="feed-stat"><span>TIME</span><strong>'+durationText+'</strong></div><div class="feed-stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="feed-stat"><span>RECORDS</span><strong>🏅 '+records+'</strong></div></div><div class="feed-exercises">'+visible+(extra?'<div class="feed-extra hidden">'+extra+'</div>':'')+'</div>'+(extra?'<button type="button" class="feed-expand" data-feed-toggle>See '+(exercises.length-3)+' more exercises</button>':'')+'<button type="button" class="secondary small feed-view-button" data-feed-view="'+esc(String(session.id))+'">VIEW WORKOUT</button></article>';
  }).join('');
 }
-function openCompletedWorkout(id){const session=(db.sessions||[]).find(item=>String(item.id)===String(id));if(!session)return;const exercises=Array.isArray(session.exercises)?session.exercises:[];const duration=Math.max(0,+session.duration||0);const volume=+session.volume||exercises.flatMap(e=>e.sets||[]).reduce((sum,set)=>sum+(+set.weight||0)*(+set.reps||0),0);$('completedWorkoutTitle').textContent=session.name||'Workout';const date=new Date(session.date);const dateLabel=Number.isNaN(date.getTime())?'Date unavailable':date.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});$('completedWorkoutDetails').innerHTML='<p class="tiny muted">'+esc(dateLabel)+'</p><div class="grid" style="margin:12px 0"><div class="stat"><span>DURATION</span><strong>'+Math.floor(duration/3600)+'h '+Math.floor(duration%3600/60)+'m</strong></div><div class="stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="stat"><span>EXERCISES</span><strong>'+exercises.length+'</strong></div><div class="stat"><span>SETS</span><strong>'+exercises.reduce((n,e)=>n+(e.sets||[]).length,0)+'</strong></div></div>'+(exercises.length?exercises.map((ex,i)=>'<div class="completed-exercise"><h3>'+(i+1)+'. '+esc(ex.name||'Exercise')+'</h3><div class="completed-set" style="font-weight:800;color:var(--muted)"><span>SET</span><span>WEIGHT</span><span>REPS</span><span>RPE</span></div>'+(ex.sets||[]).map((set,j)=>'<div class="completed-set"><span>'+esc((set.type==='Warm-up'?'W':set.type==='Backdown Set'?'B':set.type==='Failure Set'?'F':String(j+1)))+'</span><span>'+kg(+set.weight||0)+'</span><span>'+esc(set.reps??'—')+'</span><span>'+esc(set.rpe??'—')+'</span></div>').join('')+(ex.notes?'<p class="tiny muted">'+esc(ex.notes)+'</p>':'')+'</div>').join(''):'<p class="muted">No exercises recorded.</p>');$('completedWorkoutOverlay').classList.remove('hidden');}
-function closeCompletedWorkout(){$('completedWorkoutOverlay').classList.add('hidden')}
+function openCompletedWorkout(id){const session=(db.sessions||[]).find(item=>String(item.id)===String(id));if(!session)return;const exercises=Array.isArray(session.exercises)?session.exercises:[];const duration=Math.max(0,+session.duration||0);const volume=+session.volume||exercises.flatMap(e=>e.sets||[]).reduce((sum,set)=>sum+(+set.weight||0)*(+set.reps||0),0);$('completedWorkoutTitle').textContent=session.name||'Workout';const date=new Date(session.date);const dateLabel=Number.isNaN(date.getTime())?'Date unavailable':date.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});$('completedWorkoutDetails').innerHTML='<p class="tiny muted">'+esc(dateLabel)+'</p><div class="grid" style="margin:12px 0"><div class="stat"><span>DURATION</span><strong>'+Math.floor(duration/3600)+'h '+Math.floor(duration%3600/60)+'m</strong></div><div class="stat"><span>VOLUME</span><strong>'+kg(volume)+'</strong></div><div class="stat"><span>EXERCISES</span><strong>'+exercises.length+'</strong></div><div class="stat"><span>SETS</span><strong>'+exercises.reduce((n,e)=>n+(e.sets||[]).length,0)+'</strong></div></div>'+(exercises.length?exercises.map((ex,i)=>'<div class="completed-exercise"><h3>'+(i+1)+'. '+esc(ex.name||'Exercise')+'</h3><div class="completed-set" style="font-weight:800;color:var(--muted)"><span>SET</span><span>WEIGHT</span><span>REPS</span><span>RPE</span></div>'+(ex.sets||[]).map((set,j)=>'<div class="completed-set"><span>'+esc((set.type==='Warm-up'?'W':set.type==='Backdown Set'?'B':set.type==='Failure Set'?'F':String(j+1)))+'</span><span>'+kg(+set.weight||0)+'</span><span>'+esc(set.reps??'—')+'</span><span>'+esc(set.rpe??'—')+'</span></div>').join('')+(ex.notes?'<p class="tiny muted">'+esc(ex.notes)+'</p>':'')+'</div>').join(''):'<p class="muted">No exercises recorded.</p>');$('completedWorkoutDetails').scrollTop=0;lockCompletedWorkoutScroll();$('completedWorkoutOverlay').classList.remove('hidden');$('closeCompletedWorkout').focus({preventScroll:true});}
+let completedWorkoutScrollState=null;
+function lockCompletedWorkoutScroll(){
+ if(completedWorkoutScrollState)return;
+ const body=document.body;
+ completedWorkoutScrollState={y:window.scrollY,position:body.style.position,top:body.style.top,width:body.style.width,overflow:body.style.overflow};
+ body.classList.add('completed-workout-open');
+ body.style.position='fixed';body.style.top='-'+completedWorkoutScrollState.y+'px';body.style.width='100%';body.style.overflow='hidden';
+}
+function closeCompletedWorkout(){
+ $('completedWorkoutOverlay').classList.add('hidden');
+ const state=completedWorkoutScrollState;if(!state)return;
+ completedWorkoutScrollState=null;const body=document.body;
+ body.classList.remove('completed-workout-open');body.style.position=state.position;body.style.top=state.top;body.style.width=state.width;body.style.overflow=state.overflow;
+ window.scrollTo(0,state.y);
+}
 $('closeCompletedWorkout').addEventListener('click',closeCompletedWorkout);
 $('completedWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('completedWorkoutOverlay'))closeCompletedWorkout()});
 $('workoutFeed').addEventListener('keydown',e=>{const target=e.target.closest('[data-feed-view]');if(target&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openCompletedWorkout(target.dataset.feedView)}});
@@ -1112,10 +1139,25 @@ $('workoutDurationEditor').addEventListener('click',event=>{
 });
 $('cancelHistoricalEdit').addEventListener('click',cancelHistoricalWorkoutEdit);
 $('saveHistoricalEdit').addEventListener('click',saveHistoricalWorkoutEdit);
+function revealFeedMenu(menu){
+ requestAnimationFrame(()=>{
+  if(!menu||menu.classList.contains('hidden'))return;
+  const rect=menu.getBoundingClientRect();
+  const header=document.querySelector('header');
+  const nav=document.getElementById('trackerNav');
+  const headerBottom=header&&getComputedStyle(header).position!=='static'?header.getBoundingClientRect().bottom:0;
+  const navTop=nav&&getComputedStyle(nav).display!=='none'?nav.getBoundingClientRect().top:window.innerHeight;
+  const topLimit=Math.max(10,headerBottom)+10;
+  const bottomLimit=Math.min(window.innerHeight,navTop)-12;
+  let distance=rect.bottom>bottomLimit?rect.bottom-bottomLimit:rect.top<topLimit?rect.top-topLimit:0;
+  if(distance&&rect.top-distance<topLimit)distance=rect.top-topLimit;
+  if(Math.abs(distance)>1)window.scrollBy({top:distance,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+ });
+}
 $('workoutFeed').addEventListener('click',async e=>{
  const viewButton=e.target.closest('[data-feed-view]');if(viewButton){openCompletedWorkout(viewButton.dataset.feedView);return;}
  const menuButton=e.target.closest('[data-feed-menu]');
- if(menuButton){const wrap=menuButton.closest('.feed-menu-wrap'),menu=wrap.querySelector('.feed-menu'),open=!menu.classList.contains('hidden');$('workoutFeed').querySelectorAll('.feed-menu').forEach(x=>x.classList.add('hidden'));$('workoutFeed').querySelectorAll('[data-feed-menu]').forEach(x=>x.setAttribute('aria-expanded','false'));if(!open){menu.classList.remove('hidden');menuButton.setAttribute('aria-expanded','true');}return;}
+ if(menuButton){const wrap=menuButton.closest('.feed-menu-wrap'),menu=wrap.querySelector('.feed-menu'),open=!menu.classList.contains('hidden');$('workoutFeed').querySelectorAll('.feed-menu').forEach(x=>x.classList.add('hidden'));$('workoutFeed').querySelectorAll('[data-feed-menu]').forEach(x=>x.setAttribute('aria-expanded','false'));if(!open){menu.classList.remove('hidden');menuButton.setAttribute('aria-expanded','true');revealFeedMenu(menu);}return;}
  const editButton=e.target.closest('[data-feed-edit]');
  if(editButton){const id=editButton.dataset.feedEdit,session=db.sessions.find(s=>String(s.id)===id);if(!session)return;beginHistoricalWorkoutEdit(session);return;}
  const copyButton=e.target.closest('[data-feed-copy]');

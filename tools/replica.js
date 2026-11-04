@@ -76,6 +76,23 @@ const ascensionEmbedFrame=$('ascensionXEmbedFrame');
 const ascensionOpenButton=$('openAscensionX');
 const ascensionCloseButton=$('closeAscensionX');
 let ascensionReturnScroll=0,ascensionOldBodyOverflow='',ascensionOldHtmlOverflow='';
+let ascensionQuickCaller=null,ascensionQuickPending=null,ascensionEmbedReadyForShortcut=false;
+function deliverAscensionShortcut(){
+ if(!ascensionQuickPending||!ascensionEmbedReadyForShortcut||!ascensionOverlay.classList.contains('open'))return;
+ const destination=ascensionQuickPending;ascensionQuickPending=null;
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift},location.origin)}catch(e){}
+}
+window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null)=>{
+ const option=mode==='continue'?'continue':'home';
+ ascensionQuickCaller=document.activeElement;
+ ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null};
+ ascensionCloseButton.textContent='← WORKOUT';
+ ascensionCloseButton.setAttribute('aria-label','Close AscensionX and return to SpartanX');
+ openEmbeddedAscensionX();
+ if(!ascensionOverlay.classList.contains('open')){ascensionQuickPending=null;return false}
+ deliverAscensionShortcut();
+ return true;
+};
 
 function openEmbeddedAscensionX(){
  if(ascensionOverlay.classList.contains('open'))return;
@@ -102,9 +119,14 @@ function closeEmbeddedAscensionX(){
  document.body.style.overflow=ascensionOldBodyOverflow;
  document.documentElement.style.overflow=ascensionOldHtmlOverflow;
  requestAnimationFrame(()=>window.scrollTo(0,ascensionReturnScroll));
- if(ascensionOpenButton.isConnected)ascensionOpenButton.focus({preventScroll:true});
+ const returnTarget=ascensionQuickCaller?.isConnected?ascensionQuickCaller:ascensionOpenButton;
+ ascensionQuickCaller=null;ascensionQuickPending=null;
+ ascensionCloseButton.textContent='← TOOLS';
+ ascensionCloseButton.setAttribute('aria-label','Close AscensionX and return to Training Tools');
+ if(returnTarget?.isConnected)returnTarget.focus({preventScroll:true});
+ window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
 }
-ascensionOpenButton.addEventListener('click',openEmbeddedAscensionX);
+ascensionOpenButton.addEventListener('click',()=>{ascensionQuickCaller=null;ascensionQuickPending=null;ascensionCloseButton.textContent='← TOOLS';openEmbeddedAscensionX()});
 ascensionCloseButton.addEventListener('click',closeEmbeddedAscensionX);
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&ascensionOverlay.classList.contains('open'))closeEmbeddedAscensionX();
@@ -113,7 +135,9 @@ window.spartanxCloseEmbeddedAscensionX=closeEmbeddedAscensionX;
 // Handshake only with the AscensionX iframe owned by this Tools card.
 ascensionEmbedFrame.addEventListener('load',()=>{
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank')return;
+ ascensionEmbedReadyForShortcut=true;
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionEmbedReady'},location.origin)}catch(e){}
+ deliverAscensionShortcut();
 });
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || !ascensionOverlay.classList.contains('open'))return;

@@ -1128,7 +1128,12 @@ $('workoutFeed').addEventListener('click',async e=>{
   if(!confirm(question))return;
   if(sessionActive)resetSession();
   editingSessionId=null;editingSessionMeta=null;editReturnSnapshot=null;activeCycle=null;sessionPausedAt=null;
-  work=(session.exercises||[]).map(ex=>({name:ex.name||'Exercise',rest:120,notes:ex.notes||'',sets:(ex.sets||[]).map(set=>({weight:String(set.weight??''),reps:String(set.reps??''),rpe:set.rpe==null?'':String(set.rpe),type:set.type||'Working Set',done:false}))}));
+  work=(session.exercises||[]).map(ex=>{
+   const {ascensionLink,...template}=ex;
+   return {...template,name:ex.name||'Exercise',rest:Number(ex.rest)||120,notes:ex.notes||'',
+    sets:(ex.sets||[]).map(set=>({...set,weight:String(set.weight??''),reps:String(set.reps??''),
+     rpe:set.rpe==null?'':String(set.rpe),type:set.type||'Working Set',done:false}))};
+  });
   sessionActive=true;sessionStarted=Date.now();sessionPausedAt=null;clearInterval(sessionTicker);
   $('activeWorkoutName').textContent=session.name||'Workout';$('sessionClock').textContent='00:00:00';
   beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return;

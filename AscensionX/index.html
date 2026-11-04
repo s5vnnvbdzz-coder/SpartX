@@ -502,6 +502,12 @@ function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max
 // Standalone mode is unchanged; SpartanX sends a verified embedded handshake.
 let ascensionEmbeddedBySpartanX=false,ascSpartanImportPending=null;
 const ASC_WARMUP_PCTS=[40,55,65,75],ASC_WARMUP_REPS=[5,3,2,1];
+// Keep every suggested warm-up BELOW the prescribed main set, including deload.
+function ascWarmupPlan(lift,week){
+ const p=PLAN[week-1],trainingMax=tm(lift);
+ const percentages=p.deload?[25,35,45,55]:p.topPct<=75?[30,40,50,60]:ASC_WARMUP_PCTS;
+ return percentages.map((pct,i)=>({pct,weight:roundTo(trainingMax*pct/100),reps:ASC_WARMUP_REPS[i]}));
+}
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
  if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;return}
@@ -537,7 +543,7 @@ function trainInsideAscensionX(){closeAscSpartanImport();showScreen('workout')}
 function buildAscSpartanWorkout(lift){
  if(!state.cycle.created||!selectedLifts().includes(lift))return null;
  const week=currentWeekFor(lift),info=prescribed(lift,week),p=info.p,trainingMax=tm(lift);
- const warmupSets=ASC_WARMUP_PCTS.map((pct,i)=>({weight:roundTo(trainingMax*pct/100),reps:ASC_WARMUP_REPS[i]}));
+ const warmupSets=ascWarmupPlan(lift,week).map(({weight,reps})=>({weight,reps}));
  const sets=p.deload
   ?Array.from({length:3},()=>({weight:info.topLoad,reps:p.topReps}))
   :[{weight:info.topLoad,reps:p.topReps},...Array.from({length:p.backSets},()=>({weight:info.backLoad,reps:p.backReps}))];
@@ -606,7 +612,7 @@ function renderWorkout(){
  $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
  <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
  <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${p.topPct}% of TM · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${p.backPct}% of TM</div>`:''}</div>
- <div class="tiny"><strong>Warm-up suggestion:</strong> ${[40,55,65,75].map((x,i)=>`${x}% (${kg(roundTo(tm(lift)*x/100))}) × ${[5,3,2,1][i]}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
+ <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
 }
 const RPE_GAUGE="<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4.2 17a9 9 0 1 1 15.6 0\"/><path d=\"M12 14.5 16.5 8\"/><circle cx=\"12\" cy=\"14.5\" r=\"1.5\"/></svg>";

@@ -1498,7 +1498,21 @@ $('exerciseMetricTabs').addEventListener('click',e=>{const b=e.target.closest('[
 let exerciseHistoryReturn='activeWorkout';
 window.showExercisePR=name=>{exerciseHistoryReturn=document.querySelector('.screen.active')?.id||'activeWorkout';activeExerciseMetric='heaviest';renderExerciseHistory(name);switchScreen('exerciseHistoryScreen')};
 $('closeExerciseHistory').onclick=()=>{if(exerciseHistoryReturn==='exerciseStatsScreen')renderExerciseStats();switchScreen(exerciseHistoryReturn);};
-function openLibrary(){libraryCategory='All';$('librarySearch').value='';renderLibrary();switchScreen('exerciseLibraryScreen');}
+function openLibrary(){
+ libraryCategory='All';$('librarySearch').value='';renderLibrary();
+ switchScreen('exerciseLibraryScreen');
+ // Exercise selection is a new page view, not a continuation of the workout's scroll.
+ // Reset both document scroll roots (iOS PWA/Safari differ), after the screen is active.
+ const resetLibraryScroll=()=>{
+  if(!document.querySelector('#exerciseLibraryScreen.screen.active'))return;
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop=0;
+  document.body.scrollTop=0;
+  $('exerciseLibraryScreen').scrollTop=0;
+ };
+ resetLibraryScroll();
+ requestAnimationFrame(resetLibraryScroll);
+}
 function exerciseMuscles(name){const mapped=muscleMap[name];if(mapped?.length)return {primary:mapped[0],secondary:mapped.slice(1)};const n=name.toLowerCase();if(/leg curl|nordic|glute ham/.test(n))return {primary:'hamstrings',secondary:['glutes']};if(/romanian|stiff.leg|good morning/.test(n))return {primary:'hamstrings',secondary:['glutes','back']};if(/calf/.test(n))return {primary:'calves',secondary:[]};if(/squat|leg press|lunge|step.up|leg extension/.test(n))return {primary:'quads',secondary:['glutes']};if(/hip thrust|glute|kickback/.test(n))return {primary:'glutes',secondary:['hamstrings']};if(/deadlift/.test(n))return {primary:'glutes',secondary:['hamstrings','back']};if(/chest|bench|fly|push.up|crossover/.test(n))return {primary:'chest',secondary:['triceps','shoulders']};if(/shoulder|lateral|delt|face pull|upright/.test(n))return {primary:'shoulders',secondary:['traps']};if(/row|pulldown|pull.up|chin.up/.test(n))return {primary:'back',secondary:['biceps']};if(/tricep|skull|dip/.test(n))return {primary:'triceps',secondary:['chest']};if(/curl/.test(n))return {primary:'biceps',secondary:['forearms']};if(/plank|crunch|raise|sit.up|ab wheel|pallof/.test(n))return {primary:'core',secondary:[]};return {primary:'full body',secondary:[]};}
 function renderLibrary(){const cats=['All',...Object.keys(categories)];$('libraryCategories').innerHTML=cats.map(cat=>'<button type="button" class="secondary small '+(libraryCategory===cat?'selected':'')+'" data-library-category="'+esc(cat)+'">'+esc(cat)+'</button>').join('');const q=$('librarySearch').value.trim().toLocaleLowerCase();const names=exerciseNames.filter(n=>(libraryCategory==='All'||categories[libraryCategory].includes(n))&&(n.toLocaleLowerCase().includes(q)||exerciseMuscles(n).primary.includes(q)||exerciseMuscles(n).secondary.some(m=>m.includes(q))));$('libraryList').innerHTML=names.map(n=>'<div class="library-item"><button type="button" class="library-pick" data-add-exercise="'+esc(n)+'"><span class="library-item-name">'+esc(n)+'</span><span class="library-item-meta">Primary: '+esc(exerciseMuscles(n).primary.replace(/\\b\\w/g,c=>c.toUpperCase()))+'</span></button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(n)+'" aria-label="Information and personal records for '+esc(n)+'">i</button></div>').join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';}
 window.chooseLibraryCategory=cat=>{libraryCategory=cat;renderLibrary()};

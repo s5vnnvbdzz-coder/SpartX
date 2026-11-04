@@ -963,7 +963,7 @@ body.sx-workout-calendar-open #trackerNav{display:none!important}
  padding:3px 0!important;margin:0!important;
  color:var(--lime)!important;
  font-size:14px!important;font-weight:850!important;
- text-align:left!important;text-decoration:underline!important;
+ text-align:left!important;text-decoration:none!important;
  text-decoration-color:color-mix(in srgb,var(--lime) 52%,transparent)!important;
  text-decoration-thickness:1px!important;text-underline-offset:4px!important;
  background:transparent!important;border:0!important;box-shadow:none!important;
@@ -2366,5 +2366,5 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=189',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=190',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script></body></html>

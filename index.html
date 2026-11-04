@@ -1465,26 +1465,30 @@ function ascensionRestPlan(i,completedSetIndex){
  const mainPhase=isNumberedWorkoutSet(completed)||isNumberedWorkoutSet(next);
  return {seconds:base+(mainPhase?60:0),phase:mainPhase?'MAIN SETS':'WARM-UP'};
 }
+function attachRestCountdown(i,timer){
+ const tick=()=>{
+  if(exerciseTimers[i]!==timer)return;
+  timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));
+  if(timer.remaining===0){
+   clearInterval(timer.interval);timer.interval=null;
+   if(navigator.vibrate)navigator.vibrate([200,100,200]);
+   if(!document.hidden)playRestCompleteSound();
+   activeRestExercise=null;
+  }
+  updateFloatingRestTimer();
+ };
+ timer.interval=setInterval(tick,500);tick();
+}
 window.startRest=(i,completedSetIndex)=>{
- if(!work[i]||!sessionActive)return;
- restPreviewExercise=i;
- prepareRestSound();
- for(const [key,t] of Object.entries(exerciseTimers)){
-  if(t?.interval)clearInterval(t.interval);
-
- }
+ if(!work[i]||!sessionActive||editingSessionId!==null)return;
+ restPreviewExercise=i;prepareRestSound();
+ for(const t of Object.values(exerciseTimers))if(t?.interval)clearInterval(t.interval);
  exerciseTimers={};
  const plan=ascensionRestPlan(i,completedSetIndex);
  const duration=plan.seconds;
  const timer={deadline:Date.now()+duration*1000,remaining:duration,interval:null,phase:plan.phase};
  activeRestExercise=i;exerciseTimers[i]=timer;
- const tick=()=>{
-  if(exerciseTimers[i]!==timer)return;
-  timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));
-  if(timer.remaining===0){clearInterval(timer.interval);timer.interval=null;if(navigator.vibrate)navigator.vibrate([200,100,200]);if(!document.hidden)playRestCompleteSound();activeRestExercise=null;}
-  updateFloatingRestTimer();
- };
- timer.interval=setInterval(tick,500);tick();
+ attachRestCountdown(i,timer);
 };
 window.skipRest=i=>{
  const timer=exerciseTimers[i];if(timer?.interval)clearInterval(timer.interval);
@@ -1595,7 +1599,7 @@ if(trackerNav){
  },{passive:false});
 }
 function defaultWorkoutName(date=new Date()){const hour=date.getHours();if(hour>=5&&hour<12)return 'Morning Workout';if(hour>=12&&hour<17)return 'Afternoon Workout';return 'Evening Workout';}
-function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();}
+function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
 function renderSavedRoutines(){let a=Array.isArray(db.routines)?db.routines:[];const count=a.length+'/5';if($('routineCount'))$('routineCount').textContent=count;if($('homeRoutineCount'))$('homeRoutineCount').textContent=count;if($('homeRoutineSummary'))$('homeRoutineSummary').textContent='View created routines ('+a.length+')';const html=a.length?a.map((r,i)=>'<div class="listitem row between"><div><strong>'+esc(r.name)+'</strong><div class="tiny muted">'+r.exercises.length+' exercises</div></div><div class="row"><button class="secondary small" data-delete-routine="'+i+'" aria-label="Delete routine">DELETE</button><button class="small" data-start-routine="'+i+'">START</button></div></div>').join(''):'<p class="muted tiny">No routines created yet.</p>';if($('savedRoutineList'))$('savedRoutineList').innerHTML=html;if($('homeRoutineList'))$('homeRoutineList').innerHTML=html;}
 function openRoutineSelect(){renderSavedRoutines();switchScreen('routineSelectScreen');}
 function beginRoutineBuilder(){if((db.routines||[]).length>=5){alert('You can save up to five routines.');return;}routineDraft=[];$('routineName').value='';renderRoutineDraft();switchScreen('routineBuilderScreen');}
@@ -1653,6 +1657,7 @@ function updateSessionClock(){
 }
 $('sessionPauseButton').addEventListener('click',()=>{
  if(!sessionActive||editingSessionId!==null)return;
+ if(sessionStarted===null)sessionStarted=Date.now();
  if(sessionPausedAt===null)sessionPausedAt=Date.now();
  else{sessionStarted+=Date.now()-sessionPausedAt;sessionPausedAt=null;}
  updateSessionClock();saveDraft();
@@ -1883,9 +1888,42 @@ function queueAscensionWorkoutCompletion(savedSession){
   window.dispatchEvent(new CustomEvent('spartx:ascensionLinkedSessionSaved',{detail:{ids:packets.map(p=>p.id)}}));
  }catch(e){console.warn('AscensionX sync queue unavailable; SpartanX workout remains saved.',e)}
 }
-function finishSession(){const wasEditing=editingSessionId!==null;const rankBefore=getWorkoutRank();let ex=work.map(e=>({...e,sets:e.sets.filter(s=>s.done&&isValidTrackedSet(s,e.name)).map(s=>({weight:+s.weight,reps:+s.reps,rpe:s.rpe===''?null:+s.rpe,type:s.type||'Working Set',done:true}))})).filter(e=>e.sets.length);if(!ex.length){alert(editingSessionId?'An edited workout must contain at least one completed set.':'No completed sets have been logged.');return;}let sessionVolume=ex.flatMap(e=>e.sets).reduce((a,set)=>a+set.weight*set.reps,0);if(editingSessionId!==null){const index=db.sessions.findIndex(s=>String(s.id)===String(editingSessionId));if(index<0){alert('This workout could not be found.');resetSession();return;}const old=db.sessions[index];db.sessions[index]={...old,name:$('activeWorkoutName').textContent.trim()||old.name,volume:sessionVolume,exercises:ex,date:editingSessionMeta?.date||old.date,duration:editingSessionMeta?.duration??old.duration};}else{let duration=sessionStarted===null?0:Math.floor((Date.now()-sessionStarted)/1000);db.sessions.unshift({id:Date.now(),date:new Date().toISOString(),name:$('activeWorkoutName').textContent,duration,volume:sessionVolume,exercises:ex,...(activeCycle?{cycleId:activeCycle.id,cycleWeek:activeCycle.week}: {})});if(activeCycle){markCycleWeekCompleted(activeCycle.id,activeCycle.week);activeCycle=null;}}persist();if(!wasEditing)queueAscensionWorkoutCompletion(db.sessions[0]);editingSessionId=null;editingSessionMeta=null;resetSession();stats();renderHomeCycles();switchScreen('home');const rankAfter=getWorkoutRank();pendingRankCelebration=!wasEditing&&rankAfter.index>rankBefore.index?rankAfter:null;showWorkoutSavedDialog(wasEditing);}
+function finishSession(){
+ if(editingSessionId!==null){saveHistoricalWorkoutEdit();return;}
+ const rankBefore=getWorkoutRank();
+ const exercises=work.map(ex=>({
+  ...ex,sets:(ex.sets||[]).filter(set=>set.done&&isValidTrackedSet(set,ex.name)).map(set=>({
+   ...set,weight:Number(set.weight)||0,reps:Number(set.reps)||0,
+   rpe:set.rpe===''||set.rpe==null?null:Number(set.rpe),
+   type:set.type||'Working Set',done:true
+  }))
+ })).filter(ex=>ex.sets.length);
+ if(!exercises.length){alert('No completed sets have been logged.');return;}
+ const volume=exercises.flatMap(ex=>ex.sets).reduce((total,set)=>total+set.weight*set.reps,0);
+ const duration=currentWorkoutElapsed();
+ db.sessions.unshift({
+  id:Date.now(),date:new Date().toISOString(),
+  name:$('activeWorkoutName').textContent.trim()||'Workout',
+  duration,volume,exercises,
+  ...(activeCycle?{cycleId:activeCycle.id,cycleWeek:activeCycle.week}:{})
+ });
+ if(activeCycle){markCycleWeekCompleted(activeCycle.id,activeCycle.week);activeCycle=null;}
+ persist();queueAscensionWorkoutCompletion(db.sessions[0]);
+ resetSession();stats();renderHomeCycles();switchScreen('home');
+ const rankAfter=getWorkoutRank();
+ pendingRankCelebration=rankAfter.index>rankBefore.index?rankAfter:null;
+ showWorkoutSavedDialog(false);
+}
 let pendingRankCelebration=null;function closeWorkoutSavedDialog(){ $('workoutSavedOverlay').classList.add('hidden');if(pendingRankCelebration){const state=pendingRankCelebration;pendingRankCelebration=null;showRankUnlockedDialog(state);}}function showRankUnlockedDialog(state){$('rankUnlockedBadge').src='./ranks/'+state.current.file;$('rankUnlockedBadge').alt=state.current.name+' rank badge';$('rankUnlockedTitle').textContent=spartanxRankLabel(state.current.name,state.index)+' unlocked!';$('rankUnlockedMessage').textContent='Congratulations! You have completed '+state.workouts+' '+(state.workouts===1?'workout':'workouts')+' and earned '+state.count+' XP. You have reached the '+state.current.name+' rank!';$('rankUnlockedOverlay').classList.remove('hidden');$('rankUnlockedClose').focus();}$('rankUnlockedClose').onclick=()=>$('rankUnlockedOverlay').classList.add('hidden');$('rankUnlockedOverlay').addEventListener('click',e=>{if(e.target.id==='rankUnlockedOverlay')e.currentTarget.classList.add('hidden')});function showWorkoutSavedDialog(edited){const overlay=$('workoutSavedOverlay');$('workoutSavedTitle').textContent=edited?'Workout updated!':'Workout complete!';$('workoutSavedMessage').textContent=edited?'Your changes have been saved to your training history.':'Great work. Your completed session has been saved to your training history.';overlay.classList.remove('hidden');$('workoutSavedClose').focus();} $('workoutSavedClose').onclick=closeWorkoutSavedDialog;$('workoutSavedOverlay').addEventListener('click',e=>{if(e.target.id==='workoutSavedOverlay')closeWorkoutSavedDialog()});
-function resetSession(){activeRestExercise=null;restPreviewExercise=null;$('floatingRestTimer')?.classList.add('hidden');activeCycle=null;editingSessionId=null;editingSessionMeta=null;localStorage.removeItem(DRAFT_KEY);clearInterval(sessionTicker);sessionTicker=null;sessionActive=false;sessionStarted=null;Object.values(exerciseTimers).forEach(t=>{if(t.interval)clearInterval(t.interval)});exerciseTimers={};work=[];sessionStarted=null;renderWork();$('workoutName').value='';}
+function resetSession(){
+ activeRestExercise=null;restPreviewExercise=null;$('floatingRestTimer')?.classList.add('hidden');
+ activeCycle=null;editingSessionId=null;editingSessionMeta=null;editReturnSnapshot=null;
+ localStorage.removeItem(DRAFT_KEY);clearInterval(sessionTicker);sessionTicker=null;
+ sessionActive=false;sessionStarted=null;sessionPausedAt=null;
+ Object.values(exerciseTimers).forEach(t=>{if(t?.interval)clearInterval(t.interval)});
+ exerciseTimers={};work=[];renderWork();$('workoutName').value='';
+ syncWorkoutDurationControls();
+}
 
 // Calculator logic lives in the standalone Tools app, not the tracker page.
 

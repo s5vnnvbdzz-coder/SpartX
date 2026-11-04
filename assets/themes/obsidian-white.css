@@ -141,23 +141,9 @@ body.sx-obsidian-white .rank-tier.current>.rank-tier-level{
 body.sx-obsidian-white .sx-asc-quick-progress>span{
  background:linear-gradient(90deg,#777777,#eeeeee)!important;
 }
-/* The existing scrolling page footer gains an almost invisible silver sweep. */
-body.sx-obsidian-white .spartanx-page-footer{
- position:relative!important;
- color:#818181!important;
-}
-body.sx-obsidian-white .spartanx-page-footer::before{
- content:"";
- position:absolute;left:0;top:0;height:1px;width:100%;
- background:linear-gradient(90deg,transparent 0%,#ffffff18 38%,#ffffff99 50%,#ffffff18 62%,transparent 100%);
- background-size:220% 100%;
- animation:sxObsidianFooterSweep 5s linear infinite;
- pointer-events:none;
-}
-@keyframes sxObsidianFooterSweep{
- from{background-position:100% 0}
- to{background-position:-100% 0}
-}
+/* Keep the silver finish, but let the existing fixed navigation
+   own the chasing glow. Do not animate the page footer. */
+body.sx-obsidian-white .spartanx-page-footer{color:#818181!important}
 /* Contextual preview uses a grayscale palette rather than the Monster can. */
 .sx-obsidian-theme-preview{
  display:none;align-items:center;gap:12px;padding:11px 12px;
@@ -181,6 +167,5 @@ body.sx-obsidian-white .sx-obsidian-theme-preview{display:flex}
  body.sx-obsidian-white .profile-identity::before,
  body.sx-obsidian-white .sx-gamer-card::before,
  body.sx-obsidian-white #profileAvatar,
- body.sx-obsidian-white .sx-gamer-emblem.sx-portrait-frame-slot::after,
- body.sx-obsidian-white .spartanx-page-footer::before{animation:none!important}
+ body.sx-obsidian-white .sx-gamer-emblem.sx-portrait-frame-slot::after{animation:none!important}
 }

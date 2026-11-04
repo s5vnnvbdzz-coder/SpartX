@@ -23,6 +23,94 @@ window.addEventListener('message',e=>{
 });
 
  
+
+/* AscensionX embedded edition. This is the SAME AscensionX app loaded inside
+   SpartanX — no fork of its six-week cycle engine or standalone state format. */
+const ascensionToolCard=document.createElement('section');
+ascensionToolCard.className='card';
+ascensionToolCard.id='ascensionXToolCard';
+ascensionToolCard.setAttribute('aria-labelledby','ascensionXToolTitle');
+ascensionToolCard.innerHTML=
+ '<div class="card-head"><h2 id="ascensionXToolTitle">AscensionX</h2></div>'+
+ '<p class="hint" style="margin:0 0 13px;line-height:1.55">Full six-week strength programming, workout logging, adaptive progression, rest timers, training history and profile.</p>'+
+ '<button id="openAscensionX" type="button" class="ascension-launch">OPEN ASCENSIONX <span aria-hidden="true">↗</span></button>'+
+ '<p class="hint" style="margin:11px 0 0">Opens within SpartanX. The standalone AscensionX app remains available separately.</p>';
+shadow.querySelector('main').appendChild(ascensionToolCard);
+
+const ascensionOverlay=document.createElement('div');
+ascensionOverlay.id='ascensionXOverlay';
+ascensionOverlay.setAttribute('role','dialog');
+ascensionOverlay.setAttribute('aria-modal','true');
+ascensionOverlay.setAttribute('aria-labelledby','ascensionXOverlayTitle');
+ascensionOverlay.setAttribute('aria-hidden','true');
+ascensionOverlay.innerHTML=
+ '<div class="ascensionx-embedded-toolbar">'+
+   '<button id="closeAscensionX" type="button" aria-label="Close AscensionX and return to Training Tools">← TOOLS</button>'+
+   '<div class="ascensionx-embedded-brand"><strong id="ascensionXOverlayTitle">ASCENSION<span>X</span></strong><small>STRENGTH METHOD</small></div>'+
+ '</div>'+
+ '<iframe id="ascensionXEmbedFrame" title="AscensionX full training application" src="about:blank" allow="fullscreen" referrerpolicy="same-origin"></iframe>';
+shadow.appendChild(ascensionOverlay);
+
+const ascensionStyle=document.createElement('style');
+ascensionStyle.textContent=[
+ '#ascensionXToolCard .ascension-launch{display:flex!important;align-items:center;justify-content:center;gap:9px;width:100%;min-height:47px;font-size:12px;letter-spacing:.7px;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff09}',
+ '#ascensionXToolCard .ascension-launch span{color:var(--lime);font-size:19px;line-height:1}',
+ '#ascensionXOverlay{display:none;position:fixed;inset:0;width:100%;height:100dvh;z-index:2147483647;flex-direction:column;background:#090b0f;color:#f5f5f7;overflow:hidden;overscroll-behavior:contain}',
+ '#ascensionXOverlay.open{display:flex}',
+ '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:#111419f9;border-bottom:1px solid #343b44;box-shadow:0 2px 12px #0007}',
+ '#ascensionXOverlay .ascensionx-embedded-toolbar button{min-height:37px;flex-shrink:0;padding:8px 12px;background:color-mix(in srgb,var(--panel2) 80%,#111)!important;border:1px solid var(--line)!important;color:var(--txt)!important;border-radius:10px;font-weight:850;font-size:11px}',
+ '#ascensionXOverlay .ascensionx-embedded-brand{display:flex;flex-direction:column;gap:2px;min-width:0}',
+ '#ascensionXOverlay .ascensionx-embedded-brand strong{font-size:15px;letter-spacing:1.7px;font-weight:950}',
+ '#ascensionXOverlay .ascensionx-embedded-brand strong span{color:var(--lime)}',
+ '#ascensionXOverlay .ascensionx-embedded-brand small{font-size:8px;letter-spacing:1.1px;color:#a9afb9}',
+ '#ascensionXEmbedFrame{display:block;flex:1 1 auto;width:100%;height:100%;min-height:0;border:0;background:#08090c;-webkit-overflow-scrolling:touch}',
+ '@media(prefers-reduced-motion:reduce){#ascensionXOverlay *{scroll-behavior:auto}}'
+].join('\n');
+shadow.appendChild(ascensionStyle);
+
+const ascensionRootStyle=document.createElement('style');
+ascensionRootStyle.textContent='body.sx-ascensionx-open #trackerNav, body.sx-ascensionx-open .minimized-session{display:none!important}';
+document.head.appendChild(ascensionRootStyle);
+
+const ascensionEmbedFrame=$('ascensionXEmbedFrame');
+const ascensionOpenButton=$('openAscensionX');
+const ascensionCloseButton=$('closeAscensionX');
+let ascensionReturnScroll=0,ascensionOldBodyOverflow='',ascensionOldHtmlOverflow='';
+
+function openEmbeddedAscensionX(){
+ if(ascensionOverlay.classList.contains('open'))return;
+ if(shadow.querySelector('main').classList.contains('reorder-mode'))return;
+ ascensionReturnScroll=window.scrollY||0;
+ ascensionOldBodyOverflow=document.body.style.overflow;
+ ascensionOldHtmlOverflow=document.documentElement.style.overflow;
+ document.body.classList.add('sx-ascensionx-open');
+ document.body.style.overflow='hidden';
+ document.documentElement.style.overflow='hidden';
+ ascensionOverlay.classList.add('open');
+ ascensionOverlay.setAttribute('aria-hidden','false');
+ // Load only on first open; reopening preserves the full AscensionX session.
+ if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
+  ascensionEmbedFrame.src='./AscensionX/index.html?embedded=spartanx';
+ }
+ ascensionCloseButton.focus({preventScroll:true});
+}
+function closeEmbeddedAscensionX(){
+ if(!ascensionOverlay.classList.contains('open'))return;
+ ascensionOverlay.classList.remove('open');
+ ascensionOverlay.setAttribute('aria-hidden','true');
+ document.body.classList.remove('sx-ascensionx-open');
+ document.body.style.overflow=ascensionOldBodyOverflow;
+ document.documentElement.style.overflow=ascensionOldHtmlOverflow;
+ requestAnimationFrame(()=>window.scrollTo(0,ascensionReturnScroll));
+ if(ascensionOpenButton.isConnected)ascensionOpenButton.focus({preventScroll:true});
+}
+ascensionOpenButton.addEventListener('click',openEmbeddedAscensionX);
+ascensionCloseButton.addEventListener('click',closeEmbeddedAscensionX);
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&ascensionOverlay.classList.contains('open'))closeEmbeddedAscensionX();
+});
+window.spartanxCloseEmbeddedAscensionX=closeEmbeddedAscensionX;
+
 // Every Training Tools card can be minimised independently. Remember each choice on this device.
 (function setupCollapsibleCards(){
  const cards=[...shadow.querySelectorAll('main > .card')];

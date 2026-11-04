@@ -1,0 +1,27 @@
+/* Workout-page quick access for the currently active AscensionX cycle.
+   Existing theme tokens and SpartanX training navigation are preserved. */
+#sxAscensionQuickCard{position:relative;overflow:hidden;padding:16px 15px 15px;background:linear-gradient(132deg,color-mix(in srgb,var(--lime) 10%,var(--panel)) 0%,var(--panel) 56%,color-mix(in srgb,var(--panel2) 54%,var(--panel)) 100%);border:1px solid color-mix(in srgb,var(--lime) 40%,var(--line));box-shadow:0 6px 22px #0003}
+#sxAscensionQuickCard[hidden]{display:none!important}
+#sxAscensionQuickCard::before{content:"";position:absolute;right:-35px;top:-58px;width:155px;height:155px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--lime) 12%,transparent),transparent 72%);pointer-events:none}
+.sx-asc-quick-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.sx-asc-quick-head .eyebrow{font-size:10px}
+.sx-asc-quick-head h2{margin:5px 0 0;font-size:19px;letter-spacing:.25px}
+.sx-asc-quick-tag{flex:0 0 auto;font-size:9px;font-weight:900;letter-spacing:.8px;color:var(--lime);padding:6px 8px;border:1px solid color-mix(in srgb,var(--lime) 45%,var(--line));border-radius:20px;background:color-mix(in srgb,var(--lime) 8%,transparent)}
+.sx-asc-quick-summary{font-size:12px;color:var(--muted);margin:10px 0 13px;line-height:1.45}
+.sx-asc-quick-lifts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.sx-asc-quick-lift{background:color-mix(in srgb,var(--panel2) 60%,transparent);border:1px solid var(--line);border-radius:10px;padding:9px 3px 8px;text-align:center;min-width:0}
+.sx-asc-quick-lift span{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sx-asc-quick-lift strong{display:block;color:var(--txt);font-size:14px;line-height:1.25;margin-top:5px}
+.sx-asc-quick-lift.is-up-next{border-color:color-mix(in srgb,var(--lime) 65%,var(--line));box-shadow:inset 0 0 12px color-mix(in srgb,var(--lime) 7%,transparent)}
+.sx-asc-quick-lift.is-up-next strong{color:var(--lime)}
+.sx-asc-quick-progress-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;font-weight:800;margin-bottom:7px}
+.sx-asc-quick-progress-top span{color:var(--muted)}
+.sx-asc-quick-progress-top strong{color:var(--lime);font-variant-numeric:tabular-nums}
+.sx-asc-quick-progress{height:6px;background:color-mix(in srgb,var(--line) 68%,transparent);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.sx-asc-quick-progress>span{display:block;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--lime) 52%,#222),var(--lime));box-shadow:0 0 10px color-mix(in srgb,var(--lime) 40%,transparent);transition:width .2s ease}
+.sx-asc-quick-actions{display:flex;gap:8px;align-items:stretch}
+#sxAscensionContinue{flex:1.5;background:var(--lime)!important;border:1px solid var(--lime)!important;color:#101114!important;font-weight:900;letter-spacing:.25px;min-height:45px;padding:11px 8px;font-size:11px}
+#sxAscensionView{flex:1;background:color-mix(in srgb,var(--panel2) 70%,transparent)!important;border:1px solid var(--line)!important;color:var(--txt)!important;font-weight:850;min-height:45px;padding:11px 8px;font-size:11px}
+#sxAscensionContinue:focus-visible,#sxAscensionView:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+@media(max-width:359px){.sx-asc-quick-lifts{gap:4px}.sx-asc-quick-lift span{font-size:8px}#sxAscensionContinue,#sxAscensionView{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.sx-asc-quick-progress>span{transition:none}}

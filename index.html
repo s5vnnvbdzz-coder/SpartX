@@ -976,12 +976,26 @@ body.spartanx-light #workoutCalendarGrid button.calendar-day.has-workout .sx-cal
 
 </style>
 <style>
-/* Main screens: a genuinely fixed SpartanX header, not a sticky element that
-   can scroll away on iOS. Dialogs keep their own scrolling and positioning. */
+/* Main pages have a fixed SpartanX header. Reserve its height using
+   a real document-flow spacer, rather than body padding (which could be
+   lost on screen changes or iPhone scroll-lock restoration). */
 :root{--sx-header-live-height:calc(75px + env(safe-area-inset-top,0px))}
-body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)){
- padding-top:var(--sx-header-live-height)!important;
+#sxMainHeaderSpacer{
+ display:none;
+ width:100%;
+ height:var(--sx-header-live-height);
+ min-height:0;
+ pointer-events:none;
 }
+body.sx-main-header-layout,
+body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)){
+ padding-top:0!important;
+}
+body.sx-main-header-layout > #sxMainHeaderSpacer,
+body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)) > #sxMainHeaderSpacer{
+ display:block!important;
+}
+body.sx-main-header-layout > header,
 body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)) > header{
  position:fixed!important;top:0!important;left:0!important;right:0!important;
  width:100%;box-sizing:border-box;z-index:12!important;
@@ -1028,8 +1042,9 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 <link rel="stylesheet" href="./assets/themes/obsidian-white.css">
 <link rel="stylesheet" href="./assets/themes/theme-rank-frames.css?v=201">
 </head>
-<body>
+<body class="sx-main-header-layout">
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
+<div id="sxMainHeaderSpacer" aria-hidden="true"></div>
 <main>
 <section id="home" class="screen active">
 <div class="eyebrow">YOUR TRAINING, TRACKED</div><h1>Home</h1><div class="card spartan-rank-card" id="homeRankProgression"><div class="row between"><div><div class="eyebrow">YOUR JOURNEY</div><h2 style="margin:5px 0 0">Rank Progression</h2></div><span class="rank-xp-total" id="rankXP">0 XP</span></div><div class="rank-current-row"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div></div><div class="rank-progress-track"><span id="rankProgressFill"></span></div><div class="row between rank-progress-labels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div><div class="rank-tier-strip" id="homeRankTiers"></div><div class="rank-milestone-track" aria-label="Ranks achieved"><span id="rankMilestoneFill"></span></div><p class="rank-xp-note">Progress is earned through completed workouts. XP values and rank thresholds can be fine-tuned later.</p></div>
@@ -2419,16 +2434,22 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=201',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=202',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
 <script>
-/* Keep scroll offset equal to the rendered header height, including iPhone
-   safe area and theme/font differences, so content never passes underneath. */
+/* Keep fixed-header spacer exactly as tall as the rendered header.
+   Watch only top-level screen class changes: tab clicks, swipes and back
+   actions all toggle .active, including paths bypassing switchScreen(). */
 (function(){
  const header=document.querySelector('body > header');
  const nav=document.getElementById('trackerNav');
- if(!header)return;
+ const spacer=document.getElementById('sxMainHeaderSpacer');
+ const screens=document.querySelectorAll('main > .screen');
+ if(!header||!spacer)return;
  const update=()=>{
+  const active=document.querySelector('main > .screen.active');
+  const mainTab=!!active&&['home','workout','tools','profile'].includes(active.id);
+  document.body.classList.toggle('sx-main-header-layout',mainTab);
   const headHeight=Math.ceil(header.getBoundingClientRect().height);
   const navHeight=Math.ceil(nav?.getBoundingClientRect().height||0);
   if(headHeight>0)document.documentElement.style.setProperty('--sx-header-live-height',headHeight+'px');
@@ -2438,6 +2459,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   const observer=new ResizeObserver(update);
   observer.observe(header);
   if(nav)observer.observe(nav);
+ }
+ if('MutationObserver' in window){
+  const observer=new MutationObserver(update);
+  screens.forEach(screen=>observer.observe(screen,{attributes:true,attributeFilter:['class']}));
  }
  window.addEventListener('resize',update,{passive:true});
  window.addEventListener('orientationchange',update,{passive:true});

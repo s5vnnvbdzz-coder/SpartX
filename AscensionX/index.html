@@ -137,6 +137,34 @@ nav{position:fixed;isolation:isolate}
 nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--red2) 10%,transparent) 35%,color-mix(in srgb,var(--red2) 52%,transparent) 50%,color-mix(in srgb,var(--red2) 10%,transparent) 65%,transparent 100%);background-size:42% 100%;background-repeat:no-repeat;animation:ascFooterChase 10s linear infinite;opacity:.65;filter:drop-shadow(0 0 3px var(--red2))}
 @keyframes ascFooterChase{from{background-position:-75% 0}to{background-position:175% 0}}
 @media(prefers-reduced-motion:reduce){nav::before{animation:none;background-position:center}}
+
+/* Universal navigation and LOCK IN header */
+nav[aria-label="Main navigation"]{gap:6px}
+nav[aria-label="Main navigation"] button{margin:0!important;border:1px solid color-mix(in srgb,var(--red2) 24%,var(--line))!important;border-radius:11px!important;background:color-mix(in srgb,var(--panel2) 50%,transparent)!important;min-height:50px;box-shadow:inset 0 1px 0 #ffffff08!important}
+nav[aria-label="Main navigation"] button.active{border-color:color-mix(in srgb,var(--red2) 57%,var(--line))!important;background:color-mix(in srgb,var(--red2) 11%,var(--panel2))!important}
+nav[aria-label="Main navigation"] b.sx-nav-icon{display:grid;place-items:center;width:26px;height:24px;line-height:1}
+nav[aria-label="Main navigation"] .sx-nav-svg{width:22px;height:22px;display:block}
+.asc-lock-in-title{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;font-size:clamp(23px,5.5vw,32px)!important;line-height:1.15;letter-spacing:-.6px}
+.asc-lock-in-title .sx-nav-svg{height:28px;width:28px;flex-shrink:0;color:var(--red2);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--red2) 38%,transparent))}
+body[data-theme="energy-zero"]{--bg:#050705;--panel:#111711;--panel2:#202820;--panel3:#243124;--line:#426432;--text:#f0ffee;--muted:#b0c3a9;--red:#7cc600;--red2:#a7ff00;--redDeep:#365818;--green:#b1ff55;background:radial-gradient(ellipse at 93% 4%,#73d91027,transparent 48%),linear-gradient(155deg,#060906,#141b13 54%,#060806)!important}
+body[data-theme="energy-zero"] .card,body[data-theme="energy-zero"] .hero,body[data-theme="energy-zero"] .settings-modal{background:linear-gradient(225deg,#233620,#171d16 22%,#0c110d 90%)!important;border:1px solid #49703b!important;box-shadow:inset 0 1px 0 #a7ff0010,0 0 14px #7fdf1511}
+body[data-theme="energy-zero"] button:not(.ghost):not(.danger):not(.weektile):not(.iconbtn){background:#202e1ea6!important;border:1px solid #558142!important;color:#eaffde!important;box-shadow:none!important}
+body[data-theme="energy-zero"] nav button{background:#1b281b77!important;border:1px solid #4b703b!important}
+body[data-theme="energy-zero"] nav button.active{color:#baff54!important;border-color:#a7ff00!important;box-shadow:0 0 12px #a7ff002d!important}
+@keyframes ascEnergyIconPulse{0%,100%{filter:drop-shadow(0 0 2px #a7ff0044)}50%{filter:drop-shadow(0 0 8px #a7ff00b8)}}
+body[data-theme="energy-zero"] nav .sx-nav-icon{animation:ascEnergyIconPulse 2.5s ease-in-out infinite}
+body[data-theme="energy-zero"] nav button.active .sx-nav-icon{animation-duration:1.8s}
+body[data-theme="energy-zero"] .asc-profile-card{border-color:#7eb642!important;box-shadow:0 0 16px #a7ff0024;position:relative}
+body[data-theme="energy-zero"] .asc-emblem{filter:drop-shadow(0 0 8px #a7ff0070)}
+body[data-theme="energy-zero"][data-sx-rank-tier="8"] .asc-emblem{filter:drop-shadow(0 0 16px #a7ff00c0)}
+body[data-theme="energy-zero"] .rank-progress>i,body[data-theme="energy-zero"] .progress>i{background:linear-gradient(90deg,#31591e,#b6ff39)!important;box-shadow:0 0 11px #a7ff007a}
+body[data-theme="energy-zero"] .weektile.done{background:#1b321a;border-color:#79b73e;box-shadow:inset 0 0 9px #a7ff0020}
+body[data-theme="energy-zero"] .weektile.current{border-color:#a7ff00;box-shadow:0 0 12px #a7ff0040}
+body[data-theme="energy-zero"] input:checked{accent-color:#a7ff00}
+body[data-theme="energy-zero"] #homeHero{position:relative;overflow:hidden}
+body[data-theme="energy-zero"] #homeHero::after{content:"";position:absolute;right:8px;bottom:-25px;width:110px;height:160px;opacity:.08;background:url('../assets/energy-can.svg') center/contain no-repeat;pointer-events:none}
+@media(prefers-reduced-motion:reduce){body[data-theme="energy-zero"] nav .sx-nav-icon{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -187,7 +215,7 @@ nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;poin
 </section>
 
 <section id="workout" class="screen">
- <div class="eyebrow">EXECUTE THE PLAN</div><h1>Workout</h1><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
+ <div class="eyebrow">EXECUTE THE PLAN</div><h1 class="asc-lock-in-title"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg><span>LOCK IN, LET’S GO!</span></h1><p class="tiny muted">Your prescribed loads are calculated from your Training Max. Record what you actually lift.</p>
  <div class="card">
   <div class="fields">
    <div class="field"><label>Lift</label><select id="liftSelect" onchange="syncWorkoutLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
@@ -232,7 +260,7 @@ nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;poin
 </div>
 
 
- <div class="card"><div class="eyebrow">YOUR ASCENSION</div><div class="asc-profile-card"><div class="asc-emblem"><img id="ascRankEmblem" src="../ranks/mortal.svg" alt="Mortal rank emblem"></div><div class="asc-profile-info"><div class="rank-row"><strong id="ascRankName">Mortal</strong><span class="pill red" id="ascRankXp">0 XP</span></div><div class="tiny">PRESTIGE <strong id="ascPrestigeLevel">0</strong></div><div class="tiny" id="ascRankSessions">0 completed workouts</div></div></div><div class="rank-progress"><i id="ascRankBar" style="width:0%"></i></div><div class="tiny" id="ascRankNext">3 XP to next rank</div><div class="rank-tiers">Mortal · Spartan · Hero · Demigod · Titan · Olympian</div><button id="ascPrestigeButton" class="secondary full" style="margin-top:10px" onclick="prestigeAscRank()" disabled>Reach Olympian to prestige</button><p class="tiny">Prestiging resets rank XP to Mortal, increases your prestige level and preserves all workouts and training history.</p><p class="tiny" style="margin:9px 0 0">Earn XP by completing and saving training sessions. Every 3 XP advances your rank.</p></div>
+ <div class="card"><div class="eyebrow">YOUR ASCENSION</div><div class="asc-profile-card"><div class="asc-emblem"><img id="ascRankEmblem" src="../ranks/mortal.svg" alt="Mortal rank emblem"></div><div class="asc-profile-info"><div class="rank-row"><strong id="ascRankName">Mortal - Rank I</strong><span class="pill red" id="ascRankXp">0 XP</span></div><div class="tiny">PRESTIGE <strong id="ascPrestigeLevel">0</strong></div><div class="tiny" id="ascRankSessions">0 completed workouts</div></div></div><div class="rank-progress"><i id="ascRankBar" style="width:0%"></i></div><div class="tiny" id="ascRankNext">3 XP to next rank</div><div class="rank-tiers">Mortal - Rank I · Spartan - Rank II · Hero - Rank III · Demigod - Rank IV · Titan - Rank V · Olympian - Rank VIII</div><button id="ascPrestigeButton" class="secondary full" style="margin-top:10px" onclick="prestigeAscRank()" disabled>Reach Olympian to prestige</button><p class="tiny">Prestiging resets rank XP to Mortal, increases your prestige level and preserves all workouts and training history.</p><p class="tiny" style="margin:9px 0 0">Earn XP by completing and saving training sessions. Every 3 XP advances your rank.</p></div>
  <div class="card"><h2>Starting strength levels</h2><p class="tiny">Enter your current 1RM or a conservative estimated 1RM. The app calculates a Training Max from it. These values are editable at any time.</p>
   <div class="fields"><div class="field"><label>Back Squat 1RM (kg)</label><input id="maxSquat" type="number" step="0.5"></div><div class="field"><label>Bench Press 1RM (kg)</label><input id="maxBench" type="number" step="0.5"></div></div>
   <div class="fields"><div class="field"><label>Deadlift 1RM (kg)</label><input id="maxDeadlift" type="number" step="0.5"></div><div class="field"><label>Overhead Press 1RM (kg)</label><input id="maxOHP" type="number" step="0.5"></div></div>
@@ -243,11 +271,7 @@ nav::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;poin
 
 </section>
 </main>
-<nav aria-label="Main navigation">
- <button class="active" data-screen="home"><b>⌂</b>HOME</button>
- <button data-screen="workout"><b class="nav-barbell" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M3 16h26M7 9v14M11 12v8M21 12v8M25 9v14"/></svg></b>WORKOUT</button>
- <button data-screen="profile"><b class="nav-rank"><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" /></b>PROFILE</button>
-</nav>
+<nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
 <script>
 const $=id=>document.getElementById(id);
@@ -275,11 +299,13 @@ function unit(){return state.profile.unit==='lbs'?'lbs':'kg'}
 function toDisplay(n){return Number(n)*(unit()==='lbs'?2.2046226218:1)}
 function fromDisplay(n){return Number(n)/(unit()==='lbs'?2.2046226218:1)}
 function kg(n){return Number(toDisplay(n)).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit()}
-const ASC_THEMES=[['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['bronze','Bronze'],['gold','Gold'],['athena','Athena Blue']];
+const ASC_THEMES=[['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['bronze','Bronze'],['gold','Gold'],['athena','Athena Blue'],['energy-zero','Energy Zero · TRIAL']];
 const ASC_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
+const ASC_RANK_NUMERALS=['I','II','III','IV','V','VIII'];
+function ascRankLabel(level){return ASC_RANKS[level]+' - Rank '+ASC_RANK_NUMERALS[level];}
 function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;document.body.dataset.theme=theme;persist(false);renderSettings()}
 function ascRankState(){const total=state.logs.length,prestige=state.prestige||{level:0,xpOffset:0};const xp=Math.max(0,total-(prestige.xpOffset||0));const level=Math.min(5,Math.floor(xp/3));return {total,xp,level,prestige:prestige.level||0}}
-function renderAscRank(){const r=ascRankState();$('ascRankName').textContent=ASC_RANKS[r.level];$('ascRankXp').textContent=r.xp+' XP';$('ascRankBar').style.width=(r.level===5?100:r.xp%3/3*100)+'%';$('ascRankNext').textContent=r.level===5?'Olympian achieved — prestige available':(3-r.xp%3)+' XP to '+ASC_RANKS[r.level+1];$('ascPrestigeLevel').textContent=r.prestige;$('ascRankSessions').textContent=r.total+' saved workouts';$('ascRankEmblem').src='../ranks/'+['mortal.svg','spartan.svg','hero.svg','demigod.svg','titan.svg','olympian.svg'][r.level];$('ascRankEmblem').alt=ASC_RANKS[r.level]+' rank emblem';$('navRankEmblem').src=$('ascRankEmblem').src;$('ascPrestigeButton').disabled=r.level<5;$('ascPrestigeButton').textContent=r.level===5?'Prestige · Ascend to level '+(r.prestige+1):'Reach Olympian to prestige'}
+function renderAscRank(){const r=ascRankState();$('ascRankName').textContent=ascRankLabel(r.level);document.body.dataset.sxRankTier=String(r.level===5?8:r.level+1);$('ascRankXp').textContent=r.xp+' XP';$('ascRankBar').style.width=(r.level===5?100:r.xp%3/3*100)+'%';$('ascRankNext').textContent=r.level===5?'Olympian achieved — prestige available':(3-r.xp%3)+' XP to '+ascRankLabel(r.level+1);$('ascPrestigeLevel').textContent=r.prestige;$('ascRankSessions').textContent=r.total+' saved workouts';$('ascRankEmblem').src='../ranks/'+['mortal.svg','spartan.svg','hero.svg','demigod.svg','titan.svg','olympian.svg'][r.level];$('ascRankEmblem').alt=ASC_RANKS[r.level]+' rank emblem';$('navRankEmblem').src=$('ascRankEmblem').src;$('ascPrestigeButton').disabled=r.level<5;$('ascPrestigeButton').textContent=r.level===5?'Prestige · Ascend to level '+(r.prestige+1):'Reach Olympian to prestige'}
 function prestigeAscRank(){const r=ascRankState();if(r.level!==5)return;if(!confirm('Prestige to level '+(r.prestige+1)+'? Your rank resets to Mortal, but your workouts and training history are preserved.'))return;state.prestige={level:r.prestige+1,xpOffset:r.total};persist();toast('Prestige '+(r.prestige+1)+' unlocked!')}
 
 function openCycleReview(){renderCycleReview();$('cycleReviewBackdrop').classList.add('open')}

@@ -88,6 +88,19 @@ body.sx-obsidian-white {
  --sx-rank-frame-halo-size:5px;
 }
 
+/* Halo: olive-steel metal with a cool cyan visor-like edge light. */
+body.sx-halo {
+ --sx-rank-frame-metal:grayscale(1) sepia(1) saturate(3.2) hue-rotate(137deg) brightness(.96) contrast(1.14);
+ --sx-rank-frame-halo:#7ce9df80;
+ --sx-rank-frame-halo-size:7px;
+}
+/* Goku: burnished orange/gold metal with a warm power aura. */
+body.sx-goku {
+ --sx-rank-frame-metal:grayscale(1) sepia(1) saturate(4.4) hue-rotate(-17deg) brightness(1.18) contrast(1.08);
+ --sx-rank-frame-halo:#ffac4a87;
+ --sx-rank-frame-halo-size:7px;
+}
+
 /* Shared frame treatment for both sexes and all rank tiers.
    The data-active-theme selector outranks older Monster-specific rules,
    including stylesheet-order differences on an installed iPhone PWA. */

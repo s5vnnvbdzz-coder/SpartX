@@ -61,15 +61,15 @@ const ascensionStyle=document.createElement('style');
 ascensionStyle.textContent=[
  '#ascensionXToolCard .ascension-launch{display:flex!important;align-items:center;justify-content:center;gap:9px;width:100%;min-height:47px;font-size:12px;letter-spacing:.7px;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff09}',
  '#ascensionXToolCard .ascension-launch span{color:var(--lime);font-size:19px;line-height:1}',
- '#ascensionXOverlay{display:none;position:fixed;inset:0;width:100%;height:100dvh;z-index:2147483647;flex-direction:column;background:#090b0f;color:#f5f5f7;overflow:hidden;overscroll-behavior:contain}',
+ '#ascensionXOverlay{display:none;position:fixed;inset:0;width:100%;height:100dvh;z-index:2147483647;flex-direction:column;background:var(--bg,#090b0f);color:var(--txt,#f5f5f7);overflow:hidden;overscroll-behavior:contain}',
  '#ascensionXOverlay.open{display:flex}',
- '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:#111419f9;border-bottom:1px solid #343b44;box-shadow:0 2px 12px #0007}',
+ '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(100deg,var(--bg,#111419),var(--panel,#111419));border-bottom:1px solid var(--line,#343b44);box-shadow:0 2px 12px #0007}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar button{min-height:37px;flex-shrink:0;padding:8px 12px;background:color-mix(in srgb,var(--panel2) 80%,#111)!important;border:1px solid var(--line)!important;color:var(--txt)!important;border-radius:10px;font-weight:850;font-size:11px}',
  '#ascensionXOverlay .ascensionx-embedded-brand{display:flex;flex-direction:column;gap:2px;min-width:0}',
  '#ascensionXOverlay .ascensionx-embedded-brand strong{font-size:15px;letter-spacing:1.7px;font-weight:950}',
  '#ascensionXOverlay .ascensionx-embedded-brand strong span{color:var(--lime)}',
  '#ascensionXOverlay .ascensionx-embedded-brand small{font-size:8px;letter-spacing:1.1px;color:#a9afb9}',
- '#ascensionXEmbedFrame{display:block;flex:1 1 auto;width:100%;height:100%;min-height:0;border:0;background:#08090c;-webkit-overflow-scrolling:touch}',
+ '#ascensionXEmbedFrame{display:block;flex:1 1 auto;width:100%;height:100%;min-height:0;border:0;background:var(--bg,#08090c);-webkit-overflow-scrolling:touch}',
  '@media(prefers-reduced-motion:reduce){#ascensionXOverlay *{scroll-behavior:auto}}'
 ].join('\n');
 shadow.appendChild(ascensionStyle);
@@ -82,6 +82,30 @@ document.head.appendChild(ascensionRootStyle);
 const ascensionEmbedFrame=ascensionPortal.getElementById('ascensionXEmbedFrame');
 const ascensionOpenButton=$('openAscensionX');
 const ascensionCloseButton=ascensionPortal.getElementById('closeAscensionX');
+
+function syncEmbeddedAscensionTheme(){
+ let theme='dark';
+ try{
+  const p=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}');
+  if(typeof p.theme==='string')theme=p.theme;
+ }catch(e){}
+ // The portal lives in its own shadow root; pass the active parent colours
+ // through its host so the toolbar and frame chrome match SpartanX.
+ const computed=getComputedStyle(document.body);
+ for(const key of ['--bg','--panel','--panel2','--line','--txt','--muted','--lime']){
+  const value=computed.getPropertyValue(key).trim();
+  if(value)ascensionPortalHost.style.setProperty(key,value);
+ }
+ if(ascensionEmbedFrame.getAttribute('src')!=='about:blank'){
+  try{ascensionEmbedFrame.contentWindow?.postMessage(
+   {type:'spartx:applyParentTheme',theme},location.origin);}catch(e){}
+ }
+}
+window.addEventListener('spartx:preferencesChanged',syncEmbeddedAscensionTheme);
+window.addEventListener('storage',e=>{
+ if(e.key==='spartx_preferences_v1')syncEmbeddedAscensionTheme();
+});
+
 let ascensionReturnScroll=0,ascensionOldBodyOverflow='',ascensionOldHtmlOverflow='';
 let ascensionQuickCaller=null,ascensionQuickPending=null,ascensionEmbedReadyForShortcut=false;
 function deliverAscensionShortcut(){
@@ -112,6 +136,7 @@ function openEmbeddedAscensionX(){
  document.documentElement.style.overflow='hidden';
  ascensionOverlay.classList.add('open');
  ascensionOverlay.setAttribute('aria-hidden','false');
+ syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
   ascensionEmbedFrame.src='./AscensionX/index.html';
@@ -144,6 +169,7 @@ ascensionEmbedFrame.addEventListener('load',()=>{
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank')return;
  ascensionEmbedReadyForShortcut=true;
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionEmbedReady'},location.origin)}catch(e){}
+ syncEmbeddedAscensionTheme();
  deliverAscensionShortcut();
 });
 window.addEventListener('message',e=>{

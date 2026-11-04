@@ -46,7 +46,8 @@
 .session-clock-card{background:linear-gradient(135deg,#1d2420,#111619);border:1px solid #40512c;border-radius:16px;padding:16px;margin:14px 0;display:flex;flex-direction:column;gap:5px}
 .session-clock-card strong{font-size:36px;letter-spacing:1px;color:var(--lime);font-variant-numeric:tabular-nums}
 .session-stats{margin-bottom:14px}.muscle-card{padding:14px}.muscle-diagram{display:flex;justify-content:center;align-items:center;gap:18px;min-height:220px}
-.muscle-diagram svg{height:210px;width:auto;max-width:48%}.muscle-shape{fill:#333b42;stroke:#68727b;stroke-width:1.5}.muscle-hot{fill:#c8f169;stroke:#e2ff9a;stroke-width:1.5}
+.muscle-diagram svg{height:210px;width:auto;max-width:48%}.muscle-shape{fill:#333b42;stroke:#68727b;stroke-width:1.5}.muscle-secondary{fill:color-mix(in srgb,var(--lime) 39%,#354047);stroke:color-mix(in srgb,var(--lime) 55%,#6c7880);stroke-width:1.5}
+.muscle-hot{fill:var(--lime);stroke:color-mix(in srgb,var(--lime) 65%,white);stroke-width:1.5}
 .muscle-legend{font-size:11px;color:var(--muted);text-align:center;margin-top:7px}
 .library-search{margin:12px 0}body.spartanx-red .library-pick,body.spartanx-red .library-categories button,body.spartanx-red .library-item button{background:rgba(39,40,43,.62)!important;color:#e8e6e7!important;border:1px solid rgba(145,139,143,.22)!important}
 .library-categories{display:flex;gap:7px;overflow-x:auto;padding:3px 0 12px}.library-categories button{white-space:nowrap;flex:0 0 auto}.library-categories button.selected{background:var(--lime);color:#111}
@@ -1456,7 +1457,31 @@ $('activeWorkoutName').addEventListener('keydown',e=>{if(e.target.id==='activeWo
 function resumeSession(){if(!sessionActive)return;libraryMode='workout';switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
 window.resumeActiveWorkout=resumeSession;
 function updateLiveStats(){let completed=work.flatMap(e=>e.sets.filter(s=>s.done&&+s.weight>0&&+s.reps>0).map(s=>({weight:+s.weight,reps:+s.reps})));$('liveVolume').textContent=kg(completed.reduce((a,s)=>a+s.weight*s.reps,0));$('liveSets').textContent=completed.length;renderMuscles();}
-function renderMuscles(){let active=new Set(work.filter(e=>e.sets.some(s=>s.done)).flatMap(e=>muscleMap[e.name]||[]));const shape=(id,d)=>'<path class="muscle-shape '+(active.has(id)?'muscle-hot':'')+'" d="'+d+'"/>';const person=(back)=>'<svg viewBox="0 0 150 270" role="img" aria-label="'+(back?'Back':'Front')+' muscle diagram"><circle class="muscle-shape" cx="75" cy="20" r="14"/><path class="muscle-shape" d="M58 39 Q75 32 92 39 L105 80 L95 115 L90 158 L86 250 L64 250 L60 158 L55 115 L45 80Z"/>'+ (back?shape('back','M58 43 Q75 37 92 43 L99 86 Q75 105 51 86Z')+shape('glutes','M56 103 Q75 94 94 103 L91 130 Q75 143 59 130Z')+shape('hamstrings','M60 137 L73 137 L72 204 L59 204Z')+shape('hamstrings','M77 137 L90 137 L91 204 L78 204Z'):shape('chest','M51 48 Q75 39 99 48 L96 72 Q75 83 54 72Z')+shape('shoulders','M44 45 Q53 38 58 47 L55 67 L44 64Z')+shape('shoulders','M92 47 Q97 38 106 45 L106 64 L95 67Z')+shape('quads','M58 137 L73 137 L72 195 L57 195Z')+shape('quads','M77 137 L92 137 L93 195 L78 195Z'))+shape('biceps','M43 68 L53 70 L48 105 L39 101Z')+shape('triceps','M97 68 L107 70 L111 101 L102 105Z')+shape('calves','M58 207 L72 207 L69 246 L57 246Z')+shape('calves','M78 207 L92 207 L93 246 L81 246Z')+shape('core','M62 77 L88 77 L86 111 L64 111Z')+'</svg>';let diagram=person(false)+person(true);$('muscleDiagram').innerHTML=diagram;$('muscleDiagramLarge').innerHTML=diagram;$('muscleLegend').textContent=active.size?[...active].map(x=>x[0].toUpperCase()+x.slice(1)).join(' · '):'Complete sets to highlight the muscles trained.';}
+function renderMuscles(){
+ const trained=work.filter(ex=>(ex.sets||[]).some(set=>set.done)).map(ex=>exerciseMuscles(ex.name));
+ const primary=new Set(trained.flatMap(item=>item.primary));
+ const secondary=new Set(trained.flatMap(item=>item.secondary).filter(key=>!primary.has(key)));
+ const shape=(id,d)=>'<path class="muscle-shape'+(primary.has(id)?' muscle-hot':secondary.has(id)?' muscle-secondary':'')+'" d="'+d+'"/>';
+ const person=back=>'<svg viewBox="0 0 150 270" role="img" aria-label="'+(back?'Back':'Front')+' muscle diagram">'+
+ '<circle class="muscle-shape" cx="75" cy="20" r="14"/><path class="muscle-shape" d="M58 39 Q75 32 92 39 L105 80 L95 115 L90 158 L86 250 L64 250 L60 158 L55 115 L45 80Z"/>'+
+ (back?shape('traps','M62 40 L75 49 L88 40 L96 56 L75 65 L54 56Z')+
+ shape('back','M58 56 Q75 48 92 56 L99 86 Q75 105 51 86Z')+
+ shape('glutes','M56 103 Q75 94 94 103 L91 130 Q75 143 59 130Z')+
+ shape('hamstrings','M60 137 L73 137 L72 204 L59 204Z')+shape('hamstrings','M77 137 L90 137 L91 204 L78 204Z'):
+ shape('chest','M51 48 Q75 39 99 48 L96 72 Q75 83 54 72Z')+
+ shape('shoulders','M44 45 Q53 38 58 47 L55 67 L44 64Z')+shape('shoulders','M92 47 Q97 38 106 45 L106 64 L95 67Z')+
+ shape('quads','M58 137 L73 137 L72 195 L57 195Z')+shape('quads','M77 137 L92 137 L93 195 L78 195Z')+
+ shape('adductors','M70 139 L74 139 L74 186 L67 179Z')+shape('adductors','M76 139 L80 139 L83 179 L76 186Z')+
+ shape('hip_flexors','M60 113 L74 126 L69 137 L57 126Z')+shape('hip_flexors','M90 113 L76 126 L81 137 L93 126Z'))+
+ shape('biceps','M43 68 L53 70 L48 105 L39 101Z')+shape('triceps','M97 68 L107 70 L111 101 L102 105Z')+
+ shape('forearms','M40 108 L48 108 L45 137 L36 135Z')+shape('forearms','M102 108 L110 108 L114 135 L105 137Z')+
+ shape('calves','M58 207 L72 207 L69 246 L57 246Z')+shape('calves','M78 207 L92 207 L93 246 L81 246Z')+
+ shape('core','M62 77 L88 77 L86 111 L64 111Z')+'</svg>';
+ const markup=person(false)+person(true);
+ $('muscleDiagram').innerHTML=markup;$('muscleDiagramLarge').innerHTML=markup;
+ $('muscleLegend').textContent=!primary.size&&!secondary.size?'Complete sets to highlight the muscles trained.':
+ 'Primary: '+(muscleNames([...primary])||'None')+(secondary.size?' · Secondary: '+muscleNames([...secondary]):'');
+}
 function exerciseHistoryData(name){
  const key=name.toLocaleLowerCase();
  const sessions=db.sessions.map(session=>{
@@ -1540,7 +1565,24 @@ function openLibrary(){
  resetLibraryScroll();
  requestAnimationFrame(resetLibraryScroll);
 }
-function renderLibrary(){const cats=['All',...Object.keys(categories)];$('libraryCategories').innerHTML=cats.map(cat=>'<button type="button" class="secondary small '+(libraryCategory===cat?'selected':'')+'" data-library-category="'+esc(cat)+'">'+esc(cat)+'</button>').join('');const q=$('librarySearch').value.trim().toLocaleLowerCase();const names=exerciseNames.filter(n=>(libraryCategory==='All'||categories[libraryCategory].includes(n))&&(n.toLocaleLowerCase().includes(q)||exerciseMuscles(n).primary.includes(q)||exerciseMuscles(n).secondary.some(m=>m.includes(q))));$('libraryList').innerHTML=names.map(n=>'<div class="library-item"><button type="button" class="library-pick" data-add-exercise="'+esc(n)+'"><span class="library-item-name">'+esc(n)+'</span><span class="library-item-meta">Primary: '+esc(exerciseMuscles(n).primary.replace(/\\b\\w/g,c=>c.toUpperCase()))+'</span></button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(n)+'" aria-label="Information and personal records for '+esc(n)+'">i</button></div>').join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';}
+function renderLibrary(){
+ const cats=['All',...Object.keys(categories)];
+ $('libraryCategories').innerHTML=cats.map(cat=>'<button type="button" class="secondary small '+(libraryCategory===cat?'selected':'')+'" data-library-category="'+esc(cat)+'">'+esc(cat)+'</button>').join('');
+ const q=$('librarySearch').value.trim().toLocaleLowerCase();
+ const names=exerciseNames.filter(name=>{
+  const muscles=exerciseMuscles(name);
+  return (libraryCategory==='All'||categories[libraryCategory]?.includes(name))&&
+   (name.toLocaleLowerCase().includes(q)||[...muscles.primary,...muscles.secondary].some(m=>m.includes(q)||(MUSCLE_LABELS[m]||'').toLocaleLowerCase().includes(q)));
+ });
+ $('libraryList').innerHTML=names.map(name=>{
+  const muscles=exerciseMuscles(name);
+  return '<div class="library-item"><button type="button" class="library-pick" data-add-exercise="'+esc(name)+'">'+
+   '<span class="library-item-name">'+esc(name)+'</span>'+
+   '<span class="library-item-meta">Primary: '+esc(muscleNames(muscles.primary)||'Not classified')+'</span>'+
+   '<span class="library-item-meta">Secondary: '+esc(muscleNames(muscles.secondary)||'None listed')+'</span>'+
+   '</button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(name)+'" aria-label="Information and personal records for '+esc(name)+'">i</button></div>';
+ }).join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';
+}
 window.chooseLibraryCategory=cat=>{libraryCategory=cat;renderLibrary()};
 window.pickExercise=name=>{if(typeof name!=='string'||!name.trim())return;if(libraryMode==='routine'){if(!routineDraft.some(ex=>ex.name===name)){routineDraft.push({name,sets:[{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''}]});}renderRoutineDraft();switchScreen('routineBuilderScreen');saveDraft();return;}libraryMode='workout';if(!sessionActive){sessionActive=true;$('activeWorkoutName').textContent=$('workoutName').value.trim()||defaultWorkoutName();}work.push({name,rest:120,notes:'',sets:Array.from({length:3},()=>({weight:'',reps:'',rpe:'',type:'Working Set',done:false}))});switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();};
 $('exerciseList').addEventListener('click',e=>{const trophy=e.target.closest('[data-live-pr]');if(!trophy)return;e.preventDefault();e.stopPropagation();window.showExercisePR(trophy.dataset.livePr);});

@@ -192,6 +192,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
 </style>
+<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=207">
 </head>
 <body>
 <header>
@@ -234,7 +235,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
  <section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
   <div class="modal-head row between"><div><div class="eyebrow">ASCENSIONX</div><h2 id="settingsTitle" style="margin:4px 0 0">Settings</h2></div><button class="iconbtn" onclick="closeSettings()" aria-label="Close settings">×</button></div>
   <div class="card"><h2>Read Me</h2><p class="tiny">Review the six-week cycle and how to adjust your training loads.</p><button class="secondary full" onclick="openCycleReview()">End-of-cycle review</button></div>
-  <div class="card"><h2>Appearance</h2><p class="tiny">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div></div>
+  <div class="card"><h2>Appearance</h2><p class="tiny">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div><p class="tiny" id="sxLinkedThemeNote" hidden>Appearance follows your selected SpartanX theme while embedded. Standalone AscensionX themes remain independent.</p></div>
   <div class="card"><h2>Weight units</h2><p class="tiny">Choose how weights are displayed and entered throughout the app. Your saved training data stays accurate when switching units.</p><div class="unit-choice"><button id="unitKg" class="secondary" onclick="setUnit('kg')">Kilograms (kg)</button><button id="unitLbs" class="secondary" onclick="setUnit('lbs')">Pounds (lbs)</button></div></div>
   <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.3 · WORKOUT HISTORY RECOVERY · LOCAL STORAGE</div></div>
  </section>
@@ -536,6 +537,18 @@ function ascWarmupPlan(lift,week){
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
  if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;processAscensionSpartanCompletionQueue();renderDashboard();return}
+ if(e.data?.type==='spartx:applyParentTheme'){
+  // Only the verified SpartanX parent can style an embedded AscensionX.
+  // Never overwrite state.theme; standalone sessions retain their own choice.
+  if(!ascensionEmbeddedBySpartanX)return;
+  const allowed=new Set(["dark","light","spartan-red","spartan-gold","spartan-bronze","spartan-blue","spartan-amethyst","spartan-olympian","olympian-athena","sx-halloween","sx-christmas","sx-monster","premium-monster","sx-obsidian-white","sx-halo","sx-goku","premium-olympus","amazonian-crimson","athenas-aegis"]);
+  const theme=allowed.has(e.data.theme)?e.data.theme:'dark';
+  document.body.dataset.spartxParentTheme=theme;
+  const note=document.getElementById('sxLinkedThemeNote');
+  if(note)note.hidden=false;
+  return;
+ }
+
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){

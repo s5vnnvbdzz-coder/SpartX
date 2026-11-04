@@ -1016,6 +1016,14 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
   padding-bottom:calc(var(--sx-nav-live-height) + 18px)!important;
  }
 }
+/* Mobile-only: suppress rubber-band motion at page boundaries. Do not
+   alter root overflow, page height, desktop scrolling or modal scrollers. */
+@media (max-width:767px) and (pointer:coarse){
+ html:has(body>main>.screen.active:is(#home,#workout,#tools,#profile)),
+ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)){
+  overscroll-behavior-y:none;
+ }
+}
 </style>
 </head>
 <body>
@@ -2409,7 +2417,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=197',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=198',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
 <script>
 /* Keep scroll offset equal to the rendered header height, including iPhone
@@ -2432,6 +2440,53 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  window.addEventListener('resize',update,{passive:true});
  window.addEventListener('orientationchange',update,{passive:true});
  update();
+})();
+</script>
+
+<script>
+/* iPhone Safari can still rubber-band beyond an otherwise correct page end.
+   Only cancel gestures trying to move beyond the document boundary; preserve
+   normal vertical scrolling, horizontal swipe navigation, and nested dialogs. */
+(function(){
+ if(!('ontouchstart' in window)||!window.matchMedia)return;
+ const mobile=window.matchMedia('(max-width:767px) and (pointer:coarse)');
+ const mainPage=()=>!!document.querySelector('main > .screen.active:is(#home,#workout,#tools,#profile)');
+ let previousX=null,previousY=null;
+ const reset=()=>{previousX=null;previousY=null;};
+ document.addEventListener('touchstart',event=>{
+  if(!mobile.matches||event.touches.length!==1){reset();return;}
+  previousX=event.touches[0].clientX;
+  previousY=event.touches[0].clientY;
+ },{passive:true});
+ document.addEventListener('touchmove',event=>{
+  if(!mobile.matches||!event.cancelable||!mainPage()||event.touches.length!==1||previousY===null)return;
+  const x=event.touches[0].clientX,y=event.touches[0].clientY;
+  const dx=x-previousX,dy=y-previousY;
+  previousX=x;previousY=y;
+  if(Math.abs(dy)<1||Math.abs(dx)>Math.abs(dy))return;
+  const target=event.target;
+  if(target?.closest?.('input,textarea,select,[contenteditable="true"],.detail-overlay,.set-type-sheet,.feed-menu'))return;
+  if(document.body.classList.contains('sx-ascensionx-open')||
+     document.body.classList.contains('profile-settings-open')||
+     document.body.classList.contains('sx-workout-calendar-open')||
+     document.body.classList.contains('completed-workout-open')||
+     document.querySelector('.detail-overlay:not(.hidden)'))return;
+  // Do not swallow touches belonging to an independently scrolling component.
+  let ancestor=target;
+  while(ancestor&&ancestor!==document.body&&ancestor!==document.documentElement){
+   if(ancestor instanceof Element){
+    const overflow=getComputedStyle(ancestor).overflowY;
+    if((overflow==='auto'||overflow==='scroll')&&ancestor.scrollHeight>ancestor.clientHeight+2)return;
+   }
+   ancestor=ancestor.parentElement;
+  }
+  const root=document.scrollingElement||document.documentElement;
+  const position=Math.max(window.scrollY||0,root.scrollTop||0,document.body.scrollTop||0);
+  const maximum=Math.max(0,Math.max(root.scrollHeight||0,document.body.scrollHeight||0)-window.innerHeight);
+  if((dy>0&&position<=1)||(dy<0&&position>=maximum-2))event.preventDefault();
+ },{passive:false});
+ document.addEventListener('touchend',reset,{passive:true});
+ document.addEventListener('touchcancel',reset,{passive:true});
 })();
 </script>
 </body></html>

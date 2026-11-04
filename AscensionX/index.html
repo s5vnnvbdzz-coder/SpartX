@@ -358,17 +358,39 @@ function applyCycleSelection(chosen,existing){
  toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
 function toggleCycleDetails(){const panel=$('cycleDetails'),button=$('cycleExpandButton');if(!panel||!button)return;const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-expanded',String(opening));button.textContent=opening?'Hide full cycle':'View full cycle';if(opening)renderCycle()}
-function showScreen(id,addHistory=true){if(id==='progress')id='profile';
+function showScreen(id,addHistory=true){
+ // The cycle builder is a panel on Home, not its own .screen.
+ // Resolve the alias BEFORE finding the target and switching screens.
+ const openingCycleBuilder=id==='cycle';
+ if(id==='progress')id='profile';
+ if(openingCycleBuilder)id='home';
  const target=$(id);if(!target)return;
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
- if(id==='cycle'){id='home';const panel=$('cycleDetails');if(panel){panel.hidden=false;$('cycleExpandButton').textContent='Hide full cycle';$('cycleExpandButton').setAttribute('aria-expanded','true')}renderCycle()}if(id==='workout')renderWorkout();if(id==='profile')renderProgress();if(id==='metrics')renderMetrics();
+ if(openingCycleBuilder){
+  const panel=$('cycleDetails'),button=$('cycleExpandButton');
+  if(panel&&button){
+   panel.hidden=false;
+   button.textContent='Hide full cycle';
+   button.setAttribute('aria-expanded','true');
+  }
+  renderCycle();
+ }
+ if(id==='workout')renderWorkout();if(id==='profile')renderProgress();if(id==='metrics')renderMetrics();
  if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
- // Release focus from the screen-switching control and reset the document scroll reliably on iOS Safari/PWA.
+ // Reset scroll when changing screens; when opening the builder, take the
+ // user directly to the exercise selection card on mobile and in the embed.
  if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();
  document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';
  document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);
- requestAnimationFrame(()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0)});
+ requestAnimationFrame(()=>{
+  if(openingCycleBuilder){
+   const builder=$('cycleExerciseOptions')?.closest('.card');
+   if(builder)builder.scrollIntoView({block:'start',behavior:'auto'});
+  }else{
+   document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);
+  }
+ });
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 window.addEventListener('popstate',e=>showScreen(e.state?.screen||'workout',false));

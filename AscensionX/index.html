@@ -171,6 +171,14 @@ body[data-theme="energy-zero"] #homeHero::after{content:"";position:absolute;rig
 #deleteCycleButton[hidden]{display:none!important}
 #deleteCycleButton:not([hidden]){display:block!important;background:rgba(107,30,37,.16)!important;border:1px solid #924650!important;color:#ffc2c6!important}
 body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.34)!important;border-color:#a75b5f!important;color:#ffc2c6!important}
+/* Import confirmation is distinct from existing cycle editor and safe on iPhone. */
+.asc-spartan-import-dialog{max-height:calc(100dvh - 30px);overflow-y:auto}
+.asc-spartan-import-preview{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px;margin:12px 0;font-size:12px;line-height:1.7}
+.asc-spartan-import-preview strong{display:block;font-size:13px;color:var(--text)}
+.asc-spartan-import-label{display:block;margin-top:10px;color:var(--red2);font-size:10px;letter-spacing:1.2px;font-weight:850}
+.asc-spartan-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0 4px}
+.asc-spartan-import-actions button{min-height:52px;padding:9px 7px;font-size:11px;line-height:1.3}
+@media(max-width:375px){.asc-spartan-import-actions button{font-size:10px}}
 </style>
 </head>
 <body>
@@ -180,6 +188,22 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 </header>
 <div id="setPopupBackdrop" class="set-popup-backdrop" onclick="if(event.target===this)closeSetPopup()"><div class="set-popup" role="dialog" aria-modal="true" aria-labelledby="setPopupTitle"><div class="row between"><h2 id="setPopupTitle" style="margin:0">Set value</h2><button class="ghost" onclick="closeSetPopup()" aria-label="Close">✕</button></div><div id="setPopupContent"></div><div class="set-popup-actions"><button class="secondary" onclick="closeSetPopup()">Cancel</button><button onclick="applySetPopup()">Apply</button></div></div></div>
 <div id="cycleConfirmBackdrop" class="cycle-confirm-backdrop" role="presentation"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleConfirmTitle"><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleConfirmTitle" style="margin:9px 0">Start your cycle?</h2><p class="tiny" id="cycleConfirmSummary"></p><div class="cycle-confirm-actions"><button class="secondary" onclick="discardCycleConfirmation()">Discard</button><button id="cycleConfirmAction" onclick="confirmCycleStart()">Start</button></div></section></div>
+<div id="ascSpartanImportBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeAscSpartanImport()">
+  <section class="cycle-confirm-dialog asc-spartan-import-dialog" role="dialog" aria-modal="true" aria-labelledby="ascSpartanImportTitle">
+    <div class="eyebrow">ASCENSIONX × SPARTANX</div>
+    <h2 id="ascSpartanImportTitle" style="margin:9px 0">Log this workout in SpartanX?</h2>
+    <p class="tiny" style="margin:0 0 12px">Choose the lift to load as an active SpartanX workout. All four recommended warm-up sets are placed before the prescribed working sets.</p>
+    <label for="ascSpartanImportLift">Exercise</label>
+    <select id="ascSpartanImportLift" onchange="renderAscSpartanImportPreview()"></select>
+    <div id="ascSpartanImportPreview" class="asc-spartan-import-preview" aria-live="polite"></div>
+    <p class="tiny">Sets will be pre-filled, but <strong>none will be marked completed</strong>. Your AscensionX programme progress stays unchanged until you log it there.</p>
+    <div class="asc-spartan-import-actions">
+      <button type="button" class="secondary" onclick="trainInsideAscensionX()">TRAIN IN ASCENSIONX</button>
+      <button type="button" id="ascSpartanImportConfirm" onclick="requestAscensionSpartanImport()">LOAD INTO SPARTANX</button>
+    </div>
+    <button type="button" class="ghost full small" onclick="closeAscSpartanImport()">Cancel</button>
+  </section>
+</div>
 <div id="deleteCycleBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteCycleTitle"><div class="eyebrow">ASCENSIONX · PROGRAMME MANAGEMENT</div><h2 id="deleteCycleTitle" style="margin:9px 0">Delete this programme?</h2><p class="tiny" style="line-height:1.6">Your active six-week programme, selected lifts, week progress and unfinished workout draft will be removed. <strong>Your completed workouts, training history, strength records and profile will be kept.</strong></p><div class="cycle-confirm-actions"><button type="button" class="secondary" onclick="closeDeleteCycle()">KEEP PROGRAMME</button><button type="button" class="danger" id="confirmDeleteCycleButton" onclick="confirmDeleteCycle()">DELETE PROGRAMME</button></div></section></div>
 <div id="cycleReviewBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeCycleReview()"><section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="cycleReviewTitle"><div class="modal-head row between"><div><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleReviewTitle" style="margin:4px 0 0">End-of-cycle Review</h2></div><button class="iconbtn" onclick="closeCycleReview()" aria-label="Close review">×</button></div><div class="card"><div id="cycleReview" class="tiny"></div></div><button class="secondary full" onclick="closeCycleReview()">Exit</button></section></div>
 <div id="settingsBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeSettings()">
@@ -475,6 +499,69 @@ function setupProfileCollapse(){
  });
 }
 function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max['Back Squat'])).toFixed(1);$('maxBench').value=Number(toDisplay(state.profile.max['Bench Press'])).toFixed(1);$('maxDeadlift').value=Number(toDisplay(state.profile.max['Deadlift'])).toFixed(1);$('maxOHP').value=Number(toDisplay(state.profile.max['Overhead Press'])).toFixed(1);$('profileTm').value=state.profile.tmPct;$('rounding').value=state.profile.rounding;document.querySelectorAll('#profile label').forEach(l=>{if(/1RM/.test(l.textContent))l.textContent=l.textContent.replace(/\(kg\)/,'('+unit()+')')});[...$('rounding').options].forEach(o=>o.textContent=Number(toDisplay(+o.value)).toLocaleString(undefined,{maximumFractionDigits:2})+' '+unit());}
+// Standalone mode is unchanged; SpartanX sends a verified embedded handshake.
+let ascensionEmbeddedBySpartanX=false,ascSpartanImportPending=null;
+const ASC_WARMUP_PCTS=[40,55,65,75],ASC_WARMUP_REPS=[5,3,2,1];
+window.addEventListener('message',e=>{
+ if(e.source!==window.parent||e.origin!==location.origin)return;
+ if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;return}
+ if(e.data?.type==='spartx:ascensionImportResult'&&ascSpartanImportPending!==null&&String(e.data.requestId)===ascSpartanImportPending){
+  ascSpartanImportPending=null;
+  $('ascSpartanImportConfirm').disabled=false;
+  $('ascSpartanImportConfirm').textContent='LOAD INTO SPARTANX';
+  if(e.data.success){closeAscSpartanImport();return}
+  toast(e.data.message||'Could not import. Please try again.');
+ }
+});
+function continueAscensionTraining(){
+ if(!ascensionEmbeddedBySpartanX||!state.cycle.created){showScreen('workout');return}
+ const choices=selectedLifts();
+ if(!choices.length){showScreen('workout');return}
+ const picker=$('ascSpartanImportLift');
+ const preferred=choices.includes($('liftSelect').value)?$('liftSelect').value:choices[0];
+ picker.innerHTML=choices.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
+ picker.value=preferred;
+ renderAscSpartanImportPreview();
+ $('ascSpartanImportBackdrop').classList.add('open');
+ $('ascSpartanImportBackdrop').setAttribute('aria-hidden','false');
+ picker.focus();
+}
+function closeAscSpartanImport(){
+ $('ascSpartanImportBackdrop').classList.remove('open');
+ $('ascSpartanImportBackdrop').setAttribute('aria-hidden','true');
+ ascSpartanImportPending=null;
+ $('ascSpartanImportConfirm').disabled=false;
+ $('ascSpartanImportConfirm').textContent='LOAD INTO SPARTANX';
+}
+function trainInsideAscensionX(){closeAscSpartanImport();showScreen('workout')}
+function buildAscSpartanWorkout(lift){
+ if(!state.cycle.created||!selectedLifts().includes(lift))return null;
+ const week=currentWeekFor(lift),info=prescribed(lift,week),p=info.p,trainingMax=tm(lift);
+ const warmupSets=ASC_WARMUP_PCTS.map((pct,i)=>({weight:roundTo(trainingMax*pct/100),reps:ASC_WARMUP_REPS[i]}));
+ const sets=p.deload
+  ?Array.from({length:3},()=>({weight:info.topLoad,reps:p.topReps}))
+  :[{weight:info.topLoad,reps:p.topReps},...Array.from({length:p.backSets},()=>({weight:info.backLoad,reps:p.backReps}))];
+ return {source:'AscensionX',exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
+}
+function renderAscSpartanImportPreview(){
+ const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
+ const panel=$('ascSpartanImportPreview');
+ if(!prescription){panel.textContent='Select an active cycle exercise.';return}
+ const warmup=prescription.warmupSets.map((x,i)=>'W'+(i+1)+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
+ const main=prescription.sets.map((x,i)=>(i===0?'Main '+(i+1):'Set '+(i+1))+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>';
+}
+function requestAscensionSpartanImport(){
+ if(ascSpartanImportPending!==null)return;
+ const workout=buildAscSpartanWorkout($('ascSpartanImportLift').value);
+ if(!workout){toast('Select a lift in your active cycle');return}
+ ascSpartanImportPending=String(Date.now());
+ $('ascSpartanImportConfirm').disabled=true;
+ $('ascSpartanImportConfirm').textContent='LOADING WORKOUT…';
+ try{window.parent.postMessage({type:'spartx:ascensionImportWorkout',requestId:ascSpartanImportPending,payload:workout},location.origin)}
+ catch(e){ascSpartanImportPending=null;$('ascSpartanImportConfirm').disabled=false;$('ascSpartanImportConfirm').textContent='LOAD INTO SPARTANX';toast('Unable to connect to SpartanX')}
+}
+
 function renderDashboard(){
  $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const active=selectedLifts(),weeks=active.map(currentWeekFor),avgWeek=weeks.length?weeks.reduce((a,b)=>a+b,0)/weeks.length:1;
@@ -485,7 +572,7 @@ function renderDashboard(){
  $('cycleProgressText').textContent=state.cycle.created?active.map(l=>l+' · W'+currentWeekFor(l)).join('  |  '):'Create a cycle to begin.';
  $('cycleProgressPct').textContent=pct+'%';$('cycleProgressBar').style.width=pct+'%';
  $('homeWeeks').innerHTML=state.cycle.created?active.map(lift=>{const week=currentWeekFor(lift);const completed=cycleLogs.some(x=>x.lift===lift&&x.week===6&&x.setsComplete===true);return '<div class="cycle-lift-row"><div class="cycle-lift-name">'+lift+'</div><div class="weekgrid">'+PLAN.map(p=>{const done=p.week<week||(completed&&p.week===6);return '<div class="weektile '+(p.week===week?'current ':'')+(done?'done':'')+'" aria-label="'+lift+' week '+p.week+(p.week===week?' active':'')+'"><strong>W'+p.week+'</strong></div>'}).join('')+'</div></div>'}).join(''):'<p class="tiny">Create a cycle to see each lift\'s six-week progression.</p>';
- $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="showScreen('workout')">Continue training</button><button class="secondary" onclick="showScreen('cycle')">Edit programme</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
+ $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="continueAscensionTraining()">Continue training</button><button class="secondary" onclick="showScreen('cycle')">Edit programme</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
 }
 function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
 let restTimerDeadline=0,restTimerInterval=null;

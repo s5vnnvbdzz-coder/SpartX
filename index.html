@@ -2435,7 +2435,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=203',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=204',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
@@ -2516,6 +2516,33 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  },{passive:false});
  document.addEventListener('touchend',reset,{passive:true});
  document.addEventListener('touchcancel',reset,{passive:true});
+})();
+</script>
+<script>
+/* On a new app load, Home must start at scroll position zero.
+   Safari/iPhone can restore the old #home anchor position AFTER switchScreen
+   first runs; re-assert the top once layout and pageshow have completed.
+   Stop correcting as soon as the user begins interacting. */
+(function(){
+ if(document.querySelector('main > .screen.active')?.id!=='home')return;
+ let userInteracted=false;
+ const mark=()=>{userInteracted=true;};
+ ['touchstart','pointerdown','wheel','keydown'].forEach(type=>{
+  document.addEventListener(type,mark,{passive:true,once:true});
+ });
+ const reset=()=>{
+  if(userInteracted||document.querySelector('main > .screen.active')?.id!=='home')return;
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop=0;
+  document.body.scrollTop=0;
+ };
+ const afterLayout=()=>{
+  reset();
+  requestAnimationFrame(()=>{reset();requestAnimationFrame(reset);});
+ };
+ afterLayout();
+ window.addEventListener('load',afterLayout,{once:true,passive:true});
+ window.addEventListener('pageshow',afterLayout,{once:true,passive:true});
 })();
 </script>
 </body></html>

@@ -39,6 +39,11 @@
  },true);
  const get=id=>document.getElementById(id);
  const active=()=>main.querySelector(':scope > .screen.active');
+ const highlightNav=id=>{
+  document.querySelectorAll('#trackerNav button[data-screen]').forEach(button=>{
+   button.classList.toggle('active',button.dataset.screen===id);
+  });
+ };
  const ready=()=>{
   if(!enabled||!mobile.matches||busy)return false;
   const current=active();
@@ -70,6 +75,10 @@
   document.body.classList.remove('sx-carousel-in-motion');
   drag=null;
   busy=false;
+  // When a gesture is cancelled, keep the highlighted tab in sync with
+  // whichever real page is active (rather than the discarded preview).
+  const current=active();
+  if(current&&PAGES.includes(current.id))highlightNav(current.id);
  };
  window.spartanxClearDrag=clear;
  const place=(page,x)=>{
@@ -102,6 +111,9 @@
   busy=true;
   const localToken=++phaseToken;
   const targetId=toNext&&neighbor?neighbor.id:null;
+  // Update the bottom tab as soon as the user commits to the page change,
+  // not after the 320ms slide animation has finished.
+  highlightNav(targetId||origin.id);
   const width=metrics(origin).width;
   const endX=targetId?-direction*width:0;
   const time=reduced.matches?0:(targetId?320:260);
@@ -173,15 +185,21 @@
   const finger=event.touches[0];
   let dx=finger.clientX-drag.x,dy=finger.clientY-drag.y;
   if(!drag.axis){
-   if(Math.max(Math.abs(dx),Math.abs(dy))<7)return;
-   if(Math.abs(dy)>Math.abs(dx)*1.16){drag=null;return;}
-   // Wait briefly on a diagonal gesture rather than misclassifying it.
-   if(Math.abs(dx)<Math.abs(dy)*.92&&
-      Math.max(Math.abs(dx),Math.abs(dy))<18)return;
-   if(Math.abs(dx)<Math.abs(dy)*.92){drag=null;return;}
+   const horizontal=Math.abs(dx),vertical=Math.abs(dy);
+   if(Math.max(horizontal,vertical)<10)return;
+   // Vertical scrolling wins early. Do not hijack slightly diagonal page
+   // scrolls, especially inside long feed cards on iPhone.
+   if(vertical>=9&&vertical>horizontal*.77){drag=null;return;}
+   if(horizontal<13)return;
+   if(horizontal<vertical*1.28){
+    if(Math.max(horizontal,vertical)>27)drag=null;
+    return;
+   }
    drag.axis='x';
   }
-  if(event.cancelable)event.preventDefault();
+  // No preventDefault here: main already declares touch-action:pan-y,
+  // so Safari can scroll vertically on its native compositor thread.
+  // A passive listener also avoids delaying every vertical scroll frame.
   const dir=dx<0?1:-1;
   if(dir!==drag.direction){
    if(drag.neighbor){
@@ -208,7 +226,7 @@
    drag.lastX=finger.clientX;drag.lastTime=now;
   }
   drag.dx=dx;
- },{passive:false});
+ },{passive:true});
  document.addEventListener('touchend',()=>{
   if(!drag)return;
   const d=drag;

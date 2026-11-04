@@ -1,0 +1,28 @@
+/* SpartanX connected-page carousel TEST
+   During a gesture the live page and the adjacent page slide together.
+   Header, navigation and page/footer normal layout are intentionally unchanged. */
+@media (max-width:767px) and (pointer:coarse){
+ body.sx-carousel-in-motion main>.screen.active{
+  position:relative;
+  will-change:transform;
+  backface-visibility:hidden;
+ }
+ body.sx-carousel-in-motion main>.screen.drag-preview{
+  display:block!important;
+  position:absolute!important;
+  box-sizing:border-box;
+  pointer-events:none!important;
+  will-change:transform;
+  backface-visibility:hidden;
+ }
+ body.sx-carousel-in-motion main>.screen.dragging{
+  transition:none!important;
+ }
+ body.sx-carousel-in-motion main>.screen.drag-settle{
+  transition-property:transform!important;
+  will-change:transform;
+ }
+}
+@media (prefers-reduced-motion:reduce){
+ body.sx-carousel-in-motion main>.screen.drag-settle{transition:none!important}
+}

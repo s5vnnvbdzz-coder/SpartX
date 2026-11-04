@@ -60,8 +60,8 @@ body.sx-christmas {
 }
 body.sx-monster,
 body.sx-premium-monster {
- --sx-rank-frame-metal:grayscale(1) sepia(1) saturate(4) hue-rotate(53deg) brightness(1.15) contrast(1.1);
- --sx-rank-frame-halo:#a7ff0065;
+ --sx-rank-frame-metal:grayscale(1) sepia(1) saturate(7) hue-rotate(55deg) brightness(1.17) contrast(1.12);
+ --sx-rank-frame-halo:#a7ff0088;
  --sx-rank-frame-halo-size:6px;
 }
 body.sx-premium-olympus {
@@ -88,14 +88,16 @@ body.sx-obsidian-white {
  --sx-rank-frame-halo-size:5px;
 }
 
-/* Single shared frame rule for all tiers and both frame sets. */
-body .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame {
+/* Shared frame treatment for both sexes and all rank tiers.
+   The data-active-theme selector outranks older Monster-specific rules,
+   including stylesheet-order differences on an installed iPhone PWA. */
+body .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame,
+body[data-active-theme] .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame {
  filter:var(--sx-rank-frame-metal)
    drop-shadow(0 0 var(--sx-rank-frame-halo-size,5px) var(--sx-rank-frame-halo)) !important;
  transition:filter .2s ease;
 }
-/* Monster's Olympian-specific rule previously locked the frame's filter
-   to neon green. Let the chosen theme palette control it as well. */
+/* Higher-rank Monster frames receive a stronger green highlight. */
 body:is(.sx-monster,.sx-premium-monster)[data-sx-rank-tier="8"]
  .sx-gamer-emblem.sx-portrait-frame-slot > img.sx-rank-portrait-frame {
  filter:var(--sx-rank-frame-metal)

@@ -1231,10 +1231,14 @@ function renderRoutineDraft(){$('routineExerciseCount').textContent=routineDraft
 function saveRoutine(){let n=$('routineName').value.trim();if(!n||!routineDraft.length){alert('Enter a name and add at least one exercise.');return;}db.routines=Array.isArray(db.routines)?db.routines:[];if(db.routines.length>=5){alert('You can save up to five routines.');return;}if(db.routines.some(r=>r.name.toLowerCase()===n.toLowerCase())){alert('A routine with that name already exists.');return;}db.routines.push({name:n,exercises:routineDraft.map(ex=>({name:ex.name,sets:ex.sets.map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:'Working Set',done:false}))}))});persist();renderSavedRoutines();libraryMode='workout';$('homeRoutineDetails').open=true;switchScreen('home');}
 function startSavedRoutine(i){let r=(db.routines||[])[i];if(!r)return;if(sessionActive){if(!confirm('A workout is already active. Replace it?'))return;resetSession();}work=r.exercises.map(ex=>({name:typeof ex==='string'?ex:ex.name,rest:120,notes:'',sets:typeof ex==='string'?[{weight:'',reps:'',rpe:'',type:'Working Set',done:false}]:(ex.sets||[]).map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:set.type||'Working Set',done:false}))}));sessionActive=true;sessionStarted=null;clearInterval(sessionTicker);$('sessionClock').textContent='00:00:00';$('activeWorkoutName').textContent=r.name;beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();}
 function import531IntoWorkout(d){
- if(!d||!Array.isArray(d.sets)||!d.exercise)return false;
- if(!sessionActive){$('workoutName').value=d.exercise+' · 5/3/1';startSession();}
- const imported={name:d.exercise,rest:120,notes:'Imported from SpartanX Tools · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')',sets:[...(Array.isArray(d.warmupSets)?d.warmupSets:[]).map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Warm-up',done:false})),...d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))]};
- work.unshift(imported);beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();return true;
+ if(!d||!Array.isArray(d.sets)||!d.sets.length||!d.exercise)return false;
+ const source=d.source==='AscensionX'?'AscensionX':'SpartanX Tools';
+ const validSet=x=>Number.isFinite(Number(x?.weight))&&Number(x.weight)>=0&&Number.isInteger(Number(x?.reps))&&Number(x.reps)>0;
+ const warmups=Array.isArray(d.warmupSets)?d.warmupSets:[];
+ if(!d.sets.every(validSet)||!warmups.every(validSet))return false;
+ if(!sessionActive){$('workoutName').value=d.exercise+(source==='AscensionX'?' · AscensionX':' · 5/3/1');startSession();}
+ const imported={name:d.exercise,rest:120,notes:'Imported from '+source+' · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')'+(d.source==='AscensionX'?' · Target RPE '+d.targetRpe:''),sets:[...warmups.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Warm-up',done:false})),...d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))]};
+ work.unshift(imported);beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return true;
 }
 window.spartanxImport531=import531IntoWorkout;
 window.spartanxOpenProfile=()=>switchScreen('profile');

@@ -84,11 +84,13 @@ const ascensionOpenButton=$('openAscensionX');
 const ascensionCloseButton=ascensionPortal.getElementById('closeAscensionX');
 
 function syncEmbeddedAscensionTheme(){
- let theme='dark';
- try{
-  const p=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}');
-  if(typeof p.theme==='string')theme=p.theme;
- }catch(e){}
+ let theme=document.body.dataset.activeTheme||'dark';
+ if(!document.body.dataset.activeTheme){
+  try{
+   const p=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}');
+   if(typeof p.theme==='string')theme=p.theme;
+  }catch(e){}
+ }
  // The portal lives in its own shadow root; pass the active parent colours
  // through its host so the toolbar and frame chrome match SpartanX.
  const computed=getComputedStyle(document.body);
@@ -97,10 +99,20 @@ function syncEmbeddedAscensionTheme(){
   if(value)ascensionPortalHost.style.setProperty(key,value);
  }
  if(ascensionEmbedFrame.getAttribute('src')!=='about:blank'){
+  // The iframe is same-origin and owned by SpartanX. Set its theme attribute
+  // directly after load as well as messaging, avoiding a stale visual state
+  // if its initial handshake is delayed during iOS PWA restoration.
+  if(ascensionEmbedReadyForShortcut){
+   try{
+    const childBody=ascensionEmbedFrame.contentDocument?.body;
+    if(childBody)childBody.dataset.spartxParentTheme=theme;
+   }catch(e){}
+  }
   try{ascensionEmbedFrame.contentWindow?.postMessage(
    {type:'spartx:applyParentTheme',theme},location.origin);}catch(e){}
  }
 }
+window.addEventListener('pageshow',syncEmbeddedAscensionTheme);
 window.addEventListener('spartx:preferencesChanged',syncEmbeddedAscensionTheme);
 window.addEventListener('storage',e=>{
  if(e.key==='spartx_preferences_v1')syncEmbeddedAscensionTheme();
@@ -174,6 +186,10 @@ ascensionEmbedFrame.addEventListener('load',()=>{
 });
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || !ascensionOverlay.classList.contains('open'))return;
+ if(e.data?.type==='spartx:ascensionEmbedAcknowledged'){
+  syncEmbeddedAscensionTheme();
+  return;
+ }
  if(e.data?.type!=='spartx:ascensionImportWorkout')return;
  const p=e.data.payload||{},requestId=e.data.requestId;
  const allowed=['Back Squat','Bench Press','Deadlift','Overhead Press'];

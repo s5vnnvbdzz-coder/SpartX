@@ -192,7 +192,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
 </style>
-<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=207">
+<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=208">
 </head>
 <body>
 <header>
@@ -536,7 +536,14 @@ function ascWarmupPlan(lift,week){
 }
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
- if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;processAscensionSpartanCompletionQueue();renderDashboard();return}
+ if(e.data?.type==='spartx:ascensionEmbedReady'){
+  ascensionEmbeddedBySpartanX=true;
+  processAscensionSpartanCompletionQueue();
+  renderDashboard();
+  // Ask the verified host to resend its theme after iframe initialization.
+  try{window.parent.postMessage({type:'spartx:ascensionEmbedAcknowledged'},location.origin)}catch(err){}
+  return;
+ }
  if(e.data?.type==='spartx:applyParentTheme'){
   // Only the verified SpartanX parent can style an embedded AscensionX.
   // Never overwrite state.theme; standalone sessions retain their own choice.

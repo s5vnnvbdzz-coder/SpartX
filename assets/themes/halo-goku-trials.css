@@ -154,19 +154,11 @@ body:is(.sx-halo,.sx-goku) .rank-tier.current>.rank-tier-name,
 body:is(.sx-halo,.sx-goku) .rank-tier.current>.rank-tier-level{
  color:var(--lime)!important;
 }
-/* Footer remains normal document flow; only the hairline is animated. */
+/* The chase belongs on #trackerNav::after, not the page footer.
+   The footer stays ordinary scrolling text, including Cycle Planner. */
 body:is(.sx-halo,.sx-goku) .spartanx-page-footer{
- position:relative!important;color:var(--muted)!important;
+ color:var(--muted)!important;
 }
-body:is(.sx-halo,.sx-goku) .spartanx-page-footer::before{
- content:"";position:absolute;top:0;left:0;width:100%;height:1px;
- pointer-events:none;
- background:linear-gradient(90deg,transparent,var(--sx-trial-secondary),
-  var(--lime),transparent);
- background-size:220% 100%;
- animation:sxTrialFooterSweep 5.4s linear infinite;
-}
-@keyframes sxTrialFooterSweep{from{background-position:100% 0}to{background-position:-100% 0}}
 /* Appearance thumbnails are built in CSS so they work offline in the PWA. */
 .sx-crossover-theme-preview{
  display:none;gap:12px;align-items:center;margin-top:12px;
@@ -190,8 +182,7 @@ body.sx-goku .sx-goku-theme-preview .sx-crossover-theme-symbol{border:1px solid 
  body:is(.sx-halo,.sx-goku) .sx-gamer-card::before,
  body:is(.sx-halo,.sx-goku) #profileAvatar,
  body:is(.sx-halo,.sx-goku) .sx-gamer-emblem.sx-portrait-frame-slot::after,
- body:is(.sx-halo,.sx-goku) #trackerNav button .sx-nav-icon,
- body:is(.sx-halo,.sx-goku) .spartanx-page-footer::before{
+ body:is(.sx-halo,.sx-goku) #trackerNav button .sx-nav-icon{
   animation:none!important;
  }
 }

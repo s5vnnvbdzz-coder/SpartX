@@ -1359,7 +1359,12 @@ function queueAscensionWorkoutCompletion(savedSession){
   if(!working.length)return;
   const valid=working.every(set=>Number.isFinite(set.weight)&&set.weight>0&&Number.isInteger(set.reps)&&set.reps>0);
   if(!valid)return;
-  const setsComplete=working.length===link.plannedSets.length&&working.every((set,i)=>set.reps>=Number(link.plannedSets[i].reps));
+  // Verify the original prescribed rows, not merely the number of saved rows.
+  // Added or reordered sets must not falsely complete the AscensionX week.
+  const original=work.find(item=>item.ascensionLink===link);
+  const prescribedRows=original?.sets.filter(set=>set.type==='Working Set').slice(0,link.plannedSets.length)||[];
+  const setsComplete=working.length===link.plannedSets.length&&prescribedRows.length===link.plannedSets.length&&
+   prescribedRows.every((set,i)=>set.done===true&&Number(set.weight)>0&&Number(set.reps)>=Number(link.plannedSets[i].reps));
   packets.push({
    id:'sx:'+String(savedSession.id)+':'+index,sourceSessionId:String(savedSession.id),
    date:savedSession.date,cycleId:link.cycleId,lift:link.lift,week:link.week,

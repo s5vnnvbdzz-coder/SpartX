@@ -1,0 +1,104 @@
+/* SpartanX themed surfaces / Settings bridge v207
+   Allows Settings (separate HTML) and Profile Settings (modal) to honour
+   every existing SpartanX appearance, including premium and test themes. */
+body[data-sx-settings-theme="dark"]{--sx-settings-bg:#0b0d0f;--sx-settings-panel:#171a1e;--sx-settings-panel2:#22272d;--sx-settings-line:#30363e;--sx-settings-text:#f3f4f6;--sx-settings-muted:#9ba3ad;--sx-settings-accent:#c8f169}
+body[data-sx-settings-theme="light"]{--sx-settings-bg:#f3f5f7;--sx-settings-panel:#ffffff;--sx-settings-panel2:#e9edf0;--sx-settings-line:#d4dbe1;--sx-settings-text:#18212a;--sx-settings-muted:#66727d;--sx-settings-accent:#718f27}
+body[data-sx-settings-theme="spartan-red"]{--sx-settings-bg:#09090b;--sx-settings-panel:#151518;--sx-settings-panel2:#242428;--sx-settings-line:#514044;--sx-settings-text:#f3f4f6;--sx-settings-muted:#ada6a9;--sx-settings-accent:#ef2029}
+body[data-sx-settings-theme="spartan-gold"]{--sx-settings-bg:#15130f;--sx-settings-panel:#171613;--sx-settings-panel2:#25231e;--sx-settings-line:#494232;--sx-settings-text:#f5f1e9;--sx-settings-muted:#b8b09e;--sx-settings-accent:#b89b5e}
+body[data-sx-settings-theme="spartan-bronze"]{--sx-settings-bg:#15110e;--sx-settings-panel:#171513;--sx-settings-panel2:#26211d;--sx-settings-line:#40352d;--sx-settings-text:#f4eee8;--sx-settings-muted:#b6a99d;--sx-settings-accent:#a8794f}
+body[data-sx-settings-theme="spartan-blue"]{--sx-settings-bg:#101925;--sx-settings-panel:#141b25;--sx-settings-panel2:#202c3b;--sx-settings-line:#34465b;--sx-settings-text:#eef3f8;--sx-settings-muted:#aab8c8;--sx-settings-accent:#628bb8}
+body[data-sx-settings-theme="spartan-amethyst"]{--sx-settings-bg:#0b0911;--sx-settings-panel:#17121f;--sx-settings-panel2:#292037;--sx-settings-line:#4b385f;--sx-settings-text:#f1eaf7;--sx-settings-muted:#b5a5c4;--sx-settings-accent:#b58ae9}
+body[data-sx-settings-theme="spartan-olympian"]{--sx-settings-bg:#11100f;--sx-settings-panel:#171613;--sx-settings-panel2:#242222;--sx-settings-line:#66583d;--sx-settings-text:#f6f0df;--sx-settings-muted:#c9b99a;--sx-settings-accent:#d8c49a}
+body[data-sx-settings-theme="olympian-athena"]{--sx-settings-bg:#0d0912;--sx-settings-panel:#1a1422;--sx-settings-panel2:#292033;--sx-settings-line:#70577d;--sx-settings-text:#f7edf6;--sx-settings-muted:#c2abc9;--sx-settings-accent:#e8b4dd}
+body[data-sx-settings-theme="sx-halloween"]{--sx-settings-bg:#120b14;--sx-settings-panel:#261326;--sx-settings-panel2:#3a2031;--sx-settings-line:#72435b;--sx-settings-text:#f6f5ee;--sx-settings-muted:#b9b5b0;--sx-settings-accent:#ff872b}
+body[data-sx-settings-theme="sx-christmas"]{--sx-settings-bg:#091b19;--sx-settings-panel:#142d29;--sx-settings-panel2:#22423c;--sx-settings-line:#4c8174;--sx-settings-text:#f6f5ee;--sx-settings-muted:#b7cfc4;--sx-settings-accent:#e8c66b}
+body[data-sx-settings-theme="sx-monster"]{--sx-settings-bg:#090d09;--sx-settings-panel:#171e13;--sx-settings-panel2:#24311c;--sx-settings-line:#4b7134;--sx-settings-text:#f6f5ee;--sx-settings-muted:#c0b9b3;--sx-settings-accent:#a7ff00}
+body[data-sx-settings-theme="premium-monster"]{--sx-settings-bg:#050a06;--sx-settings-panel:#0d1610;--sx-settings-panel2:#17261b;--sx-settings-line:#467a36;--sx-settings-text:#fff9ed;--sx-settings-muted:#c1bba9;--sx-settings-accent:#8cff12}
+body[data-sx-settings-theme="sx-obsidian-white"]{--sx-settings-bg:#030303;--sx-settings-panel:#0b0b0b;--sx-settings-panel2:#171717;--sx-settings-line:#333333;--sx-settings-text:#f0f0f0;--sx-settings-muted:#999999;--sx-settings-accent:#dfdfdf}
+body[data-sx-settings-theme="sx-halo"]{--sx-settings-bg:#060b0b;--sx-settings-panel:#101918;--sx-settings-panel2:#1a2a27;--sx-settings-line:#40605a;--sx-settings-text:#e4f0ec;--sx-settings-muted:#a1bbb5;--sx-settings-accent:#7ce9df}
+body[data-sx-settings-theme="sx-goku"]{--sx-settings-bg:#070a14;--sx-settings-panel:#111626;--sx-settings-panel2:#20263c;--sx-settings-line:#59648c;--sx-settings-text:#f2f5ff;--sx-settings-muted:#acb9d5;--sx-settings-accent:#cddfff}
+body[data-sx-settings-theme="premium-olympus"]{--sx-settings-bg:#090c14;--sx-settings-panel:#111824;--sx-settings-panel2:#1a2534;--sx-settings-line:#a68043;--sx-settings-text:#fff9ed;--sx-settings-muted:#c1bba9;--sx-settings-accent:#ffd376}
+body[data-sx-settings-theme="amazonian-crimson"]{--sx-settings-bg:#0e0b10;--sx-settings-panel:#1d141d;--sx-settings-panel2:#341b2a;--sx-settings-line:#79435a;--sx-settings-text:#f4e7ed;--sx-settings-muted:#baa1ae;--sx-settings-accent:#c84b76}
+body[data-sx-settings-theme="athenas-aegis"]{--sx-settings-bg:#100d19;--sx-settings-panel:#1b172b;--sx-settings-panel2:#29233c;--sx-settings-line:#665483;--sx-settings-text:#f2ebfa;--sx-settings-muted:#bcadd1;--sx-settings-accent:#c5a0f1}
+body[data-sx-settings-theme]{
+ --bg:var(--sx-settings-bg);--panel:var(--sx-settings-panel);
+ --panel2:var(--sx-settings-panel2);--line:var(--sx-settings-line);
+ --txt:var(--sx-settings-text);--muted:var(--sx-settings-muted);
+ --lime:var(--sx-settings-accent);
+ background:radial-gradient(ellipse at 90% 0%,color-mix(in srgb,var(--lime) 15%,transparent),transparent 52%),
+   linear-gradient(150deg,var(--bg),var(--panel) 48%,var(--bg))!important;
+ background-attachment:fixed!important;color:var(--txt)!important;
+}
+body[data-sx-settings-theme="light"]{color-scheme:light}
+body[data-sx-settings-theme]:not([data-sx-settings-theme="light"]){color-scheme:dark}
+body[data-sx-settings-theme] header,
+body[data-sx-settings-theme] #settingsNav{
+ background:linear-gradient(105deg,var(--bg),color-mix(in srgb,var(--panel) 94%,transparent))!important;
+ border-color:var(--line)!important;
+}
+body[data-sx-settings-theme] .card{
+ background:linear-gradient(220deg,color-mix(in srgb,var(--lime) 10%,var(--panel2)),var(--panel) 52%,var(--bg))!important;
+ color:var(--txt)!important;border:1px solid var(--line)!important;
+ box-shadow:inset 0 1px 0 color-mix(in srgb,var(--txt) 7%,transparent),
+  0 0 16px color-mix(in srgb,var(--lime) 9%,transparent)!important;
+}
+body[data-sx-settings-theme] .brand span,
+body[data-sx-settings-theme] .eyebrow,
+body[data-sx-settings-theme] #settingsNav a.active,
+body[data-sx-settings-theme] .top #settingsBack{color:var(--lime)!important}
+body[data-sx-settings-theme] #settingsNav a{color:var(--muted)!important}
+body[data-sx-settings-theme] #settingsNav a.active{color:var(--lime)!important}
+body[data-sx-settings-theme] .top #settingsBack,
+body[data-sx-settings-theme] .top .spartan-back-button{
+ color:var(--lime)!important;background:var(--panel2)!important;
+ border-color:var(--line)!important;
+}
+body[data-sx-settings-theme] .switch input:checked+span{background:var(--lime)!important}
+body[data-sx-settings-theme] .switch input:checked+span:before{background:var(--panel)!important}
+body[data-sx-settings-theme] .plate-setting,
+body[data-sx-settings-theme] .profile-icon{
+ background:var(--panel2)!important;color:var(--txt)!important;border-color:var(--line)!important;
+}
+body[data-sx-settings-theme] input{accent-color:var(--lime)!important}
+body[data-sx-settings-theme] .copy small{color:var(--muted)!important}
+body[data-sx-settings-theme] footer{color:var(--muted)!important}
+
+/* Profile Settings lives inside index.html, not the standalone Tools settings
+   page. It requires the same selected surface and control colours. */
+body[data-active-theme] #profileSettingsOverlay{
+ background:color-mix(in srgb,var(--bg) 93%,transparent)!important;
+}
+body[data-active-theme] #profileSettingsOverlay .detail-panel{
+ background:linear-gradient(220deg,color-mix(in srgb,var(--lime) 12%,var(--panel2)),
+   var(--panel) 45%,var(--bg))!important;
+ border:1px solid color-mix(in srgb,var(--lime) 31%,var(--line))!important;
+ color:var(--txt)!important;
+ box-shadow:inset 0 1px 0 color-mix(in srgb,var(--txt) 7%,transparent),
+  0 0 18px color-mix(in srgb,var(--lime) 13%,transparent)!important;
+}
+body[data-active-theme] #profileSettingsOverlay :is(h2,h3,strong){
+ color:var(--txt)!important;
+}
+body[data-active-theme] #profileSettingsOverlay .eyebrow,
+body[data-active-theme] #profileSettingsOverlay label[for="themeChoice"]{
+ color:var(--lime)!important;
+}
+body[data-active-theme] #profileSettingsOverlay :is(label,.tiny,.muted){
+ color:var(--muted);
+}
+body[data-active-theme] #profileSettingsOverlay :is(input:not([type="checkbox"]),select,textarea){
+ background:var(--panel2)!important;color:var(--txt)!important;
+ border:1px solid var(--line)!important;
+}
+body[data-active-theme] #profileSettingsOverlay input[type="checkbox"]{
+ accent-color:var(--lime)!important;
+}
+body[data-active-theme] #profileSettingsOverlay button:not(.danger){
+ background:color-mix(in srgb,var(--panel2) 87%,var(--bg))!important;
+ color:var(--txt)!important;
+ border:1px solid color-mix(in srgb,var(--lime) 23%,var(--line))!important;
+}
+body[data-active-theme] #profileSettingsOverlay :is(button,input,select,textarea):focus-visible{
+ outline:2px solid var(--lime)!important;
+ outline-offset:2px;
+}

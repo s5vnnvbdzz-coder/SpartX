@@ -992,39 +992,21 @@ body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)) > header{
 body.sx-workout-calendar-open #workoutCalendarOverlay{z-index:25}
 </style>
 <style>
-/* Pinned footer for four main screens, using a body-level element so screen
-   swipe transforms never displace it. The existing bottom nav stays fixed. */
-:root{
- --sx-nav-live-height:calc(76px + env(safe-area-inset-bottom,0px));
- --sx-page-footer-live-height:34px;
+/* The page footer belongs to the scrolling content, not the viewport.
+   At maximum scroll it rests above the fixed bottom navigation on iPhone. */
+:root{--sx-nav-live-height:calc(76px + env(safe-area-inset-bottom,0px))}
+main > .screen:is(#home,#workout,#tools,#profile) > .spartanx-page-footer{
+ display:block!important;
+ position:static!important;
+ margin-top:16px;
+ margin-bottom:0!important;
+ padding:10px 0 0;
+ text-align:center;
 }
-#sxFixedMainFooter{
- display:none;
- position:fixed;left:0;right:0;bottom:var(--sx-nav-live-height);
- width:100%;margin:0;min-height:31px;
- padding:7px max(12px,env(safe-area-inset-right,0px)) 7px max(12px,env(safe-area-inset-left,0px));
- align-items:center;justify-content:center;text-align:center;
- color:var(--muted);font-size:10px;font-weight:400;letter-spacing:1.4px;
- background:color-mix(in srgb,var(--bg) 94%,transparent);
- border-top:1px solid color-mix(in srgb,var(--lime) 20%,var(--line));
- -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
- z-index:14;pointer-events:none;box-sizing:border-box;
-}
-body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)) > #sxFixedMainFooter{display:flex}
-main > .screen:is(#home,#workout,#tools,#profile) > .spartanx-page-footer{display:none!important}
-/* Leave enough scrollable space for both the pinned footer and bottom tabs. */
+/* Leave enough space beneath the natural page footer to stop it reaching
+   under the navigation; account for the real rendered navigation height. */
 body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#minimizedSession:not(.hidden))){
- padding-bottom:calc(var(--sx-nav-live-height) + var(--sx-page-footer-live-height) + 12px)!important;
-}
-/* Never cover session controls, a modal, or a full-screen embedded app. */
-body:has(#minimizedSession:not(.hidden)) > #sxFixedMainFooter,
-body:has(#floatingRestTimer:not(.hidden)) > #sxFixedMainFooter,
-body:has(.detail-overlay:not(.hidden)) > #sxFixedMainFooter,
-body.sx-workout-calendar-open > #sxFixedMainFooter,
-body.completed-workout-open > #sxFixedMainFooter,
-body.profile-settings-open > #sxFixedMainFooter,
-body.sx-ascensionx-open > #sxFixedMainFooter{
- display:none!important;
+ padding-bottom:calc(var(--sx-nav-live-height) + 4px)!important;
 }
 </style>
 </head>
@@ -1868,12 +1850,6 @@ document.addEventListener('input',e=>{if(e.target.matches('main input,main texta
 document.addEventListener('change',e=>{if(e.target.matches('main input,main textarea,main select'))saveDraft();});
 window.addEventListener('pagehide',saveDraft);setInterval(saveDraft,700);
 document.querySelectorAll('main > section.screen').forEach(screen=>{const footer=document.createElement('footer');footer.className='spartanx-page-footer';footer.textContent='SpartanX TOOLS · TRAIN SMARTER';screen.appendChild(footer);});
-const sxFixedMainFooter=document.createElement('footer');
-sxFixedMainFooter.id='sxFixedMainFooter';
-sxFixedMainFooter.className='sx-fixed-main-footer';
-sxFixedMainFooter.setAttribute('aria-label','SpartanX page footer');
-sxFixedMainFooter.textContent=document.querySelector('#home > .spartanx-page-footer')?.textContent||'SpartanX TOOLS · TRAIN SMARTER';
-document.body.appendChild(sxFixedMainFooter);
 
 window.spartanxOpenTools=()=>switchScreen('tools');window.spartanxOpenHome=()=>switchScreen('home');window.spartanxOpenPlanner=()=>switchScreen('native531');function switchScreen(id){if(window.spartanxClearDrag)window.spartanxClearDrag();if(['tools','home','workout','profile'].includes(id)){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}try{localStorage.setItem('spartx_last_screen',id);}catch(e){}try{if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);}catch(e){}document.body.classList.toggle('tools-screen-active',id==='tools');document.querySelectorAll('.screen').forEach(screen=>{screen.classList.remove('drag-preview','dragging','drag-settle');screen.style.transform='';screen.classList.toggle('active',screen.id===id);});document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));updateMinimizedSession();}function swipeBack(){if(screenHistory.length){const target=screenHistory.pop();const current=document.querySelector('.screen.active')?.id;if(current&&target!==current){try{localStorage.setItem('spartx_last_screen',target);}catch(e){}try{if(location.hash!=='#'+target)history.replaceState(null,'','#'+target);}catch(e){}document.body.classList.toggle('tools-screen-active',target==='tools');document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===target));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===target));updateMinimizedSession();}}}
 const trackerNav=document.getElementById('trackerNav');
@@ -2425,7 +2401,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=193',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=194',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
 <script>
 /* Keep scroll offset equal to the rendered header height, including iPhone
@@ -2433,21 +2409,17 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 (function(){
  const header=document.querySelector('body > header');
  const nav=document.getElementById('trackerNav');
- const footer=document.getElementById('sxFixedMainFooter');
  if(!header)return;
  const update=()=>{
   const headHeight=Math.ceil(header.getBoundingClientRect().height);
   const navHeight=Math.ceil(nav?.getBoundingClientRect().height||0);
-  const footerHeight=Math.ceil(footer?.getBoundingClientRect().height||0);
   if(headHeight>0)document.documentElement.style.setProperty('--sx-header-live-height',headHeight+'px');
   if(navHeight>0)document.documentElement.style.setProperty('--sx-nav-live-height',navHeight+'px');
-  if(footerHeight>0)document.documentElement.style.setProperty('--sx-page-footer-live-height',footerHeight+'px');
  };
  if('ResizeObserver' in window){
   const observer=new ResizeObserver(update);
   observer.observe(header);
   if(nav)observer.observe(nav);
-  if(footer)observer.observe(footer);
  }
  window.addEventListener('resize',update,{passive:true});
  window.addEventListener('orientationchange',update,{passive:true});

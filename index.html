@@ -1003,10 +1003,23 @@ main > .screen:is(#home,#workout,#tools,#profile) > .spartanx-page-footer{
  padding:10px 0 0;
  text-align:center;
 }
-/* Leave enough space beneath the natural page footer to stop it reaching
-   under the navigation; account for the real rendered navigation height. */
-body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#minimizedSession:not(.hidden))){
- padding-bottom:calc(var(--sx-nav-live-height) + 4px)!important;
+/* One scroll endpoint for the main pages on iPhone:
+   reserve the fixed navigation gap INSIDE main, never as extra body space
+   underneath the footer. The footer remains part of the page flow. */
+html:has(body>main>.screen.active:is(#home,#workout,#tools,#profile)){
+ overscroll-behavior-y:none;
+}
+body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)){
+ padding-bottom:0!important;
+ overscroll-behavior-y:none;
+}
+body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)) > main{
+ padding-bottom:calc(var(--sx-nav-live-height) + 3px)!important;
+}
+/* A resumed workout bar occupies the space above navigation. Make room for
+   that real control without introducing a second body scroll tail. */
+body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):has(#minimizedSession:not(.hidden)) > main{
+ padding-bottom:calc(var(--sx-nav-live-height) + 92px)!important;
 }
 </style>
 </head>
@@ -2401,7 +2414,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=194',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=195',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
 <script>
 /* Keep scroll offset equal to the rendered header height, including iPhone

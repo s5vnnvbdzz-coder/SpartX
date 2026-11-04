@@ -1163,13 +1163,14 @@ function renderWork(){
  $('exerciseList').innerHTML=work.map((e,i)=>{
   const previousSession=db.sessions.find(s=>s.exercises.some(x=>x.name.toLowerCase()===e.name.toLowerCase()));
   const previousExercise=previousSession?.exercises.find(x=>x.name.toLowerCase()===e.name.toLowerCase());
-  const rows=e.sets.map((s,j)=>{
+  const displayRest=ascensionRestPlan(i).seconds;
+   const rows=e.sets.map((s,j)=>{
    const previousSet=previousExercise?.sets[j],previousText=previousSet?displayWeight(previousSet.weight)+' × '+previousSet.reps:'—';
    const marker=s.type==='Warm-up'?'W':s.type==='Backdown Set'?'B':s.type==='Failure Set'?'F':'';
    const normalNumber=e.sets.slice(0,j+1).filter(x=>!['Warm-up','Backdown Set','Failure Set'].includes(x.type)).length;
    return '<div class="set-entry '+(s.done?'is-complete':'')+'"><div class="set-row"><span class="set-type-wrap"><button type="button" class="set-number set-type-picker set-type-trigger" aria-label="Choose set type" onclick="openSetTypeSheet('+i+','+j+')">'+(marker||normalNumber)+'</button><span class="set-type-display">'+(marker||normalNumber)+'</span></span><span class="previous-value">'+esc(previousText)+'</span><button type="button" class="set-number-pad-trigger" aria-label="Edit weight" onclick="openNumberPad('+i+','+j+',0)">'+esc(weightValueFromKg(+s.weight||0)||'—')+'</button><button type="button" class="set-number-pad-trigger" aria-label="Edit reps" onclick="openNumberPad('+i+','+j+',1)">'+esc(s.reps||'—')+'</button><button type="button" class="set-rpe-trigger" aria-label="Select RPE" onclick="openRpeSheet('+i+','+j+')"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 17a9 9 0 1 1 15.6 0"/><path d="M12 14.5 16.5 8"/><circle cx="12" cy="14.5" r="1.5"/></svg><span>'+(s.rpe!==''&&s.rpe!=null?esc(s.rpe):'')+'</span></button><input class="done" type="checkbox" '+(s.done?'checked':'')+' aria-label="Complete set" onchange="completeSet('+i+','+j+',this.checked)"></div></div>';
   }).join('');
-  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><div class="exercise-title">'+esc(e.name)+'</div><button type="button" class="pr-icon" data-live-pr="'+esc(e.name)+'" aria-label="View performance summary for '+esc(e.name)+'">🏆</button><button class="exercise-menu secondary small" onclick="removeEx('+i+')" aria-label="Remove exercise">×</button></div><textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-line"><div class="rest-label"><span class="rest-symbol">◴</span><span>Rest: <strong id="restClock-'+i+'">'+fmtTime(exerciseTimers[i]?.remaining??e.rest)+'</strong></span></div><div class="rest-controls"><select aria-label="Rest duration" onchange="setRest('+i+',this.value)">'+Array.from({length:20},(_,k)=>(k+1)*15).concat(Array.from({length:10},(_,k)=>330+k*30)).map(v=>'<option value="'+v+'" '+(+e.rest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select><button class="secondary small" onclick="startRest('+i+')">Start</button><button class="secondary small" onclick="skipRest('+i+')">Skip</button></div></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
+  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><div class="exercise-title">'+esc(e.name)+'</div><button type="button" class="pr-icon" data-live-pr="'+esc(e.name)+'" aria-label="View performance summary for '+esc(e.name)+'">🏆</button><button class="exercise-menu secondary small" onclick="removeEx('+i+')" aria-label="Remove exercise">×</button></div><textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-line"><div class="rest-label"><span class="rest-symbol">◴</span><span>Rest: <strong id="restClock-'+i+'">'+fmtTime(exerciseTimers[i]?.interval?exerciseTimers[i].remaining:displayRest)+'</strong></span></div><div class="rest-controls"><select aria-label="Rest duration" onchange="setRest('+i+',this.value)">'+Array.from({length:20},(_,k)=>(k+1)*15).concat(Array.from({length:10},(_,k)=>330+k*30)).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select><button class="secondary small" onclick="startRest('+i+')">Start</button><button class="secondary small" onclick="skipRest('+i+')">Skip</button></div></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
  }).join('');
  updateLiveStats();
 }
@@ -1207,7 +1208,13 @@ $('numberPadDone').addEventListener('click',closeNumberPad);
 ['setTypeSheet','rpeSheet','numberPadSheet'].forEach(id=>{const sheet=$(id),handle=sheet?.querySelector('.set-type-sheet-handle'),panel=sheet?.querySelector('.set-type-sheet-panel');if(!handle||!panel)return;let start=0,dragging=false;handle.addEventListener('pointerdown',e=>{start=e.clientY;dragging=true;handle.setPointerCapture(e.pointerId);panel.style.transition='none';});handle.addEventListener('pointermove',e=>{if(!dragging)return;panel.style.transform='translateY('+Math.max(0,e.clientY-start)+'px)';});const end=e=>{if(!dragging)return;dragging=false;const dist=e.clientY-start;panel.style.transition='';panel.style.transform='';if(dist>75){if(id==='setTypeSheet')closeSetTypeSheet();else if(id==='rpeSheet')closeRpeSheet();else closeNumberPad();}};handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);});
 window.setType=(i,j,v)=>{if(v==='X'){window.removeSet(i,j);return;}const s=work[i].sets[j];delete s.marker;s.type=v==='W'?'Warm-up':v==='B'?'Backdown Set':v==='F'?'Failure Set':'Working Set';renderWork();updateFloatingRestTimer();saveDraft();};
 window.setNotes=(i,v)=>{work[i].notes=v};
-window.setRest=(i,v)=>{work[i].rest=+v;if(!exerciseTimers[i]){let el=$('restClock-'+i);if(el)el.textContent=fmtTime(+v)}updateFloatingRestTimer();saveDraft();};
+window.setRest=(i,v)=>{
+ const before=ascensionRestPlan(i),adjustment=before.seconds-Math.max(1,Math.round(Number(work[i].rest)||120));
+ // The picker shows the effective working-set rest, while 'rest' stores the
+ // baseline. Subtract the one-minute boost so edits aren't boosted twice.
+ work[i].rest=Math.max(1,Number(v)-adjustment);
+ updateFloatingRestTimer();saveDraft();
+};
 window.addSet=i=>{work[i].sets.push({weight:'',reps:'',rpe:'',type:'Working Set',done:false});renderWork()};
 window.removeSet=(i,j)=>{work[i].sets.splice(j,1);renderWork()};
 let activeRestExercise=null,restPreviewExercise=null;
@@ -1259,15 +1266,28 @@ $('restSoundToggle').addEventListener('click',()=>{
  if(restSoundEnabled)prepareRestSound();
 });
 refreshRestSoundToggle();
+function syncExerciseRestDisplay(){
+ work.forEach((exercise,i)=>{
+  const timer=exerciseTimers[i],running=!!timer?.interval&&timer.remaining>0;
+  const plan=ascensionRestPlan(i),time=running?timer.remaining:plan.seconds;
+  const el=$('restClock-'+i);if(el)el.textContent=fmtTime(time);
+  const select=el?.closest('.rest-line')?.querySelector('select');
+  if(select&&document.activeElement!==select&&select.value!==String(plan.seconds)){
+   const value=String(plan.seconds);
+   if([...select.options].some(option=>option.value===value))select.value=value;
+  }
+ });
+}
 function updateFloatingRestTimer(){
  const bar=$('floatingRestTimer');if(!bar)return;
+ syncExerciseRestDisplay();
  const timer=activeRestExercise===null?null:exerciseTimers[activeRestExercise];
  const running=!!timer?.interval&&timer.remaining>0&&sessionActive;
  const currentScreen=document.querySelector('.screen.active')?.id;
- const visible=!!sessionActive&&(running||currentScreen==='activeWorkout');
+ const visible=!!sessionActive&&currentScreen==='activeWorkout';
  bar.classList.toggle('hidden',!visible);
  bar.classList.toggle('is-idle',visible&&!running);
- bar.classList.toggle('is-running',running);
+ bar.classList.toggle('is-running',visible&&running);
  if(!visible)return;
  const chosen=running?activeRestExercise:(restPreviewExercise!==null&&work[restPreviewExercise]?restPreviewExercise:work.findIndex(ex=>ex.sets?.some(set=>!set.done)));
  const index=chosen>=0?chosen:0,exercise=work[index];

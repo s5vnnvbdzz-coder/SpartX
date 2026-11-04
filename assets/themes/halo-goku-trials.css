@@ -1,0 +1,197 @@
+/* SpartanX crossover appearance trials · Halo / Goku (DBZ)
+   CSS-only visual language; no third-party logos, sprites or external assets.
+   Both palettes apply only when explicitly selected in Appearance. */
+body.sx-halo{
+ --bg:#060b0b;--panel:#101918;--panel2:#1a2a27;--line:#40605a;
+ --txt:#e4f0ec;--muted:#a1bbb5;--lime:#7ce9df;
+ --sx-trial-secondary:#758d4d;--sx-trial-soft:#7ce9df22;
+ background:
+  radial-gradient(ellipse at 88% 0%,#5dd7d329,transparent 43%),
+  radial-gradient(ellipse at 3% 54%,#62794b22,transparent 48%),
+  repeating-linear-gradient(0deg,transparent 0 47px,#87cab006 48px 49px),
+  linear-gradient(150deg,#05090a 0%,#101917 46%,#070b0c 100%)!important;
+ background-attachment:fixed!important;color-scheme:dark;
+}
+body.sx-goku{
+ --bg:#0c0b13;--panel:#191822;--panel2:#2c2230;--line:#77513d;
+ --txt:#fff2e3;--muted:#c8b1a7;--lime:#ffaf48;
+ --sx-trial-secondary:#3ebbf1;--sx-trial-soft:#ffaa3825;
+ background:
+  radial-gradient(ellipse at 86% 0%,#ff922c32,transparent 43%),
+  radial-gradient(ellipse at 8% 64%,#399def25,transparent 50%),
+  linear-gradient(145deg,#0c0b13 0%,#211522 50%,#0c0b13 100%)!important;
+ background-attachment:fixed!important;color-scheme:dark;
+}
+/* Permanent chrome remains fixed and transparent enough to reveal accents. */
+body.sx-halo>header,body.sx-halo #trackerNav{
+ background:linear-gradient(110deg,#080e0ef7,#1a2823f4)!important;
+ border-color:#4f8078!important;
+}
+body.sx-goku>header,body.sx-goku #trackerNav{
+ background:linear-gradient(110deg,#121019f7,#271922f5)!important;
+ border-color:#c37a4d!important;
+}
+body:is(.sx-halo,.sx-goku) .brand span,
+body:is(.sx-halo,.sx-goku) .eyebrow{color:var(--lime)!important}
+body:is(.sx-halo,.sx-goku) .card,
+body:is(.sx-halo,.sx-goku) .exercise-card,
+body:is(.sx-halo,.sx-goku) .detail-panel,
+body:is(.sx-halo,.sx-goku) .sx-gamer-card{
+ border:1px solid var(--line)!important;
+ box-shadow:inset 0 1px 0 #ffffff0a,0 8px 22px #00000035;
+}
+body.sx-halo .card,body.sx-halo .exercise-card,
+body.sx-halo .detail-panel,body.sx-halo .sx-gamer-card{
+ background:linear-gradient(225deg,#314d3dcb 0%,#192623ee 24%,#101817f5 62%,#080d0df7 100%)!important;
+}
+body.sx-goku .card,body.sx-goku .exercise-card,
+body.sx-goku .detail-panel,body.sx-goku .sx-gamer-card{
+ background:linear-gradient(225deg,#5e3b2fc7 0%,#29212ded 25%,#171620f6 65%,#0d0d15f9 100%)!important;
+}
+body:is(.sx-halo,.sx-goku) button:not(#trackerNav button):not(.danger){
+ color:var(--txt)!important;background:color-mix(in srgb,var(--panel2) 85%,transparent)!important;
+ border:1px solid color-mix(in srgb,var(--line) 75%,transparent)!important;
+ box-shadow:inset 0 1px 0 #ffffff0a!important;
+}
+body:is(.sx-halo,.sx-goku) button:not(#trackerNav button):not(.danger):active{
+ background:color-mix(in srgb,var(--panel2) 90%,var(--lime))!important;
+}
+body:is(.sx-halo,.sx-goku) input:not([type="checkbox"]):not([type="radio"]),
+body:is(.sx-halo,.sx-goku) textarea,
+body:is(.sx-halo,.sx-goku) select{
+ background:var(--panel2)!important;color:var(--txt)!important;
+ border-color:var(--line)!important;
+}
+body:is(.sx-halo,.sx-goku) input[type="checkbox"],
+body:is(.sx-halo,.sx-goku) input[type="radio"],
+body:is(.sx-halo,.sx-goku) input[type="range"]{accent-color:var(--lime)!important}
+body:is(.sx-halo,.sx-goku) :is(button,input,textarea,select):focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:2px;
+}
+/* A restrained HUD-style edge for Halo, warm orange energy for Goku. */
+body.sx-halo .sx-gamer-card{
+ border-color:#7ce9df8c!important;
+ box-shadow:0 0 16px #7ce9df18,inset 0 0 22px #7ce9df09!important;
+}
+body.sx-goku .sx-gamer-card{
+ border-color:#ffb04c92!important;
+ box-shadow:0 0 20px #ff982627,inset 0 0 24px #ffad300e!important;
+}
+@property --sxTrialFrameAngle{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes sxTrialFrameChase{to{--sxTrialFrameAngle:360deg}}
+body:is(.sx-halo,.sx-goku) .sx-gamer-card{
+ position:relative!important;isolation:isolate;
+}
+body:is(.sx-halo,.sx-goku) .sx-gamer-card::before{
+ content:""!important;display:block!important;
+ position:absolute;inset:-2px;padding:2px;border-radius:inherit;
+ pointer-events:none;z-index:3;
+ background:conic-gradient(from var(--sxTrialFrameAngle),
+  transparent 0 66%,var(--sx-trial-soft) 74%,var(--lime) 84%,
+  var(--sx-trial-secondary) 91%,transparent 97%);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ filter:drop-shadow(0 0 7px var(--sx-trial-soft));
+ animation:sxTrialFrameChase 4s linear infinite!important;
+}
+body.sx-halo .profile-identity,
+body.sx-goku .profile-identity{
+ border-color:var(--line)!important;
+ box-shadow:inset 0 0 11px var(--sx-trial-soft),0 0 13px var(--sx-trial-soft)!important;
+}
+/* Avatar/portrait aura uses the theme accent but does not tint the photo. */
+@keyframes sxTrialAura{
+ 0%,100%{box-shadow:0 0 4px var(--sx-trial-soft),0 0 0 2px color-mix(in srgb,var(--lime) 25%,transparent)}
+ 50%{box-shadow:0 0 15px color-mix(in srgb,var(--lime) 45%,transparent),0 0 0 2px color-mix(in srgb,var(--lime) 65%,transparent)}
+}
+body:is(.sx-halo,.sx-goku) #profileAvatar{
+ border:2px solid var(--lime)!important;
+ animation:sxTrialAura 3.1s ease-in-out infinite;
+}
+body:is(.sx-halo,.sx-goku) .sx-gamer-emblem.sx-portrait-frame-slot::after{
+ content:"";position:absolute;inset:26%;border-radius:50%;z-index:4;
+ pointer-events:none;border:1px solid color-mix(in srgb,var(--lime) 42%,transparent);
+ animation:sxTrialAura 3.1s ease-in-out infinite;
+}
+/* Navigation stays outlined across all themes, with pulsing icon glow only. */
+body:is(.sx-halo,.sx-goku) #trackerNav button{
+ background:color-mix(in srgb,var(--panel2) 68%,transparent)!important;
+ border:1px solid color-mix(in srgb,var(--line) 80%,transparent)!important;
+ border-radius:11px!important;
+ color:var(--muted)!important;
+ animation:none!important;
+}
+body:is(.sx-halo,.sx-goku) #trackerNav button.active{
+ background:color-mix(in srgb,var(--lime) 14%,var(--panel2))!important;
+ color:var(--txt)!important;border-color:var(--lime)!important;
+ box-shadow:0 0 10px var(--sx-trial-soft),inset 0 1px 0 #ffffff15!important;
+}
+@keyframes sxTrialNavPulse{
+ 0%,100%{filter:drop-shadow(0 0 2px color-mix(in srgb,var(--lime) 32%,transparent))}
+ 50%{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--lime) 77%,transparent))}
+}
+body:is(.sx-halo,.sx-goku) #trackerNav button .sx-nav-icon{
+ animation:sxTrialNavPulse 2.6s ease-in-out infinite;
+}
+body:is(.sx-halo,.sx-goku) #trackerNav button.active .sx-nav-icon{
+ animation-duration:1.9s;
+}
+/* Distinct themed progression bars and completed-set highlights. */
+body.sx-halo .rank-progress-track span{
+ background:linear-gradient(90deg,#526a45,#73d0c7,#c4ffff)!important;
+ box-shadow:0 0 11px #7ce9df66!important;
+}
+body.sx-goku .rank-progress-track span{
+ background:linear-gradient(90deg,#e66b23,#ffbc4a,#4eaaf1)!important;
+ box-shadow:0 0 13px #ff9c4680!important;
+}
+body:is(.sx-halo,.sx-goku) .set-entry.is-complete{
+ background:color-mix(in srgb,var(--lime) 19%,var(--panel))!important;
+ border-color:color-mix(in srgb,var(--lime) 45%,var(--line))!important;
+}
+body:is(.sx-halo,.sx-goku) .sx-session-label,
+body:is(.sx-halo,.sx-goku) .rank-tier.current>.rank-tier-name,
+body:is(.sx-halo,.sx-goku) .rank-tier.current>.rank-tier-level{
+ color:var(--lime)!important;
+}
+/* Footer remains normal document flow; only the hairline is animated. */
+body:is(.sx-halo,.sx-goku) .spartanx-page-footer{
+ position:relative!important;color:var(--muted)!important;
+}
+body:is(.sx-halo,.sx-goku) .spartanx-page-footer::before{
+ content:"";position:absolute;top:0;left:0;width:100%;height:1px;
+ pointer-events:none;
+ background:linear-gradient(90deg,transparent,var(--sx-trial-secondary),
+  var(--lime),transparent);
+ background-size:220% 100%;
+ animation:sxTrialFooterSweep 5.4s linear infinite;
+}
+@keyframes sxTrialFooterSweep{from{background-position:100% 0}to{background-position:-100% 0}}
+/* Appearance thumbnails are built in CSS so they work offline in the PWA. */
+.sx-crossover-theme-preview{
+ display:none;gap:12px;align-items:center;margin-top:12px;
+ padding:12px;border-radius:12px;border:1px solid var(--line);
+ background:var(--panel);color:var(--txt);
+}
+.sx-crossover-theme-preview strong{display:block;font-size:12px;letter-spacing:.5px}
+.sx-crossover-theme-preview small{display:block;margin-top:5px;line-height:1.5;font-size:10px;color:var(--muted)}
+.sx-crossover-theme-symbol{
+ display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;
+ border-radius:11px;font-size:24px;font-weight:900;
+ box-shadow:inset 0 1px 0 #ffffff25,0 0 12px var(--sx-trial-soft);
+}
+body.sx-halo .sx-halo-theme-preview,
+body.sx-goku .sx-goku-theme-preview{display:flex}
+body.sx-halo .sx-halo-theme-preview{background:linear-gradient(120deg,#192723,#070d0f);border-color:#467d76;color:#d6f5f0}
+body.sx-halo .sx-halo-theme-preview .sx-crossover-theme-symbol{border:1px solid #7ce9df;background:#152821;color:#a4f8e5}
+body.sx-goku .sx-goku-theme-preview{background:linear-gradient(120deg,#36222a,#0c0b14);border-color:#a66c47;color:#fff0df}
+body.sx-goku .sx-goku-theme-preview .sx-crossover-theme-symbol{border:1px solid #ffaf48;background:#42242a;color:#ffbd5c}
+@media(prefers-reduced-motion:reduce){
+ body:is(.sx-halo,.sx-goku) .sx-gamer-card::before,
+ body:is(.sx-halo,.sx-goku) #profileAvatar,
+ body:is(.sx-halo,.sx-goku) .sx-gamer-emblem.sx-portrait-frame-slot::after,
+ body:is(.sx-halo,.sx-goku) #trackerNav button .sx-nav-icon,
+ body:is(.sx-halo,.sx-goku) .spartanx-page-footer::before{
+  animation:none!important;
+ }
+}

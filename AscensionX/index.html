@@ -179,6 +179,18 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-spartan-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0 4px}
 .asc-spartan-import-actions button{min-height:52px;padding:9px 7px;font-size:11px;line-height:1.3}
 @media(max-width:375px){.asc-spartan-import-actions button{font-size:10px}}
+/* Previous SpartanX workout recovery is deliberately separate from programme editing. */
+.asc-recovery-trigger{display:block;margin:9px 0 0;width:100%;min-height:43px;font-size:11px;letter-spacing:.45px}
+.asc-recovery-trigger[hidden]{display:none!important}
+.asc-recovery-dialog{max-height:calc(100dvh - 34px);overflow-y:auto}
+.asc-recovery-choice{display:flex;align-items:center;gap:12px;padding:12px 7px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;margin:0}
+.asc-recovery-choice input{width:22px;height:22px;flex:0 0 22px;min-width:22px;accent-color:var(--red2);padding:0}
+.asc-recovery-choice input:disabled{opacity:.4}
+.asc-recovery-choice span{display:block;flex:1;min-width:0}
+.asc-recovery-choice strong{display:block;color:var(--text);font-size:12px}
+.asc-recovery-choice small{display:block;color:var(--muted);font-size:11px;line-height:1.5;margin-top:3px}
+.asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
 </style>
 </head>
 <body>
@@ -204,6 +216,18 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
     <button type="button" class="ghost full small" onclick="closeAscSpartanImport()">Cancel</button>
   </section>
 </div>
+<div id="ascRecoveryBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeAscWorkoutRecovery()">
+  <section class="cycle-confirm-dialog asc-recovery-dialog" role="dialog" aria-modal="true" aria-labelledby="ascRecoveryTitle">
+    <div class="eyebrow">ASCENSIONX × SPARTANX · HISTORY RECOVERY</div>
+    <h2 id="ascRecoveryTitle" style="margin:9px 0">Recover previous workouts</h2>
+    <p class="tiny">This checks workouts already saved in SpartanX on this device. Select qualifying AscensionX sessions to restore their completed sets and week progression. <strong>Your original SpartanX workouts are not changed.</strong></p>
+    <div id="ascRecoveryList" aria-live="polite"></div>
+    <div class="asc-recovery-actions">
+      <button type="button" class="secondary" onclick="closeAscWorkoutRecovery()">CANCEL</button>
+      <button type="button" id="ascRecoveryConfirm" onclick="confirmAscWorkoutRecovery()">SYNC SELECTED</button>
+    </div>
+  </section>
+</div>
 <div id="deleteCycleBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteCycleTitle"><div class="eyebrow">ASCENSIONX · PROGRAMME MANAGEMENT</div><h2 id="deleteCycleTitle" style="margin:9px 0">Delete this programme?</h2><p class="tiny" style="line-height:1.6">Your active six-week programme, selected lifts, week progress and unfinished workout draft will be removed. <strong>Your completed workouts, training history, strength records and profile will be kept.</strong></p><div class="cycle-confirm-actions"><button type="button" class="secondary" onclick="closeDeleteCycle()">KEEP PROGRAMME</button><button type="button" class="danger" id="confirmDeleteCycleButton" onclick="confirmDeleteCycle()">DELETE PROGRAMME</button></div></section></div>
 <div id="cycleReviewBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeCycleReview()"><section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="cycleReviewTitle"><div class="modal-head row between"><div><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleReviewTitle" style="margin:4px 0 0">End-of-cycle Review</h2></div><button class="iconbtn" onclick="closeCycleReview()" aria-label="Close review">×</button></div><div class="card"><div id="cycleReview" class="tiny"></div></div><button class="secondary full" onclick="closeCycleReview()">Exit</button></section></div>
 <div id="settingsBackdrop" class="settings-backdrop" onclick="if(event.target===this)closeSettings()">
@@ -212,7 +236,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
   <div class="card"><h2>Read Me</h2><p class="tiny">Review the six-week cycle and how to adjust your training loads.</p><button class="secondary full" onclick="openCycleReview()">End-of-cycle review</button></div>
   <div class="card"><h2>Appearance</h2><p class="tiny">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div></div>
   <div class="card"><h2>Weight units</h2><p class="tiny">Choose how weights are displayed and entered throughout the app. Your saved training data stays accurate when switching units.</p><div class="unit-choice"><button id="unitKg" class="secondary" onclick="setUnit('kg')">Kilograms (kg)</button><button id="unitLbs" class="secondary" onclick="setUnit('lbs')">Pounds (lbs)</button></div></div>
-  <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.2 · SPARTANX WORKOUT SYNC · LOCAL STORAGE</div></div>
+  <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.3 · WORKOUT HISTORY RECOVERY · LOCAL STORAGE</div></div>
  </section>
 </div>
 <main>
@@ -234,6 +258,7 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
   <div class="progress" style="margin-top:12px"><i id="cycleProgressBar" style="width:0%"></i></div>
   <div class="weekgrid" id="homeWeeks" style="margin-top:14px"></div>
   <button class="secondary small" style="margin-top:14px" id="cycleExpandButton" aria-expanded="false" aria-controls="cycleDetails" onclick="toggleCycleDetails()">View full cycle</button>
+   <button type="button" class="secondary small asc-recovery-trigger" id="ascRecoveryOpen" onclick="openAscWorkoutRecovery()" hidden>RECOVER PAST SPARTANX WORKOUTS</button>
  <div id="cycleDetails" class="cycle-details" hidden>
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
  <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><button id="deleteCycleButton" type="button" class="secondary full" style="margin-top:9px;border-color:#934a50;color:#ff9ca2" onclick="openDeleteCycle()" hidden>DELETE PROGRAMME</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
@@ -510,7 +535,7 @@ function ascWarmupPlan(lift,week){
 }
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
- if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;processAscensionSpartanCompletionQueue();return}
+ if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;processAscensionSpartanCompletionQueue();renderDashboard();return}
  if(e.data?.type==='spartx:ascensionProcessCompletedWorkouts'){processAscensionSpartanCompletionQueue();return}
  if(e.data?.type==='spartx:ascensionImportResult'&&ascSpartanImportPending!==null&&String(e.data.requestId)===ascSpartanImportPending){
   ascSpartanImportPending=null;
@@ -645,6 +670,84 @@ window.addEventListener('storage',e=>{
  if(e.key===ASCENSION_COMPLETION_QUEUE_KEY)processAscensionSpartanCompletionQueue();
 });
 
+// Recover older imports saved before cross-app cycle metadata was introduced.
+// Only explicitly labelled AscensionX sessions on this device are eligible.
+function findAscSpartanRecoverySessions(){
+ if(!ascensionEmbeddedBySpartanX||!state.cycle.created)return [];
+ let db;
+ try{db=JSON.parse(localStorage.getItem('spartx_db')||'{}')}catch(e){return []}
+ if(!Array.isArray(db?.sessions))return [];
+ const cycleStart=Date.parse(state.cycle.created);
+ if(!Number.isFinite(cycleStart))return [];
+ const matches=[];
+ for(const session of db.sessions){
+  if(session?.id===undefined||!Number.isFinite(Date.parse(session.date))||Date.parse(session.date)<cycleStart||!Array.isArray(session.exercises))continue;
+  for(let index=0;index<session.exercises.length;index++){
+   const exercise=session.exercises[index];
+   if(!exercise||!selectedLifts().includes(exercise.name))continue;
+   const link=exercise.ascensionLink;
+   const legacy=typeof exercise.notes==='string'&&/^Imported from AscensionX\b/i.test(exercise.notes.trim());
+   if(!legacy&&!(link&&link.cycleId===state.cycle.created))continue;
+   const mentioned=legacy?exercise.notes.match(/\bWeek\s+([1-6])\b/i):null;
+   const week=link&&link.cycleId===state.cycle.created?Number(link.week):mentioned?Number(mentioned[1]):0;
+   if(!Number.isInteger(week)||week<1||week>PLAN.length)continue;
+   if(state.logs.some(log=>log.cycleId===state.cycle.created&&log.lift===exercise.name&&
+        (String(log.sourceSessionId||'')===String(session.id)||(log.week===week&&log.setsComplete===true))))continue;
+   const plan=PLAN[week-1],required=plan.deload?3:1+plan.backSets;
+   const sets=(Array.isArray(exercise.sets)?exercise.sets:[])
+    .filter(set=>set?.type==='Working Set'&&set.done===true)
+    .map(set=>({weight:Number(set.weight),reps:Number(set.reps),
+      rpe:set.rpe==null||set.rpe===''?null:Number(set.rpe),done:true}));
+   if(!sets.length||sets.length>12||sets.some(x=>!Number.isFinite(x.weight)||x.weight<=0||!Number.isInteger(x.reps)||x.reps<=0))continue;
+   const meetsTargets=sets.length===required&&sets.every((set,i)=>set.reps>=(plan.deload?5:i===0?plan.topReps:plan.backReps));
+   const packet={
+    id:'sx:'+String(session.id)+':'+index,sourceSessionId:String(session.id),
+    date:session.date,cycleId:state.cycle.created,lift:exercise.name,week,
+    sets,setsComplete:meetsTargets,
+    notes:'Recovered from previously saved SpartanX workout'
+   };
+   matches.push({packet,eligible:meetsTargets,reason:meetsTargets?'Meets prescribed working sets':'Incomplete prescribed working sets or reps'});
+  }
+ }
+ return matches.sort((a,b)=>Date.parse(a.packet.date)-Date.parse(b.packet.date));
+}
+let ascRecoveryCandidates=[];
+function openAscWorkoutRecovery(){
+ if(!ascensionEmbeddedBySpartanX||!state.cycle.created)return;
+ processAscensionSpartanCompletionQueue();
+ ascRecoveryCandidates=findAscSpartanRecoverySessions();
+ const eligible=ascRecoveryCandidates.filter(x=>x.eligible);
+ $('ascRecoveryList').innerHTML=ascRecoveryCandidates.length?ascRecoveryCandidates.map((item,i)=>{
+  const date=new Date(item.packet.date).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+  return '<label class="asc-recovery-choice"><input type="checkbox" data-recover-index="'+i+'" '+(item.eligible?'checked':'disabled')+'><span><strong>'+item.packet.lift+' · Week '+item.packet.week+'</strong><small>'+date+' · '+item.packet.sets.length+' working sets · '+(item.eligible?'Ready to sync':'Does not meet progression targets')+'</small></span></label>';
+ }).join(''):'<p class="tiny">No previous AscensionX-labelled SpartanX sessions were found for this active programme on this device. Check that those sessions appear in SpartanX workout history.</p>';
+ $('ascRecoveryConfirm').disabled=!eligible.length;
+ $('ascRecoveryConfirm').textContent=eligible.length?'SYNC '+eligible.length+' QUALIFYING SESSION'+(eligible.length===1?'':'S'):'NO ELIGIBLE SESSIONS';
+ $('ascRecoveryBackdrop').classList.add('open');
+ $('ascRecoveryBackdrop').setAttribute('aria-hidden','false');
+}
+function closeAscWorkoutRecovery(){
+ $('ascRecoveryBackdrop').classList.remove('open');
+ $('ascRecoveryBackdrop').setAttribute('aria-hidden','true');
+ ascRecoveryCandidates=[];
+}
+function confirmAscWorkoutRecovery(){
+ const chosen=[...document.querySelectorAll('#ascRecoveryList input[data-recover-index]:checked')]
+  .map(input=>ascRecoveryCandidates[Number(input.dataset.recoverIndex)])
+  .filter(x=>x?.eligible);
+ if(!chosen.length){toast('Select a completed imported workout');return}
+ let queue=[];
+ try{
+  const saved=JSON.parse(localStorage.getItem(ASCENSION_COMPLETION_QUEUE_KEY)||'[]');
+  if(Array.isArray(saved))queue=saved;
+  for(const {packet} of chosen)if(!queue.some(x=>x?.id===packet.id))queue.push(packet);
+  localStorage.setItem(ASCENSION_COMPLETION_QUEUE_KEY,JSON.stringify(queue));
+ }catch(e){toast('Could not save recovery. Please export a backup and check storage.');return}
+ closeAscWorkoutRecovery();
+ processAscensionSpartanCompletionQueue();
+ renderDashboard();
+}
+
 function renderDashboard(){
  $('todayDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const active=selectedLifts(),weeks=active.map(currentWeekFor),avgWeek=weeks.length?weeks.reduce((a,b)=>a+b,0)/weeks.length:1;
@@ -655,6 +758,7 @@ function renderDashboard(){
  $('cycleProgressText').textContent=state.cycle.created?active.map(l=>l+' · W'+currentWeekFor(l)).join('  |  '):'Create a cycle to begin.';
  $('cycleProgressPct').textContent=pct+'%';$('cycleProgressBar').style.width=pct+'%';
  $('homeWeeks').innerHTML=state.cycle.created?active.map(lift=>{const week=currentWeekFor(lift);const completed=cycleLogs.some(x=>x.lift===lift&&x.week===6&&x.setsComplete===true);return '<div class="cycle-lift-row"><div class="cycle-lift-name">'+lift+'</div><div class="weekgrid">'+PLAN.map(p=>{const done=p.week<week||(completed&&p.week===6);return '<div class="weektile '+(p.week===week?'current ':'')+(done?'done':'')+'" aria-label="'+lift+' week '+p.week+(p.week===week?' active':'')+'"><strong>W'+p.week+'</strong></div>'}).join('')+'</div></div>'}).join(''):'<p class="tiny">Create a cycle to see each lift\'s six-week progression.</p>';
+ $('ascRecoveryOpen').hidden=!(ascensionEmbeddedBySpartanX&&state.cycle.created);
  $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="continueAscensionTraining()">Continue training</button><button class="secondary" onclick="showScreen('cycle')">Edit programme</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
 }
 function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}

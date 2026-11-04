@@ -1,0 +1,186 @@
+/* SpartanX Obsidian White · TEST
+   Monster-derived effects with pure black surfaces and quiet white accents.
+   Intentionally opt-in: existing Monster/premium themes remain unchanged. */
+body.sx-obsidian-white{
+ --bg:#030303;--panel:#0b0b0b;--panel2:#171717;
+ --line:#333333;--txt:#f0f0f0;--muted:#999999;--lime:#dfdfdf;
+ background:radial-gradient(ellipse at 92% 0%,#ffffff0b,transparent 46%),
+            linear-gradient(155deg,#030303,#080808 45%,#000000)!important;
+ background-attachment:fixed!important;
+ color-scheme:dark;
+}
+body.sx-obsidian-white>header,
+body.sx-obsidian-white #trackerNav{
+ background:linear-gradient(95deg,#030303fa,#101010fa)!important;
+ border-color:#363636!important;
+}
+body.sx-obsidian-white .brand span,
+body.sx-obsidian-white .eyebrow,
+body.sx-obsidian-white .sx-session-label{color:#e9e9e9!important}
+body.sx-obsidian-white .card,
+body.sx-obsidian-white .exercise-card,
+body.sx-obsidian-white .detail-panel,
+body.sx-obsidian-white .sx-gamer-card,
+body.sx-obsidian-white .stat{
+ background:linear-gradient(220deg,#191919 0%,#111111 23%,#090909 68%,#050505 100%)!important;
+ border-color:#343434!important;
+ box-shadow:inset 0 1px 0 #ffffff09,0 6px 24px #00000048;
+}
+body.sx-obsidian-white .sx-energy-start-card{
+ background:linear-gradient(145deg,#1c1c1c,#0b0b0b 54%,#050505)!important;
+}
+body.sx-obsidian-white button:not(#trackerNav button):not(.danger),
+body.sx-obsidian-white .back-button{
+ color:#f0f0f0!important;
+ background:linear-gradient(165deg,#232323,#101010)!important;
+ border:1px solid #414141!important;
+ box-shadow:inset 0 1px 0 #ffffff0c;
+}
+body.sx-obsidian-white button:not(#trackerNav button):not(.danger):active{
+ background:#303030!important;
+}
+body.sx-obsidian-white input:not([type="checkbox"]):not([type="radio"]),
+body.sx-obsidian-white textarea,
+body.sx-obsidian-white select{
+ background:#101010!important;color:#f0f0f0!important;
+ border-color:#393939!important;
+}
+body.sx-obsidian-white input[type="checkbox"],
+body.sx-obsidian-white input[type="radio"],
+body.sx-obsidian-white input[type="range"]{accent-color:#d6d6d6!important}
+body.sx-obsidian-white :is(.card,.exercise-card,button,input,select):focus-visible{
+ outline-color:#eeeeee!important;
+}
+/* Keep the distinctive bordered navigation but pulse only the icons,
+   following the current Monster behaviour, not entire buttons. */
+body.sx-obsidian-white #trackerNav button{
+ background:#131313dd!important;
+ border:1px solid #363636!important;
+ color:#a6a6a6!important;
+ border-radius:11px!important;
+ animation:none!important;
+ box-shadow:inset 0 1px 0 #ffffff08!important;
+}
+body.sx-obsidian-white #trackerNav button.active{
+ color:#f7f7f7!important;
+ border-color:#c5c5c5!important;
+ background:#242424!important;
+ box-shadow:inset 0 1px 0 #ffffff1b,0 0 10px #ffffff14!important;
+}
+@keyframes sxObsidianIconPulse{
+ 0%,100%{filter:drop-shadow(0 0 1px #ffffff20)}
+ 50%{filter:drop-shadow(0 0 5px #ffffff99)}
+}
+body.sx-obsidian-white #trackerNav button .sx-nav-icon{
+ animation:sxObsidianIconPulse 2.6s ease-in-out infinite;
+}
+body.sx-obsidian-white #trackerNav button.active .sx-nav-icon{animation-duration:2s}
+/* Dark cards with fine moving silver edge; no neon wash. */
+@property --sxObsidianAngle{
+ syntax:"<angle>";
+ inherits:false;
+ initial-value:0deg;
+}
+@keyframes sxObsidianChase{to{--sxObsidianAngle:360deg}}
+body.sx-obsidian-white .profile-identity,
+body.sx-obsidian-white .sx-gamer-card{
+ position:relative;
+ isolation:isolate;
+ overflow:visible;
+}
+body.sx-obsidian-white .profile-identity::before,
+body.sx-obsidian-white .sx-gamer-card::before{
+ content:"";
+ display:block;
+ position:absolute;
+ inset:-2px;
+ padding:1.5px;
+ border-radius:inherit;
+ background:conic-gradient(from var(--sxObsidianAngle),
+    transparent 0 66%,#ffffff0e 74%,#ffffff9c 85%,#ffffff32 91%,transparent 97%);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+ -webkit-mask-composite:xor;
+ mask-composite:exclude;
+ filter:drop-shadow(0 0 5px #ffffff4b);
+ animation:sxObsidianChase 4.1s linear infinite;
+ pointer-events:none;
+ z-index:3;
+}
+body.sx-obsidian-white .profile-identity::after{
+ content:none!important;
+}
+@keyframes sxObsidianFramePulse{
+ 0%,100%{box-shadow:0 0 3px #ffffff26,inset 0 0 2px #ffffff0d}
+ 50%{box-shadow:0 0 12px #ffffff58,inset 0 0 5px #ffffff18}
+}
+body.sx-obsidian-white #profileAvatar{
+ border:1px solid #a9a9a9!important;
+ animation:sxObsidianFramePulse 3s ease-in-out infinite;
+}
+body.sx-obsidian-white .sx-gamer-emblem.sx-portrait-frame-slot>img.sx-rank-portrait-frame{
+ filter:grayscale(1) brightness(.91) drop-shadow(0 0 5px #ffffff38)!important;
+}
+body.sx-obsidian-white .sx-gamer-emblem.sx-portrait-frame-slot::after{
+ content:"";position:absolute;inset:26%;border-radius:50%;z-index:4;
+ pointer-events:none;border:1px solid #ffffff50;
+ animation:sxObsidianFramePulse 3s ease-in-out infinite;
+}
+body.sx-obsidian-white .rank-progress-track span{
+ background:linear-gradient(90deg,#626262,#ededed)!important;
+ box-shadow:0 0 7px #ffffff2f!important;
+}
+body.sx-obsidian-white .set-entry.is-complete{
+ background:#202020!important;
+ border-color:#6a6a6a!important;
+}
+body.sx-obsidian-white .sx-seven-day-header strong,
+body.sx-obsidian-white .rank-tier.current>.rank-tier-name,
+body.sx-obsidian-white .rank-tier.current>.rank-tier-level{
+ color:#eeeeee!important;
+}
+body.sx-obsidian-white .sx-asc-quick-progress>span{
+ background:linear-gradient(90deg,#777777,#eeeeee)!important;
+}
+/* The existing scrolling page footer gains an almost invisible silver sweep. */
+body.sx-obsidian-white .spartanx-page-footer{
+ position:relative!important;
+ color:#818181!important;
+}
+body.sx-obsidian-white .spartanx-page-footer::before{
+ content:"";
+ position:absolute;left:0;top:0;height:1px;width:100%;
+ background:linear-gradient(90deg,transparent 0%,#ffffff18 38%,#ffffff99 50%,#ffffff18 62%,transparent 100%);
+ background-size:220% 100%;
+ animation:sxObsidianFooterSweep 5s linear infinite;
+ pointer-events:none;
+}
+@keyframes sxObsidianFooterSweep{
+ from{background-position:100% 0}
+ to{background-position:-100% 0}
+}
+/* Contextual preview uses a grayscale palette rather than the Monster can. */
+.sx-obsidian-theme-preview{
+ display:none;align-items:center;gap:12px;padding:11px 12px;
+ margin-top:12px;border:1px solid #424242;border-radius:12px;
+ background:linear-gradient(110deg,#171717,#050505);
+ color:#f0f0f0;
+}
+.sx-obsidian-preview-emblem{
+ flex:0 0 46px;width:46px;height:46px;border-radius:12px;
+ border:1px solid #757575;
+ background:linear-gradient(135deg,#070707,#292929 52%,#040404);
+ box-shadow:inset 0 1px 0 #ffffff22,0 0 8px #ffffff1b;
+ display:grid;place-items:center;
+ font-weight:950;font-size:21px;letter-spacing:-2px;color:#e7e7e7;
+}
+.sx-obsidian-theme-preview strong{display:block;font-size:12px;letter-spacing:.7px;color:#e8e8e8}
+.sx-obsidian-theme-preview small{display:block;margin-top:4px;font-size:10px;line-height:1.5;color:#9f9f9f}
+body.sx-obsidian-white .sx-obsidian-theme-preview{display:flex}
+@media(prefers-reduced-motion:reduce){
+ body.sx-obsidian-white #trackerNav button .sx-nav-icon,
+ body.sx-obsidian-white .profile-identity::before,
+ body.sx-obsidian-white .sx-gamer-card::before,
+ body.sx-obsidian-white #profileAvatar,
+ body.sx-obsidian-white .sx-gamer-emblem.sx-portrait-frame-slot::after,
+ body.sx-obsidian-white .spartanx-page-footer::before{animation:none!important}
+}

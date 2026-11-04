@@ -1,0 +1,98 @@
+/* SpartanX linked AscensionX surface theme v207.
+   Scoped to data-spartx-parent-theme: standalone AscensionX is untouched.
+   Original AscensionX account/theme selection remains persisted separately. */
+body[data-spartx-parent-theme="dark"]{--sx-parent-bg:#0b0d0f;--sx-parent-panel:#171a1e;--sx-parent-panel2:#22272d;--sx-parent-line:#30363e;--sx-parent-text:#f3f4f6;--sx-parent-muted:#9ba3ad;--sx-parent-accent:#c8f169}
+body[data-spartx-parent-theme="light"]{--sx-parent-bg:#f3f5f7;--sx-parent-panel:#ffffff;--sx-parent-panel2:#e9edf0;--sx-parent-line:#d4dbe1;--sx-parent-text:#18212a;--sx-parent-muted:#66727d;--sx-parent-accent:#718f27}
+body[data-spartx-parent-theme="spartan-red"]{--sx-parent-bg:#09090b;--sx-parent-panel:#151518;--sx-parent-panel2:#242428;--sx-parent-line:#514044;--sx-parent-text:#f3f4f6;--sx-parent-muted:#ada6a9;--sx-parent-accent:#ef2029}
+body[data-spartx-parent-theme="spartan-gold"]{--sx-parent-bg:#15130f;--sx-parent-panel:#171613;--sx-parent-panel2:#25231e;--sx-parent-line:#494232;--sx-parent-text:#f5f1e9;--sx-parent-muted:#b8b09e;--sx-parent-accent:#b89b5e}
+body[data-spartx-parent-theme="spartan-bronze"]{--sx-parent-bg:#15110e;--sx-parent-panel:#171513;--sx-parent-panel2:#26211d;--sx-parent-line:#40352d;--sx-parent-text:#f4eee8;--sx-parent-muted:#b6a99d;--sx-parent-accent:#a8794f}
+body[data-spartx-parent-theme="spartan-blue"]{--sx-parent-bg:#101925;--sx-parent-panel:#141b25;--sx-parent-panel2:#202c3b;--sx-parent-line:#34465b;--sx-parent-text:#eef3f8;--sx-parent-muted:#aab8c8;--sx-parent-accent:#628bb8}
+body[data-spartx-parent-theme="spartan-amethyst"]{--sx-parent-bg:#0b0911;--sx-parent-panel:#17121f;--sx-parent-panel2:#292037;--sx-parent-line:#4b385f;--sx-parent-text:#f1eaf7;--sx-parent-muted:#b5a5c4;--sx-parent-accent:#b58ae9}
+body[data-spartx-parent-theme="spartan-olympian"]{--sx-parent-bg:#11100f;--sx-parent-panel:#171613;--sx-parent-panel2:#242222;--sx-parent-line:#66583d;--sx-parent-text:#f6f0df;--sx-parent-muted:#c9b99a;--sx-parent-accent:#d8c49a}
+body[data-spartx-parent-theme="olympian-athena"]{--sx-parent-bg:#0d0912;--sx-parent-panel:#1a1422;--sx-parent-panel2:#292033;--sx-parent-line:#70577d;--sx-parent-text:#f7edf6;--sx-parent-muted:#c2abc9;--sx-parent-accent:#e8b4dd}
+body[data-spartx-parent-theme="sx-halloween"]{--sx-parent-bg:#120b14;--sx-parent-panel:#261326;--sx-parent-panel2:#3a2031;--sx-parent-line:#72435b;--sx-parent-text:#f6f5ee;--sx-parent-muted:#b9b5b0;--sx-parent-accent:#ff872b}
+body[data-spartx-parent-theme="sx-christmas"]{--sx-parent-bg:#091b19;--sx-parent-panel:#142d29;--sx-parent-panel2:#22423c;--sx-parent-line:#4c8174;--sx-parent-text:#f6f5ee;--sx-parent-muted:#b7cfc4;--sx-parent-accent:#e8c66b}
+body[data-spartx-parent-theme="sx-monster"]{--sx-parent-bg:#090d09;--sx-parent-panel:#171e13;--sx-parent-panel2:#24311c;--sx-parent-line:#4b7134;--sx-parent-text:#f6f5ee;--sx-parent-muted:#c0b9b3;--sx-parent-accent:#a7ff00}
+body[data-spartx-parent-theme="premium-monster"]{--sx-parent-bg:#050a06;--sx-parent-panel:#0d1610;--sx-parent-panel2:#17261b;--sx-parent-line:#467a36;--sx-parent-text:#fff9ed;--sx-parent-muted:#c1bba9;--sx-parent-accent:#8cff12}
+body[data-spartx-parent-theme="sx-obsidian-white"]{--sx-parent-bg:#030303;--sx-parent-panel:#0b0b0b;--sx-parent-panel2:#171717;--sx-parent-line:#333333;--sx-parent-text:#f0f0f0;--sx-parent-muted:#999999;--sx-parent-accent:#dfdfdf}
+body[data-spartx-parent-theme="sx-halo"]{--sx-parent-bg:#060b0b;--sx-parent-panel:#101918;--sx-parent-panel2:#1a2a27;--sx-parent-line:#40605a;--sx-parent-text:#e4f0ec;--sx-parent-muted:#a1bbb5;--sx-parent-accent:#7ce9df}
+body[data-spartx-parent-theme="sx-goku"]{--sx-parent-bg:#070a14;--sx-parent-panel:#111626;--sx-parent-panel2:#20263c;--sx-parent-line:#59648c;--sx-parent-text:#f2f5ff;--sx-parent-muted:#acb9d5;--sx-parent-accent:#cddfff}
+body[data-spartx-parent-theme="premium-olympus"]{--sx-parent-bg:#090c14;--sx-parent-panel:#111824;--sx-parent-panel2:#1a2534;--sx-parent-line:#a68043;--sx-parent-text:#fff9ed;--sx-parent-muted:#c1bba9;--sx-parent-accent:#ffd376}
+body[data-spartx-parent-theme="amazonian-crimson"]{--sx-parent-bg:#0e0b10;--sx-parent-panel:#1d141d;--sx-parent-panel2:#341b2a;--sx-parent-line:#79435a;--sx-parent-text:#f4e7ed;--sx-parent-muted:#baa1ae;--sx-parent-accent:#c84b76}
+body[data-spartx-parent-theme="athenas-aegis"]{--sx-parent-bg:#100d19;--sx-parent-panel:#1b172b;--sx-parent-panel2:#29233c;--sx-parent-line:#665483;--sx-parent-text:#f2ebfa;--sx-parent-muted:#bcadd1;--sx-parent-accent:#c5a0f1}
+body[data-spartx-parent-theme]{
+ --bg:var(--sx-parent-bg);--panel:var(--sx-parent-panel);
+ --panel2:var(--sx-parent-panel2);--panel3:var(--sx-parent-panel2);
+ --line:var(--sx-parent-line);--text:var(--sx-parent-text);
+ --muted:var(--sx-parent-muted);--red:var(--sx-parent-accent);
+ --red2:var(--sx-parent-accent);--redDeep:var(--sx-parent-panel2);
+ color:var(--text)!important;
+ background:radial-gradient(ellipse at 90% 0%,color-mix(in srgb,var(--red2) 16%,transparent),transparent 55%),
+ linear-gradient(145deg,var(--bg),var(--panel) 49%,var(--bg))!important;
+ background-attachment:fixed!important;
+}
+body[data-spartx-parent-theme="light"]{color-scheme:light}
+body[data-spartx-parent-theme]:not([data-spartx-parent-theme="light"]){color-scheme:dark}
+body[data-spartx-parent-theme] header,
+body[data-spartx-parent-theme] nav[aria-label="Main navigation"]{
+ background:linear-gradient(105deg,var(--bg),var(--panel))!important;
+ color:var(--text)!important;
+ border-color:var(--line)!important;
+}
+body[data-spartx-parent-theme] .card,
+body[data-spartx-parent-theme] .hero,
+body[data-spartx-parent-theme] .stat,
+body[data-spartx-parent-theme] .settings-modal,
+body[data-spartx-parent-theme] .modal,
+body[data-spartx-parent-theme] .week-card,
+body[data-spartx-parent-theme] .week-tile,
+body[data-spartx-parent-theme] .workout-panel{
+ background:linear-gradient(220deg,
+ color-mix(in srgb,var(--red2) 12%,var(--panel2)),var(--panel) 55%,var(--bg))!important;
+ color:var(--text)!important;
+ border-color:var(--line)!important;
+ box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 7%,transparent),
+ 0 0 15px color-mix(in srgb,var(--red2) 10%,transparent)!important;
+}
+body[data-spartx-parent-theme] :is(input,select,textarea){
+ background:var(--panel2)!important;color:var(--text)!important;border-color:var(--line)!important;
+}
+body[data-spartx-parent-theme] button:not(.ghost):not(.danger):not(.weektile):not(.iconbtn){
+ background:color-mix(in srgb,var(--red2) 16%,var(--panel2))!important;
+ color:var(--text)!important;border:1px solid var(--line)!important;
+ box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 9%,transparent)!important;
+}
+body[data-spartx-parent-theme] button.secondary,
+body[data-spartx-parent-theme] nav[aria-label="Main navigation"] button{
+ background:var(--panel2)!important;color:var(--text)!important;
+ border:1px solid var(--line)!important;
+ box-shadow:none!important;
+}
+body[data-spartx-parent-theme] nav[aria-label="Main navigation"] button.active{
+ color:var(--red2)!important;
+ border-color:var(--red2)!important;
+ box-shadow:0 0 10px color-mix(in srgb,var(--red2) 24%,transparent)!important;
+}
+body[data-spartx-parent-theme] .brand span,
+body[data-spartx-parent-theme] .eyebrow,
+body[data-spartx-parent-theme] .progress>i{
+ color:var(--red2)!important;
+}
+body[data-spartx-parent-theme] .progress>i{
+ background:linear-gradient(90deg,var(--panel2),var(--red2))!important;
+}
+body[data-spartx-parent-theme] .iconbtn{
+ background:var(--panel2)!important;color:var(--text)!important;border-color:var(--line)!important;
+}
+body[data-spartx-parent-theme] :is(.selected,.pill.red){
+ border-color:var(--red2)!important;
+ color:var(--red2)!important;
+}
+/* Avoid competing theme choices while embedded; local standalone choices
+   resume intact when AscensionX is launched separately. */
+body[data-spartx-parent-theme] #themeChoices{display:none!important}
+#sxLinkedThemeNote[hidden]{display:none!important}
+body[data-spartx-parent-theme] #sxLinkedThemeNote{
+ display:block;color:var(--muted);padding:9px 11px;border-radius:10px;
+ border:1px solid var(--line);background:var(--panel2);
+}

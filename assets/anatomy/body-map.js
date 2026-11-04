@@ -12,7 +12,7 @@ const KEY_TO_SLUG={
  adductors:['adductors'],calves:['calves'],back:['upper-back','lower-back'],
  shoulders:['deltoids'],traps:['trapezius'],biceps:['biceps'],
  triceps:['triceps'],forearms:['forearm'],core:['abs','obliques'],
- hip_flexors:['adductors']
+ hip_flexors:[] /* no dedicated hip flexor path: do not color adductors incorrectly */
 };
 function renderOne(view,gender,primary,secondary){
  const desc=DATA[gender]&&DATA[gender][view]||[];

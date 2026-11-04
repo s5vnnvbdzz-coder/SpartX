@@ -975,6 +975,22 @@ body.spartanx-light #workoutCalendarGrid button.calendar-day.has-workout{backgro
 body.spartanx-light #workoutCalendarGrid button.calendar-day.has-workout .sx-calendar-day-number{color:var(--txt)!important}
 
 </style>
+<style>
+/* Main screens: a genuinely fixed SpartanX header, not a sticky element that
+   can scroll away on iOS. Dialogs keep their own scrolling and positioning. */
+:root{--sx-header-live-height:calc(75px + env(safe-area-inset-top,0px))}
+body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)){
+ padding-top:var(--sx-header-live-height)!important;
+}
+body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)) > header{
+ position:fixed!important;top:0!important;left:0!important;right:0!important;
+ width:100%;box-sizing:border-box;z-index:12!important;
+ -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+/* Calendar modal retains a scrolling title. Its overlay stays above the
+   global main-page header; the main app navigation remains hidden. */
+body.sx-workout-calendar-open #workoutCalendarOverlay{z-index:25}
+</style>
 </head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -2366,5 +2382,22 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=191',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script></body></html>
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=192',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+</script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
+<script>
+/* Keep scroll offset equal to the rendered header height, including iPhone
+   safe area and theme/font differences, so content never passes underneath. */
+(function(){
+ const header=document.querySelector('body > header');
+ if(!header)return;
+ const update=()=>{
+  const height=Math.ceil(header.getBoundingClientRect().height);
+  if(height>0)document.documentElement.style.setProperty('--sx-header-live-height',height+'px');
+ };
+ if('ResizeObserver' in window)new ResizeObserver(update).observe(header);
+ window.addEventListener('resize',update,{passive:true});
+ window.addEventListener('orientationchange',update,{passive:true});
+ update();
+})();
+</script>
+</body></html>

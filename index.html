@@ -793,12 +793,12 @@ body:is(.sx-monster,.sx-premium-monster) .sx-energy-start-card::after{content:""
 body:is(.sx-monster,.sx-premium-monster) .rank-progress-track span{background:linear-gradient(90deg,#31571d,#a7ff00)!important;box-shadow:0 0 12px #a7ff006b!important}
 body:is(.sx-monster,.sx-premium-monster) .profile-identity{border-color:#658e40!important;box-shadow:0 0 14px #78ed1b28!important}
 body:is(.sx-monster,.sx-premium-monster) .sx-gamer-card{background:linear-gradient(145deg,#21331f,#111711 63%,#070a07)!important;border-color:#79b04c!important;box-shadow:0 0 15px #a7ff0020}
-body:is(.sx-monster,.sx-premium-monster) .sx-gamer-emblem.sx-portrait-frame-slot>img.sx-rank-portrait-frame{filter:drop-shadow(0 0 6px #a7ff0060)!important}
+/* Frame image colours and green halo use the shared theme-rank-frames.css. */
 body:is(.sx-monster,.sx-premium-monster) .sx-gamer-emblem.sx-portrait-frame-slot::after{content:"";position:absolute;inset:26%;border-radius:50%;z-index:4;pointer-events:none;border:2px solid #a7ff0070;box-shadow:0 0 9px #a7ff0066,inset 0 0 7px #a7ff0044;animation:sxEnergyAvatarPulse 3s ease-in-out infinite}
 @keyframes sxEnergyAvatarPulse{0%,100%{opacity:.45;box-shadow:0 0 5px #a7ff0040}50%{opacity:1;box-shadow:0 0 15px #a7ff00bb}}
 body:is(.sx-monster,.sx-premium-monster) .sx-gamer-card::before{content:"";display:block;position:absolute;inset:-2px;padding:2px;border-radius:inherit;pointer-events:none;background:conic-gradient(from var(--sxPackAngle),transparent 0 68%,#a7ff002a 77%,#a7ff00 87%,transparent 94%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:drop-shadow(0 0 8px #a7ff00aa);animation:sxPackChase 3.6s linear infinite}
 body:is(.sx-monster,.sx-premium-monster)[data-sx-rank-tier="8"] .sx-gamer-card,body:is(.sx-monster,.sx-premium-monster)[data-sx-rank-tier="8"] .profile-identity{box-shadow:0 0 24px #a7ff0040,inset 0 0 17px #a7ff000d!important}
-body:is(.sx-monster,.sx-premium-monster)[data-sx-rank-tier="8"] .sx-gamer-emblem.sx-portrait-frame-slot>img.sx-rank-portrait-frame{filter:drop-shadow(0 0 11px #b6ff2caf)!important}
+/* Rank VIII frame keeps its original geometry; shared stylesheet controls its metallic finish. */
 @media(prefers-reduced-motion:reduce){body:is(.sx-monster,.sx-premium-monster) #trackerNav button .sx-nav-icon,body:is(.sx-monster,.sx-premium-monster) .sx-gamer-emblem.sx-portrait-frame-slot::after,body:is(.sx-monster,.sx-premium-monster) .sx-gamer-card::before{animation:none!important}}
 
 .sx-start-energy-label{display:flex;align-items:center;gap:6px}.sx-start-zap{width:15px;height:15px;flex-shrink:0;color:var(--lime);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--lime) 42%,transparent))}
@@ -1026,7 +1026,7 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 }
 </style>
 <link rel="stylesheet" href="./assets/themes/obsidian-white.css">
-<link rel="stylesheet" href="./assets/themes/theme-rank-frames.css">
+<link rel="stylesheet" href="./assets/themes/theme-rank-frames.css?v=201">
 </head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -2419,7 +2419,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=200',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=201',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script>
 <script>
 /* Keep scroll offset equal to the rendered header height, including iPhone

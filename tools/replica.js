@@ -37,6 +37,12 @@ ascensionToolCard.innerHTML=
  '<p class="hint" style="margin:11px 0 0">Opens within SpartanX. The standalone AscensionX app remains available separately.</p>';
 shadow.querySelector('main').appendChild(ascensionToolCard);
 
+// Mount the full-screen AscensionX overlay outside the hidden Tools screen.
+// This lets Workout-page quick access open it reliably without changing Tools layout.
+const ascensionPortalHost=document.createElement('div');
+ascensionPortalHost.id='sxAscensionPortalHost';
+document.body.appendChild(ascensionPortalHost);
+const ascensionPortal=ascensionPortalHost.attachShadow({mode:'open'});
 const ascensionOverlay=document.createElement('div');
 ascensionOverlay.id='ascensionXOverlay';
 ascensionOverlay.setAttribute('role','dialog');
@@ -49,7 +55,7 @@ ascensionOverlay.innerHTML=
    '<div class="ascensionx-embedded-brand"><strong id="ascensionXOverlayTitle">ASCENSION<span>X</span></strong><small>STRENGTH METHOD</small></div>'+
  '</div>'+
  '<iframe id="ascensionXEmbedFrame" title="AscensionX full training application" src="about:blank" allow="fullscreen" referrerpolicy="same-origin"></iframe>';
-shadow.appendChild(ascensionOverlay);
+ascensionPortal.appendChild(ascensionOverlay);
 
 const ascensionStyle=document.createElement('style');
 ascensionStyle.textContent=[
@@ -67,14 +73,15 @@ ascensionStyle.textContent=[
  '@media(prefers-reduced-motion:reduce){#ascensionXOverlay *{scroll-behavior:auto}}'
 ].join('\n');
 shadow.appendChild(ascensionStyle);
+ascensionPortal.appendChild(ascensionStyle.cloneNode(true));
 
 const ascensionRootStyle=document.createElement('style');
 ascensionRootStyle.textContent='body.sx-ascensionx-open #trackerNav, body.sx-ascensionx-open .minimized-session{display:none!important}';
 document.head.appendChild(ascensionRootStyle);
 
-const ascensionEmbedFrame=$('ascensionXEmbedFrame');
+const ascensionEmbedFrame=ascensionPortal.getElementById('ascensionXEmbedFrame');
 const ascensionOpenButton=$('openAscensionX');
-const ascensionCloseButton=$('closeAscensionX');
+const ascensionCloseButton=ascensionPortal.getElementById('closeAscensionX');
 let ascensionReturnScroll=0,ascensionOldBodyOverflow='',ascensionOldHtmlOverflow='';
 let ascensionQuickCaller=null,ascensionQuickPending=null,ascensionEmbedReadyForShortcut=false;
 function deliverAscensionShortcut(){

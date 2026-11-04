@@ -536,6 +536,23 @@ function ascWarmupPlan(lift,week){
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
  if(e.data?.type==='spartx:ascensionEmbedReady'){ascensionEmbeddedBySpartanX=true;processAscensionSpartanCompletionQueue();renderDashboard();return}
+ if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
+  const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
+  if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
+   if(requestedLift){
+    $('liftSelect').value=requestedLift;
+    $('workWeek').value=currentWeekFor(requestedLift);
+    renderWorkout();
+   }
+   // Opens the EXISTING lift selector and verified SpartanX-import preview.
+   // User confirms the exact lift and sets before importing; no duplicate sessions.
+   continueAscensionTraining();
+  }else{
+   showScreen('home');
+   renderDashboard();
+  }
+  return;
+ }
  if(e.data?.type==='spartx:ascensionProcessCompletedWorkouts'){processAscensionSpartanCompletionQueue();return}
  if(e.data?.type==='spartx:ascensionImportResult'&&ascSpartanImportPending!==null&&String(e.data.requestId)===ascSpartanImportPending){
   ascSpartanImportPending=null;

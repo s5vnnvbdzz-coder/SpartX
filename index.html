@@ -16,13 +16,10 @@
 .exercise-menu{font-size:20px;padding:5px 10px;background:transparent;border:0;color:var(--muted)}
 .exercise-notes{width:100%;min-height:42px;max-height:100px;background:transparent;border:0;border-radius:0;border-bottom:1px solid #252b30;padding:7px 0 10px;color:var(--txt);font:inherit;resize:vertical;outline:none}
 .exercise-notes::placeholder{color:#858c94}
-.rest-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 18px;flex-wrap:wrap}
-.rest-label{display:flex;align-items:center;gap:8px;color:#a7d65c;font-size:15px;font-weight:650}
-.rest-symbol{font-size:24px;line-height:1}
-.rest-label strong{font-weight:750;font-variant-numeric:tabular-nums}
-.rest-controls{display:flex;align-items:center;gap:5px}
-.rest-controls select{width:auto;min-width:82px;padding:7px 5px;font-size:12px}
-.rest-controls button{padding:7px 9px}
+.rest-duration-setting{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:10px 0 13px;color:var(--muted)}
+.rest-duration-setting label{font-size:10px;font-weight:800;letter-spacing:.75px;white-space:nowrap}
+.rest-duration-setting select{width:auto;min-width:88px;max-width:128px;padding:7px 9px;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--txt)}
+
 .set-table{width:100%}
 .set-head,.set-row{display:grid;grid-template-columns:36px minmax(88px,1.3fr) minmax(52px,.8fr) minmax(48px,.7fr) 36px;gap:5px;align-items:center}
 .set-head{padding:0 4px 9px;color:#8e969e;font-size:11px;font-weight:700;text-align:center;letter-spacing:.35px}
@@ -41,7 +38,7 @@
 .set-extra input{width:52px}
 .set-extra .remove-set{margin-left:auto;padding:4px 8px}
 .add-set-button{width:100%;margin-top:12px;padding:13px;background:#202428!important;border:1px solid #30363e!important;color:#f4f5f6!important;font-size:15px}
-@media(max-width:390px){.exercise-card{padding:13px 10px}.set-head,.set-row{grid-template-columns:29px minmax(76px,1.2fr) minmax(43px,.75fr) minmax(42px,.7fr) 31px;gap:3px}.previous-value{font-size:11px}.set-row input:not(.done){font-size:14px}.rest-controls select{min-width:72px}.exercise-title{font-size:17px}}
+@media(max-width:390px){.exercise-card{padding:13px 10px}.set-head,.set-row{grid-template-columns:29px minmax(76px,1.2fr) minmax(43px,.75fr) minmax(42px,.7fr) 31px;gap:3px}.previous-value{font-size:11px}.set-row input:not(.done){font-size:14px}.exercise-title{font-size:17px}}
 
 
 /* SpartanX workout flow */
@@ -1165,7 +1162,7 @@ function renderWork(){
    const normalNumber=e.sets.slice(0,j+1).filter(x=>!['Warm-up','Backdown Set','Failure Set'].includes(x.type)).length;
    return '<div class="set-entry '+(s.done?'is-complete':'')+'"><div class="set-row"><span class="set-type-wrap"><button type="button" class="set-number set-type-picker set-type-trigger" aria-label="Choose set type" onclick="openSetTypeSheet('+i+','+j+')">'+(marker||normalNumber)+'</button><span class="set-type-display">'+(marker||normalNumber)+'</span></span><span class="previous-value">'+esc(previousText)+'</span><button type="button" class="set-number-pad-trigger" aria-label="Edit weight" onclick="openNumberPad('+i+','+j+',0)">'+esc(weightValueFromKg(+s.weight||0)||'—')+'</button><button type="button" class="set-number-pad-trigger" aria-label="Edit reps" onclick="openNumberPad('+i+','+j+',1)">'+esc(s.reps||'—')+'</button><button type="button" class="set-rpe-trigger" aria-label="Select RPE" onclick="openRpeSheet('+i+','+j+')"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 17a9 9 0 1 1 15.6 0"/><path d="M12 14.5 16.5 8"/><circle cx="12" cy="14.5" r="1.5"/></svg><span>'+(s.rpe!==''&&s.rpe!=null?esc(s.rpe):'')+'</span></button><input class="done" type="checkbox" '+(s.done?'checked':'')+' aria-label="Complete set" onchange="completeSet('+i+','+j+',this.checked)"></div></div>';
   }).join('');
-  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><div class="exercise-title">'+esc(e.name)+'</div><button type="button" class="pr-icon" data-live-pr="'+esc(e.name)+'" aria-label="View performance summary for '+esc(e.name)+'">🏆</button><button class="exercise-menu secondary small" onclick="removeEx('+i+')" aria-label="Remove exercise">×</button></div><textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-line"><div class="rest-label"><span class="rest-symbol">◴</span><span>Rest: <strong id="restClock-'+i+'">'+fmtTime(exerciseTimers[i]?.interval?exerciseTimers[i].remaining:displayRest)+'</strong></span></div><div class="rest-controls"><select aria-label="Rest duration" onchange="setRest('+i+',this.value)">'+Array.from({length:20},(_,k)=>(k+1)*15).concat(Array.from({length:10},(_,k)=>330+k*30)).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select><button class="secondary small" onclick="startRest('+i+')">Start</button><button class="secondary small" onclick="skipRest('+i+')">Skip</button></div></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
+  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><div class="exercise-title">'+esc(e.name)+'</div><button type="button" class="pr-icon" data-live-pr="'+esc(e.name)+'" aria-label="View performance summary for '+esc(e.name)+'">🏆</button><button class="exercise-menu secondary small" onclick="removeEx('+i+')" aria-label="Remove exercise">×</button></div><textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-duration-setting"><label for="restDuration-'+i+'">REST INTERVAL</label><select id="restDuration-'+i+'" aria-label="Rest interval for '+esc(e.name)+'" onchange="setRest('+i+',this.value)">'+Array.from(new Set([...Array.from({length:20},(_,k)=>(k+1)*15),...Array.from({length:14},(_,k)=>330+k*30),displayRest])).sort((a,b)=>a-b).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
  }).join('');
  updateLiveStats();
 }
@@ -1259,14 +1256,15 @@ $('restSoundSetting').addEventListener('change',()=>{
 refreshRestSoundSetting();
 function syncExerciseRestDisplay(){
  work.forEach((exercise,i)=>{
-  const timer=exerciseTimers[i],running=!!timer?.interval&&timer.remaining>0;
-  const plan=ascensionRestPlan(i),time=running?timer.remaining:plan.seconds;
-  const el=$('restClock-'+i);if(el)el.textContent=fmtTime(time);
-  const select=el?.closest('.rest-line')?.querySelector('select');
-  if(select&&document.activeElement!==select&&select.value!==String(plan.seconds)){
-   const value=String(plan.seconds);
-   if([...select.options].some(option=>option.value===value))select.value=value;
+  const select=$('restDuration-'+i);
+  if(!select||document.activeElement===select)return;
+  const seconds=ascensionRestPlan(i).seconds,value=String(seconds);
+  if(![...select.options].some(option=>option.value===value)){
+   const option=document.createElement('option');
+   option.value=value;option.textContent=fmtTime(seconds);
+   select.appendChild(option);
   }
+  if(select.value!==value)select.value=value;
  });
 }
 function updateFloatingRestTimer(){
@@ -1312,8 +1310,7 @@ window.startRest=(i,completedSetIndex)=>{
  prepareRestSound();
  for(const [key,t] of Object.entries(exerciseTimers)){
   if(t?.interval)clearInterval(t.interval);
-  const oldIndex=Number(key),el=$('restClock-'+oldIndex);
-  if(el&&work[oldIndex])el.textContent=fmtTime(work[oldIndex].rest);
+
  }
  exerciseTimers={};
  const plan=ascensionRestPlan(i,completedSetIndex);
@@ -1323,7 +1320,6 @@ window.startRest=(i,completedSetIndex)=>{
  const tick=()=>{
   if(exerciseTimers[i]!==timer)return;
   timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));
-  const el=$('restClock-'+i);if(el)el.textContent=fmtTime(timer.remaining);
   if(timer.remaining===0){clearInterval(timer.interval);timer.interval=null;if(navigator.vibrate)navigator.vibrate([200,100,200]);if(!document.hidden)playRestCompleteSound();activeRestExercise=null;}
   updateFloatingRestTimer();
  };
@@ -1332,7 +1328,6 @@ window.startRest=(i,completedSetIndex)=>{
 window.skipRest=i=>{
  const timer=exerciseTimers[i];if(timer?.interval)clearInterval(timer.interval);
  delete exerciseTimers[i];if(activeRestExercise===i)activeRestExercise=null;
- const el=$('restClock-'+i);if(el&&work[i])el.textContent=fmtTime(work[i].rest);
  updateFloatingRestTimer();
 };
 function adjustFloatingRestTimer(delta){
@@ -1340,7 +1335,6 @@ function adjustFloatingRestTimer(delta){
  const timer=exerciseTimers[activeRestExercise];if(!timer)return;
  timer.deadline=Math.max(Date.now()+1000,timer.deadline+delta*1000);
  timer.remaining=Math.max(1,Math.ceil((timer.deadline-Date.now())/1000));
- const el=$('restClock-'+activeRestExercise);if(el)el.textContent=fmtTime(timer.remaining);
  updateFloatingRestTimer();
 }
 $('restMinus15').addEventListener('click',()=>adjustFloatingRestTimer(-15));

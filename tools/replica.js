@@ -121,7 +121,7 @@ window.addEventListener('message',e=>{
  const p=e.data.payload||{},requestId=e.data.requestId;
  const allowed=['Back Squat','Bench Press','Deadlift','Overhead Press'];
  const validSet=x=>Number.isFinite(Number(x?.weight))&&Number(x.weight)>0&&Number.isInteger(Number(x?.reps))&&Number(x.reps)>0;
- const valid=p.source==='AscensionX'&&allowed.includes(p.exercise)&&Number.isInteger(p.week)&&p.week>=1&&p.week<=6&&Number(p.tm)>0&&
+ const valid=p.source==='AscensionX'&&allowed.includes(p.exercise)&&typeof p.cycleId==='string'&&Number.isFinite(Date.parse(p.cycleId))&&Number.isInteger(p.week)&&p.week>=1&&p.week<=6&&Number(p.tm)>0&&
   Array.isArray(p.warmupSets)&&p.warmupSets.length===4&&p.warmupSets.every(validSet)&&
   Array.isArray(p.sets)&&p.sets.length>0&&p.sets.length<=8&&p.sets.every(validSet);
  let success=false,message='Check your training max and set targets in AscensionX.';
@@ -143,6 +143,13 @@ window.addEventListener('message',e=>{
  }
 });
 
+
+// The child stays mounted after leaving its overlay. Notify it immediately
+// after saving a linked SpartanX workout; the durable queue also survives reloads.
+window.addEventListener('spartx:ascensionLinkedSessionSaved',()=>{
+ if(ascensionEmbedFrame.getAttribute('src')==='about:blank')return;
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionProcessCompletedWorkouts'},location.origin)}catch(e){}
+});
 
 // Every Training Tools card can be minimised independently. Remember each choice on this device.
 (function setupCollapsibleCards(){

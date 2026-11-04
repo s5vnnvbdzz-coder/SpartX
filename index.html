@@ -1397,6 +1397,18 @@ function exerciseMuscles(name){
  return match?{primary:match.primary,secondary:match.secondary}:{primary:[],secondary:[]};
 }
 function muscleNames(keys){return keys.map(k=>MUSCLE_LABELS[k]||k).join(', ');}
+const BODYWEIGHT_EXERCISES=new Set([
+ 'Push-Up','Close-Grip Push-Up','Bench Dip','Pull-Up','Chin-Up','Assisted Pull-Up',
+ 'Glute Bridge','Hip Thrust','Single-Leg Hip Thrust',
+ 'Bulgarian Split Squat','Reverse Lunge','Walking Lunge','Step-Up',
+ 'Ab Wheel','Decline Sit-Up','Hanging Knee Raise','Hanging Leg Raise',
+ 'Plank','Side Plank','Pallof Press'
+]);
+function isValidTrackedSet(set,name){
+ const weight=Number(set?.weight),reps=Number(set?.reps);
+ return Number.isFinite(weight)&&Number.isFinite(reps)&&reps>0&&
+  (weight>0||(weight===0&&BODYWEIGHT_EXERCISES.has(name)));
+}
 const categories={
 'Legs':['Back Squat','Front Squat','Pause Squat','Tempo Squat','Box Squat','Safety Bar Squat','Goblet Squat','Hack Squat','Smith Machine Squat','Leg Press','Single-Leg Leg Press','Leg Extension','Single-Leg Leg Extension','Bulgarian Split Squat','Reverse Lunge','Walking Lunge','Step-Up','Single-Leg Romanian Deadlift','Romanian Deadlift','Stiff-Leg Deadlift','Deadlift','Conventional Deadlift','Sumo Deadlift','Trap Bar Deadlift','Deficit Deadlift','Hip Thrust','Single-Leg Hip Thrust','Glute Bridge','Cable Kickback','Lying Leg Curl','Seated Leg Curl','Single-Leg Curl','Standing Calf Raise','Seated Calf Raise'],
 'Chest':['Bench Press','Paused Bench Press','Close-Grip Bench Press','Incline Barbell Bench Press','Decline Bench Press','Dumbbell Chest Press','Flat Dumbbell Press','Incline Dumbbell Chest Press','Incline Dumbbell Press','Decline Dumbbell Press','Single-Arm Dumbbell Chest Press','Machine Chest Press','Single-Arm Machine Chest Press','Push-Up','Weighted Dip','Chest Fly','Dumbbell Fly','Incline Dumbbell Fly','Cable Crossover','Single-Arm Cable Fly'],
@@ -1473,7 +1485,7 @@ $('activeWorkoutName').addEventListener('click',renameActiveWorkout);
 $('activeWorkoutName').addEventListener('keydown',e=>{if(e.target.id==='activeWorkoutName'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();renameActiveWorkout()}});
 function resumeSession(){if(!sessionActive)return;libraryMode='workout';switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
 window.resumeActiveWorkout=resumeSession;
-function updateLiveStats(){let completed=work.flatMap(e=>e.sets.filter(s=>s.done&&+s.weight>0&&+s.reps>0).map(s=>({weight:+s.weight,reps:+s.reps})));$('liveVolume').textContent=kg(completed.reduce((a,s)=>a+s.weight*s.reps,0));$('liveSets').textContent=completed.length;renderMuscles();}
+function updateLiveStats(){let completed=work.flatMap(e=>e.sets.filter(s=>s.done&&isValidTrackedSet(s,e.name)).map(s=>({weight:+s.weight||0,reps:+s.reps})));$('liveVolume').textContent=kg(completed.reduce((a,s)=>a+s.weight*s.reps,0));$('liveSets').textContent=completed.length;renderMuscles();}
 function renderMuscles(){
  const trained=work.filter(ex=>(ex.sets||[]).some(set=>set.done)).map(ex=>exerciseMuscles(ex.name));
  const primary=new Set(trained.flatMap(item=>item.primary));
@@ -1675,7 +1687,7 @@ function queueAscensionWorkoutCompletion(savedSession){
   window.dispatchEvent(new CustomEvent('spartx:ascensionLinkedSessionSaved',{detail:{ids:packets.map(p=>p.id)}}));
  }catch(e){console.warn('AscensionX sync queue unavailable; SpartanX workout remains saved.',e)}
 }
-function finishSession(){const wasEditing=editingSessionId!==null;const rankBefore=getWorkoutRank();let ex=work.map(e=>({...e,sets:e.sets.filter(s=>s.done&&+s.weight>0&&+s.reps>0).map(s=>({weight:+s.weight,reps:+s.reps,rpe:s.rpe===''?null:+s.rpe,type:s.type||'Working Set',done:true}))})).filter(e=>e.sets.length);if(!ex.length){alert(editingSessionId?'An edited workout must contain at least one completed set.':'No completed sets have been logged.');return;}let sessionVolume=ex.flatMap(e=>e.sets).reduce((a,set)=>a+set.weight*set.reps,0);if(editingSessionId!==null){const index=db.sessions.findIndex(s=>String(s.id)===String(editingSessionId));if(index<0){alert('This workout could not be found.');resetSession();return;}const old=db.sessions[index];db.sessions[index]={...old,name:$('activeWorkoutName').textContent.trim()||old.name,volume:sessionVolume,exercises:ex,date:editingSessionMeta?.date||old.date,duration:editingSessionMeta?.duration??old.duration};}else{let duration=sessionStarted===null?0:Math.floor((Date.now()-sessionStarted)/1000);db.sessions.unshift({id:Date.now(),date:new Date().toISOString(),name:$('activeWorkoutName').textContent,duration,volume:sessionVolume,exercises:ex,...(activeCycle?{cycleId:activeCycle.id,cycleWeek:activeCycle.week}: {})});if(activeCycle){markCycleWeekCompleted(activeCycle.id,activeCycle.week);activeCycle=null;}}persist();if(!wasEditing)queueAscensionWorkoutCompletion(db.sessions[0]);editingSessionId=null;editingSessionMeta=null;resetSession();stats();renderHomeCycles();switchScreen('home');const rankAfter=getWorkoutRank();pendingRankCelebration=!wasEditing&&rankAfter.index>rankBefore.index?rankAfter:null;showWorkoutSavedDialog(wasEditing);}
+function finishSession(){const wasEditing=editingSessionId!==null;const rankBefore=getWorkoutRank();let ex=work.map(e=>({...e,sets:e.sets.filter(s=>s.done&&isValidTrackedSet(s,e.name)).map(s=>({weight:+s.weight,reps:+s.reps,rpe:s.rpe===''?null:+s.rpe,type:s.type||'Working Set',done:true}))})).filter(e=>e.sets.length);if(!ex.length){alert(editingSessionId?'An edited workout must contain at least one completed set.':'No completed sets have been logged.');return;}let sessionVolume=ex.flatMap(e=>e.sets).reduce((a,set)=>a+set.weight*set.reps,0);if(editingSessionId!==null){const index=db.sessions.findIndex(s=>String(s.id)===String(editingSessionId));if(index<0){alert('This workout could not be found.');resetSession();return;}const old=db.sessions[index];db.sessions[index]={...old,name:$('activeWorkoutName').textContent.trim()||old.name,volume:sessionVolume,exercises:ex,date:editingSessionMeta?.date||old.date,duration:editingSessionMeta?.duration??old.duration};}else{let duration=sessionStarted===null?0:Math.floor((Date.now()-sessionStarted)/1000);db.sessions.unshift({id:Date.now(),date:new Date().toISOString(),name:$('activeWorkoutName').textContent,duration,volume:sessionVolume,exercises:ex,...(activeCycle?{cycleId:activeCycle.id,cycleWeek:activeCycle.week}: {})});if(activeCycle){markCycleWeekCompleted(activeCycle.id,activeCycle.week);activeCycle=null;}}persist();if(!wasEditing)queueAscensionWorkoutCompletion(db.sessions[0]);editingSessionId=null;editingSessionMeta=null;resetSession();stats();renderHomeCycles();switchScreen('home');const rankAfter=getWorkoutRank();pendingRankCelebration=!wasEditing&&rankAfter.index>rankBefore.index?rankAfter:null;showWorkoutSavedDialog(wasEditing);}
 let pendingRankCelebration=null;function closeWorkoutSavedDialog(){ $('workoutSavedOverlay').classList.add('hidden');if(pendingRankCelebration){const state=pendingRankCelebration;pendingRankCelebration=null;showRankUnlockedDialog(state);}}function showRankUnlockedDialog(state){$('rankUnlockedBadge').src='./ranks/'+state.current.file;$('rankUnlockedBadge').alt=state.current.name+' rank badge';$('rankUnlockedTitle').textContent=spartanxRankLabel(state.current.name,state.index)+' unlocked!';$('rankUnlockedMessage').textContent='Congratulations! You have completed '+state.workouts+' '+(state.workouts===1?'workout':'workouts')+' and earned '+state.count+' XP. You have reached the '+state.current.name+' rank!';$('rankUnlockedOverlay').classList.remove('hidden');$('rankUnlockedClose').focus();}$('rankUnlockedClose').onclick=()=>$('rankUnlockedOverlay').classList.add('hidden');$('rankUnlockedOverlay').addEventListener('click',e=>{if(e.target.id==='rankUnlockedOverlay')e.currentTarget.classList.add('hidden')});function showWorkoutSavedDialog(edited){const overlay=$('workoutSavedOverlay');$('workoutSavedTitle').textContent=edited?'Workout updated!':'Workout complete!';$('workoutSavedMessage').textContent=edited?'Your changes have been saved to your training history.':'Great work. Your completed session has been saved to your training history.';overlay.classList.remove('hidden');$('workoutSavedClose').focus();} $('workoutSavedClose').onclick=closeWorkoutSavedDialog;$('workoutSavedOverlay').addEventListener('click',e=>{if(e.target.id==='workoutSavedOverlay')closeWorkoutSavedDialog()});
 function resetSession(){activeRestExercise=null;restPreviewExercise=null;$('floatingRestTimer')?.classList.add('hidden');activeCycle=null;editingSessionId=null;editingSessionMeta=null;localStorage.removeItem(DRAFT_KEY);clearInterval(sessionTicker);sessionTicker=null;sessionActive=false;sessionStarted=null;Object.values(exerciseTimers).forEach(t=>{if(t.interval)clearInterval(t.interval)});exerciseTimers={};work=[];sessionStarted=null;renderWork();$('workoutName').value='';}
 
@@ -1703,7 +1715,7 @@ function renderTrainingStats(){
  period.forEach(session=>{
   duration+=Math.max(0,+session.duration||0);
   (session.exercises||[]).forEach(ex=>{
-   const valid=(ex.sets||[]).filter(set=>(+set.weight||0)>0&&(+set.reps||0)>0);
+   const valid=(ex.sets||[]).filter(set=>isValidTrackedSet(set,ex.name));
    const count=valid.length;
    if(!count)return;
    sets+=count;valid.forEach(set=>{volume+=(+set.weight)*(+set.reps)});
@@ -1724,7 +1736,7 @@ function renderTrainingStats(){
   return '<div class="muscle-breakdown-item"><strong>'+esc(label)+'</strong>'+
    '<span><b>'+value.primary+'</b> primary sets</span><span>'+value.secondary+' secondary sets</span></div>';
  }).join('');
- $('trainingUnclassified').textContent=unclassified?unclassified+' logged sets have an exercise name not yet classified (often custom exercises). These are excluded from muscle counts.':'';
+ $('trainingUnclassified').textContent=unclassified?unclassified+' logged '+(unclassified===1?'set has':'sets have')+' an exercise name not yet classified (often custom exercises). These are excluded from muscle counts.':'';
  const values=TRAINING_AREAS.map(x=>counts[x]),max=Math.max(1,...values),cx=180,cy=156,r=103,labelR=127;
  const point=(i,scale)=>{const a=(-90+i*60)*Math.PI/180;return [cx+Math.cos(a)*r*scale,cy+Math.sin(a)*r*scale]};
  const polygon=(scale)=>TRAINING_AREAS.map((_,i)=>point(i,scale).map(n=>n.toFixed(1)).join(',')).join(' ');

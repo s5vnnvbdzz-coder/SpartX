@@ -869,6 +869,46 @@ body.completed-workout-open #trackerNav{display:none!important}
 </style>
 <link rel="stylesheet" href="./assets/stats/statistics.css">
 <link rel="stylesheet" href="./assets/ascension/quick-access.css">
+<style>
+
+/* Profile Workout Calendar: independent iOS scrolling and accessible completed days. */
+body.sx-workout-calendar-open{overflow:hidden!important}
+#workoutCalendarOverlay{z-index:25;overflow:hidden;overscroll-behavior:contain;touch-action:none;align-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+#workoutCalendarOverlay>.detail-panel{display:flex!important;flex-direction:column!important;width:min(100%,550px);height:min(84dvh,740px);max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:0;overflow:hidden!important;overscroll-behavior:contain;touch-action:none}
+#workoutCalendarOverlay .sx-calendar-heading{flex:0 0 auto;padding-bottom:12px;border-bottom:1px solid var(--line);gap:12px}
+#workoutCalendarOverlay .sx-calendar-heading h2{margin:4px 0 0}
+#workoutCalendarScroll{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:4px 2px 16px;scrollbar-gutter:stable}
+#workoutCalendarScroll:focus-visible{outline:2px solid var(--lime);outline-offset:-2px}
+#workoutCalendarOverlay .sx-calendar-month-nav{margin:13px 0 17px}
+#workoutCalendarOverlay .sx-calendar-month-nav strong{text-align:center;font-size:15px}
+#workoutCalendarOverlay .calendar-weekday{font-size:11px;font-weight:800;color:var(--muted)}
+#workoutCalendarGrid{gap:5px}
+#workoutCalendarGrid button.calendar-day{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:43px;padding:6px 1px!important;border:1px solid var(--line);border-radius:10px;color:var(--txt);font-variant-numeric:tabular-nums}
+#workoutCalendarGrid button.calendar-day.has-workout{background:var(--lime)!important;border:2px solid color-mix(in srgb,var(--lime) 80%,white)!important;color:#101214!important;font-weight:950!important;box-shadow:0 0 11px color-mix(in srgb,var(--lime) 42%,transparent),inset 0 0 0 1px #ffffff2b}
+#workoutCalendarGrid button.calendar-day.has-workout .sx-calendar-day-number{color:#101214!important;font-size:15px;font-weight:950;transform:translate(-2px,-3px)}
+#workoutCalendarGrid .sx-calendar-day-tick{position:absolute;bottom:2px;right:4px;font-size:11px;font-weight:950;line-height:1;color:#101214}
+#workoutCalendarGrid .sx-calendar-day-multi{position:absolute;top:2px;right:3px;font-size:8px;font-weight:950;color:#101214;line-height:1}
+#workoutCalendarGrid button.calendar-day.selected{outline:2px solid var(--txt)!important;outline-offset:2px;box-shadow:0 0 0 1px var(--lime),0 0 11px color-mix(in srgb,var(--lime) 33%,transparent)}
+#workoutCalendarGrid button.calendar-day:focus-visible{outline:3px solid var(--txt)!important;outline-offset:2px}
+#workoutCalendarGrid button.calendar-day.is-today:not(.has-workout){border:2px solid var(--lime)!important}
+.sx-calendar-key{display:flex;align-items:center;flex-wrap:wrap;gap:7px;color:var(--muted);font-size:10px;font-weight:700;margin:17px 1px 10px}
+.sx-calendar-key-complete{display:grid;place-items:center;width:17px;height:17px;background:var(--lime);color:#101214;border-radius:4px;font-weight:950}
+.sx-calendar-key-selected{display:block;width:16px;height:16px;border:2px solid var(--txt);border-radius:4px;margin-left:10px}
+#calendarDayDetails.sx-calendar-day-details{margin:11px 0 4px;padding:12px;min-height:65px}
+#calendarDayDetails .sx-calendar-day-title{display:block;color:var(--txt);font-size:13px;margin-bottom:10px}
+#calendarDayDetails .sx-calendar-workout-list{display:grid;gap:9px}
+#calendarDayDetails .sx-calendar-workout-row{display:flex;flex-direction:column;gap:4px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:color-mix(in srgb,var(--panel2) 68%,transparent)}
+#calendarDayDetails button.sx-calendar-workout-link{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--lime)!important;text-align:left!important;padding:3px 0!important;font-size:13px;font-weight:850;line-height:1.4}
+#calendarDayDetails button.sx-calendar-workout-link>span:first-child{flex:1;min-width:0;overflow-wrap:anywhere}
+#calendarDayDetails button.sx-calendar-workout-link>span:last-child{font-size:16px;flex:0 0 auto}
+#calendarDayDetails button.sx-calendar-workout-link:focus-visible{outline:2px solid var(--lime);outline-offset:3px;border-radius:4px}
+#calendarDayDetails .sx-calendar-workout-meta{font-size:10px;line-height:1.5;color:var(--muted)}
+#completedWorkoutOverlay.sx-completed-from-calendar #closeCompletedWorkout{min-height:39px;white-space:nowrap;font-size:11px;font-weight:850}
+#completedWorkoutOverlay.sx-completed-from-calendar .detail-panel>.row{gap:9px}
+#completedWorkoutOverlay.sx-completed-from-calendar #completedWorkoutTitle{font-size:clamp(17px,4.5vw,24px)}
+@media(max-width:360px){#workoutCalendarOverlay{padding-left:7px;padding-right:7px}#workoutCalendarOverlay>.detail-panel{padding:12px}#workoutCalendarGrid{gap:3px}#workoutCalendarGrid button.calendar-day{min-height:38px}#workoutCalendarGrid .sx-calendar-day-tick{bottom:1px;right:2px;font-size:10px}}
+
+</style>
 </head>
 <body>
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -920,7 +960,7 @@ body.completed-workout-open #trackerNav{display:none!important}
  <div id="trainingMuscleBreakdown" class="muscle-breakdown"></div>
  <p id="trainingUnclassified" class="tiny muted" style="margin:8px 0 0"></p>
  <p class="tiny muted" style="margin:8px 0 0">Reference basis: <a href="https://www.nasm.org/workout-exercise-guidance" target="_blank" rel="noopener noreferrer">NASM</a> · <a href="https://www.acefitness.org/resources/everyone/exercise-library/" target="_blank" rel="noopener noreferrer">ACE</a> · <a href="https://www.strengthlog.com/exercise-directory/" target="_blank" rel="noopener noreferrer">StrengthLog</a>. Muscle roles are estimates, not measured activation.</p>
-</details><div class="grid training-stat-grid"><div class="stat"><span>WORKOUTS</span><strong id="periodWorkouts">0</strong></div><div class="stat"><span>DURATION</span><strong id="periodDuration">0h</strong></div><div class="stat"><span>VOLUME</span><strong id="periodVolume">0 kg</strong></div><div class="stat"><span>SETS</span><strong id="periodSets">0</strong></div></div></details></div></div><div id="workoutCalendarOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="workoutCalendarTitle"><div class="detail-panel"><div class="row between"><div><div class="eyebrow">TRAINING CONSISTENCY</div><h2 id="workoutCalendarTitle">Workout Calendar</h2></div><button type="button" class="secondary small" id="closeWorkoutCalendar">✕</button></div><div class="row between" style="margin:12px 0"><button type="button" class="secondary small" id="calendarPrev">‹</button><strong id="calendarMonth"></strong><button type="button" class="secondary small" id="calendarNext">›</button></div><div id="workoutCalendarGrid" class="workout-calendar-grid"></div><div class="tiny muted" style="margin-top:12px">● Workout completed · Tap a day for details</div><div id="calendarDayDetails" class="card" style="margin:12px 0 0"><p class="muted tiny">Select a day to see its workouts.</p></div></div></div><div id="measuresOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="measuresTitle"><div class="detail-panel"><div class="row between"><div><div class="eyebrow">ATHLETE DETAILS</div><h2 id="measuresTitle" style="margin:5px 0 0">Measures</h2></div><button type="button" class="secondary small" id="closeMeasures">✕</button></div><p class="tiny muted" style="margin-top:12px">Your bodyweight is private and is not displayed on your profile.</p><label for="measureBodyweight" style="margin-top:16px">BODYWEIGHT (KG)</label><input id="measureBodyweight" type="number" min="1" max="500" step="0.1" placeholder="e.g. 90"><div id="rankProfileHint" class="hint">Choose your gender in Edit Profile and enter bodyweight to unlock rankings.</div></div></div><section id="exerciseStatsScreen" class="screen"><div class="row between"><div><div class="eyebrow">YOUR PERFORMANCE</div><h1>Exercises</h1></div><button class="back-button" id="closeExerciseStats">← Profile</button></div><p class="muted tiny">Browse the exercise library and open any movement to see your personal bests, training volume and progress history.</p><input id="exerciseStatsSearch" class="library-search" placeholder="Search exercises..." autocomplete="off"><div id="exerciseStatsCategories" class="library-categories"></div><div id="exerciseStatsList"></div></section><div id="profileSettingsOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="profileSettingsTitle"><div class="detail-panel"><div class="row between"><div><div class="eyebrow">PERSONALISE SpartanX</div><h2 id="profileSettingsTitle" style="margin:5px 0 0">Settings</h2></div><button type="button" class="secondary small" id="closeProfileSettings">✕</button></div><section><h3 style="margin-top:20px">Units</h3><p class="tiny muted">Workout data stays stored in metric units and is converted for display.</p><label for="unitWeight">WEIGHT</label><select id="unitWeight"><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lbs)</option></select><label for="unitDistance" style="margin-top:12px">DISTANCE</label><select id="unitDistance"><option value="km">Kilometres (km)</option><option value="mi">Miles (mi)</option></select><label for="unitBody" style="margin-top:12px">BODY MEASUREMENTS</label><select id="unitBody"><option value="cm">Centimetres (cm)</option><option value="in">Inches (in)</option></select></section><section><h3 style="margin-top:22px">Workout alerts</h3><label for="restSoundSetting" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;color:var(--txt)"><span><strong style="display:block;font-size:13px">Rest timer sound</strong><small class="tiny muted">Play a chime when rest ends while SpartanX is open.</small></span><input id="restSoundSetting" type="checkbox" style="width:20px;height:20px;accent-color:var(--lime)" checked></label></section><section><h3 style="margin-top:22px">Appearance</h3><label for="themeChoice">THEME</label><p class="tiny muted">Choose an appearance. Spartan Gold, Spartan Bronze and Spartan Blue are experimental colourways.</p><select id="themeChoice"><option value="dark">Dark</option><option value="light">Light</option><option value="spartan-red">Spartan Red · FREE</option><option value="spartan-gold">Spartan Gold · TEST</option><option value="spartan-bronze">Spartan Bronze · TEST</option><option value="spartan-blue">Spartan Blue · TEST</option><option value="spartan-amethyst">Dark Amethyst · TEST</option><optgroup label="Seasonal & Energy Test Themes"><option value="sx-halloween">Halloween · TEST</option><option value="sx-christmas">Christmas · TEST</option><option value="sx-monster">Monster Energy Inspired · TEST</option></optgroup><optgroup label="Premium Theme Packs · TEST ACCESS"><option value="premium-monster">Monster Overdrive · PREMIUM TEST</option><option value="premium-olympus">Olympus Ascendant · PREMIUM TEST</option></optgroup><optgroup label="Female Theme Previews"><option value="amazonian-crimson">Amazonian Crimson · TEST</option><option value="athenas-aegis">Athena’s Aegis · TEST</option><option value="olympian-athena">Olympian Athena · PREMIUM</option></optgroup><optgroup label="Male Premium"><option value="spartan-olympian">Olympian · PREMIUM</option></optgroup></select><div class="sx-energy-theme-preview"><img src="./assets/energy-can.svg" alt="Neon green energy theme emblem"><span><strong>ENERGY ZERO · TRIAL</strong><small>Obsidian · Electric lime · Animated frames</small></span></div></section><section><h3 style="margin-top:22px">Home Feed</h3><label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;color:var(--txt)"><span><strong style="display:block;font-size:13px">Profile Cards</strong><small class="tiny muted">Display rank emblems, prestige, best compound PR, optional country flags and a collapsible session log.</small></span><input id="toggleProfileCards" type="checkbox" style="width:20px;height:20px;accent-color:var(--lime)"></label></section><section><h3 style="margin-top:22px">Training Tools</h3><p class="tiny muted">Choose which 5/3/1 tools appear on the Training Tools page. Your saved programmes and calculator entries are not deleted.</p><label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--txt)"><span><strong style="display:block;font-size:13px">5/3/1/ Calculator</strong><small class="tiny muted">Show or hide the working weights calculator.</small></span><input id="toggle531WorkingWeights" type="checkbox" checked style="width:20px;height:20px;accent-color:var(--lime)"></label><label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;color:var(--txt)"><span><strong style="display:block;font-size:13px">5/3/1 Cycle Planner</strong><small class="tiny muted">Show or hide the cycle planner shortcut.</small></span><input id="toggle531CyclePlanner" type="checkbox" checked style="width:20px;height:20px;accent-color:var(--lime)"></label></section><section><h3 style="margin-top:22px">Data & privacy</h3><p class="tiny muted">Your workouts and profile are stored locally in this browser on this device. Clearing browser website data can erase them. Export a backup regularly. This version does not sync to the cloud.</p><div class="row"><button type="button" class="secondary" id="export">Export backup</button><label class="secondary" style="padding:11px;border-radius:10px">Import backup<input id="import" type="file" accept="application/json" class="hidden"></label></div><div class="tiny muted" style="margin-top:10px">SpartanX · Version 1.1 · Build 182</div></section><p class="tiny muted" style="margin-top:18px">Settings save automatically on this device.</p></div></div><div id="editProfileOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle"><div class="detail-panel"><div class="row between"><h2 id="editProfileTitle">Edit Profile</h2><button type="button" class="secondary small" id="closeEditProfile">✕</button></div><div class="profile-edit-photo"><div class="profile-avatar profile-avatar-large" id="editProfileAvatar"><span>♙</span></div><label class="secondary profile-photo-picker">Change photo<input id="profilePhotoInput" type="file" accept="image/*" hidden></label></div><label for="profileNameInput">YOUR NAME</label><input id="profileNameInput" type="text" maxlength="60" placeholder="Enter your name"><div style="margin-top:14px"><div class="row between"><label for="profileBioInput">BIO</label><span class="tiny" id="profileBioCount">0 / 210</span></div><textarea id="profileBioInput" maxlength="210" rows="4" placeholder="Tell people a little about yourself..." style="width:100%;resize:vertical;background:#0f1215;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px"></textarea><div style="margin-top:14px"><label for="profileGenderInput">GENDER (PRIVATE)</label><select id="profileGenderInput"><option value="">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select><p class="tiny muted">Used only to calculate your SpartanX ranking standards. It is not shown on your profile.</p></div></div><div style="margin-top:14px"><label for="profileCountryInput">COUNTRY OF ORIGIN</label><select id="profileCountryInput" autocomplete="country-name" aria-label="Country of origin"><option value="">Select a country (optional)</option></select><label style="display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--txt)"><input id="profileCountryPublic" type="checkbox" style="width:20px;height:20px;accent-color:var(--lime)"><span>Show my country flag on profile cards</span></label><p class="tiny muted">When private, your flag will not appear on profile cards.</p></div><div class="row sx-edit-profile-actions" style="margin-top:16px"><button type="button" id="saveProfile" style="flex:1">SAVE PROFILE</button><button type="button" class="secondary" id="cancelEditProfile">CANCEL</button></div></div></div>
+</details><div class="grid training-stat-grid"><div class="stat"><span>WORKOUTS</span><strong id="periodWorkouts">0</strong></div><div class="stat"><span>DURATION</span><strong id="periodDuration">0h</strong></div><div class="stat"><span>VOLUME</span><strong id="periodVolume">0 kg</strong></div><div class="stat"><span>SETS</span><strong id="periodSets">0</strong></div></div></details></div></div><div id="workoutCalendarOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="workoutCalendarTitle"><div class="detail-panel"><div class="row between sx-calendar-heading"><div><div class="eyebrow">TRAINING CONSISTENCY</div><h2 id="workoutCalendarTitle">Workout Calendar</h2></div><button type="button" class="secondary small" id="closeWorkoutCalendar" aria-label="Close workout calendar">✕</button></div><div id="workoutCalendarScroll" class="sx-calendar-scroll" tabindex="0" aria-label="Scrollable workout calendar and completed sessions"><div class="row between sx-calendar-month-nav"><button type="button" class="secondary small" id="calendarPrev" aria-label="Previous month">‹</button><strong id="calendarMonth"></strong><button type="button" class="secondary small" id="calendarNext" aria-label="Next month">›</button></div><div id="workoutCalendarGrid" class="workout-calendar-grid"></div><div class="sx-calendar-key"><span class="sx-calendar-key-complete" aria-hidden="true">✓</span><span>Completed workout</span><span class="sx-calendar-key-selected" aria-hidden="true"></span><span>Selected day</span></div><div id="calendarDayDetails" class="card sx-calendar-day-details" aria-live="polite"><p class="muted tiny">Select a day to see its workouts.</p></div></div></div></div><div id="measuresOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="measuresTitle"><div class="detail-panel"><div class="row between"><div><div class="eyebrow">ATHLETE DETAILS</div><h2 id="measuresTitle" style="margin:5px 0 0">Measures</h2></div><button type="button" class="secondary small" id="closeMeasures">✕</button></div><p class="tiny muted" style="margin-top:12px">Your bodyweight is private and is not displayed on your profile.</p><label for="measureBodyweight" style="margin-top:16px">BODYWEIGHT (KG)</label><input id="measureBodyweight" type="number" min="1" max="500" step="0.1" placeholder="e.g. 90"><div id="rankProfileHint" class="hint">Choose your gender in Edit Profile and enter bodyweight to unlock rankings.</div></div></div><section id="exerciseStatsScreen" class="screen"><div class="row between"><div><div class="eyebrow">YOUR PERFORMANCE</div><h1>Exercises</h1></div><button class="back-button" id="closeExerciseStats">← Profile</button></div><p class="muted tiny">Browse the exercise library and open any movement to see your personal bests, training volume and progress history.</p><input id="exerciseStatsSearch" class="library-search" placeholder="Search exercises..." autocomplete="off"><div id="exerciseStatsCategories" class="library-categories"></div><div id="exerciseStatsList"></div></section><div id="profileSettingsOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="profileSettingsTitle"><div class="detail-panel"><div class="row between"><div><div class="eyebrow">PERSONALISE SpartanX</div><h2 id="profileSettingsTitle" style="margin:5px 0 0">Settings</h2></div><button type="button" class="secondary small" id="closeProfileSettings">✕</button></div><section><h3 style="margin-top:20px">Units</h3><p class="tiny muted">Workout data stays stored in metric units and is converted for display.</p><label for="unitWeight">WEIGHT</label><select id="unitWeight"><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lbs)</option></select><label for="unitDistance" style="margin-top:12px">DISTANCE</label><select id="unitDistance"><option value="km">Kilometres (km)</option><option value="mi">Miles (mi)</option></select><label for="unitBody" style="margin-top:12px">BODY MEASUREMENTS</label><select id="unitBody"><option value="cm">Centimetres (cm)</option><option value="in">Inches (in)</option></select></section><section><h3 style="margin-top:22px">Workout alerts</h3><label for="restSoundSetting" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;color:var(--txt)"><span><strong style="display:block;font-size:13px">Rest timer sound</strong><small class="tiny muted">Play a chime when rest ends while SpartanX is open.</small></span><input id="restSoundSetting" type="checkbox" style="width:20px;height:20px;accent-color:var(--lime)" checked></label></section><section><h3 style="margin-top:22px">Appearance</h3><label for="themeChoice">THEME</label><p class="tiny muted">Choose an appearance. Spartan Gold, Spartan Bronze and Spartan Blue are experimental colourways.</p><select id="themeChoice"><option value="dark">Dark</option><option value="light">Light</option><option value="spartan-red">Spartan Red · FREE</option><option value="spartan-gold">Spartan Gold · TEST</option><option value="spartan-bronze">Spartan Bronze · TEST</option><option value="spartan-blue">Spartan Blue · TEST</option><option value="spartan-amethyst">Dark Amethyst · TEST</option><optgroup label="Seasonal & Energy Test Themes"><option value="sx-halloween">Halloween · TEST</option><option value="sx-christmas">Christmas · TEST</option><option value="sx-monster">Monster Energy Inspired · TEST</option></optgroup><optgroup label="Premium Theme Packs · TEST ACCESS"><option value="premium-monster">Monster Overdrive · PREMIUM TEST</option><option value="premium-olympus">Olympus Ascendant · PREMIUM TEST</option></optgroup><optgroup label="Female Theme Previews"><option value="amazonian-crimson">Amazonian Crimson · TEST</option><option value="athenas-aegis">Athena’s Aegis · TEST</option><option value="olympian-athena">Olympian Athena · PREMIUM</option></optgroup><optgroup label="Male Premium"><option value="spartan-olympian">Olympian · PREMIUM</option></optgroup></select><div class="sx-energy-theme-preview"><img src="./assets/energy-can.svg" alt="Neon green energy theme emblem"><span><strong>ENERGY ZERO · TRIAL</strong><small>Obsidian · Electric lime · Animated frames</small></span></div></section><section><h3 style="margin-top:22px">Home Feed</h3><label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;color:var(--txt)"><span><strong style="display:block;font-size:13px">Profile Cards</strong><small class="tiny muted">Display rank emblems, prestige, best compound PR, optional country flags and a collapsible session log.</small></span><input id="toggleProfileCards" type="checkbox" style="width:20px;height:20px;accent-color:var(--lime)"></label></section><section><h3 style="margin-top:22px">Training Tools</h3><p class="tiny muted">Choose which 5/3/1 tools appear on the Training Tools page. Your saved programmes and calculator entries are not deleted.</p><label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--txt)"><span><strong style="display:block;font-size:13px">5/3/1/ Calculator</strong><small class="tiny muted">Show or hide the working weights calculator.</small></span><input id="toggle531WorkingWeights" type="checkbox" checked style="width:20px;height:20px;accent-color:var(--lime)"></label><label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;color:var(--txt)"><span><strong style="display:block;font-size:13px">5/3/1 Cycle Planner</strong><small class="tiny muted">Show or hide the cycle planner shortcut.</small></span><input id="toggle531CyclePlanner" type="checkbox" checked style="width:20px;height:20px;accent-color:var(--lime)"></label></section><section><h3 style="margin-top:22px">Data & privacy</h3><p class="tiny muted">Your workouts and profile are stored locally in this browser on this device. Clearing browser website data can erase them. Export a backup regularly. This version does not sync to the cloud.</p><div class="row"><button type="button" class="secondary" id="export">Export backup</button><label class="secondary" style="padding:11px;border-radius:10px">Import backup<input id="import" type="file" accept="application/json" class="hidden"></label></div><div class="tiny muted" style="margin-top:10px">SpartanX · Version 1.1 · Build 182</div></section><p class="tiny muted" style="margin-top:18px">Settings save automatically on this device.</p></div></div><div id="editProfileOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle"><div class="detail-panel"><div class="row between"><h2 id="editProfileTitle">Edit Profile</h2><button type="button" class="secondary small" id="closeEditProfile">✕</button></div><div class="profile-edit-photo"><div class="profile-avatar profile-avatar-large" id="editProfileAvatar"><span>♙</span></div><label class="secondary profile-photo-picker">Change photo<input id="profilePhotoInput" type="file" accept="image/*" hidden></label></div><label for="profileNameInput">YOUR NAME</label><input id="profileNameInput" type="text" maxlength="60" placeholder="Enter your name"><div style="margin-top:14px"><div class="row between"><label for="profileBioInput">BIO</label><span class="tiny" id="profileBioCount">0 / 210</span></div><textarea id="profileBioInput" maxlength="210" rows="4" placeholder="Tell people a little about yourself..." style="width:100%;resize:vertical;background:#0f1215;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px"></textarea><div style="margin-top:14px"><label for="profileGenderInput">GENDER (PRIVATE)</label><select id="profileGenderInput"><option value="">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select><p class="tiny muted">Used only to calculate your SpartanX ranking standards. It is not shown on your profile.</p></div></div><div style="margin-top:14px"><label for="profileCountryInput">COUNTRY OF ORIGIN</label><select id="profileCountryInput" autocomplete="country-name" aria-label="Country of origin"><option value="">Select a country (optional)</option></select><label style="display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--txt)"><input id="profileCountryPublic" type="checkbox" style="width:20px;height:20px;accent-color:var(--lime)"><span>Show my country flag on profile cards</span></label><p class="tiny muted">When private, your flag will not appear on profile cards.</p></div><div class="row sx-edit-profile-actions" style="margin-top:16px"><button type="button" id="saveProfile" style="flex:1">SAVE PROFILE</button><button type="button" class="secondary" id="cancelEditProfile">CANCEL</button></div></div></div>
 <section id="routineSelectScreen" class="screen"><div class="row between"><div><div class="eyebrow">WORKOUT LOGGER</div><h1>Start a workout</h1></div><button class="back-button" id="closeRoutineSelect">← Back</button></div><div class="card start-card"><div class="eyebrow">FRESH SESSION</div><h2>Blank workout</h2><p class="muted">Start empty and add exercises as you go.</p><button id="startBlankWorkout" class="start-workout-button">＋ START BLANK WORKOUT</button></div><div class="card"><div class="row between"><h2>Your routines</h2><span class="tiny" id="routineCount">0 / 5</span></div><div id="savedRoutineList"><p class="muted tiny">No routines created yet.</p></div><button id="createRoutine" class="secondary" style="width:100%;margin-top:12px">＋ CREATE ROUTINE</button><p class="tiny muted">Create up to five routines and reuse them whenever you train.</p></div></section>
 <section id="routineBuilderScreen" class="screen"><div class="row between"><div><div class="eyebrow">ROUTINE BUILDER</div><h1>Create routine</h1></div><button type="button" class="back-button spartan-back-button" id="cancelRoutineBuilder">← Back</button></div><div class="card"><label for="routineName">ROUTINE NAME</label><input id="routineName" maxlength="40" placeholder="e.g. Upper body A"><div class="row between" style="margin-top:15px"><h2>Exercises</h2><span class="tiny" id="routineExerciseCount">0 exercises</span></div><div id="routineDraftList"><p class="muted tiny">Add exercises to build your routine.</p></div><button id="addRoutineExercise" class="secondary" style="width:100%;margin-top:10px">＋ ADD EXERCISE</button><button id="saveRoutine" class="start-workout-button">SAVE ROUTINE</button></div></section>
 <section id="activeWorkout" class="screen">
@@ -1075,10 +1115,24 @@ function lockCompletedWorkoutScroll(){
 }
 function closeCompletedWorkout(){
  $('completedWorkoutOverlay').classList.add('hidden');
- const state=completedWorkoutScrollState;if(!state)return;
- completedWorkoutScrollState=null;const body=document.body;
- body.classList.remove('completed-workout-open');body.style.position=state.position;body.style.top=state.top;body.style.width=state.width;body.style.overflow=state.overflow;
- window.scrollTo(0,state.y);
+ const state=completedWorkoutScrollState;
+ if(state){
+  completedWorkoutScrollState=null;const body=document.body;
+  body.classList.remove('completed-workout-open');
+  body.style.position=state.position;body.style.top=state.top;body.style.width=state.width;body.style.overflow=state.overflow;
+  // Calendar owns the underlying scroll position while the read-only viewer is open.
+  if(!calendarWorkoutReturn)window.scrollTo(0,state.y);
+ }
+ if(calendarWorkoutReturn){
+  const origin=calendarWorkoutReturn;calendarWorkoutReturn=null;
+  $('completedWorkoutOverlay').classList.remove('sx-completed-from-calendar');
+  $('closeCompletedWorkout').textContent='✕';
+  $('closeCompletedWorkout').setAttribute('aria-label','Close workout details');
+  $('workoutCalendarOverlay').removeAttribute('aria-hidden');
+  $('workoutCalendarScroll').scrollTop=origin.scrollTop;
+  if(origin.trigger?.isConnected)origin.trigger.focus({preventScroll:true});
+  else $('calendarDayDetails').querySelector('[data-calendar-workout]')?.focus({preventScroll:true});
+ }
 }
 $('closeCompletedWorkout').addEventListener('click',closeCompletedWorkout);
 $('completedWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('completedWorkoutOverlay'))closeCompletedWorkout()});
@@ -2123,22 +2177,128 @@ function renderTrainingStats(){
 $('openTrainingStats').onclick=()=>{renderTrainingStats();$('trainingStatsOverlay').classList.remove('hidden')};
 $('closeTrainingStats').onclick=()=>$('trainingStatsOverlay').classList.add('hidden');
 $('trainingStatsOverlay').addEventListener('click',e=>{if(e.target===$('trainingStatsOverlay'))$('trainingStatsOverlay').classList.add('hidden')});
+let calendarScrollState=null;
+let calendarWorkoutReturn=null;
+function lockWorkoutCalendarScroll(){
+ if(calendarScrollState)return;
+ const body=document.body;
+ calendarScrollState={y:window.scrollY,position:body.style.position,top:body.style.top,width:body.style.width,overflow:body.style.overflow};
+ body.classList.add('sx-workout-calendar-open');
+ body.style.position='fixed';body.style.top='-'+calendarScrollState.y+'px';body.style.width='100%';body.style.overflow='hidden';
+}
+function closeWorkoutCalendar(){
+ // Nested read-only workout must close first, leaving the calendar available.
+ if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn)closeCompletedWorkout();
+ $('workoutCalendarOverlay').classList.add('hidden');
+ $('workoutCalendarOverlay').removeAttribute('aria-hidden');
+ const state=calendarScrollState;
+ if(state){
+  calendarScrollState=null;
+  const body=document.body;
+  body.classList.remove('sx-workout-calendar-open');
+  body.style.position=state.position;body.style.top=state.top;body.style.width=state.width;body.style.overflow=state.overflow;
+  window.scrollTo(0,state.y);
+ }
+ $('openWorkoutCalendar').focus({preventScroll:true});
+}
 function renderWorkoutCalendar(){
  const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth(),first=new Date(y,m,1),count=new Date(y,m+1,0).getDate();
- $('calendarMonth').textContent=first.toLocaleDateString(undefined,{month:'long',year:'numeric'});
- const byDay={};(db.sessions||[]).forEach(session=>{const d=new Date(session.date);if(!Number.isNaN(d.getTime())){const k=calendarKey(d);(byDay[k]||(byDay[k]=[])).push(session)}});
- let html=['M','T','W','T','F','S','S'].map(v=>'<div class="calendar-weekday">'+v+'</div>').join('');
- const offset=(first.getDay()+6)%7;for(let i=0;i<offset;i++)html+='<div class="calendar-day empty"></div>';
- for(let day=1;day<=count;day++){const k=calendarKey(new Date(y,m,day));html+='<button type="button" class="calendar-day '+(byDay[k]?'has-workout ':'')+(selectedCalendarDate===k?'selected':'')+'" data-calendar-date="'+k+'">'+day+'</button>'}
+ $('calendarMonth').textContent=first.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+ const byDay=Object.create(null);
+ (db.sessions||[]).forEach(session=>{
+  const d=new Date(session.date);
+  if(Number.isFinite(d.getTime())){
+   const key=calendarKey(d);
+   (byDay[key]||(byDay[key]=[])).push(session);
+  }
+ });
+ let html=['M','T','W','T','F','S','S'].map(letter=>'<div class="calendar-weekday">'+letter+'</div>').join('');
+ const offset=(first.getDay()+6)%7;
+ for(let i=0;i<offset;i++)html+='<div class="calendar-day empty" aria-hidden="true"></div>';
+ const today=calendarKey(new Date());
+ for(let day=1;day<=count;day++){
+  const date=new Date(y,m,day),key=calendarKey(date),sessions=byDay[key]||[],total=sessions.length;
+  const selected=selectedCalendarDate===key,description=date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+
+   ' · '+(total?total+' completed '+(total===1?'workout':'workouts'):'No workout logged');
+  html+='<button type="button" class="calendar-day'+(total?' has-workout':'')+(selected?' selected':'')+(key===today?' is-today':'')+'" data-calendar-date="'+key+
+   '" aria-label="'+esc(description)+'" aria-pressed="'+selected+'" title="'+esc(description)+'">'+
+   '<span class="sx-calendar-day-number">'+day+'</span>'+
+   (total?'<span class="sx-calendar-day-tick" aria-hidden="true">✓</span>':'')+
+   (total>1?'<span class="sx-calendar-day-multi" aria-hidden="true">'+total+'</span>':'')+'</button>';
+ }
  $('workoutCalendarGrid').innerHTML=html;
- const sessions=byDay[selectedCalendarDate]||[];
- $('calendarDayDetails').innerHTML=sessions.length?'<strong>'+new Date(selectedCalendarDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})+'</strong>'+sessions.map(x=>'<div class="listitem"><strong>'+esc(x.name||'Workout')+'</strong><div class="tiny muted">'+(x.exercises||[]).length+' exercises · '+Math.round((x.duration||0)/60)+' min · '+Math.round(x.volume||0).toLocaleString()+' kg volume</div></div>').join(''):'<p class="muted tiny">'+(selectedCalendarDate?'No workout logged on this day.':'Select a day to see its workouts.')+'</p>';
+ const sessions=(byDay[selectedCalendarDate]||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+ const details=$('calendarDayDetails');
+ if(!selectedCalendarDate){details.innerHTML='<p class="muted tiny">Select a highlighted day to see completed workouts.</p>';return;}
+ const heading='<strong class="sx-calendar-day-title">'+esc(new Date(selectedCalendarDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</strong>';
+ details.innerHTML=heading+(sessions.length?'<div class="sx-calendar-workout-list">'+sessions.map(session=>{
+  const exerciseCount=(session.exercises||[]).length;
+  const setCount=(session.exercises||[]).reduce((sum,ex)=>sum+(ex.sets||[]).length,0);
+  const volume=Number(session.volume);
+  const volumeLabel=Number.isFinite(volume)?kg(volume):'—';
+  const id=esc(String(session.id));
+  return '<div class="sx-calendar-workout-row">'+
+   '<button type="button" class="sx-calendar-workout-link" data-calendar-workout="'+id+'" aria-label="View completed workout '+esc(session.name||'Workout')+'">'+
+   '<span>'+esc(session.name||'Workout')+'</span><span aria-hidden="true">›</span></button>'+
+   '<div class="sx-calendar-workout-meta">'+exerciseCount+' '+(exerciseCount===1?'exercise':'exercises')+' · '+setCount+' sets · '+Math.round(Math.max(0,+session.duration||0)/60)+' min · '+volumeLabel+'</div>'+
+   '</div>';
+ }).join('')+'</div>':'<p class="muted tiny">No workout logged on this day.</p>');
 }
-$('openWorkoutCalendar').onclick=()=>{calendarCursor=new Date();calendarCursor.setDate(1);selectedCalendarDate='';renderWorkoutCalendar();$('workoutCalendarOverlay').classList.remove('hidden')};
-$('closeWorkoutCalendar').onclick=()=>$('workoutCalendarOverlay').classList.add('hidden');
-$('workoutCalendarOverlay').addEventListener('click',e=>{if(e.target===$('workoutCalendarOverlay'))$('workoutCalendarOverlay').classList.add('hidden')});
-$('calendarPrev').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderWorkoutCalendar()};
-$('calendarNext').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderWorkoutCalendar()};
-$('workoutCalendarGrid').addEventListener('click',e=>{const b=e.target.closest('[data-calendar-date]');if(b){selectedCalendarDate=b.dataset.calendarDate;renderWorkoutCalendar()}});
+function openCalendarCompletedWorkout(id,trigger){
+ if(!$('workoutCalendarOverlay')||$('workoutCalendarOverlay').classList.contains('hidden'))return;
+ const session=(db.sessions||[]).find(x=>String(x.id)===String(id));
+ if(!session)return;
+ calendarWorkoutReturn={trigger,scrollTop:$('workoutCalendarScroll').scrollTop};
+ openCompletedWorkout(id);
+ if($('completedWorkoutOverlay').classList.contains('hidden')){calendarWorkoutReturn=null;return;}
+ $('completedWorkoutOverlay').classList.add('sx-completed-from-calendar');
+ $('workoutCalendarOverlay').setAttribute('aria-hidden','true');
+ $('closeCompletedWorkout').textContent='← CALENDAR';
+ $('closeCompletedWorkout').setAttribute('aria-label','Back to workout calendar');
+}
+$('openWorkoutCalendar').onclick=()=>{
+ calendarCursor=new Date();calendarCursor.setDate(1);
+ selectedCalendarDate='';
+ renderWorkoutCalendar();
+ $('workoutCalendarOverlay').classList.remove('hidden');
+ $('workoutCalendarScroll').scrollTop=0;
+ lockWorkoutCalendarScroll();
+ $('closeWorkoutCalendar').focus({preventScroll:true});
+};
+$('closeWorkoutCalendar').onclick=closeWorkoutCalendar;
+$('workoutCalendarOverlay').addEventListener('click',e=>{
+ if(e.target===$('workoutCalendarOverlay'))closeWorkoutCalendar();
+});
+$('calendarPrev').onclick=()=>{
+ calendarCursor.setMonth(calendarCursor.getMonth()-1);
+ selectedCalendarDate='';
+ renderWorkoutCalendar();$('workoutCalendarScroll').scrollTop=0;
+};
+$('calendarNext').onclick=()=>{
+ calendarCursor.setMonth(calendarCursor.getMonth()+1);
+ selectedCalendarDate='';
+ renderWorkoutCalendar();$('workoutCalendarScroll').scrollTop=0;
+};
+$('workoutCalendarGrid').addEventListener('click',e=>{
+ const button=e.target.closest('[data-calendar-date]');
+ if(!button)return;
+ selectedCalendarDate=button.dataset.calendarDate;
+ renderWorkoutCalendar();
+ const details=$('calendarDayDetails'),scroller=$('workoutCalendarScroll');
+ requestAnimationFrame(()=>{
+  if($('workoutCalendarOverlay').classList.contains('hidden'))return;
+  const bottom=details.getBoundingClientRect().bottom,edge=scroller.getBoundingClientRect().bottom;
+  if(bottom>edge-12)scroller.scrollBy({top:bottom-edge+22,behavior:'smooth'});
+ });
+});
+$('calendarDayDetails').addEventListener('click',e=>{
+ const button=e.target.closest('[data-calendar-workout]');
+ if(button)openCalendarCompletedWorkout(button.dataset.calendarWorkout,button);
+});
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
+ if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
+});
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=187',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js"></script><script src="./tools/531-native.js"></script><script src="./assets/ascension/quick-access.js"></script></body></html>

@@ -27,6 +27,16 @@
  let bypass=false;
  let phaseToken=0;
  let timer=null;
+ let suppressClickUntil=0;
+ let suppressClickPage=null;
+ // A swipe across a button must not also open its click action.
+ document.addEventListener('click',event=>{
+  if(suppressClickPage&&performance.now()<suppressClickUntil&&
+     suppressClickPage.contains(event.target)){
+   event.preventDefault();
+   event.stopImmediatePropagation();
+  }
+ },true);
  const get=id=>document.getElementById(id);
  const active=()=>main.querySelector(':scope > .screen.active');
  const ready=()=>{
@@ -39,10 +49,12 @@
   if(document.querySelector('.detail-overlay:not(.hidden),.set-type-sheet.is-open,.rpe-sheet.is-open,.number-pad-sheet.is-open'))return false;
   return true;
  };
+ /* Taps still work: only actual horizontal drags take over. A swipe can
+    begin on a card's button or link, which was the main source of misses. */
  const editableTarget=t=>!!t?.closest?.(
-  'button,a,input,textarea,select,iframe,[contenteditable="true"],[role="slider"],'+
+  'input,textarea,select,iframe,[contenteditable="true"],[role="slider"],'+
   '#trackerNav,header,.feed-menu,.set-type-sheet,.rpe-sheet,.number-pad-sheet,.detail-overlay,'+
-  '.sx-ascensionx-overlay,[data-no-carousel],.library-categories'
+  '.sx-ascensionx-overlay,[data-no-carousel],.library-categories,[data-native-horizontal-scroll]'
  );
  const clear=()=>{
   phaseToken++;
@@ -144,6 +156,8 @@
  };
  document.addEventListener('touchstart',event=>{
   if(!ready()||event.touches.length!==1||editableTarget(event.target)){drag=null;return;}
+  suppressClickUntil=0;
+  suppressClickPage=null;
   const page=active();
   if(!page||!event.target?.closest?.('main > .screen.active'))return;
   const finger=event.touches[0];
@@ -159,8 +173,12 @@
   const finger=event.touches[0];
   let dx=finger.clientX-drag.x,dy=finger.clientY-drag.y;
   if(!drag.axis){
-   if(Math.max(Math.abs(dx),Math.abs(dy))<10)return;
-   if(Math.abs(dy)>=Math.abs(dx)*.85){drag=null;return;}
+   if(Math.max(Math.abs(dx),Math.abs(dy))<7)return;
+   if(Math.abs(dy)>Math.abs(dx)*1.16){drag=null;return;}
+   // Wait briefly on a diagonal gesture rather than misclassifying it.
+   if(Math.abs(dx)<Math.abs(dy)*.92&&
+      Math.max(Math.abs(dx),Math.abs(dy))<18)return;
+   if(Math.abs(dx)<Math.abs(dy)*.92){drag=null;return;}
    drag.axis='x';
   }
   if(event.cancelable)event.preventDefault();
@@ -197,9 +215,13 @@
   drag=null;
   if(d.axis!=='x'){return;}
   const distance=Math.abs(d.dx);
+  if(distance>12){
+   suppressClickPage=d.origin;
+   suppressClickUntil=performance.now()+480;
+  }
   const wanted=!!d.neighbor&&
-   (distance>Math.min(d.width*.24,110)||
-     (distance>32&&Math.abs(d.velocity)>.55));
+   (distance>Math.min(d.width*.18,72)||
+     (distance>22&&Math.abs(d.velocity)>.38));
   finish(d.origin,d.neighbor,d.direction,wanted,d.dx);
  },{passive:true});
  document.addEventListener('touchcancel',()=>{if(drag)clear();},{passive:true});

@@ -548,7 +548,8 @@ window.addEventListener('message',e=>{
    // User confirms the exact lift and sets before importing; no duplicate sessions.
    continueAscensionTraining();
   }else{
-   showScreen('home');
+   // Open the actual cycle planner/details on Home, not merely the dashboard.
+   showScreen('cycle');
    renderDashboard();
   }
   return;

@@ -61,7 +61,7 @@
   '#trackerNav,header,.feed-menu,.set-type-sheet,.rpe-sheet,.number-pad-sheet,.detail-overlay,'+
   '.sx-ascensionx-overlay,[data-no-carousel],.library-categories,[data-native-horizontal-scroll]'
  );
- const clear=()=>{
+ const clear=(keepHighlight=false)=>{
   phaseToken++;
   if(timer!==null){window.clearTimeout(timer);timer=null;}
   for(const id of PAGES){
@@ -78,7 +78,7 @@
   // When a gesture is cancelled, keep the highlighted tab in sync with
   // whichever real page is active (rather than the discarded preview).
   const current=active();
-  if(current&&PAGES.includes(current.id))highlightNav(current.id);
+  if(!keepHighlight&&current&&PAGES.includes(current.id))highlightNav(current.id);
  };
  window.spartanxClearDrag=clear;
  const place=(page,x)=>{
@@ -129,11 +129,12 @@
   }
   const complete=()=>{
    if(localToken!==phaseToken)return;
-   clear();
    if(targetId&&window.switchScreen){
+    // Keep the destination tab lit throughout the final commit. Clearing
+    // the animation must not briefly re-highlight the old page.
     bypass=true;
-    try{window.switchScreen(targetId);}finally{bypass=false;}
-   }
+    try{clear(true);window.switchScreen(targetId);}finally{bypass=false;}
+   }else clear();
   };
   if(!time){
    place(origin,endX);

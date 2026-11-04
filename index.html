@@ -1209,15 +1209,29 @@ function updateFloatingRestTimer(){
  const active=!!timer?.interval&&timer.remaining>0&&sessionActive;
  bar.classList.toggle('hidden',!active);if(!active)return;
  $('floatingRestTime').textContent=fmtTime(timer.remaining);
- $('floatingRestExercise').textContent='REST · '+(work[activeRestExercise]?.name||'WORKOUT');
+ $('floatingRestExercise').textContent='REST · '+(work[activeRestExercise]?.name||'WORKOUT')+(timer.phase?' · '+timer.phase:'');
 }
 window.completeSet=(i,j,done)=>{
  work[i].sets[j].done=done;
  const row=$('exerciseList').children[i]?.querySelectorAll('.set-entry')[j];
  if(row)row.classList.toggle('is-complete',done);
- if(done)startRest(i);updateLiveStats();saveDraft();
+ if(done)startRest(i,j);updateLiveStats();saveDraft();
 };
-window.startRest=i=>{
+function ascensionRestPlan(i,completedSetIndex){
+ const exercise=work[i],base=Math.max(1,Math.round(Number(exercise?.rest)||120));
+ const compound=['Back Squat','Bench Press','Deadlift','Overhead Press'].includes(exercise?.name);
+ const imported=!!exercise?.ascensionLink||/^Imported from AscensionX\b/i.test(exercise?.notes||'');
+ if(!compound||!imported)return {seconds:base,phase:''};
+ const sets=exercise.sets||[];
+ // A completed warm-up immediately before the first working set uses main-set rest.
+ // With the manual Start control, derive the phase from the next unfinished set.
+ const after=Number.isInteger(completedSetIndex)?sets.slice(completedSetIndex+1):sets;
+ const next=after.find(set=>!set.done);
+ const previous=Number.isInteger(completedSetIndex)?sets[completedSetIndex]:null;
+ const working=next?.type==='Working Set'||(!next&&previous?.type==='Working Set')||(!next&&sets.some(set=>set.type==='Working Set'&&set.done));
+ return {seconds:base+(working?60:0),phase:working?'MAIN SETS':'WARM-UP'};
+}
+window.startRest=(i,completedSetIndex)=>{
  if(!work[i]||!sessionActive)return;
  for(const [key,t] of Object.entries(exerciseTimers)){
   if(t?.interval)clearInterval(t.interval);
@@ -1225,8 +1239,9 @@ window.startRest=i=>{
   if(el&&work[oldIndex])el.textContent=fmtTime(work[oldIndex].rest);
  }
  exerciseTimers={};
- const duration=Math.max(1,Math.round(Number(work[i].rest)||120));
- const timer={deadline:Date.now()+duration*1000,remaining:duration,interval:null};
+ const plan=ascensionRestPlan(i,completedSetIndex);
+ const duration=plan.seconds;
+ const timer={deadline:Date.now()+duration*1000,remaining:duration,interval:null,phase:plan.phase};
  activeRestExercise=i;exerciseTimers[i]=timer;
  const tick=()=>{
   if(exerciseTimers[i]!==timer)return;

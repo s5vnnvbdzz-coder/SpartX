@@ -90,7 +90,7 @@ function openEmbeddedAscensionX(){
  ascensionOverlay.setAttribute('aria-hidden','false');
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?embedded=spartanx';
+  ascensionEmbedFrame.src='./AscensionX/index.html';
  }
  ascensionCloseButton.focus({preventScroll:true});
 }

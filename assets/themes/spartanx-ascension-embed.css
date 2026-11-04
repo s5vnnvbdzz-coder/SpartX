@@ -91,6 +91,10 @@ body[data-spartx-parent-theme] :is(.selected,.pill.red){
 /* Avoid competing theme choices while embedded; local standalone choices
    resume intact when AscensionX is launched separately. */
 body[data-spartx-parent-theme] #themeChoices{display:none!important}
+body[data-spartx-parent-theme] #sxStandaloneThemeHint{display:none!important}
+body[data-spartx-parent-theme] .settings-modal .modal-head{background:var(--panel)!important;border-color:var(--line)!important}
+body[data-spartx-parent-theme] .settings-backdrop{background:color-mix(in srgb,var(--bg) 88%,transparent)!important}
+
 #sxLinkedThemeNote[hidden]{display:none!important}
 body[data-spartx-parent-theme] #sxLinkedThemeNote{
  display:block;color:var(--muted);padding:9px 11px;border-radius:10px;

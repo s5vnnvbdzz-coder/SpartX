@@ -1,8 +1,10 @@
 name: Deploy SPARTANX to GitHub Pages
 
+# GitHub Pages is already deploying the main branch through its native
+# "pages build and deployment" workflow. Avoid racing a second automatic Pages
+# deployment (GitHub rejects it as "in progress deployment").
+# Keep this manual fallback available through Actions > Run workflow.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

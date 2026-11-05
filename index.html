@@ -2932,7 +2932,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
    const response=await fetch('./sw.js?build_check='+Date.now(),{cache:'no-store'});
    if(!response.ok)throw Error('Update check unavailable');
    const script=await response.text();
-   const match=script.match(/const CACHE=['"]spartanx-v(\\d+)['"]/);
+   const match=script.match(/const CACHE=['"]spartanx-v(\d+)['"]/);
    const newest=match?Number(match[1]):null;
    if(newest&&newest>BUILD)offerUpdate();
    else if(manual&&status)status.textContent=newest===BUILD?'Up to date · Build '+BUILD:'Unable to confirm latest version.';

@@ -136,6 +136,26 @@
       const delta=(first&&latest&&first!==latest)?+(100*(latest.max-first.max)/first.max).toFixed(1):null;
       strength[name]={records,latest,best,delta};
     }
+    // Exercise-specific dashboard statistics. Workouts containing multiple sets
+    // of a lift count as ONE session/day; volume is always measured in kg.
+    // All metrics use the selected time range instead of mixing 30-day data
+    // with a 90-day or all-time strength chart.
+    const byLift={};
+    for(const name of CORE){
+      const activity=scoped.flatMap(session=>{
+        const workSets=session.exercises
+          .filter(ex=>ex.name===name)
+          .flatMap(ex=>ex.sets.filter(isWorking));
+        return workSets.length?[{date:session.date,sets:workSets}]:[];
+      });
+      byLift[name]={
+        sessions:activity.length,
+        activeDays:new Set(activity.map(entry=>entry.date.slice(0,10))).size,
+        workingSets:activity.reduce((n,entry)=>n+entry.sets.length,0),
+        volumeKg:activity.reduce((n,entry)=>n+entry.sets.reduce((total,set)=>total+set.weight*set.reps,0),0),
+        trend:strength[name].delta
+      };
+    }
     const muscles={};
     for(const session of last7)for(const ex of session.exercises){
       const muscle=MOVES[ex.name]?.muscle||'Other';
@@ -159,8 +179,17 @@
       const count=valid.filter(s=>dayStamp(s.date)>=start&&dayStamp(s.date)<end).length;
       return {week:i+1,count};
     });
+    const weeklyByLift={};
+    for(const name of CORE){
+      weeklyByLift[name]=weekly.map((week,i)=>{
+        const start=now-(7*(7-i))*timeDay,end=now-(7*(6-i))*timeDay;
+        const count=valid.filter(s=>dayStamp(s.date)>=start&&dayStamp(s.date)<end &&
+          s.exercises.some(ex=>ex.name===name&&ex.sets.some(isWorking))).length;
+        return {week:week.week,count};
+      });
+    }
     return {
-      sourceCount:valid.length, scoped, last30, last7, moves, strength, muscleRows, weekly,
+      sourceCount:valid.length, scoped, last30, last7, moves, strength, byLift, muscleRows, weekly, weeklyByLift,
       sessions30:last30.length,sessionsRange:scoped.length,volume30:volumeOf(last30),
       volumeRange:volumeOf(scoped),last14Sessions:recent14.length,
       activeDays30:new Set(last30.map(s=>s.date.slice(0,10))).size

@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
-  <link rel="stylesheet" href="./styles.css?v=4">
+  <link rel="stylesheet" href="./styles.css?v=5">
   <script src="./engine.js?v=3" defer></script>
   <script src="./bridge.js?v=2" defer></script>
-  <script src="./app.js?v=3" defer></script>
+  <script src="./app.js?v=4" defer></script>
 </head>
 <body data-theme="black-yellow">
 <div class="app-shell">
@@ -94,7 +94,7 @@
             <div class="goal-numbers"><div><span>Estimated best</span><strong id="currentMax">—</strong></div><div><span>Target</span><strong id="goalValue">—</strong></div></div>
             <div class="goal-progress"><div id="goalBar"></div></div>
             <p id="goalExplanation" class="small-copy"></p>
-            <form id="goalForm" class="goal-form"><label for="goalInput">EDIT YOUR TARGET (KG)</label><div class="inline-form"><input type="number" id="goalInput" min="1" max="1500" step="2.5" required inputmode="decimal"><button type="submit">SAVE GOAL</button></div></form>
+            <form id="goalForm" class="goal-form"><label for="goalInput">EDIT YOUR TARGET (KG)</label><div class="inline-form"><input type="text" id="goalInput" required inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="goalStatus" aria-label="Strength target in kilograms"><button type="submit">SAVE GOAL</button></div><div id="goalStatus" class="goal-status" role="status" aria-live="polite"></div></form>
             <div class="note"><span>ⓘ</span> This is a comparison with your estimated top-set 1RM, not a verified competition lift.</div>
           </article>
         </div>

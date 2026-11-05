@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090a0c">
+  <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
+  <title>SpartanX Intelligence — Athlete Dashboard</title>
+  <link rel="stylesheet" href="./styles.css?v=1">
+  <script src="./engine.js?v=1" defer></script>
+  <script src="./app.js?v=1" defer></script>
+</head>
+<body data-theme="black-yellow">
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Primary navigation">
+    <a class="brand" href="./" aria-label="SpartanX Intelligence Home"><span class="brand-symbol">X</span><span><strong>SPARTAN<span class="accent">X</span></strong><small>INTELLIGENCE</small></span></a>
+    <div class="sidebar-label">PERFORMANCE CENTER</div>
+    <nav class="sidebar-nav" aria-label="Intelligence sections">
+      <button class="nav-item active" data-tab="overview" aria-current="page"><span class="nav-icon">◈</span> Overview</button>
+      <button class="nav-item" data-tab="performance"><span class="nav-icon">↗</span> Performance</button>
+      <button class="nav-item" data-tab="muscles"><span class="nav-icon">▧</span> Muscle workload</button>
+      <button class="nav-item" data-tab="intelligence"><span class="nav-icon">✦</span> Intelligence</button>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="status-dot"></span> STANDALONE PREVIEW
+      <p>Read-only analysis. Your existing SpartanX application is not modified.</p>
+    </div>
+  </aside>
+
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="mobile-brand"><span class="brand-symbol">X</span><span>SPARTAN<span class="accent">X</span> <small>INTELLIGENCE</small></span></div>
+      <div class="topbar-title"><span class="eyebrow">TRAIN SMARTER · PROGRESS FURTHER</span><strong>ATHLETE PERFORMANCE CENTER</strong></div>
+      <div class="topbar-actions">
+        <span class="mode-pill" id="modePill">● DEMO DATA</span>
+        <button class="icon-button" id="openSource" type="button" title="Select training data" aria-label="Select training data">⚙</button>
+      </div>
+    </header>
+
+    <main class="main-content" id="appContent">
+      <div class="page-heading">
+        <div><div class="eyebrow" id="sectionKicker">YOUR TRAINING, DECODED</div><h1 id="pageTitle">Athlete Dashboard</h1><p class="subtitle" id="pageSubtitle">Every set is data. Every session is progress.</p></div>
+        <div class="select-row">
+          <label for="rangeSelect">TIME RANGE</label>
+          <select id="rangeSelect" aria-label="Analysis time range"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="0">All time</option></select>
+        </div>
+      </div>
+      <div class="demo-banner" id="dataBanner"><span class="banner-symbol">ⓘ</span><span><strong>Demonstration mode</strong> — All training data is fictional. Recommendations are previews and must not be treated as individual coaching advice.</span></div>
+
+      <section class="page active" id="overviewPage" data-page="overview" aria-labelledby="pageTitle">
+        <div class="hero-card">
+          <div class="hero-text">
+            <div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">V0.1</span></div>
+            <h2>TRAIN WITH <em>PURPOSE.</em><br>PROGRESS WITH PROOF.</h2>
+            <p>Turn your logged workouts into clear strength trends, workload patterns and recommendations you can understand.</p>
+            <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
+          </div>
+          <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div><span class="hero-tag">S T R O N G E R &nbsp; E V E R Y &nbsp; D A Y</span></div>
+        </div>
+
+        <div class="section-top"><div><h3>Performance snapshot</h3><p>Key training metrics from your available history</p></div><span class="micro-tag">LIVE CALCULATIONS</span></div>
+        <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
+        <div class="two-col">
+          <article class="panel">
+            <div class="panel-head"><div><div class="eyebrow">STRENGTH PROGRESSION</div><h3 id="overviewChartTitle">Estimated 1RM trend</h3></div><select class="compact-select" id="overviewLift" aria-label="Select lift"><option>Bench Press</option><option>Squat</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+            <div id="overviewStrengthChart" class="chart-wrap"></div>
+            <div class="panel-foot"><span class="legend-dot"></span> Calculated from best completed work sets (Epley estimate)</div>
+          </article>
+          <article class="panel panel-insights">
+            <div class="panel-head"><div><div class="eyebrow">PERFORMANCE INTELLIGENCE</div><h3>What your data is telling us</h3></div><span class="spark-icon">✦</span></div>
+            <div id="overviewInsights" class="mini-insights"></div>
+            <button class="text-button" data-go="intelligence">EXPLORE ALL INSIGHTS <span>↗</span></button>
+          </article>
+        </div>
+        <div class="section-top"><div><h3>Training consistency</h3><p>Your sessions across recent weeks</p></div></div>
+        <article class="panel consistency-panel"><div id="consistencyChart"></div><div class="panel-foot">A completed session counts once. Consistency does not guarantee progression.</div></article>
+      </section>
+
+      <section class="page" id="performancePage" data-page="performance" hidden>
+        <div class="section-top"><div><h3>Strength analytics</h3><p>Track estimated strength and progress towards your goals</p></div></div>
+        <div class="lift-tabs" id="liftTabs" role="group" aria-label="Choose exercise"></div>
+        <div class="two-col performance-layout">
+          <article class="panel">
+            <div class="panel-head"><div><div class="eyebrow">ESTIMATED STRENGTH</div><h3 id="performanceTitle">Bench Press trend</h3></div><span class="micro-tag">KG</span></div>
+            <div class="large-chart" id="performanceChart"></div>
+            <div class="panel-foot">Top working sets, 1–12 reps only. Different rep ranges and fatigue levels affect estimates.</div>
+          </article>
+          <article class="panel goal-panel">
+            <div class="eyebrow">YOUR STRENGTH TARGET</div>
+            <h3 id="goalTitle">Bench Press</h3>
+            <div class="goal-numbers"><div><span>Estimated best</span><strong id="currentMax">—</strong></div><div><span>Target</span><strong id="goalValue">—</strong></div></div>
+            <div class="goal-progress"><div id="goalBar"></div></div>
+            <p id="goalExplanation" class="small-copy"></p>
+            <form id="goalForm" class="goal-form"><label for="goalInput">EDIT YOUR TARGET (KG)</label><div class="inline-form"><input type="number" id="goalInput" min="1" max="1500" step="2.5" required inputmode="decimal"><button type="submit">SAVE GOAL</button></div></form>
+            <div class="note"><span>ⓘ</span> This is a comparison with your estimated top-set 1RM, not a verified competition lift.</div>
+          </article>
+        </div>
+        <div class="section-top"><div><h3>Strength breakdown</h3><p>Estimated top-set strength by compound movement</p></div></div>
+        <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>EXERCISE</th><th>LATEST</th><th>BEST IN RANGE</th><th>TREND</th><th>SESSIONS</th></tr></thead><tbody id="strengthTable"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="musclesPage" data-page="muscles" hidden>
+        <div class="section-top"><div><h3>Muscle workload</h3><p>How your recent training is distributed</p></div><span class="micro-tag">LAST 7 DAYS</span></div>
+        <div class="workload-hero"><div class="body-visual" aria-hidden="true"><div class="figure-head"></div><div class="figure-torso"></div><div class="figure-arm left"></div><div class="figure-arm right"></div><div class="figure-leg left"></div><div class="figure-leg right"></div><div class="figure-accent">X</div></div><div class="workload-hero-text"><div class="eyebrow">WORKLOAD AT A GLANCE</div><h3>Know what you've trained.</h3><p>Working-set counts show training exposure across major muscle groups. They do not measure exact muscle fatigue, readiness or recovery.</p><div class="workload-legend"><span><i class="legend-color low"></i> 0–3 sets</span><span><i class="legend-color med"></i> 4–9 sets</span><span><i class="legend-color high"></i> 10+ sets</span></div></div></div>
+        <div class="muscle-grid" id="muscleGrid"></div>
+        <article class="panel disclaimer"><div class="eyebrow">UNDERSTANDING THIS VIEW</div><h3>What this does — and doesn't — mean</h3><p>Counts are assigned to the primary muscle group of each recognised exercise. Compound movements also recruit other muscles, so this is a simplified workload view. Recovery depends on sleep, effort, nutrition and individual variation; SpartanX does not diagnose injury or determine whether a muscle is fully recovered.</p></article>
+      </section>
+
+      <section class="page" id="intelligencePage" data-page="intelligence" hidden>
+        <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Your next session, informed by your last.</h3><p>Simple, explainable recommendations from completed sets and RPE. Nothing is changed in your training plan.</p></div></div>
+        <div class="section-top"><div><h3>Progression suggestions</h3><p>Review a lift to see why a recommendation was made</p></div></div>
+        <div class="recommendation-grid" id="recommendationGrid"></div>
+        <div class="section-top"><div><h3>Training insights</h3><p>Signals worth noticing, not automatic training decisions</p></div></div>
+        <div class="insight-grid" id="allInsights"></div>
+        <article class="panel disclaimer"><div class="eyebrow">IMPORTANT LIMITATIONS</div><h3>Intelligence is a decision aid, not a coach or clinician.</h3><p>Recommendations currently use recent top sets, repetitions, estimated strength trends and logged RPE. They cannot assess bar speed, technique, sleep quality, pain, injury risk or actual muscle recovery. Use judgement and adapt training to how you feel. This module does not write to SpartanX or change any workout.</p></article>
+      </section>
+      <footer class="app-footer">SPARTANX INTELLIGENCE <span>·</span> TRAIN SMARTER <span>·</span> V0.1 INDEPENDENT PREVIEW</footer>
+    </main>
+  </div>
+</div>
+
+<nav class="bottom-nav" aria-label="Mobile navigation">
+  <button data-tab="overview" class="active" aria-label="Overview"><span>◈</span><small>OVERVIEW</small></button>
+  <button data-tab="performance" aria-label="Performance"><span>↗</span><small>STRENGTH</small></button>
+  <button data-tab="muscles" aria-label="Muscle workload"><span>▧</span><small>MUSCLES</small></button>
+  <button data-tab="intelligence" aria-label="Intelligence"><span>✦</span><small>INSIGHTS</small></button>
+</nav>
+
+<dialog id="sourceDialog" class="source-dialog" aria-labelledby="sourceTitle">
+  <form method="dialog"><button class="close-dialog" aria-label="Close dialog">×</button></form>
+  <div class="eyebrow">DATA SOURCE</div><h2 id="sourceTitle">Choose your athlete data</h2>
+  <p class="small-copy">Test everything safely with sample training history. Nothing here writes to your SpartanX workouts.</p>
+  <label for="athleteSelect">DEMO ATHLETE</label>
+  <select id="athleteSelect"><option value="strength">Alex Morgan · Strength</option><option value="hypertrophy">Taylor Brooks · Hypertrophy</option><option value="beginner">Sam Ellis · Foundation</option></select>
+  <button class="primary-button full" id="applyDemo" type="button">LOAD DEMO ATHLETE</button>
+  <div class="modal-separator"><span>OPTIONAL LOCAL TEST</span></div>
+  <label for="importInput">READ-ONLY SPARTANX JSON PREVIEW</label>
+  <input id="importInput" type="file" accept=".json,application/json">
+  <p class="small-copy">Import a JSON workout export containing a <code>sessions</code> array. This processes your file on-device; no upload or automatic live connection. Imported data is held only until this tab reloads.</p>
+  <div id="importStatus" class="import-status" role="status"></div>
+  <button type="button" id="resetDemo" class="secondary-button full">RESET TO SAMPLE DATA</button>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

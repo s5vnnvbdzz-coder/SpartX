@@ -7,9 +7,9 @@
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
   <link rel="stylesheet" href="./styles.css?v=3">
-  <script src="./engine.js?v=2" defer></script>
+  <script src="./engine.js?v=3" defer></script>
   <script src="./bridge.js?v=2" defer></script>
-  <script src="./app.js?v=2" defer></script>
+  <script src="./app.js?v=3" defer></script>
 </head>
 <body data-theme="black-yellow">
 <div class="app-shell">
@@ -61,7 +61,7 @@
           <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div><span class="hero-tag">S T R O N G E R &nbsp; E V E R Y &nbsp; D A Y</span></div>
         </div>
 
-        <div class="section-top"><div><h3>Performance snapshot</h3><p>Key training metrics from your available history</p></div><span class="micro-tag">LIVE CALCULATIONS</span></div>
+        <div class="section-top"><div><h3 id="snapshotTitle">Bench Press performance snapshot</h3><p id="snapshotSubtitle">All four metrics reflect your selected exercise.</p></div><span class="micro-tag">LIVE CALCULATIONS</span></div>
         <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
         <div class="two-col">
           <article class="panel">
@@ -75,7 +75,7 @@
             <button class="text-button" data-go="intelligence">EXPLORE ALL INSIGHTS <span>↗</span></button>
           </article>
         </div>
-        <div class="section-top"><div><h3>Training consistency</h3><p>Your sessions across recent weeks</p></div></div>
+        <div class="section-top"><div><h3 id="consistencyTitle">Bench Press training consistency</h3><p id="consistencySubtitle">Sessions containing the selected lift</p></div></div>
         <article class="panel consistency-panel"><div id="consistencyChart"></div><div class="panel-foot">A completed session counts once. Consistency does not guarantee progression.</div></article>
       </section>
 

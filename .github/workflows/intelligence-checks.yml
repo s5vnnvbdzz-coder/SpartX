@@ -1,0 +1,30 @@
+name: SpartanX Intelligence checks
+
+on:
+  push:
+    paths:
+      - 'intelligence/**'
+      - '.github/workflows/intelligence-checks.yml'
+  pull_request:
+    paths:
+      - 'intelligence/**'
+      - '.github/workflows/intelligence-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax checks
+        run: |
+          node --check intelligence/engine.js
+          node --check intelligence/app.js
+      - name: Engine regression tests
+        run: node intelligence/tests.js

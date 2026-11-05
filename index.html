@@ -1047,6 +1047,73 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 <link rel="stylesheet" href="./assets/themes/theme-rank-frames.css?v=206">
 <link rel="stylesheet" href="./assets/navigation/main-carousel.css">
 <link rel="stylesheet" href="./assets/themes/spartanx-settings-surface.css?v=210">
+<style id="sx-active-set-compact-grid">
+/* Active workout: reserve meaningful room for PREV instead of six equal columns.
+   Scoped to the workout logger to avoid affecting other set tables or themes. */
+#activeWorkout .set-table .set-head,
+#activeWorkout .set-table .set-row{
+  grid-template-columns:minmax(0,.74fr) minmax(0,1.62fr) minmax(0,1fr) minmax(0,.88fr) minmax(0,1.08fr) minmax(0,.60fr)!important;
+  gap:4px!important;
+  align-items:center;
+}
+#activeWorkout .set-table .set-head{padding:0 2px 8px;font-size:10px;letter-spacing:.15px}
+#activeWorkout .set-table .set-head span{min-width:0}
+#activeWorkout .set-table .set-head span:nth-child(2){text-align:center}
+#activeWorkout .set-table .set-entry{padding:5px 3px}
+#activeWorkout .set-table .set-row>*{min-width:0}
+#activeWorkout .set-table .set-row .set-type-picker{
+  height:34px;
+  padding:2px 1px;
+  font-size:14px;
+}
+#activeWorkout .set-table .set-row .set-number-pad-trigger{
+  height:34px;
+  padding:1px;
+  font-size:15px;
+}
+#activeWorkout .set-table .set-row .set-rpe-trigger{
+  height:34px;
+  padding:0 1px;
+  gap:2px;
+  font-size:12px;
+}
+#activeWorkout .set-table .set-row .set-rpe-trigger svg{
+  flex:0 0 14px;
+  width:14px;
+  height:14px;
+}
+#activeWorkout .set-table .set-row .previous-value{
+  display:block;
+  width:100%;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:center;
+  font-size:clamp(10px,2.8vw,12px);
+  letter-spacing:-.2px;
+  font-variant-numeric:tabular-nums;
+}
+#activeWorkout .set-table .set-row input.done{
+  width:20px;
+  height:20px;
+  margin:0;
+  padding:0;
+  justify-self:center;
+  accent-color:var(--lime);
+}
+@media(max-width:390px){
+  #activeWorkout .set-table .set-head,
+  #activeWorkout .set-table .set-row{
+    grid-template-columns:minmax(0,.68fr) minmax(0,1.7fr) minmax(0,.95fr) minmax(0,.83fr) minmax(0,1.06fr) minmax(0,.58fr)!important;
+    gap:3px!important;
+  }
+  #activeWorkout .set-table .set-head{font-size:9px}
+  #activeWorkout .set-table .set-row .set-number-pad-trigger{font-size:14px}
+  #activeWorkout .set-table .set-row .set-rpe-trigger{font-size:11px;gap:1px}
+  #activeWorkout .set-table .set-row input.done{width:19px;height:19px}
+}
+</style>
 </head>
 <body class="sx-main-header-layout">
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>

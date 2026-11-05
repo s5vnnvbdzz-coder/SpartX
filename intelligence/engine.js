@@ -20,11 +20,13 @@
   const ALIASES = {
     'barbell bench press':'Bench Press','flat bench press':'Bench Press',
     'barbell back squat':'Squat','back squat':'Squat',
+    'paused back squat':'Squat','high bar back squat':'Squat','low bar squat':'Squat',
     'conventional deadlift':'Deadlift','barbell deadlift':'Deadlift',
     'ohp':'Overhead Press','shoulder press':'Overhead Press',
     'barbell overhead press':'Overhead Press','bent over row':'Barbell Row',
     'barbell bent over row':'Barbell Row','pull ups':'Pull Up','pull-up':'Pull Up',
-    'lat pull down':'Lat Pulldown','rdl':'Romanian Deadlift'
+    'lat pull down':'Lat Pulldown','dumbbell lateral raise':'Lateral Raise',
+    'rdl':'Romanian Deadlift'
   };
   const finite = value => Number.isFinite(Number(value));
   const safeNumber = (v, fallback=0) => finite(v) ? Number(v) : fallback;

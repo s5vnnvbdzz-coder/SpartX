@@ -6,7 +6,7 @@ A standalone, static, zero-dependency prototype of **SpartanX Intelligence** and
 - Live: https://s5vnnvbdzz-coder.github.io/SpartX/intelligence/
 - Source: [index.html](./index.html)
 
-This is an independent app in the \`intelligence/\` directory. It does **not** modify the original SpartanX root app, read the SpartanX database automatically, or write any data to SpartanX.
+This is an independent app in the \`intelligence/\` directory. The original SpartanX workout logger remains the only place users log workouts. This module now **automatically reads** saved completed sessions from the same-origin browser storage key `spartx_db` on launch and when the app returns to the foreground. It never modifies existing workout records. If browser storage is separate (e.g. iPhone Safari versus Home Screen app), it shows a clear no-connection state rather than fictional results.
 
 ## Included in v0.1
 - Four responsive pages: Athlete Overview, Performance, Muscle Workload and Intelligence.
@@ -16,6 +16,7 @@ This is an independent app in the \`intelligence/\` directory. It does **not** m
 - Rule-based progressive-overload suggestions for squat, bench press, deadlift and overhead press using completed working sets and recent RPE.
 - Editable strength goals saved **only for demo profiles** in this app's own \`sx_intelligence_demo_goals_v1\` localStorage key.
 - Seven-day primary-muscle working set distribution; no misleading "recovery %" claims.
+- **Automatic read-only SpartanX workout connection** when opened from the same browser or installed PWA context. Home has an Intelligence launch card. Reconnect and refresh controls are also provided.
 - Optional manual **read-only local JSON preview** from a workout export. File contents are parsed on-device and remain in memory until reload; never sent to a server.
 
 ## Files
@@ -36,21 +37,30 @@ When users explicitly opt in to connecting their data:
 5. Add Nutrition Labs and linked AscensionX adapters later, keeping each source separate until consent and data mapping are tested.
 6. If cloud accounts are added later, explicitly design permissions, retention, exports and backups before syncing.
 
-A manual JSON import exists only to test parsing and analytics; it is **not** a live sync feature.
+Automatic local reading is available now, but this is **not** cloud sync or account-wide synchronization. The source database stays on the device. The manual JSON import remains a fallback for contexts that do not share local storage.
 
 ## Limitations
 - The preview is neither a medical service nor an autonomous coach. Estimated 1RM values are based on 1–12 rep working sets, not verified lifts.
 - Load suggestions are based on very limited signals and need human judgement. They cannot account for injuries, pain, sleep, velocity, technique or fatigue.
 - Muscle counts attribute a set to the exercise's *primary* muscle only. This isn't a complete biomechanical model.
-- Demo goals are stored locally in the Intelligence app only. Imported workouts remain in memory, not persistent storage.
+- Demo goals are stored under `sx_intelligence_demo_goals_v1` and linked-user goals under `sx_intelligence_linked_goals_v1`. Neither key is part of the original SpartanX workout database. Imported workouts remain in memory, not persistent storage.
 - All training data shown by default is fictional.
 
 ## Test
 \`\`\`bash
 node intelligence/tests.js
+node intelligence/bridge.test.js
 node --check intelligence/engine.js
 node --check intelligence/app.js
+node --check intelligence/bridge.js
 \`\`\`
+
+## Data safety and same-device behaviour
+- Reading workouts requires no duplicate logging, manual export or second workout entry when the two pages share a browser storage context.
+- The adapter never calls `setItem`, `removeItem`, `clear`, or sends data over the network. It reads only completed sessions and a profile display name.
+- No records found, storage blocked, malformed JSON or isolated Home Screen storage shows an honest empty/error state; automatic demo substitution is forbidden.
+- Refresh manually from the source menu or return to Intelligence after saving a SpartanX workout to re-analyse.
+- Browser data can be lost by clearing website storage. SpartanX backups are still important.
 
 ## Theme standard
 Every new SpartanX Intelligence theme must apply across every page, modal, chart, navigation, interactive control and mobile layout. When eventually embedded in SpartanX, the host's selected theme should be mapped through shared design tokens; don't hardcode one page at a time.

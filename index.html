@@ -1039,6 +1039,8 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
  }
 }
 </style>
+<style>.sx-intelligence-entry-link:focus-visible{outline:2px solid var(--lime);outline-offset:2px}.sx-intelligence-entry-link:active{opacity:.8}
+</style>
 <link rel="stylesheet" href="./assets/themes/obsidian-white.css?v=207">
 
 
@@ -1053,6 +1055,17 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 <section id="home" class="screen active">
 <div class="eyebrow">YOUR TRAINING, TRACKED</div><h1>Home</h1><div class="card spartan-rank-card" id="homeRankProgression"><div class="row between"><div><div class="eyebrow">YOUR JOURNEY</div><h2 style="margin:5px 0 0">Rank Progression</h2></div><span class="rank-xp-total" id="rankXP">0 XP</span></div><div class="rank-current-row"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div></div><div class="rank-progress-track"><span id="rankProgressFill"></span></div><div class="row between rank-progress-labels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div><div class="rank-tier-strip" id="homeRankTiers"></div><div class="rank-milestone-track" aria-label="Ranks achieved"><span id="rankMilestoneFill"></span></div><p class="rank-xp-note">Progress is earned through completed workouts. XP values and rank thresholds can be fine-tuned later.</p></div>
 
+<section class="card sx-intelligence-entry" id="sxIntelligenceEntry" aria-label="SpartanX Intelligence">
+  <div class="row between" style="align-items:center;gap:12px">
+    <div>
+      <div class="eyebrow">ATHLETE INTELLIGENCE · CONNECTED TRAINING</div>
+      <h2 style="margin:6px 0 5px">Your Athlete Dashboard</h2>
+      <p class="tiny muted" style="margin:0;line-height:1.6">Strength trends, training workload, goals and recommendations. Reads completed workouts from this device. No duplicate logging.</p>
+    </div>
+    <span aria-hidden="true" style="font-size:30px;line-height:1;color:var(--lime)">✦</span>
+  </div>
+  <a class="sx-intelligence-entry-link" href="./intelligence/" style="display:flex;align-items:center;justify-content:center;margin-top:13px;padding:12px 15px;border:1px solid color-mix(in srgb,var(--lime) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--lime) 9%,var(--panel2));color:var(--lime);font-size:12px;letter-spacing:.8px;font-weight:850;text-decoration:none">OPEN SPARTANX INTELLIGENCE ↗</a>
+</section>
 <section class="card sx-social-home" id="sxSocialHome" aria-label="Offline Athlete Search">
  <div class="sx-social-home-head"><div><div class="eyebrow">COMMUNITY · OFFLINE DEMO</div><h2>Athlete Search</h2></div><button type="button" id="sxSocialToggle" class="secondary" aria-controls="sxSocialBody" aria-expanded="false">FIND ATHLETES</button></div>
  <p class="sx-social-home-intro">Explore six sample athletes. Follow them and try follower counts without connecting to real accounts.</p>

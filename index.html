@@ -1815,15 +1815,18 @@ function isNumberedWorkoutSet(set){
 }
 function ascensionRestPlan(i,completedSetIndex){
  const exercise=work[i],base=Math.max(1,Math.round(Number(exercise?.rest)||120));
+ // A +60s main-set rest boost must be identical whether the athlete starts
+ // an empty workout, a saved routine, a 5/3/1 cycle, or an AscensionX import.
+ // Previously this was incorrectly restricted to AscensionX imports only.
  const compound=['Back Squat','Bench Press','Deadlift','Overhead Press'].includes(exercise?.name);
- const imported=!!exercise?.ascensionLink||/^Imported from AscensionX\b/i.test(exercise?.notes||'');
- if(!compound||!imported)return {seconds:base,phase:''};
+ if(!compound)return {seconds:base,phase:''};
  const sets=exercise.sets||[];
  const after=Number.isInteger(completedSetIndex)?sets.slice(completedSetIndex+1):sets;
  const next=after.find(set=>!set.done);
  const completed=Number.isInteger(completedSetIndex)?sets[completedSetIndex]:null;
- // After the final W, use main-set rest BEFORE the first numbered set;
- // on numbered working sets, always keep that same +60 seconds.
+ // After a warm-up before the first numbered working set, use main-set
+ // rest; after each numbered working set, keep the extra minute.
+ // Warm-up-only intervals retain the normal baseline.
  const mainPhase=isNumberedWorkoutSet(completed)||isNumberedWorkoutSet(next);
  return {seconds:base+(mainPhase?60:0),phase:mainPhase?'MAIN SETS':'WARM-UP'};
 }

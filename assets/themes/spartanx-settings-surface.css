@@ -61,6 +61,10 @@ body[data-sx-settings-theme] input{accent-color:var(--lime)!important}
 body[data-sx-settings-theme] .copy small{color:var(--muted)!important}
 body[data-sx-settings-theme] footer{color:var(--muted)!important}
 
+
+/* Theme contract: each selectable theme gets a Settings palette. */
+body[data-sx-settings-theme="sx-black-yellow"]{--sx-settings-bg:#050505;--sx-settings-panel:#101010;--sx-settings-panel2:#191919;--sx-settings-line:#40371e;--sx-settings-text:#f3f3ed;--sx-settings-muted:#a5a39a;--sx-settings-accent:#f4cd37}
+
 /* Profile Settings lives inside index.html, not the standalone Tools settings
    page. It requires the same selected surface and control colours. */
 body[data-active-theme] #profileSettingsOverlay{

@@ -1,0 +1,28 @@
+name: SpartanX rest timer checks
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'tests/rest-timer.test.js'
+      - '.github/workflows/rest-timer-checks.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'tests/rest-timer.test.js'
+      - '.github/workflows/rest-timer-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rest-timer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check saved-routine rest timer
+        run: node tests/rest-timer.test.js

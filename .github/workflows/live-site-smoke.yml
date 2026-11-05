@@ -27,4 +27,10 @@ jobs:
           curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/sw.js?iphone-check=219" -o /tmp/site-sw.js
           head -c 130 /tmp/site-sw.js
           grep -Fq "const CACHE='spartanx-v219'" /tmp/site-sw.js && echo "PASS: iPhone SW 219 available"
+          echo '=== Live safe recovery page ==='
+          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/refresh.html?iphone-check=219" -o /tmp/site-refresh.html
+          grep -Fq 'Refresh app files safely' /tmp/site-refresh.html && echo 'PASS: Recovery page published'
+          grep -Fq "keys.filter(k=>k.startsWith('spartanx-v'))" /tmp/site-refresh.html && echo 'PASS: Recovery touches only SpartanX file caches'
+          grep -Fq 'navigator.serviceWorker?.getRegistration' /tmp/site-refresh.html && echo 'PASS: Recovery checks scoped app worker'
+
           echo

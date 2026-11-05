@@ -1,28 +1,36 @@
-const CACHE='spartanx-v218';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg','./intelligence/','./intelligence/index.html','./intelligence/styles.css?v=5','./intelligence/engine.js?v=3','./intelligence/bridge.js?v=2','./intelligence/app.js?v=4','./tools/replica.js','./AscensionX/index.html','./AscensionX/icon.svg','./tools/settings.html','./tools/531-cycle.html','./tools/531-native.js','./assets/halloween-forest.svg','./assets/christmas-forest.svg','./assets/energy-can.svg','./assets/anatomy/body-map.js','./assets/stats/statistics.css','./assets/stats/statistics.js','./assets/ascension/quick-access.css','./assets/themes/obsidian-white.css?v=207','./assets/themes/theme-rank-frames.css?v=206','./assets/themes/spartanx-settings-surface.css?v=209','./assets/themes/spartanx-ascension-embed.css?v=211','./assets/ascension/quick-access.js','./assets/navigation/main-carousel.css','./assets/navigation/main-carousel.js','./assets/exercises/repdb-thumbnails.js','./assets/exercises/exercise-placeholder.svg','./ranks/mortal.svg','./ranks/spartan.svg','./ranks/hero.svg','./ranks/demigod.svg','./ranks/titan.svg','./ranks/olympian.svg','./ranks/flags/gb.svg','./social.js','./ranks/male-profile-mortal.svg','./ranks/male-profile-spartan.svg','./ranks/male-profile-hero.svg','./ranks/male-profile-demigod.svg','./ranks/male-profile-titan.svg','./ranks/male-profile-olympian.svg','./ranks/female-frame-initiate.svg','./ranks/female-frame-huntress.svg','./ranks/female-frame-amazon.svg','./ranks/female-frame-valkyrie.svg','./ranks/female-frame-athena.svg','./ranks/female-frame-olympian.svg'];
+/* SpartanX PWA — lightweight install so iOS is not blocked by any optional
+   image/theme/tool asset. All successfully fetched files are cached on use. */
+const CACHE='spartanx-v219';
+const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
-  event.waitUntil(
-    caches.open(CACHE)
-      .then(cache=>cache.addAll(ASSETS))
-      .then(()=>self.skipWaiting())
-  );
+ event.waitUntil(caches.open(CACHE)
+  .then(cache=>cache.addAll(CORE))
+  .then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
-  event.waitUntil(
-    caches.keys()
-      .then(keys=>Promise.all(keys.filter(key=>key.startsWith('spartanx-v') && key!==CACHE).map(key=>caches.delete(key))))
-      .then(()=>self.clients.claim())
-  );
+ event.waitUntil(
+  caches.keys()
+   .then(keys=>Promise.all(keys.filter(key=>key.startsWith('spartanx-v')&&key!==CACHE).map(key=>caches.delete(key))))
+   .then(()=>self.clients.claim())
+ );
 });
 self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET') return;
-  const url=new URL(event.request.url);
-  if(url.origin!==self.location.origin) return;
-  event.respondWith(fetch(event.request).then(response=>{
-    if(response && response.ok){
-      const copy=response.clone();
-      caches.open(CACHE).then(cache=>cache.put(event.request,copy));
-    }
-    return response;
-  }).catch(()=>caches.match(event.request).then(cached=>cached||(event.request.mode==='navigate'?caches.match('./index.html'):undefined))));
+ const request=event.request;
+ if(request.method!=='GET')return;
+ const url=new URL(request.url);
+ if(url.origin!==self.location.origin)return;
+ const navigate=request.mode==='navigate';
+ // Don't let Safari's HTTP cache mask a newly deployed HTML document.
+ const live=navigate?fetch(new Request(request,{cache:'no-store'})):fetch(request);
+ event.respondWith(live.then(response=>{
+  if(response&&response.ok){
+   const copy=response.clone();
+   // Best-effort runtime cache: a failed cache write never blocks the page.
+   event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,copy)).catch(()=>{}));
+  }
+  return response;
+ }).catch(async()=>{
+  const cache=await caches.open(CACHE);
+  return (await cache.match(request))||(navigate?await cache.match('./index.html'):undefined)||Response.error();
+ }));
 });

@@ -79,6 +79,7 @@ select option{background:#141517;color:#eee}
 .kpi-icon{font-size:19px;color:var(--gold)}
 .kpi-value{margin:12px 0 4px;font-size:clamp(20px,2.3vw,30px);line-height:1.1;font-weight:950;color:#f6f6f6;letter-spacing:-1px;white-space:nowrap}
 .kpi-sub{color:#a4a5a7;font-size:10px}
+.kpi-volume .kpi-value{font-size:clamp(19px,2.05vw,27px);white-space:normal;overflow-wrap:anywhere;line-height:1.17}
 .kpi-sub .positive{color:var(--good)}
 .kpi-sub .negative{color:var(--warn)}
 .two-col{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.95fr);gap:14px}
@@ -243,7 +244,7 @@ tr:last-child td{border:0}
  .hero-art{right:-35px;width:45%;opacity:.27}.hero-x{font-size:133px}.hero-card p{font-size:11px;max-width:300px}
  .section-top{margin:23px 0 12px}.section-top h3{font-size:16px}
  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
- .kpi{padding:16px 14px}.kpi-value{font-size:25px}
+ .kpi{padding:16px 14px}.kpi-value{font-size:25px}.kpi-volume .kpi-value{font-size:21px}
  .two-col,.performance-layout{grid-template-columns:1fr;gap:11px}.panel{padding:16px}
  .panel-head{gap:7px}.panel-head h3{font-size:15px}.chart-wrap{height:180px}
  .compact-select{min-width:120px;max-width:155px;font-size:10px;padding-left:7px}

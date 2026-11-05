@@ -2080,7 +2080,7 @@ function historyChart(title,unit,points,valueKey,format){
  const live=coords.find(p=>p.p.isLive),previous=savedCoords.at(-1);
  const path=savedCoords.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' ');
  const liveLine=live&&previous?'<path d="M'+previous.x.toFixed(1)+' '+previous.y.toFixed(1)+' L'+live.x.toFixed(1)+' '+live.y.toFixed(1)+'" class="history-line-live"/>':'';
- const labels=coords.map((p,i)=>i===0||i===coords.length-1||i===Math.floor((coords.length-1)/2)?'<text x="'+p.x.toFixed(1)+'" y="'+(h-8)+'" text-anchor="middle" class="history-axis">'+(p.p.isLive?'TODAY':new Date(p.p.date).toLocaleDateString(undefined,{day:'numeric',month:'short'}))+'</text>':'').join('');
+ const labels=coords.map((p,i)=>i===0||i===coords.length-1||i===Math.floor((coords.length-1)/2)?'<text x="'+p.x.toFixed(1)+'" y="'+(h-8)+'" text-anchor="'+(p.p.isLive?'end':'middle')+'" class="history-axis">'+(p.p.isLive?'TODAY':new Date(p.p.date).toLocaleDateString(undefined,{day:'numeric',month:'short'}))+'</text>':'').join('');
  const dots=coords.map(p=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(p.p.isLive?'6':'4')+'" class="'+(p.p.isLive?'history-dot-live':'history-dot')+'"><title>'+(p.p.isLive?'TODAY · LIVE':new Date(p.p.date).toLocaleDateString())+' · '+format(p.p[valueKey])+'</title></circle>').join('');
  const liveLabel=live?'<text x="'+(live.x-7).toFixed(1)+'" y="'+Math.max(11,live.y-13).toFixed(1)+'" text-anchor="end" class="history-live-label">LIVE</text>':'';
  return points.length?'<div class="history-chart-wrap"><svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+title+' progress chart"><line x1="'+left+'" y1="'+(top+innerH)+'" x2="'+(w-right)+'" y2="'+(top+innerH)+'" class="history-axis-line"/><line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+innerH)+'" class="history-axis-line"/><path d="'+path+'" class="history-line"/>'+liveLine+dots+liveLabel+labels+'</svg></div>':'<p class="muted tiny" style="padding:18px 0;text-align:center">No completed sets yet. Complete a set to see today’s live progress.</p>';
@@ -2133,6 +2133,7 @@ function renderExerciseMetric(points,id){
  }
  $('exerciseMetricUnit').textContent=metric.id==='totalReps'?'reps':metric.id==='setVolume'?'kg × reps':preferences.weight==='lb'?'lbs':'kg';
  const live=values.find(p=>p.isLive),previous=values.filter(p=>!p.isLive).at(-1);
+ if(live)$('exerciseMetricLabel').textContent+=' · TODAY LIVE';
  const formatMetric=value=>metric.id==='totalReps'?Number(value).toLocaleString()+' reps':kg(value);
  const comparison=live?'<div class="history-live-compare"><div><span>PREVIOUS SESSION</span><strong>'+(previous?formatMetric(previous.metricValue):'No earlier session')+'</strong></div><div><span>TODAY · LIVE</span><strong class="history-live-value">'+formatMetric(live.metricValue)+'</strong></div>'+(previous?'<div><span>CHANGE</span><strong>'+(live.metricValue>=previous.metricValue?'+':'')+formatMetric(live.metricValue-previous.metricValue)+'</strong></div>':'')+'</div>':'';
  $('exerciseHistoryCharts').innerHTML=historyChart(metric.label,$('exerciseMetricUnit').textContent,values,'metricValue',v=>metric.id==='totalReps'?String(v)+' reps':kg(v))+comparison;

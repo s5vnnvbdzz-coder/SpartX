@@ -191,6 +191,14 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-recovery-choice small{display:block;color:var(--muted);font-size:11px;line-height:1.5;margin-top:3px}
 .asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
+
+/* Theme bridge: additional SpartanX palettes for integrated AscensionX */
+body[data-theme="amethyst"]{--bg:#0b0911;--panel:#17121f;--panel2:#292037;--line:#4b385f;--red:#9162c9;--red2:#b58ae9;--redDeep:#43275f}
+body[data-theme="black-yellow"]{--bg:#050505;--panel:#101010;--panel2:#1c1c1a;--line:#45432c;--red:#c9a51c;--red2:#ffe044;--redDeep:#685411}
+body[data-theme="halloween"]{--bg:#0e0909;--panel:#201713;--panel2:#30201a;--red:#c26421;--red2:#ff923a;--redDeep:#71320e}
+body[data-theme="christmas"]{--bg:#080e0c;--panel:#12201b;--panel2:#1b3026;--red:#a92c36;--red2:#d94d57;--redDeep:#64151f}
+body[data-theme="monster"]{--bg:#070a07;--panel:#101710;--panel2:#1b261a;--red:#67b52a;--red2:#a0e64b;--redDeep:#335c16}
+body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0b0b0;--red2:#f4f4f4;--redDeep:#555}
 </style>
 <link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=210">
 </head>
@@ -360,7 +368,11 @@ const ASC_THEMES=[['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['
 const ASC_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
 const ASC_RANK_NUMERALS=['I','II','III','IV','V','VIII'];
 function ascRankLabel(level){return ASC_RANKS[level]+' - Rank '+ASC_RANK_NUMERALS[level];}
-function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;document.body.dataset.theme=theme;persist(false);renderSettings()}
+const SX_SHARED_THEME_KEY='spartanx_shared_active_theme_v1';
+const SX_THEME_MAP={'dark':'dark','light':'light','spartan-red':'spartan','spartan-bronze':'bronze','spartan-gold':'gold','spartan-blue':'athena','spartan-amethyst':'amethyst','sx-black-yellow':'black-yellow','spartan-olympian':'gold','olympian-athena':'gold','sx-halloween':'halloween','sx-christmas':'christmas','sx-monster':'monster','sx-obsidian-white':'obsidian','premium-monster':'monster','premium-olympus':'gold','amazonian-crimson':'spartan','athenas-aegis':'athena'};
+function ascOpenedFromSpartanX(){const params=new URLSearchParams(location.search);if(params.get('from')==='spartanx')return true;try{const ref=new URL(document.referrer);return ref.origin===location.origin&&ref.pathname.replace(/\/$/,'')===location.pathname.replace(/AscensionX\/index\.html$|AscensionX\/$/,'').replace(/\/$/,'')}catch(e){return false}}
+function applyAscTheme(){let theme=state.theme||'dark';if(ascOpenedFromSpartanX()){let main='';try{main=localStorage.getItem(SX_SHARED_THEME_KEY)||''}catch(e){}if(main)theme=SX_THEME_MAP[main]||'dark'}document.body.dataset.theme=theme;document.body.dataset.inheritedTheme=ascOpenedFromSpartanX()?'true':'false';return theme}
+function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;applyAscTheme();persist(false);renderSettings()}
 function ascRankState(){const total=state.logs.length,prestige=state.prestige||{level:0,xpOffset:0};const xp=Math.max(0,total-(prestige.xpOffset||0));const level=Math.min(5,Math.floor(xp/3));return {total,xp,level,prestige:prestige.level||0}}
 function renderAscRank(){const r=ascRankState();$('ascRankName').textContent=ascRankLabel(r.level);document.body.dataset.sxRankTier=String(r.level===5?8:r.level+1);$('ascRankXp').textContent=r.xp+' XP';$('ascRankBar').style.width=(r.level===5?100:r.xp%3/3*100)+'%';$('ascRankNext').textContent=r.level===5?'Olympian achieved — prestige available':(3-r.xp%3)+' XP to '+ascRankLabel(r.level+1);$('ascPrestigeLevel').textContent=r.prestige;$('ascRankSessions').textContent=r.total+' saved workouts';$('ascRankEmblem').src='../ranks/'+['mortal.svg','spartan.svg','hero.svg','demigod.svg','titan.svg','olympian.svg'][r.level];$('ascRankEmblem').alt=ASC_RANKS[r.level]+' rank emblem';$('navRankEmblem').src=$('ascRankEmblem').src;$('ascPrestigeButton').disabled=r.level<5;$('ascPrestigeButton').textContent=r.level===5?'Prestige · Ascend to level '+(r.prestige+1):'Reach Olympian to prestige'}
 function prestigeAscRank(){const r=ascRankState();if(r.level!==5)return;if(!confirm('Prestige to level '+(r.prestige+1)+'? Your rank resets to Mortal, but your workouts and training history are preserved.'))return;state.prestige={level:r.prestige+1,xpOffset:r.total};persist();toast('Prestige '+(r.prestige+1)+' unlocked!')}
@@ -917,7 +929,7 @@ function renderProgress(){
 
 }
 function renderCycleReview(){const selected=selectedLifts(),logs=activeCycleLogs(),finished=selected.filter(l=>logs.some(x=>x.lift===l&&x.week===6&&x.setsComplete===true));const completed=finished.length;const sessions=logs.length;$('cycleReview').innerHTML=`<strong>${sessions} sessions logged.</strong><p>${completed?completed+' of '+selected.length+' selected lifts have completed Week 6.':'Complete Week 6 for your selected exercises to finish the cycle.'}</p><p>Review rep completion, RPE, technique and recovery before adjusting your Training Max.</p><p><strong>Progress:</strong> Increase upper-body loads by approximately 2.5 kg and lower-body loads by 2.5–5 kg when all targets were achieved comfortably.</p><p><strong>Hold:</strong> Repeat the current load if effort was higher than planned or recovery was poor.</p><p><strong>Reduce:</strong> Consider lowering loads by 2.5–5% after repeated missed work or technique breakdown.</p>`}
-function renderAll(){document.body.dataset.theme=state.theme||'dark';renderAscRank();renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
+function renderAll(){applyAscTheme();renderAscRank();renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
 function metricValue(v,unit){return v===null||v===undefined||v===""?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:1})+unit}
 function saveMetrics(){
  const fields={weight:"metricWeight",fat:"metricFat",waist:"metricWaist",chest:"metricChest",arm:"metricArm",thigh:"metricThigh",calf:"metricCalf"};
@@ -947,7 +959,7 @@ $('importFile').addEventListener('change',async e=>{try{const obj=JSON.parse(awa
 function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all saved workout history from this browser?'))return;state=defaults();localStorage.removeItem(KEY);renderAll();toast('AscensionX data cleared')}
 function init(){
  setupProfileCollapse();
- document.body.dataset.theme=state.theme||'dark';
+ applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});

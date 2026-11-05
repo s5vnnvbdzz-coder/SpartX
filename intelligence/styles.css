@@ -125,6 +125,8 @@ select option{background:#141517;color:#eee}
 .small-copy{font-size:11px;line-height:1.7;color:#a4a9af}
 .goal-form{border-top:1px solid #33363b;padding-top:16px;margin-top:18px}
 .goal-form label,.source-dialog label{display:block;color:#b9bbbf;font-size:10px;letter-spacing:1px;font-weight:850;margin-bottom:8px}
+.goal-status{min-height:17px;padding-top:8px;font-size:11px;line-height:1.5;color:var(--goldPale)}
+#goalInput:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(244,205,55,.14)}
 .inline-form{display:flex;gap:8px}
 .inline-form input{padding:8px 11px;width:100%;min-width:0}
 .inline-form button{white-space:nowrap;background:#292619;color:var(--gold);font-size:10px;font-weight:850;border:1px solid #6a5524;border-radius:8px;padding:0 14px}

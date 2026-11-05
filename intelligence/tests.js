@@ -47,4 +47,35 @@ const rpeMissing=E.recommendation('Bench Press',[
   {max:110,set:{weight:100,reps:3,rpe:null}}
 ]);
 assert.equal(rpeMissing.next,100,'Conservative suggestion when RPE missing');
+// Overview KPIs must reflect the SELECTED lift, including kg volume,
+// and the active date range; global workout totals must not leak into cards.
+const daysAgo=days=>new Date(Date.now()-days*86400000).toISOString();
+const exercise=(name,sets)=>({name,sets:sets.map(set=>({type:'Working Set',done:true,...set}))});
+const overviewSessions=[
+  {id:'b1',date:daysAgo(10),exercises:[
+    exercise('Bench Press',[{weight:100,reps:5,rpe:7},{weight:100,reps:5,rpe:8}]),
+    exercise('Back Squat',[{weight:120,reps:5,rpe:8}])
+  ]},
+  {id:'b2',date:daysAgo(12),exercises:[exercise('Bench Press',[{weight:110,reps:3,rpe:8}])]},
+  {id:'s2',date:daysAgo(15),exercises:[exercise('Back Squat',[{weight:125,reps:5,rpe:8}])]},
+  {id:'bOld',date:daysAgo(55),exercises:[exercise('Bench Press',[{weight:80,reps:5,rpe:8}])]},
+  {id:'oOld',date:daysAgo(60),exercises:[exercise('Overhead Press',[{weight:50,reps:5,rpe:8}])]}
+];
+const overview30=E.analyse(overviewSessions,30);
+const overview90=E.analyse(overviewSessions,90);
+assert.equal(overview30.byLift['Bench Press'].sessions,2,'Bench only counts sessions containing bench');
+assert.equal(overview30.byLift['Bench Press'].activeDays,2,'Bench only counts dates with bench sets');
+assert.equal(overview30.byLift['Bench Press'].workingSets,3,'All completed bench work sets are counted');
+assert.equal(overview30.byLift['Bench Press'].volumeKg,1330,'Volume is in kilograms, not tonnes');
+assert.equal(overview30.byLift['Squat'].sessions,2,'Squat sessions independent from Bench');
+assert.equal(overview30.byLift['Squat'].volumeKg,1225,'Squat volume independent from Bench');
+assert.equal(overview30.byLift['Deadlift'].sessions,0,'No invented deadlift sessions');
+assert.equal(overview30.byLift['Deadlift'].volumeKg,0,'No invented deadlift kg');
+assert.equal(overview30.byLift['Deadlift'].trend,null,'Missing data has no invented trend');
+assert.equal(overview90.byLift['Bench Press'].sessions,3,'Time range changes per-lift sessions');
+assert.equal(overview90.byLift['Bench Press'].volumeKg,1730,'Time range changes per-lift kg');
+assert.equal(overview30.byLift['Bench Press'].trend,overview30.strength['Bench Press'].delta,'KPI trend matches chart');
+assert.equal(overview90.byLift['Bench Press'].trend,overview90.strength['Bench Press'].delta,'Trend matches chart after range change');
+assert.ok(overview90.weeklyByLift['Bench Press'].some(w=>w.count>0),'Bench consistency shows actual Bench sessions');
+assert.ok(overview90.weeklyByLift['Squat'].some(w=>w.count>0),'Squat consistency independent');
 console.log('PASS — SpartanX Intelligence engine regression tests.');

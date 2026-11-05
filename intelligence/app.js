@@ -127,7 +127,7 @@
     return grid;
   }
   function kpi(label,value,sub,icon){
-    return '<article class="kpi"><div class="kpi-top"><span>'+escapeHtml(label)+'</span><span class="kpi-icon" aria-hidden="true">'+icon+'</span></div><div class="kpi-value">'+escapeHtml(value)+'</div><div class="kpi-sub">'+sub+'</div></article>';
+    return '<article class="kpi'+(label==='Training volume'?' kpi-volume':'')+'"><div class="kpi-top"><span>'+escapeHtml(label)+'</span><span class="kpi-icon" aria-hidden="true">'+icon+'</span></div><div class="kpi-value">'+escapeHtml(value)+'</div><div class="kpi-sub">'+sub+'</div></article>';
   }
   function renderKpis(){
     const lift=state.overviewLift;

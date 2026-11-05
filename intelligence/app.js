@@ -3,6 +3,7 @@
 (function () {
   'use strict';
   const E=window.SXEngine;
+  const Bridge=window.SXBridge;
   if(!E){document.body.textContent='Unable to load SpartanX Intelligence analytics engine.';return;}
   const $=id=>document.getElementById(id);
   const escapeHtml=str=>String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -19,6 +20,7 @@
   };
   const defaultGoal={'Squat':200,'Bench Press':160,'Deadlift':230,'Overhead Press':100};
   const savedGoalsKey='sx_intelligence_demo_goals_v1';
+  const linkedGoalsKey='sx_intelligence_linked_goals_v1';
   let toastTimer;
   function toast(msg){
     const node=$('toast');node.textContent=msg;node.classList.add('show');
@@ -28,8 +30,18 @@
     try{const g=JSON.parse(localStorage.getItem(savedGoalsKey)||'{}');return g&&typeof g==='object'?g:{}}catch(_){return{}}
   }
   function saveGoals(){
-    if(state.source!=='demo')return; // Imported workouts remain ephemeral.
-    try{const saved=readSavedGoals();saved[state.athlete]=state.goals;localStorage.setItem(savedGoalsKey,JSON.stringify(saved))}catch(_){}
+    // Never writes to SpartanX's original workout database.
+    try{
+      if(state.source==='demo'){
+        const saved=readSavedGoals();saved[state.athlete]=state.goals;
+        localStorage.setItem(savedGoalsKey,JSON.stringify(saved));
+      }else if(state.source==='spartanx'){
+        localStorage.setItem(linkedGoalsKey,JSON.stringify(state.goals));
+      }
+    }catch(_){}
+  }
+  function readLinkedGoals(){
+    try{const saved=JSON.parse(localStorage.getItem(linkedGoalsKey)||'{}');return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{}}catch(_){return{}}
   }
   function loadDemo(type){
     state.profile=E.makeDemoProfile(type);
@@ -41,6 +53,32 @@
     $('dataBanner').innerHTML='<span class="banner-symbol">ⓘ</span><span><strong>Demonstration mode</strong> — All training data is fictional. Recommendations are previews and must not be treated as individual coaching advice.</span>';
     state.analysis=E.analyse(state.profile.sessions,state.range);
     renderAll();
+  }
+  function loadSpartanX(silent=false){
+    const result=Bridge?.read();
+    const status=result?.status||'unavailable';
+    const connected=status==='connected';
+    // Intentionally show an empty dashboard, never switch silently to fictional data.
+    state.profile={
+      name:connected?(result.profile?.name||'SpartanX Athlete'):'SpartanX Athlete',
+      label:connected?'Your completed workouts':'No saved workouts available',
+      sessions:connected?result.sessions:[],
+      isDemo:false
+    };
+    state.source=connected?'spartanx':'spartanx-'+status;
+    state.goals=Object.assign({},defaultGoal,readLinkedGoals());
+    $('modePill').textContent=connected?'● CONNECTED':'● '+(status==='empty'?'NO WORKOUTS':'NOT CONNECTED');
+    const line=connected
+      ?'<strong>Connected to SpartanX · '+result.sessions.length+' workouts.</strong> Training history is read from this device whenever Intelligence opens or returns to the foreground. Completed workouts only; no changes are made to your records.'
+      :'<strong>SpartanX history not available here.</strong> '+escapeHtml(result?.reason||'Unable to read this device’s workouts.')+' Open Intelligence using the button on SpartanX Home on the same device, or import a backup. iPhone Safari and Home Screen apps can use separate storage.';
+    $('dataBanner').innerHTML='<span class="banner-symbol">ⓘ</span><span>'+line+' <a class="sx-back-link" href="../">Back to SpartanX</a></span>';
+    const detail=$('connectionDetails');
+    if(detail)detail.textContent=connected
+      ?'Connected to '+result.sessions.length+' valid completed workouts on this device (read-only).'
+      :result?.reason||'Unable to find SpartanX workout history in this browser.';
+    renderAll();
+    if(!silent)toast(connected?'SpartanX workouts loaded: '+result.sessions.length:'No local workout history found.');
+    return connected;
   }
   function loadImported(raw){
     const src=Array.isArray(raw)?raw:raw?.sessions||raw?.db?.sessions||raw?.data?.sessions;
@@ -173,10 +211,12 @@
     e.preventDefault();const n=Number($('goalInput').value);
     if(!Number.isFinite(n)||n<1||n>1500){toast('Enter a target from 1 to 1,500 kg.');return}
     state.goals[state.selectedLift]=n;saveGoals();renderPerformance();
-    toast(state.source==='demo'?'Goal saved for this demo athlete.':'Goal updated for this preview only.');
+    toast(state.source==='demo'?'Goal saved for this demo athlete.':state.source==='spartanx'?'Goal saved in Intelligence only.':'Goal updated for this preview only.');
   });
   const dialog=$('sourceDialog');
   $('openSource').addEventListener('click',()=>dialog.showModal());
+  $('connectSpartanX').addEventListener('click',()=>{const ok=loadSpartanX();if(ok)dialog.close()});
+  $('refreshSpartanX').addEventListener('click',()=>{const ok=loadSpartanX();if(ok)dialog.close()});
   $('applyDemo').addEventListener('click',()=>{loadDemo($('athleteSelect').value);dialog.close();toast('Demo athlete loaded.')});
   $('resetDemo').addEventListener('click',()=>{loadDemo('strength');dialog.close();toast('Demo data restored.')});
   $('importInput').addEventListener('change',async e=>{
@@ -191,8 +231,20 @@
     }catch(err){status.classList.add('error');status.textContent=err?.message||'Unable to read JSON file.'}
     finally{e.target.value=''}
   });
-  loadDemo('strength');
-  // Future integration point: E.normalizeSessions(db.sessions) can read the
-  // current SpartX local storage format, ONLY after explicit user opt-in.
-  // No automatic localStorage access to SpartX DB and no write-back.
+  loadSpartanX(true);
+  // Same-origin local storage is shared only within the same browser/app context.
+  // No timer polling: re-read after another tab edits the DB or when app regains focus.
+  window.addEventListener('storage',event=>{
+    if(event.key===Bridge?.storageKey && state.source.startsWith('spartanx'))loadSpartanX(true);
+  });
+  window.addEventListener('pageshow',()=>{
+    if(state.source.startsWith('spartanx'))loadSpartanX(true);
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden && state.source.startsWith('spartanx'))loadSpartanX(true);
+  });
+  window.addEventListener('focus',()=>{
+    if(state.source.startsWith('spartanx'))loadSpartanX(true);
+  });
+  // All workouts are read-only. Only goals are saved under this module's own key.
 })();

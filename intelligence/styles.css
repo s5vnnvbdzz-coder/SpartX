@@ -211,6 +211,10 @@ tr:last-child td{border:0}
 .connection-panel{border:1px solid #4d4123;border-radius:12px;padding:15px;background:linear-gradient(130deg,#211d13,#141517);margin:15px 0 8px}
 .connection-panel p{margin:8px 0 14px}
 .sx-back-link{color:var(--goldPale);font-weight:800;white-space:nowrap;text-underline-offset:2px}
+.sx-return-app{display:inline-flex;align-items:center;gap:7px;margin:-8px 0 18px;text-decoration:none;color:var(--goldPale);font-weight:850;font-size:10px;letter-spacing:1.1px;padding:7px 2px}
+.sx-return-app:hover{text-decoration:underline}
+.sx-return-app:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
 .sx-back-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 #connectionDetails{min-height:28px}
 

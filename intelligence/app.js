@@ -30,15 +30,20 @@
     try{const g=JSON.parse(localStorage.getItem(savedGoalsKey)||'{}');return g&&typeof g==='object'?g:{}}catch(_){return{}}
   }
   function saveGoals(){
-    // Never writes to SpartanX's original workout database.
+    // Only Intelligence-owned keys are writable; SpartanX workouts stay untouched.
     try{
       if(state.source==='demo'){
         const saved=readSavedGoals();saved[state.athlete]=state.goals;
         localStorage.setItem(savedGoalsKey,JSON.stringify(saved));
-      }else if(state.source==='spartanx'){
-        localStorage.setItem(linkedGoalsKey,JSON.stringify(state.goals));
+        return true;
       }
-    }catch(_){}
+      if(state.source.startsWith('spartanx')){
+        localStorage.setItem(linkedGoalsKey,JSON.stringify(state.goals));
+        return true;
+      }
+      // Manually imported workout previews are held in memory, by design.
+      return null;
+    }catch(_){return false}
   }
   function readLinkedGoals(){
     try{const saved=JSON.parse(localStorage.getItem(linkedGoalsKey)||'{}');return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{}}catch(_){return{}}
@@ -163,6 +168,7 @@
   function selectLift(name){
     if(!core.includes(name))return;
     state.selectedLift=name;
+    $('goalStatus').textContent='';
     renderPerformance();
   }
   function renderPerformance(){
@@ -175,7 +181,8 @@
     $('currentMax').textContent=s.latest?fmtKg(s.latest.max):'—';
     const goal=state.goals[state.selectedLift]||defaultGoal[state.selectedLift];
     $('goalValue').textContent=fmtKg(goal);
-    $('goalInput').value=goal;
+    // Do not overwrite an in-progress edit when analysis is refreshed.
+    if(document.activeElement!==$('goalInput'))$('goalInput').value=String(goal);
     const pct=s.latest?Math.round(100*s.latest.max/goal):0;
     $('goalBar').style.width=Math.min(100,pct)+'%';
     $('goalExplanation').textContent=s.latest?format(pct)+'% of the selected target based on your latest estimated top-set strength.':'No recent comparable work sets for this exercise.';
@@ -214,11 +221,34 @@
   $('rangeSelect').addEventListener('change',e=>{state.range=Number(e.target.value);renderAll()});
   $('overviewLift').addEventListener('change',e=>{state.overviewLift=e.target.value;renderOverview()});
   $('liftTabs').addEventListener('click',e=>{const target=e.target.closest('[data-lift]');if(target)selectLift(target.dataset.lift)});
+  const goalField=$('goalInput');
+  // Text input + numeric keyboard allows full text selection on mobile Safari.
+  // Native <input type=number min=1 step=2.5> rejected valid goals such as
+  // 160 kg without firing submit; validate the decimal ourselves instead.
+  function selectGoalText(){
+    try{goalField.select()}catch(_){}
+  }
+  goalField.addEventListener('focus',selectGoalText);
+  goalField.addEventListener('click',selectGoalText);
   $('goalForm').addEventListener('submit',e=>{
-    e.preventDefault();const n=Number($('goalInput').value);
-    if(!Number.isFinite(n)||n<1||n>1500){toast('Enter a target from 1 to 1,500 kg.');return}
-    state.goals[state.selectedLift]=n;saveGoals();renderPerformance();
-    toast(state.source==='demo'?'Goal saved for this demo athlete.':state.source==='spartanx'?'Goal saved in Intelligence only.':'Goal updated for this preview only.');
+    e.preventDefault();
+    const typed=goalField.value.trim().replace(',', '.');
+    const valid=/^(?:\\d+(?:\\.\\d+)?|\\.\\d+)$/.test(typed);
+    const n=valid?Number(typed):NaN;
+    if(!Number.isFinite(n)||n<1||n>1500){
+      $('goalStatus').textContent='Enter a target between 1 and 1,500 kg.';
+      toast('Enter a valid target from 1 to 1,500 kg.');
+      return;
+    }
+    state.goals[state.selectedLift]=n;
+    const saved=saveGoals();
+    goalField.blur();
+    renderPerformance();
+    $('goalStatus').textContent=saved===false
+      ?'Target updated, but this browser could not save it for next time.'
+      :saved===null?'Target updated for this preview.'
+      :'Saved '+state.selectedLift+' target: '+fmtKg(n)+'.';
+    toast(saved===false?'Goal updated for now; local storage is unavailable.':'Saved '+state.selectedLift+' goal: '+fmtKg(n));
   });
   const dialog=$('sourceDialog');
   $('openSource').addEventListener('click',()=>dialog.showModal());

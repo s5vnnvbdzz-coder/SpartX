@@ -2,6 +2,8 @@
    Scoped to data-spartx-parent-theme: standalone AscensionX is untouched.
    Original AscensionX account/theme selection remains persisted separately. */
 body[data-spartx-parent-theme="dark"]{--sx-parent-bg:#0b0d0f;--sx-parent-panel:#171a1e;--sx-parent-panel2:#22272d;--sx-parent-line:#30363e;--sx-parent-text:#f3f4f6;--sx-parent-muted:#9ba3ad;--sx-parent-accent:#c8f169}
+
+body[data-spartx-parent-theme="sx-black-yellow"]{--sx-parent-bg:#050505;--sx-parent-panel:#101010;--sx-parent-panel2:#191919;--sx-parent-line:#40371e;--sx-parent-text:#f3f3ed;--sx-parent-muted:#a5a39a;--sx-parent-accent:#f4cd37}
 body[data-spartx-parent-theme="light"]{--sx-parent-bg:#f3f5f7;--sx-parent-panel:#ffffff;--sx-parent-panel2:#e9edf0;--sx-parent-line:#d4dbe1;--sx-parent-text:#18212a;--sx-parent-muted:#66727d;--sx-parent-accent:#718f27}
 body[data-spartx-parent-theme="spartan-red"]{--sx-parent-bg:#09090b;--sx-parent-panel:#151518;--sx-parent-panel2:#242428;--sx-parent-line:#514044;--sx-parent-text:#f3f4f6;--sx-parent-muted:#ada6a9;--sx-parent-accent:#ef2029}
 body[data-spartx-parent-theme="spartan-gold"]{--sx-parent-bg:#15130f;--sx-parent-panel:#171613;--sx-parent-panel2:#25231e;--sx-parent-line:#494232;--sx-parent-text:#f5f1e9;--sx-parent-muted:#b8b09e;--sx-parent-accent:#b89b5e}

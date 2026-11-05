@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d0f">
+<title>SpartanX • Safe App Refresh</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Arial,sans-serif;background:#0b0d0f;color:#f3f3ed}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at top right,#2e2711 0%,#0b0d0f 56%)}
+main{width:min(100%,500px);background:#141516;border:1px solid #373120;border-radius:20px;padding:24px;box-shadow:0 20px 80px #0009}
+.brand{color:#f4cd37;font-size:12px;font-weight:900;letter-spacing:2px}
+h1{font-size:26px;margin:15px 0 8px}p{line-height:1.55;color:#c8c7c3;font-size:14px}.note{border-left:3px solid #f4cd37;padding-left:12px;font-size:13px;margin:20px 0}
+button,.link{font:inherit;font-weight:800;display:flex;width:100%;justify-content:center;align-items:center;text-align:center;border-radius:12px;min-height:48px;padding:12px;margin:12px 0;text-decoration:none;cursor:pointer}
+button{background:#f4cd37;color:#111;border:1px solid #f4cd37}button:disabled{opacity:.55;cursor:wait}.link{color:#f4cd37;background:#191919;border:1px solid #564724}
+.status{color:#d6d2c4;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;background:#0d0e0f;border:1px solid #373737;border-radius:11px;padding:15px;line-height:1.75;min-height:120px}
+.good{color:#9edc79}.error{color:#f3ad92}small{color:#8f908b;font-size:11px}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">SPARTANX · UPDATE CHECK</div>
+<h1>Refresh SpartanX safely</h1>
+<p>This page checks the version your iPhone can access. The refresh button resets <strong>only the SpartanX offline file cache and service-worker registration</strong>, then opens the newest app.</p>
+<p class="note"><strong>Your workouts, routines, profile and preferences stay in local storage.</strong> This does not clear website data, reset your account, or delete your installed Home Screen app. If a workout is currently open, finish or save the draft before refreshing that app window.</p>
+<div id="status" class="status" role="status" aria-live="polite">Checking the published website…</div>
+<button type="button" id="refresh">Refresh app files safely</button>
+<a class="link" href="./?version=219">Open SpartanX without refreshing</a>
+<small>Recovery page · 5 November 2026 · Build 219</small>
+</main>
+<script>
+(()=>{
+'use strict';
+const status=document.getElementById('status');
+const button=document.getElementById('refresh');
+let lines=[];
+function line(message,good=false,error=false){
+ lines.push((good?'✓ ':error?'! ':'• ')+message);
+ status.textContent=lines.join('\n');
+}
+async function check(){
+ lines=[];
+ line('Page origin: '+location.origin);
+ line('Path: '+location.pathname);
+ try{
+  const url=new URL('./index.html?check='+Date.now(),location.href);
+  const res=await fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+  if(!res.ok)throw Error('Website response '+res.status);
+  const html=await res.text();
+  const current=html.includes('id="openCustomExercise"')&&html.includes('type="hidden" id="workoutName"');
+  line('Live server: '+(current?'new Workout Logger and Custom + header':'older or unexpected app'),current,!current);
+  line('Latest build marker: '+(html.includes('Build 219')?'219':'not found'),html.includes('Build 219'));
+ }catch(e){line('Unable to read live app: '+e.message,false,true)}
+ try{
+  const reg=await navigator.serviceWorker?.getRegistration('./');
+  line('Offline worker: '+(reg?'installed':'not registered'));
+  if(reg?.active)line('Worker script: '+new URL(reg.active.scriptURL).pathname);
+ }catch(e){line('Offline worker information unavailable')}
+}
+button.addEventListener('click',async()=>{
+ button.disabled=true;
+ lines=[];
+ line('Refreshing only SpartanX app files…');
+ try{
+  const reg=await navigator.serviceWorker?.getRegistration('./');
+  if(reg){
+   await reg.unregister();
+   line('Old offline worker unregistered.',true);
+  }
+  if('caches' in window){
+   const keys=await caches.keys();
+   const own=keys.filter(k=>k.startsWith('spartanx-v'));
+   await Promise.all(own.map(k=>caches.delete(k)));
+   line('Removed '+own.length+' outdated app file cache(s).',true);
+  }
+  line('Local workout storage left untouched.',true);
+  line('Opening the latest app…',true);
+  const target=new URL('./index.html',location.href);
+  target.searchParams.set('sx_fresh',String(Date.now()));
+  location.replace(target.toString());
+ }catch(e){
+  line('Refresh failed: '+(e?.message||String(e)),false,true);
+  button.disabled=false;
+ }
+});
+check();
+})();
+</script>
+</body>
+</html>

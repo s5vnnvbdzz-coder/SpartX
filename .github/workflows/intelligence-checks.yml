@@ -31,3 +31,4 @@ jobs:
         run: |
           node intelligence/tests.js
           node intelligence/bridge.test.js
+          node intelligence/goal.test.js

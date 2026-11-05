@@ -130,14 +130,19 @@
     return '<article class="kpi"><div class="kpi-top"><span>'+escapeHtml(label)+'</span><span class="kpi-icon" aria-hidden="true">'+icon+'</span></div><div class="kpi-value">'+escapeHtml(value)+'</div><div class="kpi-sub">'+sub+'</div></article>';
   }
   function renderKpis(){
-    const a=state.analysis;
-    const delta=a.strength['Bench Press'].delta;
-    const deltaSub=delta!=null?'<span class="'+(delta>=0?'positive':'negative')+'">'+formatPct(delta)+'</span> bench estimate in range':'No comparable trend yet';
+    const lift=state.overviewLift;
+    const metrics=state.analysis.byLift[lift];
+    const period=state.range===0?'All time':'Last '+state.range+' days';
+    const delta=metrics.trend;
+    const deltaSub=delta==null?'At least two comparable sessions needed':
+      '<span class="'+(delta>=0?'positive':'negative')+'">'+formatPct(delta)+'</span> estimated 1RM change';
+    $('snapshotTitle').textContent=lift+' performance snapshot';
+    $('snapshotSubtitle').textContent='All four metrics reflect '+lift+' · '+period.toLowerCase();
     $('kpiGrid').innerHTML=
-      kpi('Completed sessions',format(a.sessions30),'In the last 30 days','▣')+
-      kpi('Training volume',format(a.volume30/1000,1)+'t','Working-set tonnage, 30 days','▤')+
-      kpi('Bench trend',formatPct(delta),deltaSub,'↗')+
-      kpi('Active training days',format(a.activeDays30),'Unique workout days, 30 days','◷');
+      kpi('Lift sessions',format(metrics.sessions),period+' · '+escapeHtml(lift),'▣')+
+      kpi('Training volume',format(metrics.volumeKg)+' kg','Working sets × reps × kg · '+period,'▤')+
+      kpi('Strength trend',formatPct(delta),deltaSub,'↗')+
+      kpi('Training days',format(metrics.activeDays),'Unique '+escapeHtml(lift)+' training days','◷');
   }
   function renderOverview(){
     renderKpis();
@@ -146,7 +151,9 @@
     $('overviewStrengthChart').innerHTML=pathChart(records,false);
     const items=E.insights(state.analysis);
     $('overviewInsights').innerHTML=items.slice(0,3).map(x=>'<article class="insight-mini"><div class="insight-head '+x.kind+'">'+escapeHtml(x.title)+'</div><p>'+escapeHtml(x.text)+'</p></article>').join('');
-    const weeks=state.analysis.weekly;
+    $('consistencyTitle').textContent=state.overviewLift+' training consistency';
+    $('consistencySubtitle').textContent='Sessions containing '+state.overviewLift+' over the last eight weeks';
+    const weeks=state.analysis.weeklyByLift[state.overviewLift];
     const max=Math.max(4,...weeks.map(x=>x.count));
     $('consistencyChart').innerHTML='<div class="week-bars">'+weeks.map(x=>{
       const size=Math.max(4,Math.round(x.count/max*82));

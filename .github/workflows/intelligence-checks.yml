@@ -26,5 +26,8 @@ jobs:
         run: |
           node --check intelligence/engine.js
           node --check intelligence/app.js
+          node --check intelligence/bridge.js
       - name: Engine regression tests
-        run: node intelligence/tests.js
+        run: |
+          node intelligence/tests.js
+          node intelligence/bridge.test.js

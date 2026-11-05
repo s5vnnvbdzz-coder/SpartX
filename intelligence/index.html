@@ -6,9 +6,10 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
-  <link rel="stylesheet" href="./styles.css?v=1">
-  <script src="./engine.js?v=1" defer></script>
-  <script src="./app.js?v=1" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=2">
+  <script src="./engine.js?v=2" defer></script>
+  <script src="./bridge.js?v=2" defer></script>
+  <script src="./app.js?v=2" defer></script>
 </head>
 <body data-theme="black-yellow">
 <div class="app-shell">
@@ -32,7 +33,7 @@
       <div class="mobile-brand"><span class="brand-symbol">X</span><span>SPARTAN<span class="accent">X</span> <small>INTELLIGENCE</small></span></div>
       <div class="topbar-title"><span class="eyebrow">TRAIN SMARTER · PROGRESS FURTHER</span><strong>ATHLETE PERFORMANCE CENTER</strong></div>
       <div class="topbar-actions">
-        <span class="mode-pill" id="modePill">● DEMO DATA</span>
+        <span class="mode-pill" id="modePill">● CHECKING CONNECTION</span>
         <button class="icon-button" id="openSource" type="button" title="Select training data" aria-label="Select training data">⚙</button>
       </div>
     </header>
@@ -45,12 +46,12 @@
           <select id="rangeSelect" aria-label="Analysis time range"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="0">All time</option></select>
         </div>
       </div>
-      <div class="demo-banner" id="dataBanner"><span class="banner-symbol">ⓘ</span><span><strong>Demonstration mode</strong> — All training data is fictional. Recommendations are previews and must not be treated as individual coaching advice.</span></div>
+      <div class="demo-banner" id="dataBanner"><span class="banner-symbol">ⓘ</span><span>Checking saved workouts on this device. SpartanX's original records will not be modified.</span></div>
 
       <section class="page active" id="overviewPage" data-page="overview" aria-labelledby="pageTitle">
         <div class="hero-card">
           <div class="hero-text">
-            <div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">V0.1</span></div>
+            <div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">V0.2 · LINKED</span></div>
             <h2>TRAIN WITH <em>PURPOSE.</em><br>PROGRESS WITH PROOF.</h2>
             <p>Turn your logged workouts into clear strength trends, workload patterns and recommendations you can understand.</p>
             <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
@@ -114,7 +115,7 @@
         <div class="insight-grid" id="allInsights"></div>
         <article class="panel disclaimer"><div class="eyebrow">IMPORTANT LIMITATIONS</div><h3>Intelligence is a decision aid, not a coach or clinician.</h3><p>Recommendations currently use recent top sets, repetitions, estimated strength trends and logged RPE. They cannot assess bar speed, technique, sleep quality, pain, injury risk or actual muscle recovery. Use judgement and adapt training to how you feel. This module does not write to SpartanX or change any workout.</p></article>
       </section>
-      <footer class="app-footer">SPARTANX INTELLIGENCE <span>·</span> TRAIN SMARTER <span>·</span> V0.1 INDEPENDENT PREVIEW</footer>
+      <footer class="app-footer">SPARTANX INTELLIGENCE <span>·</span> TRAIN SMARTER <span>·</span> V0.2 · READ-ONLY INTEGRATION</footer>
     </main>
   </div>
 </div>
@@ -129,14 +130,22 @@
 <dialog id="sourceDialog" class="source-dialog" aria-labelledby="sourceTitle">
   <form method="dialog"><button class="close-dialog" aria-label="Close dialog">×</button></form>
   <div class="eyebrow">DATA SOURCE</div><h2 id="sourceTitle">Choose your athlete data</h2>
-  <p class="small-copy">Test everything safely with sample training history. Nothing here writes to your SpartanX workouts.</p>
+  <p class="small-copy">Connect to workouts already logged in SpartanX on this device. Intelligence analyses completed sessions without changing any saved training data.</p>
+  <div class="connection-panel">
+    <div class="eyebrow">SPARTANX WORKOUT HISTORY</div>
+    <p id="connectionDetails" class="small-copy" role="status">Checking same-device workout history…</p>
+    <button class="primary-button full" id="connectSpartanX" type="button">USE MY SPARTANX WORKOUTS</button>
+    <button class="secondary-button full" id="refreshSpartanX" type="button">REFRESH TRAINING DATA</button>
+    <p class="small-copy">Open this dashboard using the new button inside SpartanX Home to use the same browser storage. Safari and an iPhone Home Screen app may not share website data.</p>
+  </div>
+  <div class="modal-separator"><span>OPTIONAL DEMO MODE</span></div>
   <label for="athleteSelect">DEMO ATHLETE</label>
   <select id="athleteSelect"><option value="strength">Alex Morgan · Strength</option><option value="hypertrophy">Taylor Brooks · Hypertrophy</option><option value="beginner">Sam Ellis · Foundation</option></select>
   <button class="primary-button full" id="applyDemo" type="button">LOAD DEMO ATHLETE</button>
   <div class="modal-separator"><span>OPTIONAL LOCAL TEST</span></div>
   <label for="importInput">READ-ONLY SPARTANX JSON PREVIEW</label>
   <input id="importInput" type="file" accept=".json,application/json">
-  <p class="small-copy">Import a JSON workout export containing a <code>sessions</code> array. This processes your file on-device; no upload or automatic live connection. Imported data is held only until this tab reloads.</p>
+  <p class="small-copy">If your saved workouts are not visible here, import a SpartanX backup JSON. The file stays on your device and is held only until this page reloads; no cloud upload.</p>
   <div id="importStatus" class="import-status" role="status"></div>
   <button type="button" id="resetDemo" class="secondary-button full">RESET TO SAMPLE DATA</button>
 </dialog>

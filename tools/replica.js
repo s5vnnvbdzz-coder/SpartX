@@ -123,6 +123,7 @@ function syncEmbeddedAscensionTheme(){
    {type:'spartx:applyParentTheme',theme},location.origin);}catch(e){}
  }
 }
+new MutationObserver(syncEmbeddedAscensionTheme).observe(document.body,{attributes:true,attributeFilter:['data-active-theme']});
 window.addEventListener('pageshow',syncEmbeddedAscensionTheme);
 window.addEventListener('spartx:preferencesChanged',syncEmbeddedAscensionTheme);
 window.addEventListener('storage',e=>{
@@ -162,7 +163,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx';
  }
  ascensionCloseButton.focus({preventScroll:true});
 }

@@ -233,7 +233,7 @@
   $('goalForm').addEventListener('submit',e=>{
     e.preventDefault();
     const typed=goalField.value.trim().replace(',', '.');
-    const valid=/^(?:\\d+(?:\\.\\d+)?|\\.\\d+)$/.test(typed);
+    const valid=/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(typed);
     const n=valid?Number(typed):NaN;
     if(!Number.isFinite(n)||n<1||n>1500){
       $('goalStatus').textContent='Enter a target between 1 and 1,500 kg.';

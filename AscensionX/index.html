@@ -200,7 +200,7 @@ body[data-theme="christmas"]{--bg:#080e0c;--panel:#12201b;--panel2:#1b3026;--red
 body[data-theme="monster"]{--bg:#070a07;--panel:#101710;--panel2:#1b261a;--red:#67b52a;--red2:#a0e64b;--redDeep:#335c16}
 body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0b0b0;--red2:#f4f4f4;--redDeep:#555}
 </style>
-<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=210">
+<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=211">
 </head>
 <body>
 <header>
@@ -560,9 +560,10 @@ window.addEventListener('message',e=>{
   // Only the verified SpartanX parent can style an embedded AscensionX.
   // Never overwrite state.theme; standalone sessions retain their own choice.
   if(!ascensionEmbeddedBySpartanX)return;
-  const allowed=new Set(["dark","light","spartan-red","spartan-gold","spartan-bronze","spartan-blue","spartan-amethyst","spartan-olympian","olympian-athena","sx-halloween","sx-christmas","sx-monster","premium-monster","sx-obsidian-white","premium-olympus","amazonian-crimson","athenas-aegis"]);
+  const allowed=new Set(["dark","light","spartan-red","spartan-gold","spartan-bronze","spartan-blue","spartan-amethyst","spartan-olympian","olympian-athena","sx-black-yellow","sx-halloween","sx-christmas","sx-monster","premium-monster","sx-obsidian-white","premium-olympus","amazonian-crimson","athenas-aegis"]);
   const theme=allowed.has(e.data.theme)?e.data.theme:'dark';
   document.body.dataset.spartxParentTheme=theme;
+  document.body.dataset.theme=SX_THEME_MAP[theme]||'dark';
   const note=document.getElementById('sxLinkedThemeNote');
   if(note)note.hidden=false;
   return;

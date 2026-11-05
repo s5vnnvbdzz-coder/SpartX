@@ -1114,6 +1114,127 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
   #activeWorkout .set-table .set-row input.done{width:19px;height:19px}
 }
 </style>
+<style id="sx-add-exercise-header-dialog-styles">
+/* Header is a three-column row: both actions vertically centred, title truly centred. */
+#exerciseLibraryScreen .sx-add-exercise-header{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+ align-items:center;
+ gap:6px;
+ min-height:48px;
+ margin:2px 0 12px;
+}
+#exerciseLibraryScreen .sx-add-exercise-header h1{
+ margin:0;
+ padding:0;
+ font-size:clamp(17px,4.5vw,24px);
+ font-weight:850;
+ text-align:center;
+ line-height:1.15;
+ white-space:nowrap;
+ letter-spacing:-.025em;
+}
+#exerciseLibraryScreen .sx-add-exercise-header #closeExerciseLibrary{
+ justify-self:start;
+ min-width:0!important;
+ min-height:42px;
+ padding:8px 10px!important;
+}
+#exerciseLibraryScreen .sx-add-exercise-header .sx-custom-open{
+ justify-self:end;
+ width:auto!important;
+ min-width:0;
+ min-height:42px;
+ padding:8px 11px;
+ border:1px solid var(--lime)!important;
+ border-radius:11px;
+ background:color-mix(in srgb,var(--lime) 9%,var(--panel2))!important;
+ color:var(--lime)!important;
+ font-size:12px;
+ font-weight:850;
+ white-space:nowrap;
+ line-height:1.2;
+}
+#exerciseLibraryScreen .sx-add-exercise-header button{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ align-self:center;
+}
+#exerciseLibraryScreen .sx-custom-exercise-dialog{
+ box-sizing:border-box;
+ width:min(460px,calc(100% - 28px));
+ max-width:460px;
+ max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px));
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ margin:auto;
+ padding:18px;
+ color:var(--txt);
+ background:var(--panel);
+ border:1px solid var(--line);
+ border-radius:18px;
+ box-shadow:0 20px 75px #000a;
+}
+#exerciseLibraryScreen .sx-custom-exercise-dialog::backdrop{
+ background:rgba(0,0,0,.76);
+ -webkit-backdrop-filter:blur(4px);
+ backdrop-filter:blur(4px);
+}
+#exerciseLibraryScreen .sx-custom-dialog-top{align-items:center;gap:12px}
+#exerciseLibraryScreen .sx-custom-dialog-top h2{
+ font-size:18px;
+ line-height:1.3;
+ margin:0;
+}
+#exerciseLibraryScreen .sx-custom-close{
+ width:40px!important;
+ min-width:40px!important;
+ height:40px;
+ padding:0!important;
+ font-size:25px;
+ line-height:1;
+ border-radius:10px;
+}
+#exerciseLibraryScreen .sx-custom-exercise-dialog .custom-exercise-box{
+ margin:14px 0 0;
+ padding:14px;
+}
+#exerciseLibraryScreen .sx-custom-exercise-dialog form label{
+ display:block;
+ margin:14px 0 7px;
+ color:var(--muted);
+ font-size:12px;
+ font-weight:800;
+}
+#exerciseLibraryScreen .sx-custom-exercise-dialog input{
+ width:100%;
+ min-height:44px;
+ font-size:16px;
+}
+#exerciseLibraryScreen .sx-custom-dialog-actions{
+ display:flex;
+ justify-content:flex-end;
+ gap:9px;
+ margin-top:16px;
+}
+#exerciseLibraryScreen .sx-custom-dialog-actions button{
+ flex:1;
+ min-height:44px;
+ font-weight:800;
+}
+#exerciseLibraryScreen .sx-custom-dialog-actions #addCustomExercise{
+ background:var(--lime)!important;
+ color:var(--bg)!important;
+ border-color:var(--lime)!important;
+}
+@media(max-width:370px){
+ #exerciseLibraryScreen .sx-add-exercise-header{gap:4px}
+ #exerciseLibraryScreen .sx-add-exercise-header h1{font-size:16px}
+ #exerciseLibraryScreen .sx-add-exercise-header #closeExerciseLibrary{padding:7px 7px!important;font-size:11px!important}
+ #exerciseLibraryScreen .sx-add-exercise-header .sx-custom-open{padding:7px 8px;font-size:11px}
+}
+</style>
 </head>
 <body class="sx-main-header-layout">
 <header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
@@ -1206,10 +1327,31 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 <div id="exerciseMetricTabs" class="history-metric-tabs" role="tablist" aria-label="Exercise metrics"></div>
 </section>
 <section id="exerciseLibraryScreen" class="screen">
-<div class="row between"><div><div class="eyebrow">BUILD YOUR SESSION</div><h1>Add exercise</h1></div><button class="back-button spartan-back-button" id="closeExerciseLibrary">← Back</button></div>
-<input id="librarySearch" class="library-search" placeholder="Search exercises or muscles (e.g. hamstrings)..." autocomplete="off"><div class="custom-exercise-box"><strong>Custom exercise</strong><div class="tiny">Add a movement or variation that is not listed.</div><div class="row" style="margin-top:9px"><input id="customExerciseName" placeholder="Enter exercise name"><button id="addCustomExercise" class="secondary">Add</button></div></div>
+<div class="sx-add-exercise-header" role="group" aria-label="Add Exercise header">
+  <button type="button" class="back-button spartan-back-button" id="closeExerciseLibrary">← Back</button>
+  <h1>Add Exercise</h1>
+  <button type="button" class="secondary sx-custom-open" id="openCustomExercise">Custom +</button>
+</div>
+<input id="librarySearch" class="library-search" placeholder="Search exercises or muscles (e.g. hamstrings)..." autocomplete="off">
 <div id="libraryCategories" class="library-categories"></div>
 <div id="libraryList" class="library-list"></div>
+<dialog id="customExerciseDialog" class="sx-custom-exercise-dialog" aria-labelledby="customExerciseTitle">
+  <div class="row between sx-custom-dialog-top">
+    <h2 id="customExerciseTitle">Custom exercise</h2>
+    <button type="button" class="secondary sx-custom-close" id="closeCustomExercise" aria-label="Close custom exercise window">×</button>
+  </div>
+  <div class="custom-exercise-box">
+    <div class="tiny">Add a movement or variation that is not listed.</div>
+    <form id="customExerciseForm">
+      <label for="customExerciseName">Name</label>
+      <input id="customExerciseName" name="customExerciseName" placeholder="Enter exercise name" maxlength="90" autocomplete="off" required>
+      <div class="sx-custom-dialog-actions">
+        <button type="button" class="secondary" id="cancelCustomExercise">Cancel</button>
+        <button type="submit" class="secondary" id="addCustomExercise">Add</button>
+      </div>
+    </form>
+  </div>
+</dialog>
 </section>
 <style>.spartanx-page-footer{text-align:center;color:#68717a;font-size:10px;letter-spacing:1.4px;padding:10px;margin-top:16px;margin-bottom:18px;font-weight:400}</style>
 <section id="native531" class="screen"><div id="native531Host"></div></section><section id="tools" class="screen"><div id="toolsReplica"></div></section>
@@ -2290,7 +2432,19 @@ function renderExerciseStats(){
  }).join('')||'<p class="muted tiny">No matching exercises found.</p>';
 }
 $('openExerciseStats').onclick=()=>{statsCategory='All';$('exerciseStatsSearch').value='';renderExerciseStats();switchScreen('exerciseStatsScreen');};$('closeExerciseStats').onclick=()=>switchScreen('profile');$('exerciseStatsSearch').addEventListener('input',renderExerciseStats);$('exerciseStatsCategories').addEventListener('click',e=>{const b=e.target.closest('[data-stats-category]');if(b){statsCategory=b.dataset.statsCategory;renderExerciseStats();}});$('exerciseStatsList').addEventListener('click',e=>{const b=e.target.closest('[data-open-exercise-stats]');if(b){exerciseHistoryReturn='exerciseStatsScreen';renderExerciseHistory(b.dataset.openExerciseStats);switchScreen('exerciseHistoryScreen');}});
-$('openMuscleDiagram').onclick=()=>$('muscleOverlay').classList.remove('hidden');$('closeMuscleDiagram').onclick=()=>$('muscleOverlay').classList.add('hidden');$('closePr').onclick=()=>$('prOverlay').classList.add('hidden');$('addCustomExercise').onclick=()=>{let n=$('customExerciseName').value.trim();if(n){window.pickExercise(n);$('customExerciseName').value='';}};$('customExerciseName').addEventListener('keydown',e=>{if(e.key==='Enter')$('addCustomExercise').click()});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});$('startWorkout').onclick=()=>{libraryMode='workout';startSession();};$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>switchScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';switchScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();switchScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
+$('openMuscleDiagram').onclick=()=>$('muscleOverlay').classList.remove('hidden');$('closeMuscleDiagram').onclick=()=>$('muscleOverlay').classList.add('hidden');$('closePr').onclick=()=>$('prOverlay').classList.add('hidden');const customExerciseDialog=$('customExerciseDialog');
+function closeCustomExerciseDialog(){if(customExerciseDialog.open)customExerciseDialog.close();$('customExerciseName').value='';}
+$('openCustomExercise').addEventListener('click',()=>{$('customExerciseName').value='';customExerciseDialog.showModal();$('customExerciseName').focus();});
+$('closeCustomExercise').addEventListener('click',closeCustomExerciseDialog);
+$('cancelCustomExercise').addEventListener('click',closeCustomExerciseDialog);
+customExerciseDialog.addEventListener('close',()=>{$('customExerciseName').value='';});
+$('customExerciseForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const name=$('customExerciseName').value.trim();
+ if(!name){$('customExerciseName').focus();return;}
+ closeCustomExerciseDialog();
+ window.pickExercise(name);
+});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});$('startWorkout').onclick=()=>{libraryMode='workout';startSession();};$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>switchScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';switchScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();switchScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
 $('homeRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});$('openExerciseLibrary').onclick=openLibrary;$('closeExerciseLibrary').onclick=returnFromExerciseLibrary;if($('endWorkout'))$('endWorkout').onclick=()=>finishSession();
 // Durable completion queue. A successful SpartanX save creates at most one
 // AscensionX sync record per imported exercise; reopening either app can retry it.

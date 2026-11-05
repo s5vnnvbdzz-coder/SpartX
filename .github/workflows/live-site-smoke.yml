@@ -1,9 +1,8 @@
 name: Verify published SpartanX iPhone version
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/live-site-smoke.yml'
+  workflow_run:
+    workflows: ["Deploy SPARTANX to GitHub Pages"]
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,13 +15,16 @@ jobs:
           set -euo pipefail
           base='https://s5vnnvbdzz-coder.github.io/SpartX'
           echo '=== Live root response headers ==='
-          curl -fLsSI --max-time 20 "${base}/?iphone-check=220" | head -35
+          curl -fLsSI --max-time 20 "${base}/?iphone-check=219" | head -35
           echo '=== Live site HTML markers ==='
-          curl -fLsS --max-time 25 -H 'Cache-Control: no-cache' "${base}/?iphone-check=220" -o /tmp/site.html
+          curl -fLsS --max-time 25 -H 'Cache-Control: no-cache' "${base}/?iphone-check=219" -o /tmp/site.html
           echo "Live HTML bytes: $(wc -c </tmp/site.html)"
           if grep -Fq 'id="openCustomExercise"' /tmp/site.html; then echo 'PASS: Custom + on live Add Exercise page'; else echo 'FAIL: Live HTML missing Custom +'; exit 1; fi
           if grep -Fq '<input type="hidden" id="workoutName"' /tmp/site.html; then echo 'PASS: Workout Logger input hidden'; else echo 'FAIL: Workout Logger still has text field'; exit 1; fi
-          if grep -Fq 'sw.js?v=218' /tmp/site.html; then echo 'PASS: New SW registration'; else echo 'WARN: Old SW registration'; fi
+          if grep -Fq 'sw.js?v=219' /tmp/site.html; then echo 'PASS: iPhone SW 219 registration'; else echo 'FAIL: old SW registration'; exit 1; fi
+          if grep -Fq 'Build 219' /tmp/site.html; then echo 'PASS: Settings shows Build 219'; else echo 'FAIL: old settings build'; exit 1; fi
           echo '=== Live SW response ==='
-          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/sw.js?iphone-check=220" | head -c 130
+          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/sw.js?iphone-check=219" -o /tmp/site-sw.js
+          head -c 130 /tmp/site-sw.js
+          grep -Fq "const CACHE='spartanx-v219'" /tmp/site-sw.js && echo "PASS: iPhone SW 219 available"
           echo

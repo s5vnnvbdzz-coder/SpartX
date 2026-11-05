@@ -1,0 +1,50 @@
+/* Run with: node intelligence/tests.js
+   Independent engine regression tests; no SpartanX app files are changed. */
+'use strict';
+const assert=require('node:assert/strict');
+global.window=global;
+require('./engine.js');
+const E=global.SXEngine;
+assert.ok(E,'Engine export should exist');
+
+for(const type of ['strength','hypertrophy','beginner']){
+  const profile=E.makeDemoProfile(type);
+  assert.ok(profile.sessions.length>40,type+' sample session count');
+  const all=E.analyse(profile.sessions,0);
+  const month=E.analyse(profile.sessions,30);
+  assert.ok(month.sessions30>0,'Recent sample data exists');
+  assert.ok(all.volumeRange>month.volumeRange,'All-time volume larger');
+  assert.ok(month.volume30>0,'Last 30 day workload positive');
+  for(const lift of E.CORE){
+    assert.ok(all.strength[lift].latest,'Compound strength data exists for '+lift);
+    const rec=E.recommendation(lift,all.strength[lift].records);
+    assert.ok(rec.title && rec.detail && rec.confidence,'Recommendation explains itself');
+    assert.ok(['Low','Moderate'].includes(rec.confidence),'No overstated confidence');
+  }
+}
+assert.equal(E.estimatedMax({weight:100,reps:5}),116.7,'Epley 100 kg x5');
+assert.equal(E.estimatedMax({weight:100,reps:15}),null,'Epley limited to 12 reps');
+assert.equal(E.canonical('Barbell Bench Press'),'Bench Press');
+assert.equal(E.canonical('rdl'),'Romanian Deadlift');
+const original=[{id:'s1',date:new Date().toISOString(),name:'Test session',exercises:[
+  {name:'Barbell Bench Press',sets:[
+    {weight:100,reps:5,rpe:8,type:'Working Set',done:true},
+    {weight:50,reps:10,rpe:6,type:'Warmup',done:true},
+    {weight:9999,reps:5,type:'Working Set',done:true},
+    {weight:110,reps:1,type:'Working Set',done:false}
+  ]}]}];
+const before=JSON.stringify(original);
+const sessions=E.normalizeSessions(original);
+assert.equal(JSON.stringify(original),before,'Normalizer must not mutate source workouts');
+assert.equal(sessions.length,1);
+assert.equal(sessions[0].exercises[0].name,'Bench Press');
+assert.equal(sessions[0].exercises[0].sets.length,2,'Invalid and unfinished sets excluded');
+assert.equal(E.analyse(sessions,30).strength['Bench Press'].latest.max,116.7,'Warmup not used as top working set');
+const lacking=E.recommendation('Squat',[]);
+assert.equal(lacking.next,null,'No weight suggested without evidence');
+const rpeMissing=E.recommendation('Bench Press',[
+  {max:105,set:{weight:95,reps:3,rpe:null}},
+  {max:110,set:{weight:100,reps:3,rpe:null}}
+]);
+assert.equal(rpeMissing.next,100,'Conservative suggestion when RPE missing');
+console.log('PASS — SpartanX Intelligence engine regression tests.');

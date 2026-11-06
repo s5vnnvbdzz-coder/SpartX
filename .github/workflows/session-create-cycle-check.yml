@@ -1,0 +1,88 @@
+name: Verify Active Session 5/3/1 Create Cycle
+on:
+  workflow_run:
+    workflows: ["Deploy SPARTANX to GitHub Pages"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-session-cycle:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare mobile browser
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+      - name: Test Create Cycle, save, cancel and active workout
+        run: |
+          python3 - <<'PY'
+          import time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+          options=Options()
+          options.add_argument('--headless=new')
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          options.add_experimental_option('mobileEmulation',{'deviceMetrics':{'width':390,'height':844,'pixelRatio':3},'userAgent':'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'})
+          browser=webdriver.Chrome(options=options)
+          wait=WebDriverWait(browser,25)
+          try:
+            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/?cycle-quick-check='+str(int(time.time())))
+            wait.until(lambda d:d.execute_script('return !!document.querySelector("#toolsReplica")?.shadowRoot?.getElementById("quickCreate531Cycle") && !!document.querySelector("#native531Host")?.shadowRoot?.getElementById("oneRm")'))
+            browser.execute_script("""document.querySelector('#trackerNav button[data-screen=workout]').click();
+              document.querySelector('#startWorkout').click();
+              document.querySelector('#sessionOptionsButton').click();
+              document.querySelector('#start531Shortcut').click();""")
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531Overlay").hidden'))
+            visible=browser.execute_script("""const root=document.querySelector('#toolsReplica').shadowRoot;
+              const create=root.getElementById('quickCreate531Cycle'),apply=root.getElementById('apply531');
+              return {createVisible:getComputedStyle(create).display!=='none',beneathAdd:create.getBoundingClientRect().top>=apply.getBoundingClientRect().bottom,
+                workout:document.querySelector('.screen.active')?.id==='activeWorkout',
+                locked:document.body.style.position==='fixed'};""")
+            print('CALCULATOR CREATE BUTTON:',visible)
+            assert all(visible.values())
+            browser.execute_script("""const r=document.querySelector('#toolsReplica').shadowRoot;
+              r.getElementById('applyLift').value='Bench Press';
+              r.getElementById('applyLift').dispatchEvent(new Event('change',{bubbles:true}));
+              r.getElementById('tmFinderOneRm').value='160';
+              r.getElementById('tmFinderOneRm').dispatchEvent(new Event('input',{bubbles:true}));
+              r.getElementById('quickCreate531Cycle').click();""")
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531CycleOverlay").hidden'))
+            cycle=browser.execute_script("""const shadow=document.querySelector('#native531Host').shadowRoot;
+              return {lift:shadow.getElementById('lift').value,rm:shadow.getElementById('oneRm').value,tm:shadow.getElementById('tm').value,
+              moved:document.querySelector('#sxQuick531CycleMount').contains(document.querySelector('#native531Host')),
+              workout:document.querySelector('.screen.active')?.id==='activeWorkout',
+              locked:document.body.style.position==='fixed',
+              calculatorClosed:document.querySelector('#sxQuick531Overlay').hidden,
+              weeks:[...shadow.querySelectorAll('#lengthChoices button')].map(x=>x.dataset.weeks)};""")
+            print('NATIVE CYCLE MODAL:',cycle)
+            assert cycle=={'lift':'Bench Press','rm':'160','tm':'145','moved':True,'workout':True,'locked':True,'calculatorClosed':True,'weeks':['4','8','12']}
+            browser.execute_script("""const r=document.querySelector('#native531Host').shadowRoot;
+              r.querySelector('#lengthChoices button[data-weeks="8"]').click();
+              r.getElementById('generate').click();""")
+            result=browser.execute_script("""const r=document.querySelector('#native531Host').shadowRoot;
+              return {visible:r.getElementById('programmeCard').classList.contains('visible'),
+                weeks:r.getElementById('programmeLength').textContent,
+                startTm:r.getElementById('startTM').textContent};""")
+            print('GENERATED PROGRAMME:',result)
+            assert result=={'visible':True,'weeks':'8 WEEKS','startTm':'145'}
+            browser.execute_script("""document.querySelector('#native531Host').shadowRoot.getElementById('saveCycle').click()""")
+            wait.until(lambda d:d.execute_script("return document.querySelector('#sxQuick531CycleOverlay').hidden"))
+            saved=browser.execute_script("""const items=JSON.parse(localStorage.getItem('spartanx_531_saved_cycles_v1')||'[]');
+              return {count:items.length,lift:items[0]?.lift,weeks:items[0]?.weeks,tm:items[0]?.startTM,
+                workout:document.querySelector('.screen.active')?.id==='activeWorkout',
+                unlocked:document.body.style.position!=='fixed',
+                restored:document.querySelector('#native531').contains(document.querySelector('#native531Host'))};""")
+            print('SAVED AND BACK IN WORKOUT:',saved)
+            assert saved=={'count':1,'lift':'Bench Press','weeks':8,'tm':145,'workout':True,'unlocked':True,'restored':True}
+            browser.execute_script("""document.querySelector('#sessionOptionsButton').click();document.querySelector('#start531Shortcut').click();
+              document.querySelector('#toolsReplica').shadowRoot.getElementById('quickCreate531Cycle').click();""")
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531CycleOverlay").hidden'))
+            browser.execute_script("document.querySelector('#sxQuick531CycleClose').click()")
+            wait.until(lambda d:d.execute_script('return document.querySelector("#sxQuick531CycleOverlay").hidden && !document.querySelector("#sxQuick531Overlay").hidden'))
+            print('PASS: Cancel returned to calculator, 4/8/12 cycle saved and active session preserved.')
+          finally:
+            browser.quit()
+          PY

@@ -137,6 +137,7 @@ window.addEventListener('storage',e=>{
 });
 
 let ascensionReturnScroll=0,ascensionOldBodyOverflow='',ascensionOldHtmlOverflow='';
+let ascensionPreviousBodyLayout=null;
 let ascensionQuickCaller=null,ascensionQuickPending=null,ascensionEmbedReadyForShortcut=false;
 function deliverAscensionShortcut(){
  if(!ascensionQuickPending||!ascensionEmbedReadyForShortcut||!ascensionOverlay.classList.contains('open'))return;
@@ -160,11 +161,14 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null)=>{
 function openEmbeddedAscensionX(){
  if(ascensionOverlay.classList.contains('open'))return;
  if(shadow.querySelector('main').classList.contains('reorder-mode'))return;
- ascensionReturnScroll=window.scrollY||0;
+ ascensionReturnScroll=window.scrollY||document.documentElement.scrollTop||0;
  ascensionOldBodyOverflow=document.body.style.overflow;
  ascensionOldHtmlOverflow=document.documentElement.style.overflow;
+ ascensionPreviousBodyLayout={};
+ for(const key of ['position','top','left','right','width'])ascensionPreviousBodyLayout[key]=document.body.style[key];
  document.body.classList.add('sx-ascensionx-open');
- document.body.style.overflow='hidden';
+ // Fixed-body lock prevents iOS/PWA rubber-band scrolling behind the active modal.
+ Object.assign(document.body.style,{position:'fixed',top:'-'+ascensionReturnScroll+'px',left:'0',right:'0',width:'100%',overflow:'hidden'});
  document.documentElement.style.overflow='hidden';
  ascensionOverlay.classList.add('open');
  ascensionOverlay.setAttribute('aria-hidden','false');
@@ -184,7 +188,12 @@ function closeEmbeddedAscensionX(){
  }
  document.body.classList.remove('sx-ascensionx-open');
  document.body.style.overflow=ascensionOldBodyOverflow;
+ if(ascensionPreviousBodyLayout){
+  for(const key of ['position','top','left','right','width'])document.body.style[key]=ascensionPreviousBodyLayout[key];
+  ascensionPreviousBodyLayout=null;
+ }
  document.documentElement.style.overflow=ascensionOldHtmlOverflow;
+ window.scrollTo(0,ascensionReturnScroll);
  requestAnimationFrame(()=>window.scrollTo(0,ascensionReturnScroll));
  const returnTarget=ascensionQuickCaller?.isConnected?ascensionQuickCaller:ascensionOpenButton;
  ascensionQuickCaller=null;ascensionQuickPending=null;

@@ -67,6 +67,31 @@ jobs:
             assert summary['height']<120, 'Summary card should be compact on phone'
             assert all(v for k,v in summary.items() if k!='height'), 'Diagram, spacing and timer layout should be clear'
             browser.save_screenshot('/tmp/active-workout-summary.png')
+            # Simulate a long Active Session: the same compact card should float
+            # beneath the global header without shifting the workout layout.
+            browser.execute_script("""const spacer=document.createElement('div');
+              spacer.id='sxFloatRegressionSpacer';spacer.style.height='1500px';
+              document.querySelector('#activeWorkout').appendChild(spacer);
+              window.scrollTo(0,500);""")
+            wait.until(lambda d:d.execute_script("""return window.scrollY>400&&
+              document.querySelector('#sessionSummarySticky').classList.contains('is-floating');"""))
+            floated=browser.execute_script("""const wrapper=document.querySelector('#sessionSummarySticky');
+              const card=wrapper.querySelector('.session-summary-bar');
+              const header=document.querySelector('body>header');
+              const screen=document.querySelector('#activeWorkout');
+              const c=card.getBoundingClientRect(),h=header.getBoundingClientRect(),s=screen.getBoundingClientRect();
+              return {fixed:getComputedStyle(card).position==='fixed',
+                beneathHeader:c.top>=h.bottom&&c.top<=h.bottom+16,
+                sameWidth:Math.abs(c.width-s.width)<3,
+                sameLeft:Math.abs(c.left-s.left)<3,
+                staysCompact:c.height<120,
+                inFlow:wrapper.getBoundingClientRect().height>=c.height};""")
+            print('FLOATING ACTIVE SESSION SUMMARY:',floated)
+            assert all(floated.values()), 'Summary must remain aligned, compact and below the header while scrolling'
+            browser.save_screenshot('/tmp/active-workout-floating.png')
+            browser.execute_script('window.scrollTo(0,0)')
+            wait.until(lambda d:d.execute_script("""return !document.querySelector('#sessionSummarySticky').classList.contains('is-floating');"""))
+            browser.execute_script("document.querySelector('#sxFloatRegressionSpacer').remove()")
             # Active Session Options is a true scroll-locking dialog, not a dropdown.
             browser.execute_script('document.querySelector("#sessionOptionsButton").click()')
             wait.until(lambda d:d.execute_script('return !document.querySelector("#sessionOptionsMenu").hidden'))

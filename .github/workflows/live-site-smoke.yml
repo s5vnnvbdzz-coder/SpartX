@@ -15,20 +15,21 @@ jobs:
           set -euo pipefail
           base='https://s5vnnvbdzz-coder.github.io/SpartX'
           echo '=== Live root response headers ==='
-          curl -fLsSI --max-time 20 "${base}/?iphone-check=220" | head -35
+          curl -fLsSI --max-time 20 "${base}/?iphone-check=221" | head -35
           echo '=== Live site HTML markers ==='
-          curl -fLsS --max-time 25 -H 'Cache-Control: no-cache' "${base}/?iphone-check=220" -o /tmp/site.html
+          curl -fLsS --max-time 25 -H 'Cache-Control: no-cache' "${base}/?iphone-check=221" -o /tmp/site.html
           echo "Live HTML bytes: $(wc -c </tmp/site.html)"
           if grep -Fq 'id="openCustomExercise"' /tmp/site.html; then echo 'PASS: Custom + on live Add Exercise page'; else echo 'FAIL: Live HTML missing Custom +'; exit 1; fi
           if grep -Fq '<input type="hidden" id="workoutName"' /tmp/site.html; then echo 'PASS: Workout Logger input hidden'; else echo 'FAIL: Workout Logger still has text field'; exit 1; fi
-          if grep -Fq 'sw.js?v=220' /tmp/site.html; then echo 'PASS: iPhone SW 220 registration'; else echo 'FAIL: old SW registration'; exit 1; fi
-          if grep -Fq 'Build 220' /tmp/site.html; then echo 'PASS: Settings shows Build 220'; else echo 'FAIL: old settings build'; exit 1; fi
+          if grep -Fq 'sw.js?v=221' /tmp/site.html; then echo 'PASS: iPhone SW 221 registration'; else echo 'FAIL: old SW registration'; exit 1; fi
+          if grep -Fq 'Build 221' /tmp/site.html; then echo 'PASS: Settings shows Build 221'; else echo 'FAIL: old settings build'; exit 1; fi
+          if grep -Fq 'tools/replica.js?v=211' /tmp/site.html; then echo 'PASS: 5/3/1 calculator script refreshed'; else echo 'FAIL: 5/3/1 script version stale'; exit 1; fi
           echo '=== Live SW response ==='
-          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/sw.js?iphone-check=220" -o /tmp/site-sw.js
+          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/sw.js?iphone-check=221" -o /tmp/site-sw.js
           head -c 130 /tmp/site-sw.js
-          grep -Fq "const CACHE='spartanx-v220'" /tmp/site-sw.js && echo "PASS: iPhone SW 220 available"
+          grep -Fq "const CACHE='spartanx-v221'" /tmp/site-sw.js && echo "PASS: iPhone SW 221 available"
           echo '=== Live safe recovery page ==='
-          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/refresh.html?iphone-check=220" -o /tmp/site-refresh.html
+          curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/refresh.html?iphone-check=221" -o /tmp/site-refresh.html
           grep -Fq 'Refresh app files safely' /tmp/site-refresh.html && echo 'PASS: Recovery page published'
           grep -Fq "keys.filter(k=>k.startsWith('spartanx-v'))" /tmp/site-refresh.html && echo 'PASS: Recovery touches only SpartanX file caches'
           grep -Fq 'navigator.serviceWorker?.getRegistration' /tmp/site-refresh.html && echo 'PASS: Recovery checks scoped app worker'

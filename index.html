@@ -1332,7 +1332,7 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 #activeWorkout .sx-active-workout-name{margin:4px 0 12px}
 #activeWorkout .sx-active-workout-name h1{margin:5px 0;cursor:pointer;overflow-wrap:anywhere}
 #regularWorkoutActions{position:relative}
-#regularWorkoutActions #sessionOptionsButton{flex:1;min-width:0;margin:0;padding:15px 8px;font-weight:850;border:1px solid var(--lime);color:var(--lime);background:var(--panel2)}
+#regularWorkoutActions #finishWorkoutBottom{flex:1;min-width:0;margin:0;padding:15px 8px;font-weight:850;border:1px solid var(--lime);color:var(--bg);background:var(--lime)}
 #sessionOptionsMenu[hidden],#sxQuick531Overlay[hidden],#sxQuick531CycleOverlay[hidden]{display:none!important}
 #sessionOptionsMenu{position:fixed;inset:0;z-index:240000;display:flex;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.8);backdrop-filter:blur(7px);overscroll-behavior:contain}
 #sxSessionOptionsDialog{width:min(100%,430px);max-height:100%;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--lime);border-radius:17px;background:var(--bg);box-shadow:0 20px 60px #000b}
@@ -1574,7 +1574,7 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 </section>
 <section id="workout" class="screen">
 <div class="eyebrow">YOUR TRAINING, TRACKED</div><h1 class="sx-lock-in-title"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg><span>LOCK IN, LET’S GO!</span></h1><p class="muted" id="today"></p>
-<div class="card start-card sx-energy-start-card"><div class="eyebrow sx-start-energy-label"><svg class="sx-start-zap" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg><span>WORKOUT LOGGER</span></div><input type="hidden" id="workoutName" value=""><button id="startWorkout" class="start-workout-button">＋ START EMPTY WORKOUT</button></div>
+<div class="card start-card sx-energy-start-card"><div class="eyebrow sx-start-energy-label"><svg class="sx-start-zap" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg><span>WORKOUT LOGGER</span></div><input type="hidden" id="workoutName" value=""><button type="button" id="startWorkout" class="start-workout-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="sessionOptionsMenu">＋ START NEW WORKOUT</button></div>
 <div class="card"><div class="row between"><div><div class="eyebrow">YOUR ROUTINES</div><h2 style="margin:5px 0 0">Custom routines</h2></div><span class="tiny" id="homeRoutineCount">0 / 5</span></div><button id="homeCreateRoutine" class="secondary" style="width:100%;margin:12px 0">＋ ADD NEW ROUTINE</button><details id="homeRoutineDetails"><summary id="homeRoutineSummary">View created routines (0)</summary><div id="homeRoutineList" style="margin-top:10px"><p class="muted tiny">No routines created yet.</p></div></details></div><div class="card" id="homeCycleCard"><div class="row between"><div><div class="eyebrow">YOUR PROGRAMMES</div><h2 style="margin:5px 0 0">Saved 5/3/1 cycles</h2></div><span class="tiny" id="homeCycleCount">0 SAVED</span></div><div id="homeCycleList" style="margin-top:10px"><p class="muted tiny">Your saved cycles will appear here.</p></div></div>
 </section>
 <section id="profile" class="screen"><div class="eyebrow">YOUR PROFILE</div><h1>Profile</h1><div class="card profile-identity"><div class="profile-action-buttons"><button type="button" class="secondary profile-edit-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button type="button" class="secondary profile-settings-button" id="openProfileSettings" aria-label="Settings" title="Settings">⚙</button></div><div class="profile-top"><div class="profile-avatar" id="profileAvatar"><span>♙</span></div><div class="profile-main"><h2 id="profileDisplayName">Your Name</h2><div class="profile-workouts"><span>Workouts</span><strong class="profile-workout-count" id="profileWorkoutCount">0</strong></div><p id="profileDisplayBio" class="muted profile-bio">Add a little about yourself.</p></div></div>
@@ -1605,7 +1605,7 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 <div class="session-summary-sticky" id="sessionSummarySticky"><div class="session-summary-bar"><div class="summary-metric session-duration-metric"><span>DURATION</span><div class="session-duration-control"><strong id="sessionClock">00:00:00</strong><button type="button" id="sessionPauseButton" class="session-pause-button" aria-label="Pause workout timer" title="Pause workout timer">Ⅱ</button></div></div><div class="summary-metric"><span>VOLUME</span><strong id="liveVolume">0 kg</strong></div><div class="summary-metric"><span>SETS</span><strong id="liveSets">0</strong></div><button type="button" class="muscle-preview" id="openMuscleDiagram" aria-label="View muscles worked" title="View muscles worked"><div id="muscleDiagram"></div></button><button type="button" class="summary-dismiss" id="dismissSessionSummary" aria-label="Hide session summary">×</button></div></div><div id="discardWorkoutOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="discardWorkoutTitle"><div class="detail-panel" style="max-width:360px;text-align:center"><div class="eyebrow">END SESSION</div><h2 id="discardWorkoutTitle" style="font-size:22px;margin:10px 0">Are you sure?</h2><p class="muted" style="margin:0 0 20px">Do you want to discard this workout? Your exercises and logged sets will be lost.</p><div class="row" style="gap:10px"><button id="cancelDiscardWorkout" class="secondary" type="button" style="flex:1">NO</button><button id="confirmDiscardWorkout" type="button" style="flex:1;background:#e34b4b;color:#fff">YES</button></div></div></div><div id="muscleOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2>Muscles worked</h2><button class="secondary small" id="closeMuscleDiagram">Close</button></div><div id="muscleDiagramLarge" class="muscle-diagram"></div><div id="muscleLegend" class="muscle-legend"></div></div></div><div id="prOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2 id="prTitle">Personal records</h2><button class="secondary small" id="closePr">Close</button></div><div id="prDetails"></div></div></div>
 <div id="exerciseList"></div>
 <button id="openExerciseLibrary" class="library-add-button">＋ ADD EXERCISE</button>
-<div id="regularWorkoutActions" class="row" style="display:flex;gap:10px;margin-top:16px;align-items:stretch"><button type="button" id="discardWorkout" class="secondary" style="flex:1;min-width:0;border-color:#a94444;color:#ff7777;padding:15px 8px;font-weight:850">DISCARD</button><button type="button" id="sessionOptionsButton" class="secondary" aria-haspopup="dialog" aria-expanded="false" aria-controls="sessionOptionsMenu">⚙ OPTIONS</button></div>
+<div id="regularWorkoutActions" class="row" style="display:flex;gap:10px;margin-top:16px;align-items:stretch"><button type="button" id="discardWorkout" class="secondary" style="flex:1;min-width:0;border-color:#a94444;color:#ff7777;padding:15px 8px;font-weight:850">DISCARD</button><button type="button" id="finishWorkoutBottom" class="start-workout-button" style="flex:1;min-width:0;margin:0;padding:15px 8px;font-weight:850">✓ FINISH &amp; SAVE</button></div>
 <div id="historicalEditActions" class="row hidden" style="gap:10px;margin-top:16px;align-items:stretch">
 <button type="button" id="cancelHistoricalEdit" class="secondary" style="flex:1;min-width:0;padding:15px 8px">CANCEL EDIT</button>
 <button type="button" id="saveHistoricalEdit" class="start-workout-button" style="flex:1;min-width:0;margin-top:0;padding:15px 8px">✓ SAVE CHANGES</button></div>
@@ -1653,8 +1653,9 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 </main>
 <div id="sessionOptionsMenu" role="presentation" hidden>
   <section id="sxSessionOptionsDialog" role="dialog" aria-modal="true" aria-labelledby="sxSessionOptionsTitle">
-    <div id="sxSessionOptionsHeader"><div><div class="eyebrow">ACTIVE SESSION</div><h2 id="sxSessionOptionsTitle">Options</h2></div><button type="button" id="sxCloseSessionOptions" aria-label="Close Options">✕ Close</button></div>
+    <div id="sxSessionOptionsHeader"><div><div class="eyebrow">WORKOUT LOGGER</div><h2 id="sxSessionOptionsTitle">Start a Workout</h2></div><button type="button" id="sxCloseSessionOptions" aria-label="Close workout choices">✕ Close</button></div>
     <div id="sxSessionOptionsLinks">
+      <button type="button" id="startNewWorkoutChoice"><strong>New Workout</strong><span>Start an empty session and add exercises as you go.</span></button>
       <button type="button" id="start531Shortcut"><strong>Start 5/3/1</strong><span>Open the calculator and add sets to this session.</span></button>
       <button type="button" id="startAscensionShortcut"><strong>Start AscensionX</strong><span>Choose a cycle lift and load sets into this workout.</span></button>
     </div>
@@ -2806,8 +2807,9 @@ $('customExerciseForm').addEventListener('submit',e=>{
  if(!name){$('customExerciseName').focus();return;}
  closeCustomExerciseDialog();
  window.pickExercise(name);
-});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});$('startWorkout').onclick=()=>{libraryMode='workout';startSession();};$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>switchScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';switchScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();switchScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
+});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});// Start New Workout now opens the workout-type chooser below.$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>switchScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';switchScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();switchScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
 $('homeRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});$('openExerciseLibrary').onclick=openLibrary;$('closeExerciseLibrary').onclick=returnFromExerciseLibrary;if($('endWorkout'))$('endWorkout').onclick=()=>finishSession();
+if($('finishWorkoutBottom'))$('finishWorkoutBottom').onclick=()=>finishSession();
 // Durable completion queue. A successful SpartanX save creates at most one
 // AscensionX sync record per imported exercise; reopening either app can retry it.
 const ASCENSION_COMPLETION_QUEUE_KEY='spartx_ascension_completion_queue_v1';
@@ -3235,7 +3237,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script id="sx-active-session-quick-531">
 (()=>{
  const $=id=>document.getElementById(id);
- const button=$('sessionOptionsButton'),menu=$('sessionOptionsMenu'),menuClose=$('sxCloseSessionOptions'),overlay=$('sxQuick531Overlay');
+ const button=$('startWorkout'),menu=$('sessionOptionsMenu'),menuClose=$('sxCloseSessionOptions'),overlay=$('sxQuick531Overlay');
  const host=$('toolsReplica'),tools=$('tools'),mount=$('sxQuick531Mount'),close=$('sxClose531Quick');
  const cycleOverlay=$('sxQuick531CycleOverlay'),cycleMount=$('sxQuick531CycleMount'),cycleClose=$('sxQuick531CycleClose');
  const nativeHost=$('native531Host'),nativeHome=$('native531');
@@ -3246,6 +3248,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  if(!calc)return;
  let menuLock=null,calcLock=null,wasCollapsed=false;
  const onWorkout=()=>document.querySelector('.screen.active')?.id==='activeWorkout';
+ const onWorkoutSetup=()=>document.querySelector('.screen.active')?.id==='workout';
  const scope=document.createElement('style');scope.id='sx-quick-531-shadow-style';
  scope.textContent=`
  :host(.sx-531-quick-mode) main > :not(section[aria-labelledby="531Title"]){display:none!important}
@@ -3272,10 +3275,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   if(menu.hidden)return;
   menu.hidden=true;button.setAttribute('aria-expanded','false');
   unlock(menuLock);menuLock=null;
-  if(focus)button.focus({preventScroll:true});
+  if(focus&&onWorkoutSetup())button.focus({preventScroll:true});
  }
  function openMenu(){
-  if(!onWorkout()||!menu.hidden||calcLock||cycleLock)return;
+  if(!onWorkoutSetup()||!menu.hidden||calcLock||cycleLock)return;
   menuLock=lock();menu.hidden=false;button.setAttribute('aria-expanded','true');
   menuClose.focus({preventScroll:true});
  }
@@ -3286,7 +3289,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   calc.hidden=calc.dataset.sxQuickWasHidden==='true';delete calc.dataset.sxQuickWasHidden;
   tools.prepend(host);document.body.classList.remove('sx-531-popup-open');
   unlock(calcLock,imported?0:calcLock.scroll);calcLock=null;
-  if(!imported)button.focus({preventScroll:true});
+  if(!imported)$('openExerciseLibrary')?.focus({preventScroll:true});
   else requestAnimationFrame(()=>window.scrollTo(0,0));
  }
  function openCalc(){
@@ -3305,7 +3308,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   nativeHome.appendChild(nativeHost);
   unlock(cycleLock);cycleLock=null;
   if(returnToCalculator&&onWorkout())openCalc();
-  else if(onWorkout())button.focus({preventScroll:true});
+  else if(onWorkout())$('openExerciseLibrary')?.focus({preventScroll:true});
  }
  function openCycleFromCalculator(detail){
   if(!onWorkout()||cycleLock||!calcLock)return;
@@ -3324,11 +3327,13 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  cycleClose.addEventListener('click',()=>closeCycle(true));
  cycleOverlay.addEventListener('click',e=>{if(e.target===cycleOverlay)closeCycle(true)});
  button.addEventListener('click',openMenu);
+ $('startNewWorkoutChoice').addEventListener('click',()=>{closeMenu(false);startSession();});
  menuClose.addEventListener('click',()=>closeMenu());
  menu.addEventListener('click',e=>{if(e.target===menu)closeMenu()});
- $('start531Shortcut').addEventListener('click',openCalc);
+ $('start531Shortcut').addEventListener('click',()=>{closeMenu(false);startSession();openCalc();});
  $('startAscensionShortcut').addEventListener('click',()=>{
-  closeMenu();
+  closeMenu(false);
+  startSession();
   if(typeof window.spartanxQuickStartAscension!=='function'||window.spartanxQuickStartAscension()!==true)
    alert('AscensionX could not open. Refresh SpartanX and try again.');
  });

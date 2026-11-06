@@ -177,7 +177,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=226';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=229';
  }
  if(ascensionOverlay.classList.contains('sx-ascension-quick'))ascensionOverlay.focus({preventScroll:true});
  else ascensionCloseButton.focus({preventScroll:true});

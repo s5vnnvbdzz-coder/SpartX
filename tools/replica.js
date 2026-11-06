@@ -400,11 +400,65 @@ function calcPlates(){const target=toKg(+$('target').value),bar=toKg(+$('bar').v
 $('plateDiagramWrap').style.display=settings.diagram?'block':'none';
 // Training Max is integrated into 5/3/1 Working Weights.
 // Keep calculator entries while navigating to Settings and back in the same app session.
-const calculatorInputIds=['ormWeight','ormReps','tmFinderOneRm','tmFinderRound','tm','week','target','bar'];
-function saveCalculatorInputs(){try{const values={};calculatorInputIds.forEach(id=>{values[id]=id==='tmFinderRound'?$(id).checked:$(id).value;});localStorage.setItem('spartxToolsInputs',JSON.stringify(values));}catch(e){}}
-try{const savedInputs=JSON.parse(localStorage.getItem('spartxToolsInputs')||'null');if(savedInputs){calculatorInputIds.forEach(id=>{if(Object.prototype.hasOwnProperty.call(savedInputs,id)){if(id==='tmFinderRound')$(id).checked=savedInputs[id]===true||savedInputs[id]==='true';else $(id).value=savedInputs[id];}});}if(!savedInputs.bar) $('bar').value='20';$('applyLift').value='Back Squat';}catch(e){}
-calculatorInputIds.forEach(id=>$(id).addEventListener('input',saveCalculatorInputs));
-calculatorInputIds.forEach(id=>$(id).addEventListener('change',saveCalculatorInputs));
+const calculatorInputIds=['ormWeight','ormReps','tmFinderOneRm','tmFinderRound','tm','applyLift','week','target','bar'];
+const tracked531Lifts=['Back Squat','Bench Press','Conventional Deadlift'];
+// Save each lift's actual 1RM in kg so values survive an exercise switch,
+// reopening SpartanX, and a future kg/lb preference change.
+let savedCalculatorInputs=null;
+try{savedCalculatorInputs=JSON.parse(localStorage.getItem('spartxToolsInputs')||'null');}catch(e){}
+const savedLiftMaxes=savedCalculatorInputs?.oneRmsByLiftKg;
+const oneRmsByLiftKg={};
+if(savedLiftMaxes&&typeof savedLiftMaxes==='object'&&!Array.isArray(savedLiftMaxes)){
+ tracked531Lifts.forEach(lift=>{
+  const n=Number(savedLiftMaxes[lift]);
+  if(savedLiftMaxes[lift]!==''&&Number.isFinite(n)&&n>0)oneRmsByLiftKg[lift]=n;
+ });
+}
+if(savedCalculatorInputs&&typeof savedCalculatorInputs==='object'){
+ calculatorInputIds.forEach(id=>{
+  if(!Object.prototype.hasOwnProperty.call(savedCalculatorInputs,id))return;
+  if(id==='tmFinderRound')$(id).checked=savedCalculatorInputs[id]===true||savedCalculatorInputs[id]==='true';
+  else if(id==='applyLift'){
+   if(tracked531Lifts.includes(savedCalculatorInputs[id]))$(id).value=savedCalculatorInputs[id];
+  }else $(id).value=savedCalculatorInputs[id];
+ });
+}
+if(!$('bar').value)$('bar').value='20';
+let active531Lift=$('applyLift').value;
+// Migrate the older single saved 1RM once. That version always defaulted to
+// Squat; never copy that legacy value into Bench or Deadlift automatically.
+if(!savedLiftMaxes){
+ const oldOneRm=Number(savedCalculatorInputs?.tmFinderOneRm);
+ if(Number.isFinite(oldOneRm)&&oldOneRm>0)oneRmsByLiftKg[active531Lift]=toKg(oldOneRm);
+}
+function rememberActive531OneRm(){
+ const raw=$('tmFinderOneRm').value.trim();
+ if(raw===''){delete oneRmsByLiftKg[active531Lift];return;}
+ const displayValue=Number(raw);
+ if(Number.isFinite(displayValue)&&displayValue>0)oneRmsByLiftKg[active531Lift]=toKg(displayValue);
+}
+function restore531OneRm(lift){
+ const saved=oneRmsByLiftKg[lift];
+ $('tmFinderOneRm').value=Number.isFinite(saved)&&saved>0?String(Number(fromKg(saved).toFixed(2))):'';
+ calcTrainingMaxFinder();
+}
+function saveCalculatorInputs(){
+ try{
+  rememberActive531OneRm();
+  const values={};
+  calculatorInputIds.forEach(id=>{values[id]=id==='tmFinderRound'?$(id).checked:$(id).value;});
+  values.oneRmsByLiftKg={...oneRmsByLiftKg};
+  localStorage.setItem('spartxToolsInputs',JSON.stringify(values));
+ }catch(e){}
+}
+restore531OneRm(active531Lift);
+calculatorInputIds.filter(id=>id!=='applyLift').forEach(id=>$(id).addEventListener('input',saveCalculatorInputs));
+calculatorInputIds.filter(id=>id!=='applyLift').forEach(id=>$(id).addEventListener('change',saveCalculatorInputs));
+$('applyLift').addEventListener('change',()=>{
+ rememberActive531OneRm();
+ active531Lift=$('applyLift').value;
+ restore531OneRm(active531Lift);
+});
 window.addEventListener('pagehide',saveCalculatorInputs);
 // Select the existing value when a numeric field receives focus, so a new entry replaces it.
 shadow.querySelectorAll('input[type="number"]').forEach(input=>input.addEventListener('focus',()=>input.select()));

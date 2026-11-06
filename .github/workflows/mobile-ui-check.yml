@@ -59,7 +59,47 @@ jobs:
             browser.execute_script('document.querySelector("#openCustomExercise").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#customExerciseDialog")?.open'))
             print('CUSTOM POPUP OPEN: true')
-            print('PASS: live mobile Workout Logger and Add Exercise behave as requested')
+            browser.execute_script('document.querySelector("#closeCustomExercise").click();document.querySelector("#trackerNav button[data-screen=tools]").click();')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#tools")?.classList.contains("active")'))
+            lift_data=browser.execute_script("""
+            const root=document.querySelector('#toolsReplica').shadowRoot;
+            const lift=root.getElementById('applyLift'),rm=root.getElementById('tmFinderOneRm'),tm=root.getElementById('tm');
+            function pick(name,oneRm){
+              lift.value=name;
+              lift.dispatchEvent(new Event('change',{bubbles:true}));
+              if(oneRm!==null){
+                rm.value=oneRm;
+                rm.dispatchEvent(new Event('input',{bubbles:true}));
+              }
+              return [lift.value,rm.value,tm.value];
+            }
+            const sequence=[
+              pick('Bench Press','160'),
+              pick('Back Squat','180'),
+              pick('Conventional Deadlift','210'),
+              pick('Bench Press',null),
+              pick('Back Squat',null),
+              pick('Conventional Deadlift',null)
+            ];
+            return {sequence,storage:JSON.parse(localStorage.getItem('spartxToolsInputs'))};
+            """)
+            expected=[
+              ['Bench Press','160','145'],['Back Squat','180','162.5'],
+              ['Conventional Deadlift','210','190'],['Bench Press','160','145'],
+              ['Back Squat','180','162.5'],['Conventional Deadlift','210','190']
+            ]
+            print('5/3/1 LIVE SEQUENCE:',lift_data['sequence'])
+            assert lift_data['sequence']==expected, '5/3/1 must restore each lift 1RM and 90% TM'
+            assert lift_data['storage']['oneRmsByLiftKg']=={'Back Squat':180,'Bench Press':160,'Conventional Deadlift':210}
+            browser.refresh()
+            wait.until(lambda d:d.execute_script('return !!document.querySelector("#toolsReplica")?.shadowRoot?.getElementById("applyLift")'))
+            persisted=browser.execute_script("""
+              const root=document.querySelector('#toolsReplica').shadowRoot;
+              return [root.getElementById('applyLift').value,root.getElementById('tmFinderOneRm').value,root.getElementById('tm').value];
+            """)
+            print('5/3/1 AFTER RELOAD:',persisted)
+            assert persisted==['Conventional Deadlift','210','190'], '5/3/1 values must persist on page reload'
+            print('PASS: live mobile Workout Logger, Add Exercise and 5/3/1 saved per-lift TM')
           except Exception:
             print('CURRENT PAGE:',browser.current_url)
             print('ERROR LOGS:',browser.get_log('browser'))

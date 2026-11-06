@@ -131,6 +131,44 @@ jobs:
             assert all(asc_popup.values()), 'AscensionX must be a modal above an unchanged active workout'
             wait.until(lambda d:d.execute_script('''const f=document.querySelector("#sxAscensionPortalHost").shadowRoot.getElementById("ascensionXEmbedFrame");
               return !!f.contentWindow?.cancelAscSpartanImport&&f.contentDocument?.body?.classList.contains("sx-spartan-quick-import");'''))
+            # Build Your Cycle must reuse the existing saved 1RM for each lift,
+            # calculate a rounded TM immediately, and remember those values when
+            # selecting another lift—without changing the ongoing SpartanX session.
+            strength=browser.execute_script("""
+              const app=document.querySelector('#sxAscensionPortalHost').shadowRoot.getElementById('ascensionXEmbedFrame').contentWindow;
+              app.showScreen('cycle');
+              const doc=app.document,select=doc.getElementById('cycleStrengthLift'),
+                oneRm=doc.getElementById('cycleStrengthOneRm'),
+                pct=doc.getElementById('cycleStrengthPercent'),
+                output=doc.getElementById('cycleStrengthTm');
+              function pick(lift,rm){
+                select.value=lift;select.dispatchEvent(new Event('change',{bubbles:true}));
+                if(rm!==null){oneRm.value=rm;oneRm.dispatchEvent(new Event('input',{bubbles:true}));}
+                return {lift:select.value,rm:oneRm.value,tm:output.textContent.trim()};
+              }
+              const before=pct.value;
+              const bench=pick('Bench Press','160'),
+                squat=pick('Back Squat','180'),
+                deadlift=pick('Deadlift','210');
+              pct.value='90';pct.dispatchEvent(new Event('change',{bubbles:true}));
+              const saved=[pick('Bench Press',null),pick('Back Squat',null),pick('Deadlift',null)];
+              const stored=JSON.parse(app.localStorage.getItem('ascensionx_strength_v1'));
+              app.renderCycle();
+              return {before,bench,squat,deadlift,after:pct.value,saved,
+                outputAfterRender:output.textContent.trim(),
+                storedPct:stored.profile.tmPct,
+                savedMaxes:stored.profile.max,
+                cycleLift:doc.getElementById('cycleLift').value,
+                listShowsNewTm:doc.querySelector('[data-cycle-tm-lift="Bench Press"]').textContent.includes('145 kg')};
+            """)
+            print('ASCENSIONX PER-LIFT 1RM AND TM:',strength)
+            assert strength['before']=='95', 'AscensionX must preserve existing TM percentage'
+            assert strength['bench']['tm']=='152.5 kg' and strength['squat']['tm']=='170 kg' and strength['deadlift']['tm']=='200 kg'
+            assert strength['after']=='90' and strength['storedPct']==90
+            assert [(x['lift'],x['rm'],x['tm']) for x in strength['saved']]==[
+              ('Bench Press','160','145 kg'),('Back Squat','180','162.5 kg'),('Deadlift','210','190 kg')]
+            assert strength['savedMaxes']['Bench Press']==160 and strength['savedMaxes']['Back Squat']==180 and strength['savedMaxes']['Deadlift']==210
+            assert strength['outputAfterRender']=='190 kg' and strength['cycleLift']=='Deadlift' and strength['listShowsNewTm']
             browser.execute_script('''document.querySelector("#sxAscensionPortalHost").shadowRoot.getElementById("ascensionXEmbedFrame").contentWindow.cancelAscSpartanImport();''')
             wait.until(lambda d:d.execute_script('''const p=document.querySelector("#sxAscensionPortalHost").shadowRoot;
               return !p.getElementById("ascensionXOverlay").classList.contains("open");'''))

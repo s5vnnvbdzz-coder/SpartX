@@ -187,6 +187,13 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 #cycleStrengthFeedback[data-error="true"]{color:#ff9898}
 @media(max-width:375px){.asc-cycle-strength-editor{padding:12px 9px}.asc-cycle-strength-editor .fields{gap:7px}.asc-cycle-strength-editor select,.asc-cycle-strength-editor input{padding:11px 7px}.asc-cycle-tm-result{padding:10px 8px;font-size:14px}}
 
+/* The embedded workout-options popup owns its header and Back navigation. */
+body.sx-spartan-quick-import > header,
+body.sx-spartan-quick-import > nav[aria-label="Main navigation"]{display:none!important}
+body.sx-spartan-quick-import{padding-bottom:0!important}
+body.sx-spartan-quick-import main{padding-top:10px}
+body.sx-spartan-quick-import .rest-timer{bottom:12px}
+
 /* Within SpartanX Active Session, only the import dialog scrolls.
    The underlying AscensionX page otherwise creates a phantom iframe scrollbar
    from its 100vh min-height and navigation padding. Cycle creation without the

@@ -101,6 +101,16 @@ jobs:
               scrollHeight:document.documentElement.scrollHeight,
               floating:document.querySelector('#sessionSummarySticky').classList.contains('is-floating')
             }"""))
+            float_debug=browser.execute_script("""const bar=document.querySelector('#sessionSummarySticky'),
+              head=document.querySelector('body>header'),screen=document.querySelector('#activeWorkout');
+              const metrics=()=>({y:window.scrollY,top:bar.getBoundingClientRect().top,
+                headerBottom:head.getBoundingClientRect().bottom,
+                dismissed:bar.classList.contains('is-dismissed'),
+                floating:bar.classList.contains('is-floating'),
+                screenActive:screen.classList.contains('active'),
+                bodyPosition:document.body.style.position});
+              const before=metrics();syncSessionSummaryFloat();return {before,after:metrics()};""")
+            print('SUMMARY FLOAT DIAGNOSTIC:',float_debug)
             wait.until(lambda d:d.execute_script("""return window.scrollY>400&&
               document.querySelector('#sessionSummarySticky').classList.contains('is-floating');"""))
             floated=browser.execute_script("""const wrapper=document.querySelector('#sessionSummarySticky');

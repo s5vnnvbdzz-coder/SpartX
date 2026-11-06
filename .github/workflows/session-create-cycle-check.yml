@@ -48,7 +48,6 @@ jobs:
             wait.until(lambda d:d.execute_script('return !!document.querySelector("#toolsReplica")?.shadowRoot?.getElementById("quickCreate531Cycle") && !!document.querySelector("#native531Host")?.shadowRoot?.getElementById("oneRm")'))
             browser.execute_script("""document.querySelector('#trackerNav button[data-screen=workout]').click();
               document.querySelector('#startWorkout').click();
-              document.querySelector('#sessionOptionsButton').click();
               document.querySelector('#start531Shortcut').click();""")
             wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531Overlay").hidden'))
             visible=browser.execute_script("""const root=document.querySelector('#toolsReplica').shadowRoot;
@@ -100,7 +99,9 @@ jobs:
                 restored:document.querySelector('#native531').contains(document.querySelector('#native531Host'))};""")
             print('SAVED AND BACK IN WORKOUT:',saved)
             assert saved=={'count':1,'lift':'Bench Press','weeks':8,'tm':145,'workout':True,'unlocked':True,'restored':True}
-            browser.execute_script("""document.querySelector('#sessionOptionsButton').click();document.querySelector('#start531Shortcut').click();
+            browser.execute_script("""document.querySelector('#trackerNav button[data-screen=workout]').click();
+              document.querySelector('#startWorkout').click();
+              document.querySelector('#start531Shortcut').click();
               document.querySelector('#toolsReplica').shadowRoot.getElementById('quickCreate531Cycle').click();""")
             wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531CycleOverlay").hidden'))
             browser.execute_script("document.querySelector('#sxQuick531CycleClose').click()")

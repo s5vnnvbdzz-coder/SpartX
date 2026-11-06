@@ -434,6 +434,10 @@ if(!savedLiftMaxes){
 function rememberActive531OneRm(){
  const raw=$('tmFinderOneRm').value.trim();
  if(raw===''){delete oneRmsByLiftKg[active531Lift];return;}
+ // Don't re-convert an unchanged formatted value: kg → lb → kg rounding
+ // must never gradually alter the stored 1RM across app reloads.
+ const saved=oneRmsByLiftKg[active531Lift];
+ if(Number.isFinite(saved)&&saved>0&&raw===String(Number(fromKg(saved).toFixed(2))))return;
  const displayValue=Number(raw);
  if(Number.isFinite(displayValue)&&displayValue>0)oneRmsByLiftKg[active531Lift]=toKg(displayValue);
 }

@@ -1253,9 +1253,77 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 #sxUpdateBanner #sxUpdateLater{background:var(--panel2)!important;color:var(--txt)!important;border:1px solid var(--line)!important}
 @media(max-width:390px){#sxUpdateBanner{gap:5px;padding:9px}#sxUpdateBanner button{padding:7px!important;font-size:10px}}
 </style>
+<style id="sx-exercise-controls-in-global-header">
+/* One contextual top bar: keep the standard SpartanX identity everywhere
+   except Add Exercise. Reuse the real buttons, so their existing event
+   handlers work without duplicate IDs or JavaScript DOM shuffling. */
+body > header #sxHeaderExerciseControls{display:none!important}
+body:has(#exerciseLibraryScreen.screen.active) > header #sxBrandHeader{display:none!important}
+body:has(#exerciseLibraryScreen.screen.active) > header{
+ padding:calc(11px + env(safe-area-inset-top,0px)) 16px 11px!important;
+ align-items:center!important;
+}
+body:has(#exerciseLibraryScreen.screen.active) > header #sxHeaderExerciseControls{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+ align-items:center;
+ gap:6px;
+ width:100%;
+ margin:0;
+ min-width:0;
+}
+#sxHeaderExerciseControls h1{
+ margin:0;
+ padding:0;
+ min-width:0;
+ font-size:clamp(17px,4.5vw,24px);
+ font-weight:850;
+ line-height:1.15;
+ letter-spacing:-.025em;
+ text-align:center;
+ white-space:nowrap;
+}
+#sxHeaderExerciseControls button{
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ align-self:center;
+ min-height:42px;
+ line-height:1.2!important;
+ white-space:nowrap;
+}
+#sxHeaderExerciseControls #closeExerciseLibrary{
+ justify-self:start;
+ min-width:0!important;
+ padding:8px 10px!important;
+}
+#sxHeaderExerciseControls .sx-custom-open{
+ justify-self:end;
+ width:auto!important;
+ min-width:0;
+ padding:8px 11px!important;
+ border:1px solid var(--lime)!important;
+ border-radius:11px!important;
+ background:color-mix(in srgb,var(--lime) 9%,var(--panel2))!important;
+ color:var(--lime)!important;
+ font-size:12px!important;
+ font-weight:850!important;
+}
+@media(max-width:370px){
+ body:has(#exerciseLibraryScreen.screen.active) > header{padding-inline:10px!important}
+ #sxHeaderExerciseControls{gap:4px!important}
+ #sxHeaderExerciseControls h1{font-size:16px}
+ #sxHeaderExerciseControls #closeExerciseLibrary{padding:7px 7px!important;font-size:11px!important}
+ #sxHeaderExerciseControls .sx-custom-open{padding:7px 8px!important;font-size:11px!important}
+}
+</style>
 </head>
 <body class="sx-main-header-layout">
-<header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
+<header><div id="sxBrandHeader"><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sx-add-exercise-header" id="sxHeaderExerciseControls" role="group" aria-label="Add Exercise header">
+  <button type="button" class="back-button spartan-back-button" id="closeExerciseLibrary">← Back</button>
+  <h1>Add Exercise</h1>
+  <button type="button" class="secondary sx-custom-open" id="openCustomExercise">Custom +</button>
+</div></header>
 <div id="sxMainHeaderSpacer" aria-hidden="true"></div>
 <main>
 <section id="home" class="screen active">
@@ -1345,11 +1413,6 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 <div id="exerciseMetricTabs" class="history-metric-tabs" role="tablist" aria-label="Exercise metrics"></div>
 </section>
 <section id="exerciseLibraryScreen" class="screen">
-<div class="sx-add-exercise-header" role="group" aria-label="Add Exercise header">
-  <button type="button" class="back-button spartan-back-button" id="closeExerciseLibrary">← Back</button>
-  <h1>Add Exercise</h1>
-  <button type="button" class="secondary sx-custom-open" id="openCustomExercise">Custom +</button>
-</div>
 <input id="librarySearch" class="library-search" placeholder="Search exercises or muscles (e.g. hamstrings)..." autocomplete="off">
 <div id="libraryCategories" class="library-categories"></div>
 <div id="libraryList" class="library-list"></div>

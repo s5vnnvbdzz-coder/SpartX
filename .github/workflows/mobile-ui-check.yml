@@ -46,6 +46,27 @@ jobs:
             browser.execute_script('document.querySelector("#startWorkout").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#activeWorkout")?.classList.contains("active")'))
             print('ACTIVE WORKOUT:',browser.execute_script('return document.querySelector("#activeWorkoutName")?.textContent'))
+            # The compact summary keeps a clear timer/pause block, three readable
+            # metrics and a diagram-only thumbnail at iPhone width.
+            summary=browser.execute_script("""
+              const card=document.querySelector('#activeWorkout .session-summary-bar');
+              const diagram=document.querySelector('#openMuscleDiagram');
+              const duration=document.querySelector('.session-duration-metric');
+              const pause=document.querySelector('#sessionPauseButton');
+              const volume=document.querySelector('#liveVolume');
+              const sets=document.querySelector('#liveSets');
+              const rect=el=>el.getBoundingClientRect();
+              return {height:rect(card).height,
+                diagramOnly:diagram.textContent.trim()==='',
+                accessible:diagram.getAttribute('aria-label')==='View muscles worked',
+                pauseByTimer:rect(pause).left>=rect(duration).left,
+                pauseClearOfVolume:rect(pause).right+5<rect(volume).left,
+                volumeClearOfSets:rect(volume).right<=rect(sets).left,
+                diagramVisible:rect(diagram).width>0&&rect(diagram).height>0};""")
+            print('ACTIVE SESSION COMPACT SUMMARY:',summary)
+            assert summary['height']<120, 'Summary card should be compact on phone'
+            assert all(v for k,v in summary.items() if k!='height'), 'Diagram, spacing and timer layout should be clear'
+            browser.save_screenshot('/tmp/active-workout-summary.png')
             # Active Session Options is a true scroll-locking dialog, not a dropdown.
             browser.execute_script('document.querySelector("#sessionOptionsButton").click()')
             wait.until(lambda d:d.execute_script('return !document.querySelector("#sessionOptionsMenu").hidden'))

@@ -1,0 +1,79 @@
+name: Verify AscensionX cycle 1RM and TM
+on:
+  workflow_run:
+    workflows: ["Deploy SPARTANX to GitHub Pages"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-cycle-strength:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup browser
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+      - name: Check lift-specific 1RM, TM and persistence on phone viewport
+        run: |
+          python3 - <<'PY'
+          import time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+          o=Options()
+          o.add_argument('--headless=new')
+          o.add_argument('--no-sandbox')
+          o.add_argument('--disable-dev-shm-usage')
+          o.add_experimental_option('mobileEmulation',{
+            'deviceMetrics':{'width':390,'height':844,'pixelRatio':3},
+            'userAgent':'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
+          })
+          browser=webdriver.Chrome(options=o)
+          try:
+            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/AscensionX/index.html?strength-check='+str(int(time.time())))
+            wait=WebDriverWait(browser,20)
+            wait.until(lambda d:d.execute_script("return !!document.querySelector('#cycleStrengthOneRm') && typeof renderCycle==='function'"))
+            before=browser.execute_script("""
+              showScreen('cycle');
+              const sel=document.getElementById('cycleStrengthLift'),rm=document.getElementById('cycleStrengthOneRm');
+              const pct=document.getElementById('cycleStrengthPercent'),out=document.getElementById('cycleStrengthTm');
+              function pick(lift,oneRm){
+                sel.value=lift;sel.dispatchEvent(new Event('change',{bubbles:true}));
+                if(oneRm!==null){rm.value=oneRm;rm.dispatchEvent(new Event('input',{bubbles:true}));}
+                return [sel.value,rm.value,out.textContent.trim()];
+              }
+              const original=pct.value;
+              const at95=[pick('Bench Press','160'),pick('Back Squat','180'),pick('Deadlift','210')];
+              pct.value='90';pct.dispatchEvent(new Event('change',{bubbles:true}));
+              const at90=[pick('Bench Press',null),pick('Back Squat',null),pick('Deadlift',null)];
+              const saved=JSON.parse(localStorage.getItem('ascensionx_strength_v1'));
+              const benchLabel=document.querySelector('[data-cycle-tm-lift="Bench Press"]').textContent;
+              return {original,at95,at90,pct:pct.value,profile:saved.profile,
+                benchLabel,previewLift:document.getElementById('cycleLift').value};
+            """)
+            print('CYCLE STRENGTH:',before)
+            assert before['original']=='95', 'Existing TM percentage must remain unchanged by the feature'
+            assert [x[2] for x in before['at95']]==['152.5 kg','170 kg','200 kg']
+            assert before['pct']=='90'
+            assert before['at90']==[['Bench Press','160','145 kg'],['Back Squat','180','162.5 kg'],['Deadlift','210','190 kg']]
+            assert before['profile']['tmPct']==90 and before['profile']['max']['Back Squat']==180
+            assert before['profile']['max']['Bench Press']==160 and before['profile']['max']['Deadlift']==210
+            assert before['previewLift']=='Deadlift' and '145 kg' in before['benchLabel']
+            browser.refresh()
+            wait.until(lambda d:d.execute_script("return !!document.querySelector('#cycleStrengthOneRm') && typeof renderCycle==='function'"))
+            after=browser.execute_script("""
+              showScreen('cycle');
+              const sel=document.getElementById('cycleStrengthLift'),rm=document.getElementById('cycleStrengthOneRm');
+              const pct=document.getElementById('cycleStrengthPercent'),out=document.getElementById('cycleStrengthTm');
+              return ['Bench Press','Back Squat','Deadlift'].map(lift=>{
+                sel.value=lift;sel.dispatchEvent(new Event('change',{bubbles:true}));
+                return [sel.value,rm.value,out.textContent.trim(),pct.value];
+              });
+            """)
+            print('AFTER RELOAD:',after)
+            assert after==[['Bench Press','160','145 kg','90'],['Back Squat','180','162.5 kg','90'],['Deadlift','210','190 kg','90']]
+            print('PASS: AscensionX per-lift 1RM, automatic rounded TM and persistent cycle loading')
+          finally:
+            browser.quit()
+          PY

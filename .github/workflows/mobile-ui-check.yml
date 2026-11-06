@@ -1,8 +1,8 @@
 name: SpartanX live mobile workout flow diagnostic
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/mobile-ui-check.yml']
+  workflow_run:
+    workflows: ["Deploy SPARTANX to GitHub Pages"]
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -48,7 +48,13 @@ jobs:
             print('ACTIVE WORKOUT:',browser.execute_script('return document.querySelector("#activeWorkoutName")?.textContent'))
             browser.execute_script('document.querySelector("#openExerciseLibrary").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#exerciseLibraryScreen")?.classList.contains("active")'))
-            print('LIBRARY DOM:',browser.execute_script('return {title:document.querySelector(".sx-add-exercise-header h1")?.textContent,custom:document.querySelector("#openCustomExercise")?.textContent,back:document.querySelector("#closeExerciseLibrary")?.textContent,headerVisible:!!document.querySelector(".sx-add-exercise-header")?.getBoundingClientRect().height}'))
+            result=browser.execute_script('''const h=document.querySelector("#sxHeaderExerciseControls"),brand=document.querySelector("#sxBrandHeader"),rect=h.getBoundingClientRect(),head=document.querySelector("body>header").getBoundingClientRect();return {title:h?.querySelector("h1")?.textContent,custom:document.querySelector("#openCustomExercise")?.textContent,back:document.querySelector("#closeExerciseLibrary")?.textContent,parent:h?.parentElement?.tagName,headerVisible:rect.height>0,brandHidden:getComputedStyle(brand).display==="none",headerTop:head.top,headerBottom:head.bottom,controlsTop:rect.top,controlsBottom:rect.bottom,controlsWidth:rect.width,viewportWidth:innerWidth};''')
+            print('LIVE EXERCISE HEADER:',result)
+            assert result['parent']=='HEADER', 'Exercise controls must be inside the global header'
+            assert result['title']=='Add Exercise' and result['custom']=='Custom +' and result['back']=='← Back'
+            assert result['headerVisible'] and result['brandHidden'], 'Header should replace SpartanX branding on this screen'
+            assert result['controlsTop']>=result['headerTop']-2 and result['controlsBottom']<=result['headerBottom']+2, 'Buttons must fit in global header'
+            assert result['controlsWidth']<=result['viewportWidth'], 'Header must fit phone viewport'
             browser.save_screenshot('/tmp/add-exercise.png')
             browser.execute_script('document.querySelector("#openCustomExercise").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#customExerciseDialog")?.open'))
@@ -68,5 +74,7 @@ jobs:
         if: always()
         with:
           name: spartanx-mobile-ui-screenshots
-          path: /tmp/*workout*.png
+          path: |
+            /tmp/*workout*.png
+            /tmp/*exercise*.png
           if-no-files-found: ignore

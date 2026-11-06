@@ -59,6 +59,15 @@ jobs:
             browser.execute_script('document.querySelector("#startNewWorkoutChoice").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#activeWorkout")?.classList.contains("active")'))
             print('ACTIVE WORKOUT:',browser.execute_script('return document.querySelector("#activeWorkoutName")?.textContent'))
+            time.sleep(0.55)
+            unlocked=browser.execute_script("""return {
+              bodyPosition:document.body.style.position,
+              htmlOverflow:document.documentElement.style.overflow,
+              chooserHidden:document.querySelector('#sessionOptionsMenu').hidden,
+              active:document.querySelector('.screen.active')?.id
+            }""")
+            print('AFTER NEW WORKOUT TRANSITION:',unlocked)
+            assert unlocked['bodyPosition']!='fixed' and unlocked['htmlOverflow']!='hidden' and unlocked['chooserHidden'] and unlocked['active']=='activeWorkout', 'Workout must not remain scroll-locked after choosing New Workout'
             # The compact summary keeps a clear timer/pause block, three readable
             # metrics and a diagram-only thumbnail at iPhone width.
             summary=browser.execute_script("""
@@ -86,6 +95,12 @@ jobs:
               spacer.id='sxFloatRegressionSpacer';spacer.style.height='1500px';
               document.querySelector('#activeWorkout').appendChild(spacer);
               window.scrollTo(0,500);""")
+            print('SCROLL AFTER NAVIGATION:',browser.execute_script("""return {
+              y:window.scrollY,bodyPosition:document.body.style.position,
+              htmlOverflow:document.documentElement.style.overflow,
+              scrollHeight:document.documentElement.scrollHeight,
+              floating:document.querySelector('#sessionSummarySticky').classList.contains('is-floating')
+            }"""))
             wait.until(lambda d:d.execute_script("""return window.scrollY>400&&
               document.querySelector('#sessionSummarySticky').classList.contains('is-floating');"""))
             floated=browser.execute_script("""const wrapper=document.querySelector('#sessionSummarySticky');

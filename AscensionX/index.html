@@ -178,6 +178,15 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-spartan-import-label{display:block;margin-top:10px;color:var(--red2);font-size:10px;letter-spacing:1.2px;font-weight:850}
 .asc-spartan-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0 4px}
 .asc-spartan-import-actions button{min-height:52px;padding:9px 7px;font-size:11px;line-height:1.3}
+/* Cycle builder shares the same 1RM and TM settings as Profile & Setup. */
+.asc-cycle-strength-editor{margin:16px 0 12px;padding:14px 12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel2) 52%,transparent)}
+.asc-cycle-strength-editor .fields{align-items:end;margin:10px 0 0}
+.asc-cycle-strength-editor label{font-weight:750}
+.asc-cycle-tm-result{display:flex;align-items:center;min-height:47px;padding:11px 12px;border-radius:11px;border:1px solid color-mix(in srgb,var(--red2) 55%,var(--line));background:var(--panel);color:var(--red2);font-size:17px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap}
+#cycleStrengthFeedback{margin-top:10px;min-height:18px}
+#cycleStrengthFeedback[data-error="true"]{color:#ff9898}
+@media(max-width:375px){.asc-cycle-strength-editor{padding:12px 9px}.asc-cycle-strength-editor .fields{gap:7px}.asc-cycle-strength-editor select,.asc-cycle-strength-editor input{padding:11px 7px}.asc-cycle-tm-result{padding:10px 8px;font-size:14px}}
+
 /* Within SpartanX Active Session, only the import dialog scrolls.
    The underlying AscensionX page otherwise creates a phantom iframe scrollbar
    from its 100vh min-height and navigation padding. Cycle creation without the
@@ -277,7 +286,22 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
    <button type="button" class="secondary small asc-recovery-trigger" id="ascRecoveryOpen" onclick="openAscWorkoutRecovery()" hidden>RECOVER PAST SPARTANX WORKOUTS</button>
  <div id="cycleDetails" class="cycle-details" hidden>
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
- <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p><div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><button id="deleteCycleButton" type="button" class="secondary full" style="margin-top:9px;border-color:#934a50;color:#ff9ca2" onclick="openDeleteCycle()" hidden>DELETE PROGRAMME</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
+ <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p>
+  <div class="asc-cycle-strength-editor" id="cycleStrengthEditor" aria-label="Starting strength for your cycle">
+    <div class="eyebrow">SET YOUR STARTING STRENGTH</div>
+    <p class="tiny" style="margin:6px 0 12px">Each lift remembers its own 1RM. Your Training Max and cycle weights recalculate automatically.</p>
+    <div class="fields">
+      <div class="field"><label for="cycleStrengthLift">Exercise</label><select id="cycleStrengthLift" onchange="selectCycleStrengthLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+      <div class="field"><label id="cycleStrengthOneRmLabel" for="cycleStrengthOneRm">1RM (kg)</label><input id="cycleStrengthOneRm" type="number" min="0.5" step="any" inputmode="decimal" placeholder="Enter your 1RM" oninput="saveCycleStrengthOneRm()"></div>
+    </div>
+    <div class="fields">
+      <div class="field"><label for="cycleStrengthPercent">TM percentage</label><select id="cycleStrengthPercent" onchange="saveCycleStrengthPercent()"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95">95%</option></select></div>
+      <div class="field"><label id="cycleStrengthTmLabel" for="cycleStrengthTm">Calculated TM (kg)</label><output id="cycleStrengthTm" for="cycleStrengthOneRm cycleStrengthPercent" class="asc-cycle-tm-result" aria-live="polite">—</output></div>
+    </div>
+    <div id="cycleStrengthFeedback" class="tiny" role="status" aria-live="polite">Changes save automatically.</div>
+    <div id="cycleStrengthRoundNote" class="tiny" style="margin-top:5px"></div>
+  </div>
+  <div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><button id="deleteCycleButton" type="button" class="secondary full" style="margin-top:9px;border-color:#934a50;color:#ff9ca2" onclick="openDeleteCycle()" hidden>DELETE PROGRAMME</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
  <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
  <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
  <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
@@ -394,6 +418,54 @@ function exitMetrics(){showScreen('profile')}
 function e1rm(w,r){return r>0?w*(1+r/30):0}
 function tm(lift){return roundTo((Number(state.profile.max[lift])||0)*state.profile.tmPct/100)}
 function prescribed(lift,week){const p=PLAN[week-1],base=tm(lift);return {p,topLoad:roundTo(base*p.topPct/100),backLoad:p.backPct===null?null:roundTo(base*p.backPct/100)}}
+// Build Your Cycle uses the existing Profile strength values, never duplicates.
+function cycleStrengthLift(){
+ const select=$('cycleStrengthLift');
+ return select&&LIFTS.includes(select.value)?select.value:LIFTS[0];
+}
+function updateCycleStrengthList(){
+ document.querySelectorAll('#cycleExerciseOptions [data-cycle-tm-lift]').forEach(label=>{
+  const lift=label.dataset.cycleTmLift;
+  if(LIFTS.includes(lift))label.textContent='1RM: '+kg(state.profile.max[lift])+' · Training Max: '+kg(tm(lift));
+ });
+}
+function updateCycleStrengthPreview(){
+ const lift=cycleStrengthLift(),input=$('cycleStrengthOneRm'),output=$('cycleStrengthTm');
+ if(!input||!output)return;
+ const raw=input.value.trim(),rm=Number(raw),valid=raw!==''&&Number.isFinite(rm)&&rm>0;
+ output.textContent=valid?kg(roundTo(fromDisplay(rm)*state.profile.tmPct/100)):'—';
+ $('cycleStrengthFeedback').textContent=valid?'Saved automatically · '+lift+' weights are up to date.':'Enter a positive 1RM. Your last saved value is kept.';
+ $('cycleStrengthFeedback').dataset.error=String(!valid);
+}
+function selectCycleStrengthLift(lift){
+ const select=$('cycleStrengthLift');
+ if(lift&&LIFTS.includes(lift))select.value=lift;
+ const chosen=cycleStrengthLift(),stored=Number(state.profile.max[chosen])||0;
+ const input=$('cycleStrengthOneRm');
+ input.value=stored>0?String(Number(toDisplay(stored).toFixed(2))):'';
+ $('cycleStrengthOneRmLabel').textContent='1RM ('+unit()+')';
+ $('cycleStrengthTmLabel').textContent='Calculated TM ('+unit()+')';
+ $('cycleStrengthPercent').value=String(state.profile.tmPct);
+ $('cycleStrengthRoundNote').textContent='TM rounded to '+kg(state.profile.rounding||2.5)+' increments · change rounding in Profile & Setup.';
+ if($('cycleLift')){$('cycleLift').value=chosen;renderCycleLoads();}
+ updateCycleStrengthPreview();
+}
+function saveCycleStrengthOneRm(){
+ const input=$('cycleStrengthOneRm'),raw=input.value.trim(),value=Number(raw),lift=cycleStrengthLift();
+ if(raw===''||!Number.isFinite(value)||value<=0){updateCycleStrengthPreview();return}
+ const previous=state.profile.max[lift];
+ state.profile.max[lift]=fromDisplay(value);
+ if(!persist(false)){state.profile.max[lift]=previous;return}
+ updateCycleStrengthPreview();updateCycleStrengthList();renderCycleLoads();renderProfile();
+}
+function saveCycleStrengthPercent(){
+ const percentage=Number($('cycleStrengthPercent').value);
+ if(![90,92.5,95].includes(percentage))return;
+ const previous=state.profile.tmPct;
+ state.profile.tmPct=percentage;
+ if(!persist(false)){state.profile.tmPct=previous;return}
+ updateCycleStrengthPreview();updateCycleStrengthList();renderCycleLoads();renderProfile();
+}
 function saveProfile(){
  const vals={'Back Squat':$('maxSquat').value,'Bench Press':$('maxBench').value,'Deadlift':$('maxDeadlift').value,'Overhead Press':$('maxOHP').value};
  if(Object.values(vals).some(v=>!Number.isFinite(+v)||+v<=0)){toast('Enter a valid 1RM for all four lifts');return}
@@ -454,7 +526,7 @@ function saveCycleSelection(){
  const chosen=[...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].map(x=>x.value);
  if(!chosen.length){toast('Select at least one exercise');return}
  const existing=!!state.cycle.created;
- if(existing&&chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x))){toast('No changes to save');return}
+ if(existing&&chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x))){toast('Cycle selection unchanged · 1RM and TM changes already saved');return}
  const added=chosen.filter(x=>!selectedLifts().includes(x));
  const removed=selectedLifts().filter(x=>!chosen.includes(x));
  const prompt=existing
@@ -923,7 +995,8 @@ function saveWorkout(lift,week,count){
 function editWorkout(lift,week){const old=activeCycleLogs().find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>x!==old);persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
 function renderCycle(){
  const selected=selectedLifts();
- $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" style="display:block">Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" ${selected.includes(l)?'checked':''}></label>`).join('');
+ $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" data-cycle-tm-lift="${l}" style="display:block">1RM: ${kg(state.profile.max[l])} · Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" onchange="selectCycleStrengthLift(this.value)" ${selected.includes(l)?'checked':''}></label>`).join('');
+ selectCycleStrengthLift();
  $('cycleBuilderStatus').textContent=state.cycle.created?'Active: '+selected.map(l=>l+' (Week '+currentWeekFor(l)+')').join(' · '):'No active cycle. Select one or more exercises, then create your cycle.';
  $('saveCycleSelectionBtn').textContent=state.cycle.created?'Save cycle changes':'Create six-week cycle';$('deleteCycleButton').hidden=!state.cycle.created;
  $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');

@@ -1663,7 +1663,7 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 </div>
 <div id="sxQuick531Overlay" role="dialog" aria-modal="true" aria-labelledby="sxQuick531Title" hidden>
   <div id="sxQuick531Dialog">
-    <div id="sxQuick531Heading"><h2 id="sxQuick531Title">5/3/1 Calculator</h2><button type="button" id="sxClose531Quick" aria-label="Close calculator">✕ Close</button></div>
+    <div id="sxQuick531Heading"><h2 id="sxQuick531Title">5/3/1 Calculator</h2><button type="button" id="sxClose531Quick" aria-label="Back to workout options">← Back</button></div>
     <div id="sxQuick531Scroll" tabindex="0" aria-label="Scrollable 5/3/1 calculator"><div id="sxQuick531Mount"></div></div>
   </div>
 </div>
@@ -3112,7 +3112,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=233',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js?v=232"></script><script src="./tools/531-native.js?v=232"></script><script src="./assets/ascension/quick-access.js?v=226"></script>
+</script><script src="./assets/stats/statistics.js"></script><script src="./social.js"></script><script src="./tools/replica.js?v=234"></script><script src="./tools/531-native.js?v=232"></script><script src="./assets/ascension/quick-access.js?v=226"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -3275,21 +3275,21 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   if(menu.hidden)return;
   menu.hidden=true;button.setAttribute('aria-expanded','false');
   unlock(menuLock);menuLock=null;
-  if(focus&&onWorkoutSetup())button.focus({preventScroll:true});
+  if(focus){const target=onWorkoutSetup()?button:(onWorkout() ? $('openExerciseLibrary'):null);target?.focus({preventScroll:true});}
  }
  function openMenu(){
-  if(!onWorkoutSetup()||!menu.hidden||calcLock||cycleLock)return;
+  if(!(onWorkoutSetup()||onWorkout())||!menu.hidden||calcLock||cycleLock)return;
   menuLock=lock();menu.hidden=false;button.setAttribute('aria-expanded','true');
   menuClose.focus({preventScroll:true});
  }
- function closeCalc(imported=false){
+ function closeCalc(imported=false,returnToOptions=false){
   if(!calcLock)return;
   overlay.hidden=true;host.classList.remove('sx-531-quick-mode');
   calc.classList.toggle('is-collapsed',wasCollapsed);
   calc.hidden=calc.dataset.sxQuickWasHidden==='true';delete calc.dataset.sxQuickWasHidden;
   tools.prepend(host);document.body.classList.remove('sx-531-popup-open');
   unlock(calcLock,imported?0:calcLock.scroll);calcLock=null;
-  if(!imported)$('openExerciseLibrary')?.focus({preventScroll:true});
+  if(!imported&&!returnToOptions)$('openExerciseLibrary')?.focus({preventScroll:true});
   else requestAnimationFrame(()=>window.scrollTo(0,0));
  }
  function openCalc(){
@@ -3327,6 +3327,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  cycleClose.addEventListener('click',()=>closeCycle(true));
  cycleOverlay.addEventListener('click',e=>{if(e.target===cycleOverlay)closeCycle(true)});
  button.addEventListener('click',openMenu);
+  window.addEventListener('spartx:showSessionOptions',openMenu);
  $('startNewWorkoutChoice').addEventListener('click',()=>{closeMenu(false);startSession();});
  menuClose.addEventListener('click',()=>closeMenu());
  menu.addEventListener('click',e=>{if(e.target===menu)closeMenu()});
@@ -3337,12 +3338,12 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   if(typeof window.spartanxQuickStartAscension!=='function'||window.spartanxQuickStartAscension()!==true)
    alert('AscensionX could not open. Refresh SpartanX and try again.');
  });
- close.addEventListener('click',()=>closeCalc());
- overlay.addEventListener('click',e=>{if(e.target===overlay)closeCalc()});
+ close.addEventListener('click',()=>{closeCalc(false,true);openMenu();});
+ overlay.addEventListener('click',e=>{if(e.target===overlay){closeCalc(false,true);openMenu();}});
  document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
    if(cycleLock){e.preventDefault();closeCycle(true)}
-   else if(calcLock){e.preventDefault();closeCalc()}
+   else if(calcLock){e.preventDefault();closeCalc(false,true);openMenu()}
    else if(!menu.hidden){e.preventDefault();closeMenu()}
   }else if(e.key==='Tab'&&!menu.hidden){
    const els=[...$('sxSessionOptionsDialog').querySelectorAll('button:not([disabled])')];
@@ -3358,7 +3359,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 </script>
 <script id="sx-pwa-update-controller">
 (()=>{
- const BUILD=233;
+ const BUILD=234;
  const status=document.getElementById('sxUpdateStatus');
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;

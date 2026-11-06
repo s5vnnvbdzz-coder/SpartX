@@ -80,7 +80,7 @@ ascensionStyle.textContent=[
  '#ascensionXOverlay.sx-ascension-quick{align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}',
  '#ascensionXOverlay.sx-ascension-quick .sx-ascension-window{flex:none;width:min(100%,660px);height:min(88dvh,870px);max-height:100%;border:1px solid var(--lime,#c8f169);border-radius:17px;box-shadow:0 20px 60px #000c}',
  '#ascensionXOverlay.sx-ascension-quick #ascensionXEmbedFrame{overflow-y:auto;overscroll-behavior:contain}',
- '#ascensionXOverlay.sx-ascension-quick #closeAscensionX{display:inline-flex!important;align-items:center;justify-content:center}',
+ '#ascensionXOverlay.sx-ascension-quick #closeAscensionX{display:inline-flex!important;align-items:center;justify-content:center;order:2;margin-left:auto}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(100deg,var(--bg,#111419),var(--panel,#111419));border-bottom:1px solid var(--line,#343b44);box-shadow:0 2px 12px #0007}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar button{min-height:37px;flex-shrink:0;padding:8px 12px;background:color-mix(in srgb,var(--panel2) 80%,#111)!important;border:1px solid var(--line)!important;color:var(--txt)!important;border-radius:10px;font-weight:850;font-size:11px}',
  '#ascensionXOverlay .ascensionx-embedded-brand{display:flex;flex-direction:column;gap:2px;min-width:0}',

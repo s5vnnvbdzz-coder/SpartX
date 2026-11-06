@@ -44,6 +44,19 @@ jobs:
             browser.save_screenshot('/tmp/workout-logger.png')
             print('WORKOUT card:',browser.execute_script('return {name:document.querySelector("#workoutName")?.outerHTML,header:document.querySelector(".sx-start-energy-label")?.textContent,visible:document.querySelector("#workoutName")?.getBoundingClientRect().height}'))
             browser.execute_script('document.querySelector("#startWorkout").click()')
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sessionOptionsMenu").hidden'))
+            start_options=browser.execute_script("""return {
+              title:document.querySelector('#sxSessionOptionsTitle').textContent.trim(),
+              dialog:document.querySelector('#sxSessionOptionsDialog').getAttribute('role'),
+              bodyLocked:document.body.style.position==='fixed',
+              htmlLocked:document.documentElement.style.overflow==='hidden',
+              choices:[...document.querySelectorAll('#sxSessionOptionsLinks button strong')].map(x=>x.textContent.trim()),
+              active:document.querySelector('.screen.active')?.id
+            }""")
+            print('START NEW WORKOUT OPTIONS:',start_options)
+            assert start_options=={'title':'Start a Workout','dialog':'dialog','bodyLocked':True,'htmlLocked':True,
+              'choices':['New Workout','Start 5/3/1','Start AscensionX'],'active':'workout'}
+            browser.execute_script('document.querySelector("#startNewWorkoutChoice").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#activeWorkout")?.classList.contains("active")'))
             print('ACTIVE WORKOUT:',browser.execute_script('return document.querySelector("#activeWorkoutName")?.textContent'))
             # The compact summary keeps a clear timer/pause block, three readable
@@ -92,17 +105,22 @@ jobs:
             browser.execute_script('window.scrollTo(0,0)')
             wait.until(lambda d:d.execute_script("""return !document.querySelector('#sessionSummarySticky').classList.contains('is-floating');"""))
             browser.execute_script("document.querySelector('#sxFloatRegressionSpacer').remove()")
-            # Active Session Options is a true scroll-locking dialog, not a dropdown.
-            browser.execute_script('document.querySelector("#sessionOptionsButton").click()')
-            wait.until(lambda d:d.execute_script('return !document.querySelector("#sessionOptionsMenu").hidden'))
-            modal=browser.execute_script("""return {
-              dialog:document.querySelector('#sxSessionOptionsDialog').getAttribute('role'),
-              bodyLocked:document.body.style.position==='fixed',
-              htmlLocked:document.documentElement.style.overflow==='hidden',
-              choiceCount:document.querySelectorAll('#sxSessionOptionsLinks button').length
+            # Active Workout now has a direct Finish & Save action in place of Options.
+            active_actions=browser.execute_script("""return {
+              bottomButton:document.querySelector('#finishWorkoutBottom')?.textContent.trim(),
+              existingHeader:document.querySelector('#endWorkout')?.textContent.trim(),
+              oldOptionsRemoved:!document.querySelector('#sessionOptionsButton'),
+              active:document.querySelector('.screen.active')?.id
             }""")
-            print('SESSION OPTIONS:',modal)
-            assert modal=={'dialog':'dialog','bodyLocked':True,'htmlLocked':True,'choiceCount':2}
+            print('ACTIVE WORKOUT FINISH ACTIONS:',active_actions)
+            assert active_actions['oldOptionsRemoved'] and active_actions['active']=='activeWorkout'
+            assert 'FINISH' in active_actions['bottomButton'] and 'SAVE' in active_actions['bottomButton']
+            assert 'FINISH' in active_actions['existingHeader'] and 'SAVE' in active_actions['existingHeader']
+            # To start 5/3/1 from the chooser, return to Workout and select it.
+            browser.execute_script('document.querySelector("#trackerNav button[data-screen=workout]").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#workout")?.classList.contains("active")'))
+            browser.execute_script('document.querySelector("#startWorkout").click()')
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sessionOptionsMenu").hidden'))
             # The shared calculator must open expanded with no collapse button.
             browser.execute_script('document.querySelector("#start531Shortcut").click()')
             wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531Overlay").hidden'))
@@ -119,7 +137,9 @@ jobs:
             assert browser.execute_script("return document.body.style.position!=='fixed'")
             # AscensionX launches inside the same workflow, locks the SpartanX
             # background and Cancel returns directly to this active session.
-            browser.execute_script('document.querySelector("#sessionOptionsButton").click();document.querySelector("#startAscensionShortcut").click()')
+            browser.execute_script('document.querySelector("#trackerNav button[data-screen=workout]").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#workout")?.classList.contains("active")'))
+            browser.execute_script('document.querySelector("#startWorkout").click();document.querySelector("#startAscensionShortcut").click()')
             wait.until(lambda d:d.execute_script('''const p=document.querySelector("#sxAscensionPortalHost")?.shadowRoot;
               return !!p?.getElementById("ascensionXOverlay")?.classList.contains("open");'''))
             asc_popup=browser.execute_script('''const p=document.querySelector("#sxAscensionPortalHost").shadowRoot;

@@ -72,14 +72,18 @@ function refresh(){
  byId('sxAscensionContinue').dataset.lift=upNext.lift;
 }
 function launch(mode){
- const state=readCycle();if(!state){refresh();return}
+ const state=readCycle();
  if(typeof window.spartanxOpenEmbeddedAscensionX==='function'){
-  window.spartanxOpenEmbeddedAscensionX(mode,mode==='continue'?state.upNext.lift:null);
- }else{
-  // The connection normally exists; gracefully retain access via Training Tools.
-  if(typeof switchScreen==='function')switchScreen('tools');
+  // The linked cycle is read fresh from AscensionX state, not copied into a new planner.
+  return window.spartanxOpenEmbeddedAscensionX(mode==='continue'&&state?'continue':'home',mode==='continue'&&state?state.upNext.lift:null)===true;
  }
+ // The connection normally exists; gracefully retain access via Training Tools.
+ if(typeof switchScreen==='function')switchScreen('tools');
+ return false;
 }
+// Used by Active Session → Options. With a cycle: preview the next prescribed
+// lift/week; without one: open the real AscensionX cycle setup.
+window.spartanxQuickStartAscension=()=>launch(readCycle()?'continue':'home');
 byId('sxAscensionContinue').addEventListener('click',()=>launch('continue'));
 byId('sxAscensionView').addEventListener('click',()=>launch('home'));
 window.addEventListener('spartx:ascensionCycleUpdated',refresh);

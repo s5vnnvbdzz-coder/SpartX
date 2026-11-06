@@ -1,0 +1,72 @@
+name: SpartanX live mobile workout flow diagnostic
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/mobile-ui-check.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-mobile-workout-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up browser tools
+        run: |
+          google-chrome --version || chromium --version
+          python3 -m pip install --quiet --break-system-packages selenium
+      - name: Exercise real live site on phone-sized browser
+        run: |
+          python3 - <<'PY'
+          import time, traceback
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait
+          from selenium.webdriver.support import expected_conditions as EC
+          options=Options()
+          options.add_argument('--headless=new')
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          options.add_argument('--disable-gpu')
+          options.add_experimental_option('mobileEmulation',{'deviceMetrics':{'width':390,'height':844,'pixelRatio':3},'userAgent':'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'})
+          options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+          browser=webdriver.Chrome(options=options)
+          wait=WebDriverWait(browser,20)
+          try:
+            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/?mobile-ui-test=1')
+            wait.until(lambda d:d.execute_script('return document.readyState')=='complete')
+            time.sleep(1)
+            print('URL:',browser.current_url)
+            print('Root DOM data:',browser.execute_script('return {inputType:document.querySelector("#workoutName")?.type, customButton:!!document.querySelector("#openCustomExercise"), page:document.querySelector(".screen.active")?.id,build:document.body.textContent.includes("Build 219")}'))
+            print('Browser errors:',[x['message'] for x in browser.get_log('browser') if x['level']=='SEVERE'][:12])
+            browser.execute_script('document.querySelector("#trackerNav button[data-screen=workout]").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#workout")?.classList.contains("active")'))
+            browser.save_screenshot('/tmp/workout-logger.png')
+            print('WORKOUT card:',browser.execute_script('return {name:document.querySelector("#workoutName")?.outerHTML,header:document.querySelector(".sx-start-energy-label")?.textContent,visible:document.querySelector("#workoutName")?.getBoundingClientRect().height}'))
+            browser.execute_script('document.querySelector("#startWorkout").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#activeWorkout")?.classList.contains("active")'))
+            print('ACTIVE WORKOUT:',browser.execute_script('return document.querySelector("#activeWorkoutName")?.textContent'))
+            browser.execute_script('document.querySelector("#openExerciseLibrary").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#exerciseLibraryScreen")?.classList.contains("active")'))
+            print('LIBRARY DOM:',browser.execute_script('return {title:document.querySelector(".sx-add-exercise-header h1")?.textContent,custom:document.querySelector("#openCustomExercise")?.textContent,back:document.querySelector("#closeExerciseLibrary")?.textContent,headerVisible:!!document.querySelector(".sx-add-exercise-header")?.getBoundingClientRect().height}'))
+            browser.save_screenshot('/tmp/add-exercise.png')
+            browser.execute_script('document.querySelector("#openCustomExercise").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#customExerciseDialog")?.open'))
+            print('CUSTOM POPUP OPEN: true')
+            print('PASS: live mobile Workout Logger and Add Exercise behave as requested')
+          except Exception:
+            print('CURRENT PAGE:',browser.current_url)
+            print('ERROR LOGS:',browser.get_log('browser'))
+            traceback.print_exc()
+            browser.save_screenshot('/tmp/error-workout.png')
+            raise
+          finally:
+            browser.quit()
+          PY
+      - name: Upload diagnostic screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spartanx-mobile-ui-screenshots
+          path: /tmp/*workout*.png
+          if-no-files-found: ignore

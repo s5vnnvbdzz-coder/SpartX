@@ -37,7 +37,7 @@ jobs:
             wait.until(lambda d:d.execute_script('return document.readyState')=='complete')
             time.sleep(1)
             print('URL:',browser.current_url)
-            print('Root DOM data:',browser.execute_script('return {inputType:document.querySelector("#workoutName")?.type, customButton:!!document.querySelector("#openCustomExercise"), page:document.querySelector(".screen.active")?.id,build:document.body.textContent.includes("Build 219")}'))
+            print('Root DOM data:',browser.execute_script('return {inputType:document.querySelector("#workoutName")?.type, customButton:!!document.querySelector("#openCustomExercise"), page:document.querySelector(".screen.active")?.id,build:document.body.textContent.match(/Build \\d+/)?.[0]}'))
             print('Browser errors:',[x['message'] for x in browser.get_log('browser') if x['level']=='SEVERE'][:12])
             browser.execute_script('document.querySelector("#trackerNav button[data-screen=workout]").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#workout")?.classList.contains("active")'))
@@ -46,6 +46,53 @@ jobs:
             browser.execute_script('document.querySelector("#startWorkout").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#activeWorkout")?.classList.contains("active")'))
             print('ACTIVE WORKOUT:',browser.execute_script('return document.querySelector("#activeWorkoutName")?.textContent'))
+            # Active Session Options is a true scroll-locking dialog, not a dropdown.
+            browser.execute_script('document.querySelector("#sessionOptionsButton").click()')
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sessionOptionsMenu").hidden'))
+            modal=browser.execute_script("""return {
+              dialog:document.querySelector('#sxSessionOptionsDialog').getAttribute('role'),
+              bodyLocked:document.body.style.position==='fixed',
+              htmlLocked:document.documentElement.style.overflow==='hidden',
+              choiceCount:document.querySelectorAll('#sxSessionOptionsLinks button').length
+            }""")
+            print('SESSION OPTIONS:',modal)
+            assert modal=={'dialog':'dialog','bodyLocked':True,'htmlLocked':True,'choiceCount':2}
+            # The shared calculator must open expanded with no collapse button.
+            browser.execute_script('document.querySelector("#start531Shortcut").click()')
+            wait.until(lambda d:d.execute_script('return !document.querySelector("#sxQuick531Overlay").hidden'))
+            calc_popup=browser.execute_script("""const host=document.querySelector('#toolsReplica');
+              const card=host.shadowRoot.querySelector('section[aria-labelledby="531Title"]');
+              return {bodyLocked:document.body.style.position==='fixed',
+                expanded:!card.classList.contains('is-collapsed'),
+                noCollapse:getComputedStyle(card.querySelector('.card-collapse')).display==='none',
+                inPopup:document.querySelector('#sxQuick531Mount').contains(host)};""")
+            print('SESSION 5/3/1:',calc_popup)
+            assert all(calc_popup.values()), '5/3/1 must be expanded with hidden collapse button'
+            browser.execute_script('document.querySelector("#sxClose531Quick").click()')
+            wait.until(lambda d:d.execute_script('return document.querySelector("#sxQuick531Overlay").hidden'))
+            assert browser.execute_script("return document.body.style.position!=='fixed'")
+            # AscensionX launches inside the same workflow, locks the SpartanX
+            # background and Cancel returns directly to this active session.
+            browser.execute_script('document.querySelector("#sessionOptionsButton").click();document.querySelector("#startAscensionShortcut").click()')
+            wait.until(lambda d:d.execute_script('''const p=document.querySelector("#sxAscensionPortalHost")?.shadowRoot;
+              return !!p?.getElementById("ascensionXOverlay")?.classList.contains("open");'''))
+            asc_popup=browser.execute_script('''const p=document.querySelector("#sxAscensionPortalHost").shadowRoot;
+              return {quick:p.getElementById("ascensionXOverlay").classList.contains("sx-ascension-quick"),
+                bodyLocked:document.body.style.position==="fixed",
+                htmlLocked:document.documentElement.style.overflow==="hidden",
+                activeWorkout:document.querySelector(".screen.active")?.id==="activeWorkout"};''')
+            print('ASCENSIONX MODAL:',asc_popup)
+            assert all(asc_popup.values()), 'AscensionX must be a modal above an unchanged active workout'
+            wait.until(lambda d:d.execute_script('''const f=document.querySelector("#sxAscensionPortalHost").shadowRoot.getElementById("ascensionXEmbedFrame");
+              return !!f.contentWindow?.cancelAscSpartanImport&&f.contentDocument?.body?.classList.contains("sx-spartan-quick-import");'''))
+            browser.execute_script('''document.querySelector("#sxAscensionPortalHost").shadowRoot.getElementById("ascensionXEmbedFrame").contentWindow.cancelAscSpartanImport();''')
+            wait.until(lambda d:d.execute_script('''const p=document.querySelector("#sxAscensionPortalHost").shadowRoot;
+              return !p.getElementById("ascensionXOverlay").classList.contains("open");'''))
+            after_cancel=browser.execute_script('''return {activeWorkout:document.querySelector(".screen.active")?.id==="activeWorkout",
+              bodyRestored:document.body.style.position!=="fixed",
+              htmlRestored:document.documentElement.style.overflow!=="hidden"};''')
+            print('ASCENSIONX CANCEL RETURNS TO WORKOUT:',after_cancel)
+            assert after_cancel=={'activeWorkout':True,'bodyRestored':True,'htmlRestored':True}
             browser.execute_script('document.querySelector("#openExerciseLibrary").click()')
             wait.until(lambda d:d.execute_script('return document.querySelector("#exerciseLibraryScreen")?.classList.contains("active")'))
             result=browser.execute_script('''const h=document.querySelector("#sxHeaderExerciseControls"),brand=document.querySelector("#sxBrandHeader"),rect=h.getBoundingClientRect(),head=document.querySelector("body>header").getBoundingClientRect();return {title:h?.querySelector("h1")?.textContent,custom:document.querySelector("#openCustomExercise")?.textContent,back:document.querySelector("#closeExerciseLibrary")?.textContent,parent:h?.parentElement?.tagName,headerVisible:rect.height>0,brandHidden:getComputedStyle(brand).display==="none",headerTop:head.top,headerBottom:head.bottom,controlsTop:rect.top,controlsBottom:rect.bottom,controlsWidth:rect.width,viewportWidth:innerWidth};''')

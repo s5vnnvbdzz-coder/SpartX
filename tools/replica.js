@@ -80,7 +80,7 @@ ascensionStyle.textContent=[
  '#ascensionXOverlay.sx-ascension-quick{align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}',
  '#ascensionXOverlay.sx-ascension-quick .sx-ascension-window{flex:none;width:min(100%,660px);height:min(88dvh,870px);max-height:100%;border:1px solid var(--lime,#c8f169);border-radius:17px;box-shadow:0 20px 60px #000c}',
  '#ascensionXOverlay.sx-ascension-quick #ascensionXEmbedFrame{overflow-y:auto;overscroll-behavior:contain}',
- '#ascensionXOverlay.sx-ascension-quick #closeAscensionX{display:none!important}',
+ '#ascensionXOverlay.sx-ascension-quick #closeAscensionX{display:inline-flex!important;align-items:center;justify-content:center}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(100deg,var(--bg,#111419),var(--panel,#111419));border-bottom:1px solid var(--line,#343b44);box-shadow:0 2px 12px #0007}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar button{min-height:37px;flex-shrink:0;padding:8px 12px;background:color-mix(in srgb,var(--panel2) 80%,#111)!important;border:1px solid var(--line)!important;color:var(--txt)!important;border-radius:10px;font-weight:850;font-size:11px}',
  '#ascensionXOverlay .ascensionx-embedded-brand{display:flex;flex-direction:column;gap:2px;min-width:0}',
@@ -152,8 +152,8 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null)=>{
  const fromActiveSession=document.querySelector('.screen.active')?.id==='activeWorkout';
  ascensionOverlay.classList.toggle('sx-ascension-quick',fromActiveSession);
  ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:fromActiveSession};
- ascensionCloseButton.textContent='← WORKOUT';
- ascensionCloseButton.setAttribute('aria-label','Close AscensionX and return to SpartanX');
+ ascensionCloseButton.textContent=fromActiveSession?'← Back':'← WORKOUT';
+ ascensionCloseButton.setAttribute('aria-label',fromActiveSession?'Back to workout options':'Close AscensionX and return to SpartanX');
  openEmbeddedAscensionX();
  if(!ascensionOverlay.classList.contains('open')){ascensionQuickPending=null;return false}
  deliverAscensionShortcut();
@@ -177,7 +177,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=229';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=234';
  }
  if(ascensionOverlay.classList.contains('sx-ascension-quick'))ascensionOverlay.focus({preventScroll:true});
  else ascensionCloseButton.focus({preventScroll:true});
@@ -206,7 +206,11 @@ function closeEmbeddedAscensionX(){
  window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
 }
 ascensionOpenButton.addEventListener('click',()=>{ascensionQuickCaller=null;ascensionQuickPending=null;ascensionOverlay.classList.remove('sx-ascension-quick');ascensionCloseButton.textContent='← TOOLS';openEmbeddedAscensionX()});
-ascensionCloseButton.addEventListener('click',closeEmbeddedAscensionX);
+ascensionCloseButton.addEventListener('click',()=>{
+ const backToChoices=ascensionOverlay.classList.contains('sx-ascension-quick');
+ closeEmbeddedAscensionX();
+ if(backToChoices)window.dispatchEvent(new CustomEvent('spartx:showSessionOptions'));
+});
 ascensionOverlay.addEventListener('click',e=>{if(e.target===ascensionOverlay&&ascensionOverlay.classList.contains('sx-ascension-quick'))closeEmbeddedAscensionX()});
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&ascensionOverlay.classList.contains('open'))closeEmbeddedAscensionX();

@@ -521,7 +521,7 @@ function apply531ToWorkout(){
 $('apply531').addEventListener('click',apply531ToWorkout);
 $('quickCreate531Cycle').addEventListener('click',()=>{
  const currentTm=toKg(Number($('tm').value)),rm=toKg(Number($('tmFinderOneRm').value));
- if(!(currentTm>0)){$('applyHint').textContent='Enter a valid 1RM or Training Max before creating a cycle.';return;}
+ // The planner also supports entering a new 1RM from scratch; no TM prerequisite.
  // Open the existing 4 / 8 / 12 week planner; never duplicate its saved data.
  window.dispatchEvent(new CustomEvent('spartx:create531CycleFromCalculator',{
   detail:{lift:$('applyLift').value,tm:currentTm,oneRm:rm>0?rm:null}

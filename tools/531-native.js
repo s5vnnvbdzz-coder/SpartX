@@ -68,13 +68,14 @@ function recalcPlannerTM(){
 // Called only by the Active Session's 5/3/1 Create Cycle shortcut.
 // The same real native planner is moved into a scroll-locked modal.
 window.spartanxPrefill531Cycle=detail=>{
- if(!detail||!(Number(detail.tm)>0))return false;
+ if(!detail)return false;
  if(editingId!==null)closeEditForm();
  const lift=detail.lift==='Conventional Deadlift'?'Deadlift':detail.lift;
  if(['Bench Press','Back Squat','Deadlift','Overhead Press'].includes(lift))$('lift').value=lift;
  const rm=Number(detail.oneRm)||calculatorOneRm($('lift').value)||0;
  $('oneRm').value=rm>0?String(rm):'';
- $('tm').value=String(round(Number(detail.tm)));
+ const requestedTM=Number(detail.tm);
+ $('tm').value=requestedTM>0?String(round(requestedTM)):(rm>0?String(round(rm*.9)):'');
  if(rm>0)updatePlannerOneRm(rm);
  $('programmeCard').classList.remove('visible');
  generated=null;

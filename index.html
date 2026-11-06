@@ -3010,89 +3010,90 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 
 <script id="sx-active-session-quick-531">
 (()=>{
-  const $=id=>document.getElementById(id);
-  const optionsButton=$('sessionOptionsButton'),menu=$('sessionOptionsMenu'),overlay=$('sxQuick531Overlay');
-  const host=$('toolsReplica'),origin=$('tools'),mount=$('sxQuick531Mount'),closeButton=$('sxClose531Quick');
-  if(!optionsButton||!menu||!overlay||!host||!origin||!host.shadowRoot)return;
-  let isOpen=false,previousScroll=0,previousBody=null,previousFocus=null;
-  const calculator=host.shadowRoot.querySelector('section[aria-labelledby="531Title"]');
-  if(!calculator)return;
-  // The actual calculator is moved, not cloned. Its values, input listeners,
-  // saved lift-specific 1RMs and existing ADD TO WORKOUT action are preserved.
-  const scope=document.createElement('style');
-  scope.id='sx-quick-531-shadow-style';
-  scope.textContent=`
-    :host(.sx-531-quick-mode) main > :not(section[aria-labelledby="531Title"]){display:none!important}
-    :host(.sx-531-quick-mode) main > section[aria-labelledby="531Title"]{display:block!important;margin:0!important}
-    :host(.sx-531-quick-mode) main{padding:0!important;margin:0!important;max-width:none!important}
-    :host(.sx-531-quick-mode) #cyclePlannerOverlay{display:none!important}
-  `;
-  host.shadowRoot.appendChild(scope);
-  function toggleMenu(force){
-    const show=typeof force==='boolean'?force:menu.hidden;
-    menu.hidden=!show;optionsButton.setAttribute('aria-expanded',String(show));
+ const $=id=>document.getElementById(id);
+ const button=$('sessionOptionsButton'),menu=$('sessionOptionsMenu'),menuClose=$('sxCloseSessionOptions'),overlay=$('sxQuick531Overlay');
+ const host=$('toolsReplica'),tools=$('tools'),mount=$('sxQuick531Mount'),close=$('sxClose531Quick');
+ if(!button||!menu||!menuClose||!overlay||!host?.shadowRoot||!tools||!mount)return;
+ const calc=host.shadowRoot.querySelector('section[aria-labelledby="531Title"]');
+ if(!calc)return;
+ let menuLock=null,calcLock=null,wasCollapsed=false;
+ const onWorkout=()=>document.querySelector('.screen.active')?.id==='activeWorkout';
+ const scope=document.createElement('style');scope.id='sx-quick-531-shadow-style';
+ scope.textContent=`
+ :host(.sx-531-quick-mode) main > :not(section[aria-labelledby="531Title"]){display:none!important}
+ :host(.sx-531-quick-mode) main > section[aria-labelledby="531Title"]{display:block!important;margin:0!important}
+ :host(.sx-531-quick-mode) main{padding:0!important;margin:0!important;max-width:none!important}
+ :host(.sx-531-quick-mode) section[aria-labelledby="531Title"] .card-collapse{display:none!important}
+ :host(.sx-531-quick-mode) #cyclePlannerOverlay{display:none!important}`;
+ host.shadowRoot.appendChild(scope);
+ function lock(){
+  const x={scroll:window.scrollY||document.documentElement.scrollTop||0};
+  for(const k of ['position','top','left','right','width','overflow'])x[k]=document.body.style[k];
+  x.htmlOverflow=document.documentElement.style.overflow;
+  Object.assign(document.body.style,{position:'fixed',top:'-'+x.scroll+'px',left:'0',right:'0',width:'100%',overflow:'hidden'});
+  document.documentElement.style.overflow='hidden';return x;
+ }
+ function unlock(x,target){
+  if(!x)return;
+  for(const k of ['position','top','left','right','width','overflow'])document.body.style[k]=x[k];
+  document.documentElement.style.overflow=x.htmlOverflow;
+  window.scrollTo(0,typeof target==='number'?target:x.scroll);
+ }
+ function closeMenu(focus=true){
+  if(menu.hidden)return;
+  menu.hidden=true;button.setAttribute('aria-expanded','false');
+  unlock(menuLock);menuLock=null;
+  if(focus)button.focus({preventScroll:true});
+ }
+ function openMenu(){
+  if(!onWorkout()||!menu.hidden||calcLock)return;
+  menuLock=lock();menu.hidden=false;button.setAttribute('aria-expanded','true');
+  menuClose.focus({preventScroll:true});
+ }
+ function closeCalc(imported=false){
+  if(!calcLock)return;
+  overlay.hidden=true;host.classList.remove('sx-531-quick-mode');
+  calc.classList.toggle('is-collapsed',wasCollapsed);
+  calc.hidden=calc.dataset.sxQuickWasHidden==='true';delete calc.dataset.sxQuickWasHidden;
+  tools.prepend(host);document.body.classList.remove('sx-531-popup-open');
+  unlock(calcLock,imported?0:calcLock.scroll);calcLock=null;
+  if(!imported)button.focus({preventScroll:true});
+  else requestAnimationFrame(()=>window.scrollTo(0,0));
+ }
+ function openCalc(){
+  closeMenu();
+  if(!onWorkout()||calcLock)return;
+  wasCollapsed=calc.classList.contains('is-collapsed');calc.classList.remove('is-collapsed');
+  calc.dataset.sxQuickWasHidden=String(calc.hidden);calc.hidden=false;
+  host.classList.add('sx-531-quick-mode');mount.appendChild(host);
+  calcLock=lock();overlay.hidden=false;document.body.classList.add('sx-531-popup-open');
+  $('sxQuick531Scroll').scrollTop=0;close.focus({preventScroll:true});
+ }
+ button.addEventListener('click',openMenu);
+ menuClose.addEventListener('click',()=>closeMenu());
+ menu.addEventListener('click',e=>{if(e.target===menu)closeMenu()});
+ $('start531Shortcut').addEventListener('click',openCalc);
+ $('startAscensionShortcut').addEventListener('click',()=>{
+  closeMenu();
+  if(typeof window.spartanxQuickStartAscension!=='function'||window.spartanxQuickStartAscension()!==true)
+   alert('AscensionX could not open. Refresh SpartanX and try again.');
+ });
+ close.addEventListener('click',()=>closeCalc());
+ overlay.addEventListener('click',e=>{if(e.target===overlay)closeCalc()});
+ document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+   if(calcLock){e.preventDefault();closeCalc()}
+   else if(!menu.hidden){e.preventDefault();closeMenu()}
+  }else if(e.key==='Tab'&&!menu.hidden){
+   const els=[...$('sxSessionOptionsDialog').querySelectorAll('button:not([disabled])')];
+   if(e.shiftKey&&document.activeElement===els[0]){e.preventDefault();els[els.length-1].focus()}
+   else if(!e.shiftKey&&document.activeElement===els[els.length-1]){e.preventDefault();els[0].focus()}
   }
-  function unlockBody(){
-    if(!previousBody)return;
-    document.body.style.position=previousBody.position;
-    document.body.style.top=previousBody.top;
-    document.body.style.left=previousBody.left;
-    document.body.style.right=previousBody.right;
-    document.body.style.width=previousBody.width;
-    document.body.style.overflow=previousBody.overflow;
-    previousBody=null;
-  }
-  function closePopup(imported=false){
-    if(!isOpen)return;
-    isOpen=false;overlay.hidden=true;
-    host.classList.remove('sx-531-quick-mode');
-    calculator.hidden=calculator.dataset.sxQuickWasHidden==='true';
-    delete calculator.dataset.sxQuickWasHidden;
-    origin.prepend(host);
-    document.body.classList.remove('sx-531-popup-open');
-    unlockBody();
-    window.scrollTo(0,imported?0:previousScroll);
-    if(!imported&&previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
-    if(imported)requestAnimationFrame(()=>window.scrollTo(0,0));
-  }
-  function openPopup(){
-    toggleMenu(false);
-    if(isOpen||document.querySelector('.screen.active')?.id!=='activeWorkout')return;
-    previousFocus=document.activeElement;
-    previousScroll=window.scrollY||document.documentElement.scrollTop||0;
-    previousBody={position:document.body.style.position,top:document.body.style.top,left:document.body.style.left,right:document.body.style.right,width:document.body.style.width,overflow:document.body.style.overflow};
-    calculator.dataset.sxQuickWasHidden=String(calculator.hidden);
-    calculator.hidden=false;
-    host.classList.add('sx-531-quick-mode');
-    mount.appendChild(host);
-    overlay.hidden=false;isOpen=true;
-    document.body.classList.add('sx-531-popup-open');
-    document.body.style.position='fixed';document.body.style.top='-'+previousScroll+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden';
-    $('sxQuick531Scroll').scrollTop=0;
-    closeButton.focus({preventScroll:true});
-  }
-  optionsButton.addEventListener('click',()=>toggleMenu());
-  $('start531Shortcut').addEventListener('click',openPopup);
-  $('startAscensionShortcut').addEventListener('click',()=>{
-    toggleMenu(false);
-    // Shared AscensionX quick-start handles cycle selection and already uses
-    // SpartanX's existing embedded app and import-to-active-workout bridge.
-    if(typeof window.spartanxQuickStartAscension!=='function' || window.spartanxQuickStartAscension()!==true){
-      alert('AscensionX could not open. Refresh SpartanX and try again.');
-    }
-  });
-  closeButton.addEventListener('click',()=>closePopup());
-  overlay.addEventListener('click',e=>{if(e.target===overlay)closePopup()});
-  document.addEventListener('click',e=>{if(!menu.hidden&&!e.composedPath().includes(optionsButton)&&!e.composedPath().includes(menu))toggleMenu(false)});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(isOpen){e.preventDefault();closePopup();}else if(!menu.hidden)toggleMenu(false);}});
-  const originalImport=window.spartanxImport531;
-  if(typeof originalImport==='function'){
-    window.spartanxImport531=function(detail){
-      const imported=originalImport(detail);
-      if(imported&&isOpen)closePopup(true);
-      return imported;
-    };
-  }
+ });
+ const import531=window.spartanxImport531;
+ if(typeof import531==='function')window.spartanxImport531=function(detail){
+  const ok=import531(detail);if(ok&&calcLock)closeCalc(true);return ok;
+ };
 })();
 </script>
 <script id="sx-pwa-update-controller">

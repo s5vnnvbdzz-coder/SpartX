@@ -1,5 +1,7 @@
 name: Verify Active Session 5/3/1 Create Cycle
 on:
+  push:
+    branches: [main]
   workflow_run:
     workflows: ["Deploy SPARTANX to GitHub Pages"]
     types: [completed]
@@ -8,9 +10,22 @@ permissions:
   contents: read
 jobs:
   verify-session-cycle:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Check out current version
+        uses: actions/checkout@v4
+      - name: Serve the current repository locally
+        run: |
+          mkdir -p /tmp/sx-cycle-test/SpartX
+          cp -a . /tmp/sx-cycle-test/SpartX/
+          nohup python3 -m http.server 8765 --directory /tmp/sx-cycle-test >/tmp/sx-cycle-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/SpartX/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/sx-cycle-server.log
+          exit 1
       - name: Prepare mobile browser
         run: |
           python3 -m pip install --quiet --break-system-packages selenium
@@ -29,7 +44,7 @@ jobs:
           browser=webdriver.Chrome(options=options)
           wait=WebDriverWait(browser,25)
           try:
-            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/?cycle-quick-check='+str(int(time.time())))
+            browser.get('http://127.0.0.1:8765/SpartX/?cycle-quick-check='+str(int(time.time())))
             wait.until(lambda d:d.execute_script('return !!document.querySelector("#toolsReplica")?.shadowRoot?.getElementById("quickCreate531Cycle") && !!document.querySelector("#native531Host")?.shadowRoot?.getElementById("oneRm")'))
             browser.execute_script("""document.querySelector('#trackerNav button[data-screen=workout]').click();
               document.querySelector('#startWorkout').click();

@@ -178,6 +178,8 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-spartan-import-label{display:block;margin-top:10px;color:var(--red2);font-size:10px;letter-spacing:1.2px;font-weight:850}
 .asc-spartan-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0 4px}
 .asc-spartan-import-actions button{min-height:52px;padding:9px 7px;font-size:11px;line-height:1.3}
+body.sx-spartan-quick-import #ascSpartanImportBackdrop{background:var(--bg);backdrop-filter:none;padding:0;align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+body.sx-spartan-quick-import #ascSpartanImportBackdrop .asc-spartan-import-dialog{width:100%;max-width:none;min-height:100%;padding:18px 16px 24px;background:var(--bg);border:0;border-radius:0;box-shadow:none}
 @media(max-width:375px){.asc-spartan-import-actions button{font-size:10px}}
 /* Previous SpartanX workout recovery is deliberately separate from programme editing. */
 .asc-recovery-trigger{display:block;margin:9px 0 0;width:100%;min-height:43px;font-size:11px;letter-spacing:.45px}
@@ -209,7 +211,7 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
 </header>
 <div id="setPopupBackdrop" class="set-popup-backdrop" onclick="if(event.target===this)closeSetPopup()"><div class="set-popup" role="dialog" aria-modal="true" aria-labelledby="setPopupTitle"><div class="row between"><h2 id="setPopupTitle" style="margin:0">Set value</h2><button class="ghost" onclick="closeSetPopup()" aria-label="Close">✕</button></div><div id="setPopupContent"></div><div class="set-popup-actions"><button class="secondary" onclick="closeSetPopup()">Cancel</button><button onclick="applySetPopup()">Apply</button></div></div></div>
 <div id="cycleConfirmBackdrop" class="cycle-confirm-backdrop" role="presentation"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleConfirmTitle"><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleConfirmTitle" style="margin:9px 0">Start your cycle?</h2><p class="tiny" id="cycleConfirmSummary"></p><div class="cycle-confirm-actions"><button class="secondary" onclick="discardCycleConfirmation()">Discard</button><button id="cycleConfirmAction" onclick="confirmCycleStart()">Start</button></div></section></div>
-<div id="ascSpartanImportBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeAscSpartanImport()">
+<div id="ascSpartanImportBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)cancelAscSpartanImport()">
   <section class="cycle-confirm-dialog asc-spartan-import-dialog" role="dialog" aria-modal="true" aria-labelledby="ascSpartanImportTitle">
     <div class="eyebrow">ASCENSIONX × SPARTANX</div>
     <h2 id="ascSpartanImportTitle" style="margin:9px 0">Log this workout in SpartanX?</h2>
@@ -219,10 +221,9 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
     <div id="ascSpartanImportPreview" class="asc-spartan-import-preview" aria-live="polite"></div>
     <p class="tiny">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets in SpartanX</strong> to record the session in AscensionX and advance this lift to the next week. Partial sessions are saved but do not advance.</p>
     <div class="asc-spartan-import-actions">
-      <button type="button" class="secondary" onclick="trainInsideAscensionX()">TRAIN IN ASCENSIONX</button>
+      <button type="button" class="secondary" onclick="cancelAscSpartanImport()">CANCEL</button>
       <button type="button" id="ascSpartanImportConfirm" onclick="requestAscensionSpartanImport()">LOAD INTO SPARTANX</button>
     </div>
-    <button type="button" class="ghost full small" onclick="closeAscSpartanImport()">Cancel</button>
   </section>
 </div>
 <div id="ascRecoveryBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeAscWorkoutRecovery()">
@@ -569,7 +570,13 @@ window.addEventListener('message',e=>{
   return;
  }
 
+ if(e.data?.type==='spartx:ascensionQuickExit'&&ascensionEmbeddedBySpartanX){
+  document.body.classList.remove('sx-spartan-quick-import');
+  closeAscSpartanImport();
+  return;
+ }
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
+  document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
    if(requestedLift){
@@ -616,7 +623,13 @@ function closeAscSpartanImport(){
  $('ascSpartanImportConfirm').disabled=false;
  $('ascSpartanImportConfirm').textContent='LOAD INTO SPARTANX';
 }
-function trainInsideAscensionX(){closeAscSpartanImport();showScreen('workout')}
+function cancelAscSpartanImport(){
+ closeAscSpartanImport();
+ // In Active Session, close the entire embedded window and resume SpartanX.
+ if(ascensionEmbeddedBySpartanX&&document.body.classList.contains('sx-spartan-quick-import')){
+  try{window.parent.postMessage({type:'spartx:ascensionQuickCancel'},location.origin)}catch(e){}
+ }
+}
 function buildAscSpartanWorkout(lift){
  if(!state.cycle.created||!selectedLifts().includes(lift))return null;
  const week=currentWeekFor(lift),info=prescribed(lift,week),p=info.p,trainingMax=tm(lift);

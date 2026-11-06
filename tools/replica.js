@@ -60,11 +60,13 @@ ascensionOverlay.setAttribute('aria-modal','true');
 ascensionOverlay.setAttribute('aria-labelledby','ascensionXOverlayTitle');
 ascensionOverlay.setAttribute('aria-hidden','true');
 ascensionOverlay.innerHTML=
+ '<div class="sx-ascension-window">'+
  '<div class="ascensionx-embedded-toolbar">'+
    '<button id="closeAscensionX" type="button" aria-label="Close AscensionX and return to Training Tools">← TOOLS</button>'+
    '<div class="ascensionx-embedded-brand"><strong id="ascensionXOverlayTitle">ASCENSION<span>X</span></strong><small>STRENGTH METHOD</small></div>'+
  '</div>'+
- '<iframe id="ascensionXEmbedFrame" title="AscensionX full training application" src="about:blank" allow="fullscreen" referrerpolicy="same-origin"></iframe>';
+ '<iframe id="ascensionXEmbedFrame" title="AscensionX full training application" src="about:blank" allow="fullscreen" referrerpolicy="same-origin"></iframe>'+
+ '</div>';
 ascensionPortal.appendChild(ascensionOverlay);
 
 const ascensionStyle=document.createElement('style');
@@ -73,6 +75,10 @@ ascensionStyle.textContent=[
  '#ascensionXToolCard .ascension-launch span{color:var(--lime);font-size:19px;line-height:1}',
  '#ascensionXOverlay{display:none;position:fixed;inset:0;width:100%;height:100dvh;z-index:2147483647;flex-direction:column;background:var(--bg,#090b0f);color:var(--txt,#f5f5f7);overflow:hidden;overscroll-behavior:contain}',
  '#ascensionXOverlay.open{display:flex}',
+ '#ascensionXOverlay .sx-ascension-window{display:flex;flex-direction:column;flex:1 1 auto;width:100%;height:100%;min-height:0;overflow:hidden;background:var(--bg,#090b0f)}',
+ '#ascensionXOverlay.sx-ascension-quick{align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}',
+ '#ascensionXOverlay.sx-ascension-quick .sx-ascension-window{flex:none;width:min(100%,660px);height:min(88dvh,870px);max-height:100%;border:1px solid var(--lime,#c8f169);border-radius:17px;box-shadow:0 20px 60px #000c}',
+ '#ascensionXOverlay.sx-ascension-quick #ascensionXEmbedFrame{overflow-y:auto;overscroll-behavior:contain}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(100deg,var(--bg,#111419),var(--panel,#111419));border-bottom:1px solid var(--line,#343b44);box-shadow:0 2px 12px #0007}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar button{min-height:37px;flex-shrink:0;padding:8px 12px;background:color-mix(in srgb,var(--panel2) 80%,#111)!important;border:1px solid var(--line)!important;color:var(--txt)!important;border-radius:10px;font-weight:850;font-size:11px}',
  '#ascensionXOverlay .ascensionx-embedded-brand{display:flex;flex-direction:column;gap:2px;min-width:0}',
@@ -135,12 +141,14 @@ let ascensionQuickCaller=null,ascensionQuickPending=null,ascensionEmbedReadyForS
 function deliverAscensionShortcut(){
  if(!ascensionQuickPending||!ascensionEmbedReadyForShortcut||!ascensionOverlay.classList.contains('open'))return;
  const destination=ascensionQuickPending;ascensionQuickPending=null;
- try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift},location.origin)}catch(e){}
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift,quickImport:destination.quickImport===true},location.origin)}catch(e){}
 }
 window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null)=>{
  const option=mode==='continue'?'continue':'home';
  ascensionQuickCaller=document.activeElement;
- ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null};
+ const fromActiveSession=document.querySelector('.screen.active')?.id==='activeWorkout';
+ ascensionOverlay.classList.toggle('sx-ascension-quick',fromActiveSession);
+ ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:fromActiveSession};
  ascensionCloseButton.textContent='← WORKOUT';
  ascensionCloseButton.setAttribute('aria-label','Close AscensionX and return to SpartanX');
  openEmbeddedAscensionX();
@@ -163,14 +171,17 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=224';
  }
  ascensionCloseButton.focus({preventScroll:true});
 }
 function closeEmbeddedAscensionX(){
  if(!ascensionOverlay.classList.contains('open'))return;
- ascensionOverlay.classList.remove('open');
+ ascensionOverlay.classList.remove('open','sx-ascension-quick');
  ascensionOverlay.setAttribute('aria-hidden','true');
+ if(ascensionEmbedFrame.getAttribute('src')!=='about:blank'){
+  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickExit'},location.origin)}catch(e){}
+ }
  document.body.classList.remove('sx-ascensionx-open');
  document.body.style.overflow=ascensionOldBodyOverflow;
  document.documentElement.style.overflow=ascensionOldHtmlOverflow;
@@ -182,8 +193,9 @@ function closeEmbeddedAscensionX(){
  if(returnTarget?.isConnected)returnTarget.focus({preventScroll:true});
  window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
 }
-ascensionOpenButton.addEventListener('click',()=>{ascensionQuickCaller=null;ascensionQuickPending=null;ascensionCloseButton.textContent='← TOOLS';openEmbeddedAscensionX()});
+ascensionOpenButton.addEventListener('click',()=>{ascensionQuickCaller=null;ascensionQuickPending=null;ascensionOverlay.classList.remove('sx-ascension-quick');ascensionCloseButton.textContent='← TOOLS';openEmbeddedAscensionX()});
 ascensionCloseButton.addEventListener('click',closeEmbeddedAscensionX);
+ascensionOverlay.addEventListener('click',e=>{if(e.target===ascensionOverlay&&ascensionOverlay.classList.contains('sx-ascension-quick'))closeEmbeddedAscensionX()});
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&ascensionOverlay.classList.contains('open'))closeEmbeddedAscensionX();
 });
@@ -198,6 +210,9 @@ ascensionEmbedFrame.addEventListener('load',()=>{
 });
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || !ascensionOverlay.classList.contains('open'))return;
+ if(e.data?.type==='spartx:ascensionQuickCancel'&&ascensionOverlay.classList.contains('sx-ascension-quick')){
+  closeEmbeddedAscensionX();return;
+ }
  if(e.data?.type==='spartx:ascensionEmbedAcknowledged'){
   syncEmbeddedAscensionTheme();
   return;

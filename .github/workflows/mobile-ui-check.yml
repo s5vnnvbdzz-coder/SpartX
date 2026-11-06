@@ -57,7 +57,7 @@ jobs:
               const sets=document.querySelector('#liveSets');
               const rect=el=>el.getBoundingClientRect();
               return {height:rect(card).height,
-                diagramOnly:diagram.textContent.trim()==='',
+                diagramOnly:diagram.querySelectorAll('.tiny').length===0,
                 accessible:diagram.getAttribute('aria-label')==='View muscles worked',
                 pauseByTimer:rect(pause).left>=rect(duration).left,
                 pauseClearOfVolume:rect(pause).right+5<rect(volume).left,

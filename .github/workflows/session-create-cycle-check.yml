@@ -82,7 +82,7 @@ jobs:
                 weeks:r.getElementById('programmeLength').textContent,
                 startTm:r.getElementById('startTM').textContent};""")
             print('GENERATED PROGRAMME:',result)
-            assert result=={'visible':True,'weeks':'8 WEEKS','startTm':'145'}
+            assert result=={'visible':True,'weeks':'8 WEEKS','startTm':'145 kg'}
             browser.execute_script("""document.querySelector('#native531Host').shadowRoot.getElementById('saveCycle').click()""")
             wait.until(lambda d:d.execute_script("return document.querySelector('#sxQuick531CycleOverlay').hidden"))
             saved=browser.execute_script("""const items=JSON.parse(localStorage.getItem('spartanx_531_saved_cycles_v1')||'[]');

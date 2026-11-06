@@ -490,6 +490,16 @@ $('applyLift').addEventListener('change',()=>{
  active531Lift=$('applyLift').value;
  restore531OneRm(active531Lift);
 });
+window.addEventListener('spartx:531OneRmUpdated',e=>{
+ const lift=e.detail?.lift,rm=Number(e.detail?.oneRm);
+ if(!tracked531Lifts.includes(lift)||!(rm>0)||!Number.isFinite(rm))return;
+ oneRmsByLiftKg[lift]=rm;
+ if(active531Lift===lift){
+  $('tmFinderOneRm').value=String(Number(fromKg(rm).toFixed(2)));
+  calcTrainingMaxFinder();
+ }
+});
+
 window.addEventListener('pagehide',saveCalculatorInputs);
 // Select the existing value when a numeric field receives focus, so a new entry replaces it.
 shadow.querySelectorAll('input[type="number"]').forEach(input=>input.addEventListener('focus',()=>input.select()));

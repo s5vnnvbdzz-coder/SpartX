@@ -21,7 +21,7 @@ jobs:
           echo "Live HTML bytes: $(wc -c </tmp/site.html)"
           if grep -Fq 'id="openCustomExercise"' /tmp/site.html; then echo 'PASS: Custom + on live Add Exercise page'; else echo 'FAIL: Live HTML missing Custom +'; exit 1; fi
           if grep -Fq '<input type="hidden" id="workoutName"' /tmp/site.html; then echo 'PASS: Workout Logger input hidden'; else echo 'FAIL: Workout Logger still has text field'; exit 1; fi
-          build=$(grep -oE 'sw.js\\?v=[0-9]+' /tmp/site.html | head -1 | cut -d= -f2)
+          build=$(grep -oE 'sw.js\?v=[0-9]+' /tmp/site.html | head -1 | cut -d= -f2)
           test -n "$build" || { echo 'FAIL: SW registration not found'; exit 1; }
           if grep -Fq "Build ${build}" /tmp/site.html; then echo "PASS: Settings matches Build ${build}"; else echo 'FAIL: Settings/SW build mismatch'; exit 1; fi
           if grep -Fq 'tools/replica.js?v=211' /tmp/site.html; then echo 'PASS: 5/3/1 calculator script refreshed'; else echo 'FAIL: 5/3/1 script version stale'; exit 1; fi

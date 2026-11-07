@@ -21,10 +21,12 @@ const cardioMetrics=[
  {id:'duration',name:'Time'},
  {id:'distance',name:'Distance'},
  {id:'floors',name:'Floors Climbed'},
+ {id:'steps',name:'Steps Climbed'},
  {id:'calories',name:'Calories'}
 ];
 const cardio=()=>!!window.SpartanXCardio?.isCardio(exerciseName);
-const currentMetrics=()=>cardio()?cardioMetrics.filter(m=>exerciseName==='StairMaster'||m.id!=='floors'):metrics;
+const cardioMeasure=()=>window.SpartanXCardio?.measurement(exerciseName)||'distanceKm';
+const currentMetrics=()=>cardio()?cardioMetrics.filter(m=>!['distance','floors','steps'].includes(m.id)||m.id===({distanceKm:'distance',floors:'floors',steps:'steps'}[cardioMeasure()])):metrics;
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const weight=n=>kg(Math.max(0,Number(n)||0));
 const number=n=>Math.round(Number(n)||0).toLocaleString();
@@ -37,12 +39,13 @@ const metricsFor=p=>{
  const setVolume=Math.max(0,...sets.map(s=>(Number(s.weight)||0)*(Number(s.reps)||0)));
  const total=k=>sets.reduce((sum,s)=>sum+Math.max(0,Number(s[k])||0),0);
  return {heaviest:heavy,e1rm,setVolume,sessionVolume:Number(p.volume)||0,totalReps:Number(p.totalReps)||0,
-  duration:total('durationSeconds'),distance:total('distanceKm'),floors:total('floors'),calories:total('calories')};
+  duration:total('durationSeconds'),distance:total('distanceKm'),floors:total('floors'),steps:total('steps'),calories:total('calories')};
 };
 const display=(value,id)=>{
  if(id==='duration')return window.SpartanXCardio.duration(value);
  if(id==='distance')return window.SpartanXCardio.distance(value,preferences.distance);
  if(id==='floors')return number(value)+' floors';
+ if(id==='steps')return number(value)+' steps';
  if(id==='calories')return number(value)+' kcal';
  return id==='totalReps'?number(value)+' reps':weight(value);
 };
@@ -122,7 +125,7 @@ function drawMetric(){
  $('exerciseMetricValue').textContent=focus?display(selectedValue,metric):'—';
  $('exerciseMetricDate').textContent=focus?(focus.isLive?'TODAY · LIVE':shortDate(focus.date)):'';
  $('exerciseMetricLabel').textContent=m.name.toUpperCase();
- $('exerciseMetricUnit').textContent=metric==='duration'?'min':metric==='distance'?preferences.distance:metric==='floors'?'floors':metric==='calories'?'kcal':metric==='totalReps'?'reps':preferences.weight==='lb'?'lbs':'kg';
+ $('exerciseMetricUnit').textContent=metric==='duration'?'min':metric==='distance'?preferences.distance:metric==='floors'?'floors':metric==='steps'?'steps':metric==='calories'?'kcal':metric==='totalReps'?'reps':preferences.weight==='lb'?'lbs':'kg';
  $('exerciseHistoryCharts').innerHTML=chartSVG(series,metric);
  const row=$('exerciseMetricTabs');
  row.innerHTML=available.map(m=>'<button type="button" role="tab" data-exercise-metric="'+m.id+
@@ -139,14 +142,14 @@ function drawHistory(){
  $('sxExerciseHistoryList').innerHTML='<h2>Workout History</h2>'+(records.length?
  records.map(p=>{
   const totals=metricsFor(p);
-  return '<article class="sx-exercise-history-row"><div><strong>'+escape(p.isLive?'Today · Live':longDate(p.date))+'</strong><span>'+escape(p.name||exerciseName)+'</span></div><div><strong>'+escape(cardio()?display(totals.duration,'duration'):weight(totals.heaviest))+'</strong><span>'+escape(cardio()?(exerciseName==='StairMaster'?display(totals.floors,'floors'):display(totals.distance,'distance'))+' · '+number(p.sets?.length||0)+' intervals':number(p.sets?.length||0)+' sets · '+weight(p.volume))+'</span></div></article>';
+  return '<article class="sx-exercise-history-row"><div><strong>'+escape(p.isLive?'Today · Live':longDate(p.date))+'</strong><span>'+escape(p.name||exerciseName)+'</span></div><div><strong>'+escape(cardio()?display(totals.duration,'duration'):weight(totals.heaviest))+'</strong><span>'+escape(cardio()?display(totals[cardioMeasure()==='distanceKm'?'distance':cardioMeasure()],cardioMeasure()==='distanceKm'?'distance':cardioMeasure())+' · '+number(p.sets?.length||0)+' intervals':number(p.sets?.length||0)+' sets · '+weight(p.volume))+'</span></div></article>';
  }).join(''):'<p>No workouts logged for this exercise yet.</p>');
 }
 function drawHowTo(muscles){
  const el=$('sxExerciseHowTo');
  el.replaceChildren();
  const heading=document.createElement('h2');heading.textContent='Exercise information';
- const summary=document.createElement('p');summary.textContent=cardio()?'Record the time, '+(exerciseName==='StairMaster'?'floors climbed':'distance')+' and optional calories from your machine. Each interval appears in your exercise history.':'Primary muscles: '+(muscleNames(muscles.primary)||'Not classified')+'. Secondary muscles: '+(muscleNames(muscles.secondary)||'Not classified')+'.';
+ const summary=document.createElement('p');summary.textContent=cardio()?'Record the time, '+(cardioMeasure()==='floors'?'floors climbed':cardioMeasure()==='steps'?'steps climbed':'distance')+' and optional calories from your machine. Each interval appears in your exercise history.':'Primary muscles: '+(muscleNames(muscles.primary)||'Not classified')+'. Secondary muscles: '+(muscleNames(muscles.secondary)||'Not classified')+'.';
  const note=document.createElement('p');note.textContent='Exercise-specific video instructions have not been added yet. This section will use the SpartanX exercise library.';
  el.append(heading,summary,note);
 }
@@ -167,7 +170,7 @@ function render(name,list,isLive,muscles){
  $('exerciseHistoryTitle').textContent=name;
  $('sxExerciseChartRange').value='3m';
  $('exerciseHistorySubtitle').textContent=points.filter(x=>!x.isLive).length+' logged workouts'+(points.some(x=>x.isLive)?(cardio()?' · Live cardio intervals included':' · Live sets included'):'');
- $('exerciseHistoryMuscles').innerHTML=cardio()?'<strong>CARDIO SESSION</strong><span>Time, '+(exerciseName==='StairMaster'?'floors climbed':'distance')+' and calories recorded separately from strength stats</span>':'<strong>MUSCLES WORKED</strong><span>'+escape(muscleNames(muscles.primary)||'Not classified')+' · '+escape(muscleNames(muscles.secondary)||'None')+'</span>';
+ $('exerciseHistoryMuscles').innerHTML=cardio()?'<strong>CARDIO SESSION</strong><span>Time, '+(cardioMeasure()==='floors'?'floors climbed':cardioMeasure()==='steps'?'steps climbed':'distance')+' and calories recorded separately from strength stats</span>':'<strong>MUSCLES WORKED</strong><span>'+escape(muscleNames(muscles.primary)||'Not classified')+' · '+escape(muscleNames(muscles.secondary)||'None')+'</span>';
  drawMetric();records();drawHowTo(muscles);showTab('summary');
 }
 $('exerciseMetricTabs').addEventListener('click',e=>{

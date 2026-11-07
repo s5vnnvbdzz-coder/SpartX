@@ -1,4 +1,4 @@
-/* SpartanX photo crop v245 — full-viewport circular selector on iPhone.
+/* SpartanX photo crop v247 — full-viewport circular selector on iPhone.
    The actual saved image is the square enclosed by the translucent circle.
    Existing profile avatar frame & rank emblem are not modified. */
 .sx-photo-crop-overlay[hidden]{display:none!important}
@@ -106,17 +106,17 @@
 .sx-photo-crop-grip::before{left:6px;top:-8px;width:1px;height:28px}
 .sx-photo-crop-grip::after{top:6px;left:-8px;width:28px;height:1px}
 .sx-photo-crop-tools{display:flex;flex-direction:column;gap:8px}
-.sx-photo-crop-tools label{
- display:flex;align-items:center;justify-content:space-between;gap:8px;
- font-size:12px;font-weight:750;color:var(--txt,#fff)!important;
+.sx-photo-crop-gesture-hint{
+ display:flex;align-items:center;justify-content:center;gap:9px;
+ margin:1px 0 4px!important;padding:8px 10px;
+ border:1px dashed color-mix(in srgb,var(--lime,#aaff37) 36%,var(--line,#53624e));
+ border-radius:10px;
+ background:color-mix(in srgb,var(--lime,#aaff37) 6%,transparent)!important;
+ color:var(--txt,#fff)!important;
+ font-size:11px;font-weight:720;line-height:1.35;text-align:center;
 }
-.sx-photo-crop-tools output{color:var(--lime,#aaff37)!important;font-variant-numeric:tabular-nums}
-.sx-photo-crop-tools input[type=range]{
- display:block;width:100%;height:30px;padding:0!important;margin:0!important;
- accent-color:var(--lime,#aaff37)!important;
- background:transparent!important;border:0!important;
- box-shadow:none!important;
-}
+.sx-photo-crop-gesture-hint span{color:var(--lime,#aaff37)}
+.sx-photo-crop-gesture-hint .sx-photo-pinch-symbol{font-size:17px;letter-spacing:-5px;padding-right:5px}
 .sx-photo-crop-preview-row{
  display:flex;align-items:center;gap:13px;
  padding:10px 12px;

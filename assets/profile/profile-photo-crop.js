@@ -208,7 +208,7 @@
       canvas.width=512;canvas.height=512;
       drawCrop(canvas.getContext('2d',{alpha:false}),512);
       const data=canvas.toDataURL('image/jpeg',.88);
-      if(!data.startsWith('data:image/jpeg,'))throw Error('Could not create the cropped picture.');
+      if(!data.startsWith('data:image/jpeg;base64,'))throw Error('Could not create the cropped picture.');
       // The existing SAVE PROFILE action commits the pending photo along
       // with all the other fields; cancelling the editor still discards it.
       editOverlay.dataset.pendingPhoto=data;

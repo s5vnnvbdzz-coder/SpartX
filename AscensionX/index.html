@@ -722,7 +722,10 @@ function buildAscSpartanWorkout(lift){
  const sets=p.deload
   ?Array.from({length:3},()=>({weight:info.topLoad,reps:p.topReps}))
   :[{weight:info.topLoad,reps:p.topReps},...Array.from({length:p.backSets},()=>({weight:info.backLoad,reps:p.backReps}))];
- return {source:'AscensionX',cycleId:state.cycle.created,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
+ // Carry the human-readable cycle label across the app boundary.
+ const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
+ const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
+ return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
 }
 function renderAscSpartanImportPreview(){
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);

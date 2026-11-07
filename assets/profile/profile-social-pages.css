@@ -104,3 +104,44 @@ body.sx-profile-list-open:has(#profile.screen.active)>header .sx-profile-connect
  #profile .sx-profile-connection-row{gap:8px}
  #profile .sx-profile-connection-follow{min-width:76px;padding:8px!important}
 }
+
+
+/* v241: Unboxed, entirely transparent Followers / Following links.
+   This deliberately avoids the older .sx-profile-social-metrics button
+   and global themed button rules that kept drawing rectangular cards. */
+#profile .sx-profile-social-links{display:contents!important}
+#profile .sx-profile-social-links>.sx-social-mini-note{display:none!important}
+#profile .sx-profile-social-links>a.sx-profile-social-link{
+ display:flex!important;flex-direction:column-reverse!important;
+ align-items:flex-start!important;justify-content:flex-end!important;gap:5px!important;
+ min-width:0!important;min-height:46px!important;width:100%!important;
+ padding:3px 2px!important;margin:0!important;
+ background:transparent!important;background-image:none!important;
+ border:none!important;border-radius:0!important;outline:none!important;
+ box-shadow:none!important;filter:none!important;
+ color:var(--muted)!important;text-decoration:none!important;
+ font-size:11px!important;font-weight:500!important;line-height:1.2!important;
+ cursor:pointer!important;-webkit-tap-highlight-color:transparent;
+}
+#profile .sx-profile-social-links>a.sx-profile-social-link::before,
+#profile .sx-profile-social-links>a.sx-profile-social-link::after{
+ display:none!important;content:none!important;
+}
+#profile .sx-profile-social-links>a.sx-profile-social-link span{
+ font-size:11px;color:var(--muted)!important;font-weight:500;
+}
+#profile .sx-profile-social-links>a.sx-profile-social-link strong{
+ font-size:21px!important;line-height:1.15!important;font-weight:790!important;
+ color:var(--txt)!important;font-variant-numeric:tabular-nums;
+}
+#profile .sx-profile-social-links>a.sx-profile-social-link:focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:2px!important;
+ border-radius:5px!important;
+}
+#profile .sx-profile-social-links>a.sx-profile-social-link:active strong{
+ color:var(--lime)!important;
+}
+@media(max-width:390px){
+ #profile .sx-profile-social-links>a.sx-profile-social-link span{font-size:10px!important}
+ #profile .sx-profile-social-links>a.sx-profile-social-link{font-size:10px!important}
+}

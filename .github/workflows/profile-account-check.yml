@@ -134,6 +134,7 @@ jobs:
             crop_debug=evaluate("""return {
               hidden:document.querySelector('#sxPhotoCropOverlay').hidden,
               error:document.querySelector('#sxPhotoCropError').textContent,
+              lastError:document.querySelector('#sxPhotoCropOverlay').dataset.lastCropError,
               disabled:document.querySelector('#sxPhotoCropApply').disabled,
               pendingLength:document.querySelector('#editProfileOverlay').dataset.pendingPhoto?.length||0,
               naturalWidth:document.querySelector('#sxPhotoCropImage').naturalWidth,

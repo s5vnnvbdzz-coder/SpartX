@@ -2263,7 +2263,9 @@ function renderWork(){
  $('exerciseList').innerHTML=work.map((e,i)=>{
   const previousSession=db.sessions.find(s=>s.exercises.some(x=>x.name.toLowerCase()===e.name.toLowerCase()));
   const previousExercise=previousSession?.exercises.find(x=>x.name.toLowerCase()===e.name.toLowerCase());
-  const displayRest=ascensionRestPlan(i).seconds;
+  // The picker always shows the base interval. +1:00 is applied only
+  // to the countdown after the final warm-up and numbered working sets.
+  const displayRest=Math.max(1,Math.round(Number(e.rest)||120));
    const rows=e.sets.map((s,j)=>{
    const previousSet=previousExercise?.sets[j],previousText=previousSet?displayWeight(previousSet.weight)+' × '+previousSet.reps:'—';
    const marker=s.type==='Warm-up'?'W':s.type==='Backdown Set'?'B':s.type==='Failure Set'?'F':'';
@@ -2309,10 +2311,13 @@ $('numberPadDone').addEventListener('click',closeNumberPad);
 window.setType=(i,j,v)=>{if(v==='X'){window.removeSet(i,j);return;}const s=work[i].sets[j];delete s.marker;s.type=v==='W'?'Warm-up':v==='B'?'Backdown Set':v==='F'?'Failure Set':'Working Set';renderWork();updateFloatingRestTimer();saveDraft();};
 window.setNotes=(i,v)=>{work[i].notes=v};
 window.setRest=(i,v)=>{
- const before=ascensionRestPlan(i),adjustment=before.seconds-Math.max(1,Math.round(Number(work[i].rest)||120));
- // The picker shows the effective working-set rest, while 'rest' stores the
- // baseline. Subtract the one-minute boost so edits aren't boosted twice.
- work[i].rest=Math.max(1,Number(v)-adjustment);
+ if(!work[i])return;
+ // Store exactly the base interval chosen by the athlete. In particular,
+ // choosing 2:00 must NOT silently store 1:00 for a linked AscensionX squat.
+ // ascensionRestPlan adds the main-set +60s when the set is completed.
+ const value=Math.round(Number(v));
+ if(!Number.isFinite(value)||value<1)return;
+ work[i].rest=value;
  updateFloatingRestTimer();saveDraft();
 };
 window.addSet=i=>{work[i].sets.push({weight:'',reps:'',rpe:'',type:'Working Set',done:false});renderWork()};
@@ -2366,7 +2371,7 @@ function syncExerciseRestDisplay(){
  work.forEach((exercise,i)=>{
   const select=$('restDuration-'+i);
   if(!select||document.activeElement===select)return;
-  const seconds=ascensionRestPlan(i).seconds,value=String(seconds);
+  const seconds=Math.max(1,Math.round(Number(exercise.rest)||120)),value=String(seconds);
   if(![...select.options].some(option=>option.value===value)){
    const option=document.createElement('option');
    option.value=value;option.textContent=fmtTime(seconds);

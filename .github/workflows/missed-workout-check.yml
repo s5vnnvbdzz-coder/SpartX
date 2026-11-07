@@ -59,7 +59,7 @@ jobs:
             assert saved['date']==saved_date,(saved['date'],saved_date)
             assert saved['exercises'][0]['sets'][0]['weight']==80
             assert run("return document.querySelector('#home').classList.contains('active')")
-            assert run("return document.querySelector('#workoutFeed').textContent.includes('2 Nov')")
+            assert run("return /(?:2\\s+Nov|Nov\\s+2)/.test(document.querySelector('#workoutFeed').textContent)"),'Workout history should show the backdated day in the browser locale'
             run("document.querySelector('#workoutSavedClose').click()")
             # Existing workout edit also allows correcting the date without
             # altering it until SAVE CHANGES.

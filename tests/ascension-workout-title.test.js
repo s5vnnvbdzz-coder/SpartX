@@ -24,19 +24,24 @@ function draftTest(currentName,exerciseList,expected,shouldRepair){
  assert.equal(JSON.stringify(exerciseList),before,'Never change logged sets');
  assert.equal(updates,shouldRepair?1:0);
 }
-draftTest('Afternoon Workout',imported,'Squats (current week) Week 2',true);
-draftTest('Morning Workout',imported,'Squats (current week) Week 2',true);
-draftTest('Evening Workout',imported,'Squats (current week) Week 2',true);
+draftTest('Afternoon Workout',imported,'Back Squat - Week 2',true);
+draftTest('Morning Workout',imported,'Back Squat - Week 2',true);
+draftTest('Evening Workout',imported,'Back Squat - Week 2',true);
+draftTest('Squats (current week) Week 2',imported,'Back Squat - Week 2',true);
+draftTest('Back Squat - Week 2',imported,'Back Squat - Week 2',false);
 draftTest('Deadlift · AscensionX',[{
  ...imported[0],name:'Deadlift',
  ascensionLink:{...imported[0].ascensionLink,lift:'Deadlift',week:3}
-}],'Deadlifts (current week) Week 3',true);
+}],'Deadlift - Week 3',true);
 draftTest('Afternoon Workout',[{
  ...imported[0],ascensionLink:{...imported[0].ascensionLink,cycleTitle:'Strength Cycle'}
-}],'Strength Cycle Week 2',true);
+}],'Back Squat - Week 2',true);
+draftTest('Strength Cycle Week 2',[{
+ ...imported[0],ascensionLink:{...imported[0].ascensionLink,cycleTitle:'Strength Cycle'}
+}],'Back Squat - Week 2',true);
 draftTest('Afternoon Workout',[{
  ...imported[0],ascensionLink:null
-}],'Squats (current week) Week 2',true);
+}],'Back Squat - Week 2',true);
 draftTest('My Custom Workout',imported,'My Custom Workout',false);
 draftTest('Afternoon Workout',[],'Afternoon Workout',false);
 draftTest('Afternoon Workout',[{name:'Back Squat',notes:'Normal workout',sets:[]}],'Afternoon Workout',false);

@@ -1,3 +1,5 @@
+body[data-sx-settings-theme="jade-sentinel"]{--sx-settings-bg:#08130f;--sx-settings-panel:#142820;--sx-settings-panel2:#233b31;--sx-settings-line:#63846b;--sx-settings-text:#f5f7ef;--sx-settings-muted:#bdcec0;--sx-settings-accent:#aaff37}
+
 /* SpartanX themed surfaces / Settings bridge v207
    Allows Settings (separate HTML) and Profile Settings (modal) to honour
    every existing SpartanX appearance, including premium and test themes. */

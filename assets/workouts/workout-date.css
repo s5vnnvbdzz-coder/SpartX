@@ -1,4 +1,5 @@
-/* SpartanX v248: calendar-correct missed workout logging, theme-aware. */
+/* SpartanX v249: calendar only for missed/backdated and edited workouts. */
+#activeWorkout .sx-workout-date-button[hidden]{display:none!important}
 #activeWorkout .sx-active-workout-name{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
 #activeWorkout .sx-active-workout-name h1{flex:1;min-width:180px;overflow-wrap:anywhere}
 #activeWorkout .sx-workout-date-button{

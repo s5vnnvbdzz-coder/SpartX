@@ -187,8 +187,37 @@
    persist();renderProfile();closeSub();
   });
  }
+ // The Profile editor is reachable directly from the Profile header OR
+ // through Settings > Account > Edit Profile. Return to the right parent.
+ let profileEditorFromSettings=false;
+ let savedSettingsScrollTop=0;
+ function reopenSettingsAfterEditor(){
+  const shouldReopen=profileEditorFromSettings;
+  profileEditorFromSettings=false;
+  if(!shouldReopen)return;
+  byId('openProfileSettings').click();
+  panel.scrollTop=savedSettingsScrollTop;
+ }
+ const backButton=byId('closeEditProfile'),cancelButton=byId('cancelEditProfile');
+ const oldBackAction=backButton.onclick,oldCancelAction=cancelButton.onclick;
+ backButton.onclick=function(event){
+  if(typeof oldBackAction==='function')oldBackAction.call(this,event);
+  reopenSettingsAfterEditor();
+ };
+ cancelButton.onclick=function(event){
+  if(typeof oldCancelAction==='function')oldCancelAction.call(this,event);
+  reopenSettingsAfterEditor();
+ };
+ saveButton.addEventListener('click',()=>{
+  // Invalid input leaves the editor open; only a completed save navigates.
+  if(profileEditor.classList.contains('hidden'))reopenSettingsAfterEditor();
+ });
  byId('sxSettingsEditProfile').addEventListener('click',()=>{
-  closeSub();byId('closeProfileSettings').click();editButton.click();
+  closeSub();
+  savedSettingsScrollTop=panel.scrollTop;
+  byId('closeProfileSettings').click();
+  profileEditorFromSettings=true;
+  editButton.click();
  });
  byId('sxSettingsAccount').addEventListener('click',()=>openSub('account'));
  byId('sxSettingsUnits').addEventListener('click',()=>openSub('units'));

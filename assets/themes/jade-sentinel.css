@@ -1,0 +1,63 @@
+/* Jade Sentinel v236 — scoped cinematic test appearance: intentionally never touches other themes. */
+body.sx-jade{--bg:#08130f;--panel:#142820;--panel2:#233b31;--line:#63846b;--txt:#f5f7ef;--muted:#bdcec0;--lime:#aaff37;--jade-gold:#d9bb79;color-scheme:dark;background:radial-gradient(ellipse at 95% 0%,#9bff3740,transparent 47%),linear-gradient(#071812ec,#07140ffc),url("./jade-citadel.svg") center top/auto 80vh no-repeat,#07140e!important;background-attachment:fixed!important}
+body.sx-jade header{background:linear-gradient(112deg,#061710f7,#1e392af7 60%,#091a13fa)!important;border-bottom:2px solid #b9ff76!important;box-shadow:0 3px 17px #aaff3755,inset 0 -1px 0 #f1e3a17c!important}
+body.sx-jade #sxBrandHeader{position:relative;padding-left:39px}
+body.sx-jade #sxBrandHeader:before{content:"";position:absolute;top:50%;left:0;transform:translateY(-50%);height:43px;width:36px;background:url("./jade-crest.svg") center/contain no-repeat;filter:drop-shadow(0 0 7px #9fff36)}
+body.sx-jade .brand{font-style:italic;text-shadow:0 0 11px #aaff3760}
+body.sx-jade :is(.eyebrow,.brand span,.result){color:#baff6b!important;text-shadow:0 0 9px #aaff3755}
+body.sx-jade :is(.card,.exercise-card,.detail-panel,.custom-exercise-box,.session-summary-bar){border:1px solid #84a783!important;border-radius:18px 5px 18px 5px!important;background:linear-gradient(115deg,#ecf7dd18,transparent 18%),linear-gradient(155deg,#294a39 0%,#172e22 38%,#071710 100%)!important;color:var(--txt)!important;box-shadow:inset 0 1px 0 #efffed45,inset 0 0 22px #aaff3712,0 0 0 1px #d9bd7745,0 0 21px #aaff373d,0 9px 24px #0008!important}
+body.sx-jade #homeRankProgression{background:linear-gradient(90deg,#061912f7,#0d281dd9 63%,#0b2217ae),url("./jade-citadel.svg") right center/cover no-repeat!important;border:2px solid #baff78!important;box-shadow:inset 0 0 23px #aaff3730,0 0 30px #aaff375a!important}
+body.sx-jade :is(#homeRankProgression,.sx-energy-start-card){border-radius:3px!important;clip-path:polygon(14px 0,calc(100% - 26px) 0,100% 26px,100% calc(100% - 14px),calc(100% - 15px) 100%,14px 100%,0 calc(100% - 15px),0 14px)}
+body.sx-jade :is(.rank-progress-track,.rank-milestone-track,.progress-track){background:#04160b!important;border:1px solid #859e70!important;box-shadow:inset 0 2px 5px #000b!important}
+body.sx-jade :is(#rankProgressFill,#rankMilestoneFill,.progress-fill){background:linear-gradient(90deg,#326b2e,#aaff37 75%,#f4ffb4)!important;box-shadow:0 0 11px #aaff37b3,0 0 20px #aaff3761!important}
+body.sx-jade .sx-energy-start-card{position:relative;overflow:hidden!important;min-height:203px;padding:23px!important;background:linear-gradient(90deg,#061710f9,#082116d0 54%,#0b241b55),url("./jade-citadel.svg") 62% center/cover no-repeat!important;border:2px solid #bdff75!important;box-shadow:inset 0 0 26px #aaff3738,0 0 29px #aaff3773!important}
+body.sx-jade .sx-energy-start-card:after{content:"";position:absolute;right:7px;top:7px;bottom:7px;width:41%;z-index:0;background:url("./jade-crest.svg") center/contain no-repeat;opacity:.43;filter:drop-shadow(0 0 12px #adff36);pointer-events:none}
+body.sx-jade .sx-energy-start-card>*{position:relative;z-index:1}
+body.sx-jade .sx-lock-in-title{font-style:italic;letter-spacing:.3px;font-weight:950;color:#f7fef2;text-shadow:0 2px 2px #000,0 0 16px #baff3760}
+body.sx-jade :is(#home .sx-intelligence-entry,#workout .card:not(.sx-energy-start-card)){background:linear-gradient(135deg,#071b13f4,#193e2eeb),url("./jade-citadel.svg") right center/cover!important}
+body.sx-jade :is(.stat,.rank-item){background:linear-gradient(132deg,#f1f5ec,#afc3b5 60%,#e7ece3)!important;border:1px solid #a2b8a2!important;border-radius:4px 13px 4px 13px!important;color:#172d21!important;box-shadow:inset 0 1px 0 #fff,0 0 11px #aaff3730!important}
+body.sx-jade :is(.stat,.rank-item) :is(span,strong,small){color:#172d21!important;text-shadow:none!important}
+body.sx-jade :is(.rank-current-row,.sx-gamer-top,.sx-gamer-line,.sx-session-log){border-color:#d9b97980!important}
+body.sx-jade :is(.sx-gamer-card,.profile-identity){border:2px solid #baff6c!important;border-radius:19px 5px 19px 5px!important;background:linear-gradient(110deg,#071e16fa,#214b34e8),url("./jade-citadel.svg") right center/cover no-repeat!important;box-shadow:inset 0 1px 0 #e9ffc063,0 0 18px #baff377c,0 0 34px #aaff3745!important}
+body.sx-jade .sx-gamer-card{animation:jadeCardPulse 3.3s ease-in-out infinite}
+body.sx-jade .sx-gamer-card:before{filter:drop-shadow(0 0 8px #aaff37)!important}
+body.sx-jade .sx-gamer-emblem>img{filter:drop-shadow(0 0 10px #baff57) drop-shadow(0 0 18px #aaff37)!important}
+body.sx-jade :is(.sx-gamer-avatar,.profile-avatar){border:2px solid #c7ff83!important;box-shadow:0 0 0 2px #d0b77d,0 0 18px #baff44!important}
+body.sx-jade .sx-gamer-line b{color:#c4ff87!important}
+body.sx-jade #trackerNav{background:linear-gradient(105deg,#06150ffb,#1a3a28fc,#07180dfc)!important;border-top:2px solid #baff70!important;box-shadow:0 -5px 23px #baff3760,inset 0 1px 0 #ffeec27f!important}
+body.sx-jade #trackerNav:before{content:"";position:absolute;left:0;top:-3px;width:35%;height:3px;background:linear-gradient(90deg,transparent,#efffc1,#adff33,transparent);filter:drop-shadow(0 0 7px #aaff37);animation:jadeSweep 3.8s linear infinite;pointer-events:none}
+body.sx-jade #trackerNav button{border:1px solid #73946e!important;border-radius:12px 3px 12px 3px!important;margin:0 2px!important;padding:6px 2px!important;background:linear-gradient(145deg,#23422c,#0a1d13)!important;color:#ecf8e7!important;box-shadow:inset 0 1px 0 #ecfcd626,0 0 7px #76ef2826!important}
+body.sx-jade #trackerNav button.active{color:#c9ff8a!important;border-color:#caff7b!important;background:linear-gradient(145deg,#34652c,#0c2816)!important;box-shadow:inset 0 0 13px #afff3740,0 0 12px #aaff37b5,0 0 23px #aaff375c!important;animation:jadeNavPulse 2.3s ease-in-out infinite}
+body.sx-jade #trackerNav button.active .sx-nav-icon{filter:drop-shadow(0 0 8px #afff37)}
+body.sx-jade :is(button:not(#trackerNav button):not(.danger),.secondary){background:linear-gradient(150deg,#34483c,#17281e)!important;border:1px solid #7a9473!important;color:#f6faef!important;box-shadow:inset 0 1px 0 #e7f5e32d,0 0 8px #aaff3729!important}
+body.sx-jade :is(.start-workout-button,.library-add-button,#startWorkout,#endWorkout,#saveProfile,.primary){border:2px solid #dcffad!important;border-radius:6px 15px 6px 15px!important;background:linear-gradient(155deg,#deff8a,#aaff37 58%,#7dbd24)!important;color:#13240a!important;font-weight:900!important;text-shadow:0 1px 0 #fff8!important;box-shadow:inset 0 1px 0 #fffd,0 0 17px #aaff37b8,0 0 29px #aaff3757!important}
+body.sx-jade :is(input:not([type=checkbox]),select,textarea,.set-number-pad-trigger,.set-rpe-trigger){background:#0a1c15!important;border:1px solid #65886c!important;color:#f7fbf3!important}
+body.sx-jade :is(input[type=checkbox],input[type=radio]){accent-color:#aaff37}
+body.sx-jade .set-entry.is-complete{background:#9fff3020!important}
+body.sx-jade .session-summary-sticky .session-summary-bar{background:linear-gradient(145deg,#0a1c17fa,#1e3d2dfa)!important;border:2px solid #baff6e!important;box-shadow:0 0 20px #baff3767,0 8px 22px #000b!important}
+body.sx-jade .session-summary-bar .summary-metric strong{color:#f9fff1!important}
+body.sx-jade .detail-overlay{background:#020c09ed!important}
+body.sx-jade :is(.detail-overlay .detail-panel,#profileSettingsOverlay .detail-panel){background:linear-gradient(135deg,#264838,#0a1b15)!important;border:2px solid #b4f778!important;box-shadow:0 0 27px #baff3775,inset 0 1px 0 #ffefc160!important}
+.sx-jade-theme-preview{display:none}
+body.sx-jade .sx-jade-theme-preview{display:flex;gap:11px;align-items:center;padding:13px;margin-top:12px;border:2px solid #c2ff80;border-radius:16px 4px 16px 4px;background:linear-gradient(90deg,#04160fe6,#0a281ac9),url("./jade-citadel.svg") center/cover no-repeat;box-shadow:0 0 18px #aaff3765}
+.sx-jade-theme-preview img{height:64px;width:55px;object-fit:contain;filter:drop-shadow(0 0 8px #aaff37)}
+.sx-jade-theme-preview strong{display:block;font-size:13px;letter-spacing:1px;color:#c7ff84}
+.sx-jade-theme-preview small{display:block;margin-top:5px;color:#ecedd9;font-size:11px;line-height:1.45}
+body.sx-jade :is(.performance-tabs button.selected,.library-categories button.active,.sx-social-filters button.is-selected){border-color:#baff67!important;color:#c5ff8a!important;box-shadow:0 0 13px #aaff3770!important}
+body.sx-jade :is(#toolsNav,#settingsNav){background:linear-gradient(110deg,#081b12,#193b29)!important;border-color:#aaff68!important;box-shadow:0 -3px 20px #aaff3754!important}
+body.sx-jade :is(#toolsNav a,#settingsNav a){color:#f0f6e6!important}
+body.sx-jade :is(#toolsNav a.active,#settingsNav a.active){color:#afff48!important;text-shadow:0 0 12px #aaff37}
+body.sx-jade .card-head{border-color:#d1b87966!important}
+body.theme-jade{--bg:#08130f;--panel:#13241e;--panel2:#23392f;--line:#63856b;--txt:#f5f7f0;--muted:#bdcec0;--lime:#aaff37;background:linear-gradient(#071813ee,#0a1d16f0),url("./jade-citadel.svg") center/cover fixed!important}
+body.theme-jade :is(header,footer){background:#0b2018!important;border-color:#baff69!important;box-shadow:0 0 15px #aaff374d!important}
+body.theme-jade :is(.card,.detail-panel){background:linear-gradient(145deg,#2d4c3b,#11291d 65%,#0a1b14)!important;border:2px solid #94c774!important;border-radius:16px 4px 16px 4px!important;box-shadow:0 0 19px #aaff374b!important}
+body.theme-jade :is(button,.back-button){background:#233a2e!important;color:#f6ffee!important;border-color:#8ca77a!important}
+body.theme-jade :is(button.primary,.segment button.active){background:#aaff37!important;color:#15240c!important;box-shadow:0 0 16px #aaff3787!important}
+body.theme-jade :is(input,select){background:#0b1d16!important;border-color:#77976c!important;color:#f5ffed!important}
+body.theme-jade input[type=checkbox]{accent-color:#aaff37}
+body.theme-jade :is(.eyebrow,.block-title,.status,.result){color:#baff64!important}
+@keyframes jadeCardPulse{0%,100%{box-shadow:0 0 16px #baff376d,0 0 29px #baff373b,inset 0 0 14px #aaff3718}50%{box-shadow:0 0 27px #baff37ab,0 0 47px #baff3766,inset 0 0 28px #aaff3740}}
+@keyframes jadeNavPulse{0%,100%{filter:drop-shadow(0 0 4px #aaff3780)}50%{filter:drop-shadow(0 0 12px #aaff37)}}
+@keyframes jadeSweep{from{transform:translateX(-110%)}to{transform:translateX(325%)}}
+@media(max-width:430px){body.sx-jade #trackerNav button{margin:0 1px!important;font-size:9px!important}body.sx-jade .sx-energy-start-card{min-height:173px}body.sx-jade .sx-energy-start-card:after{width:32%;opacity:.29}}
+@media(prefers-reduced-motion:reduce){body.sx-jade .sx-gamer-card,body.sx-jade #trackerNav button.active,body.sx-jade #trackerNav:before{animation:none!important}}

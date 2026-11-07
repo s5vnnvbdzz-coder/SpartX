@@ -1,0 +1,106 @@
+/* Profile update v240 — real header, uncluttered social counters,
+   full-page follower/following lists. Never changes #trackerNav. */
+
+/* The prior HTML-preview version deliberately suppressed the shared header.
+   Restore that header only on Profile, and place its existing action buttons
+   inside it. Spacer height continues to be handled by SpartanX itself. */
+body:has(#profile.screen.active)>header{display:flex!important;align-items:center!important;padding:calc(11px + env(safe-area-inset-top,0px)) 15px 11px!important;min-height:68px;z-index:12!important}
+body:has(#profile.screen.active)>#sxMainHeaderSpacer{display:block!important}
+body:has(#profile.screen.active)>header #sxBrandHeader{display:none!important}
+body>header>.sx-profile-layout-top{display:none!important}
+body:has(#profile.screen.active)>header>.sx-profile-layout-top{
+ display:flex!important;position:static!important;align-items:center;justify-content:space-between;
+ width:100%;min-width:0;min-height:44px;margin:0!important;padding:0!important;gap:9px;
+ background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+body:has(#profile.screen.active)>header .sx-profile-layout-top>div:first-child{display:flex;align-items:center;min-width:0;flex:1}
+body:has(#profile.screen.active)>header .sx-profile-handle{
+ display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ font-size:clamp(19px,5.4vw,26px);font-weight:850;line-height:1.1;letter-spacing:-.6px;color:var(--txt);
+}
+body:has(#profile.screen.active)>header .profile-action-buttons{
+ position:static!important;display:flex;align-items:center;justify-content:center;flex:none;gap:0;
+ margin:0!important;padding:3px!important;border:1px solid color-mix(in srgb,var(--line) 80%,var(--txt) 18%)!important;
+ border-radius:26px!important;background:var(--panel2)!important;box-shadow:none!important;
+}
+body:has(#profile.screen.active)>header .profile-action-buttons button{
+ display:grid!important;place-items:center!important;position:static!important;
+ width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+ margin:0!important;padding:8px!important;border:0!important;border-radius:22px!important;
+ background:transparent!important;box-shadow:none!important;color:var(--txt)!important;
+ font-size:20px!important;
+}
+body:has(#profile.screen.active)>header .profile-action-buttons button:focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:1px!important;
+}
+body:has(#profile.screen.active)>header .profile-action-buttons button svg{
+ width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;
+}
+/* Profile identity now starts beneath the actual header. */
+#profile>.profile-identity{margin-top:11px!important}
+#profile #sxProfileXP{display:none!important}
+
+/* Buttons stay large enough to tap; their surrounding boxes disappear. */
+#profile .sx-profile-social-metrics button,
+body.sx-jade #profile .sx-profile-social-metrics button{
+ -webkit-appearance:none!important;appearance:none!important;position:relative;display:flex!important;
+ min-height:46px!important;min-width:0!important;height:auto!important;
+ margin:0!important;padding:3px 2px!important;background:transparent!important;
+ background-image:none!important;border:0!important;border-width:0!important;border-radius:0!important;
+ outline:0!important;box-shadow:none!important;filter:none!important;transform:none!important;
+ color:var(--muted)!important;text-align:left!important;cursor:pointer;
+}
+#profile .sx-profile-social-metrics button::before,
+#profile .sx-profile-social-metrics button::after{content:none!important;display:none!important}
+#profile .sx-profile-social-metrics button:focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:1px!important;border-radius:5px!important;
+}
+#profile .sx-profile-social-metrics button:active strong{color:var(--lime)!important}
+
+/* Profile has two genuine subpages. They replace the main Profile content
+   until Back is pressed, leaving the four original bottom navigation tabs. */
+#profile .sx-profile-connections-page[hidden]{display:none!important}
+#profile.sx-connections-open>:not(#sxProfileConnectionsPage){display:none!important}
+#profile .sx-profile-connections-page{display:block;min-height:calc(100dvh - 205px);padding:14px 0 40px}
+#profile .sx-profile-connections-intro{padding:6px 2px 18px;border-bottom:1px solid var(--line)}
+#profile .sx-profile-connections-intro .eyebrow{font-size:10px;letter-spacing:1.2px}
+#profile .sx-profile-connections-intro h2{margin:7px 0 6px;font-size:25px;letter-spacing:-.5px;color:var(--txt)}
+#profile .sx-profile-connections-intro p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+#profile .sx-profile-connections-list{display:flex;flex-direction:column;gap:0}
+#profile .sx-profile-connection-row{display:flex;align-items:center;gap:11px;min-height:82px;padding:13px 2px;border-bottom:1px solid color-mix(in srgb,var(--line) 63%,transparent)}
+#profile .sx-profile-connection-avatar{display:grid;place-items:center;flex:0 0 49px;width:49px;height:49px;border-radius:50%;background:linear-gradient(145deg,var(--panel2),var(--panel));border:2px solid color-mix(in srgb,var(--lime) 37%,var(--line));color:var(--lime);font-size:13px;font-weight:850;box-shadow:0 0 9px color-mix(in srgb,var(--lime) 11%,transparent)}
+#profile .sx-profile-connection-copy{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+#profile .sx-profile-connection-copy strong{font-size:13px;color:var(--txt);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#profile .sx-profile-connection-copy small{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#profile .sx-profile-connection-copy span{font-size:10px;color:var(--muted);opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#profile .sx-profile-connection-follow{
+ display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:86px;min-height:39px;
+ margin:0!important;padding:8px 12px!important;border-radius:10px!important;border:1px solid var(--lime)!important;
+ background:color-mix(in srgb,var(--lime) 17%,var(--panel))!important;color:var(--lime)!important;
+ box-shadow:none!important;font-size:11px!important;font-weight:850!important;
+}
+#profile .sx-profile-connection-follow.is-following{border-color:var(--line)!important;background:var(--panel2)!important;color:var(--txt)!important}
+#profile .sx-profile-connections-empty{margin-top:22px;padding:22px 18px;border:1px solid var(--line);border-radius:15px;background:var(--panel);text-align:center}
+#profile .sx-profile-connections-empty strong{display:block;font-size:16px}
+#profile .sx-profile-connections-empty p{margin:10px 0 17px;color:var(--muted);font-size:12px;line-height:1.55}
+#profile .sx-profile-connections-empty button{min-height:40px;padding:9px 15px!important;border-radius:10px!important;font-size:12px;font-weight:760}
+body>header .sx-profile-connections-back,
+body>header .sx-profile-connections-header-title{display:none!important}
+body.sx-profile-list-open:has(#profile.screen.active)>header .profile-action-buttons{display:none!important}
+body.sx-profile-list-open:has(#profile.screen.active)>header #sxProfileHandle{display:none!important}
+body.sx-profile-list-open:has(#profile.screen.active)>header .sx-profile-connections-back{
+ display:inline-flex!important;align-items:center;gap:4px;flex:none;margin:0 11px 0 0;
+ padding:6px 8px 6px 1px;min-height:44px;background:transparent!important;border:0!important;
+ box-shadow:none!important;color:var(--lime)!important;font-size:13px;font-weight:800;
+}
+body.sx-profile-list-open:has(#profile.screen.active)>header .sx-profile-connections-back svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+body.sx-profile-list-open:has(#profile.screen.active)>header .sx-profile-connections-header-title{
+ display:block!important;color:var(--txt);font-size:18px;font-weight:850;letter-spacing:-.35px;
+}
+@media(max-width:390px){
+ body:has(#profile.screen.active)>header{padding-right:10px!important;padding-left:11px!important}
+ body:has(#profile.screen.active)>header .profile-action-buttons button{min-width:39px!important;width:39px!important}
+ #profile .sx-profile-connection-row{gap:8px}
+ #profile .sx-profile-connection-follow{min-width:76px;padding:8px!important}
+}

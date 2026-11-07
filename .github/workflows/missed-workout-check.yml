@@ -53,6 +53,24 @@ jobs:
             });""")
             assert imported,'AscensionX squat import should succeed'
             assert run("return document.querySelector('#sxWorkoutDateButton').hidden"),'Calendar must also be hidden for a live AscensionX session'
+            # The rest selector must store the ACTUAL selected baseline, not
+            # pre-subtract the 60-second working-set boost.
+            base=run("""return {stored:work[0].rest,
+              shown:document.querySelector('#restDuration-0').value,
+              afterFinalWarmup:ascensionRestPlan(0,2).seconds};""")
+            print('INITIAL ASCENSION REST:',base,flush=True)
+            assert base=={'stored':120,'shown':'120','afterFinalWarmup':180},base
+            changed=run("""const select=document.querySelector('#restDuration-0');
+              select.value='150';select.dispatchEvent(new Event('change',{bubbles:true}));
+              return {stored:work[0].rest,selected:select.value,
+                afterWarmup:ascensionRestPlan(0,2).seconds,
+                working:ascensionRestPlan(0,3).seconds};""")
+            assert changed=={'stored':150,'selected':'150','afterWarmup':210,'working':210},changed
+            reset=run("""const select=document.querySelector('#restDuration-0');
+              select.value='120';select.dispatchEvent(new Event('change',{bubbles:true}));
+              return {stored:work[0].rest,selected:select.value,
+                afterWarmup:ascensionRestPlan(0,2).seconds};""")
+            assert reset=={'stored':120,'selected':'120','afterWarmup':180},reset
             results=run("""const result=[];
               const actual=i=>({set:i,rest:exerciseTimers[0]?.remaining,
                  phase:exerciseTimers[0]?.phase,preview:ascensionRestPlan(0,i).seconds});

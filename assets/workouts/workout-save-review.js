@@ -46,7 +46,7 @@ function goBack(){
    sessionStarted+=Date.now()-sessionPausedAt;sessionPausedAt=null;
  }
  window.sxReviewDurationSeconds=null;
- switchScreen('activeWorkout');updateSessionClock();saveDraft();
+ returnToScreen('activeWorkout');updateSessionClock();saveDraft();
 }
 function renderMedia(){
  cleanupUrls(attachedUrls);preview.replaceChildren();

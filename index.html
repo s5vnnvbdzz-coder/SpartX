@@ -3665,12 +3665,14 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  const host=$('toolsReplica'),tools=$('tools'),mount=$('sxQuick531Mount'),close=$('sxClose531Quick');
  const cycleOverlay=$('sxQuick531CycleOverlay'),cycleMount=$('sxQuick531CycleMount'),cycleClose=$('sxQuick531CycleClose');
  const nativeHost=$('native531Host'),nativeHome=$('native531');
+ const confirmOverlay=$('sxConfirm531StartOverlay'),confirmText=$('sxConfirm531StartDescription');
+ const confirmCancel=$('sxCancel531Start'),confirmAccept=$('sxAccept531Start');
  let cycleLock=null;
 
  if(!button||!menu||!menuClose||!overlay||!host?.shadowRoot||!tools||!mount||!cycleOverlay||!cycleMount||!cycleClose||!nativeHost?.shadowRoot||!nativeHome)return;
  const calc=host.shadowRoot.querySelector('section[aria-labelledby="531Title"]');
  if(!calc)return;
- let menuLock=null,calcLock=null,wasCollapsed=false;
+ let menuLock=null,calcLock=null,wasCollapsed=false,pending531Start=null;
  const onWorkout=()=>document.querySelector('.screen.active')?.id==='activeWorkout';
  const onWorkoutSetup=()=>document.querySelector('.screen.active')?.id==='workout';
  const scope=document.createElement('style');scope.id='sx-quick-531-shadow-style';
@@ -3682,16 +3684,17 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  :host(.sx-531-quick-mode) #cyclePlannerOverlay{display:none!important}
  :host(.sx-531-quick-mode) #quickCreate531Cycle{display:block!important}`;
  host.shadowRoot.appendChild(scope);
+ // Keep the iOS bottom nav in normal document flow; never fix the whole body.
  function lock(){
-  const x={scroll:window.scrollY||document.documentElement.scrollTop||0};
-  for(const k of ['position','top','left','right','width','overflow'])x[k]=document.body.style[k];
-  x.htmlOverflow=document.documentElement.style.overflow;
-  Object.assign(document.body.style,{position:'fixed',top:'-'+x.scroll+'px',left:'0',right:'0',width:'100%',overflow:'hidden'});
-  document.documentElement.style.overflow='hidden';return x;
+  const x={scroll:window.scrollY||document.documentElement.scrollTop||0,
+   overflow:document.body.style.overflow,htmlOverflow:document.documentElement.style.overflow};
+  document.body.style.overflow='hidden';
+  document.documentElement.style.overflow='hidden';
+  return x;
  }
  function unlock(x,target){
   if(!x)return;
-  for(const k of ['position','top','left','right','width','overflow'])document.body.style[k]=x[k];
+  document.body.style.overflow=x.overflow;
   document.documentElement.style.overflow=x.htmlOverflow;
   window.scrollTo(0,typeof target==='number'?target:x.scroll);
  }
@@ -3708,17 +3711,19 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  }
  function closeCalc(imported=false,returnToOptions=false){
   if(!calcLock)return;
+  pending531Start=null;window.spartanx531StartPending=false;
+  if(confirmOverlay)confirmOverlay.hidden=true;
   overlay.hidden=true;host.classList.remove('sx-531-quick-mode');
   calc.classList.toggle('is-collapsed',wasCollapsed);
   calc.hidden=calc.dataset.sxQuickWasHidden==='true';delete calc.dataset.sxQuickWasHidden;
   tools.prepend(host);document.body.classList.remove('sx-531-popup-open');
   unlock(calcLock,imported?0:calcLock.scroll);calcLock=null;
-  if(!imported&&!returnToOptions)$('openExerciseLibrary')?.focus({preventScroll:true});
-  else requestAnimationFrame(()=>window.scrollTo(0,0));
+  if(!imported&&!returnToOptions&&onWorkout())$('openExerciseLibrary')?.focus({preventScroll:true});
+  else if(!imported&&!returnToOptions&&onWorkoutSetup())button.focus({preventScroll:true});
  }
  function openCalc(){
   closeMenu();
-  if(!onWorkout()||calcLock)return;
+  if(!(onWorkout()||onWorkoutSetup())||calcLock)return;
   wasCollapsed=calc.classList.contains('is-collapsed');calc.classList.remove('is-collapsed');
   calc.dataset.sxQuickWasHidden=String(calc.hidden);calc.hidden=false;
   host.classList.add('sx-531-quick-mode');mount.appendChild(host);
@@ -3731,11 +3736,12 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   nativeHost.classList.remove('sx-531-cycle-quick-mode');
   nativeHome.appendChild(nativeHost);
   unlock(cycleLock);cycleLock=null;
-  if(returnToCalculator&&onWorkout())openCalc();
+  if(returnToCalculator&&(onWorkout()||onWorkoutSetup()))openCalc();
   else if(onWorkout())$('openExerciseLibrary')?.focus({preventScroll:true});
+  else if(onWorkoutSetup())openMenu();
  }
  function openCycleFromCalculator(detail){
-  if(!onWorkout()||cycleLock||!calcLock)return;
+  if(!(onWorkout()||onWorkoutSetup())||cycleLock||!calcLock)return;
   if(typeof window.spartanxPrefill531Cycle!=='function'||window.spartanxPrefill531Cycle(detail)!==true)return;
   closeCalc();
   nativeHost.classList.add('sx-531-cycle-quick-mode');
@@ -3755,18 +3761,18 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  $('startNewWorkoutChoice').addEventListener('click',()=>{closeMenu(false);startSession();});
  menuClose.addEventListener('click',()=>closeMenu());
  menu.addEventListener('click',e=>{if(e.target===menu)closeMenu()});
- $('start531Shortcut').addEventListener('click',()=>{closeMenu(false);startSession();openCalc();});
+ $('start531Shortcut').addEventListener('click',()=>{closeMenu(false);openCalc();});
  $('startAscensionShortcut').addEventListener('click',()=>{
   closeMenu(false);
-  startSession();
-  if(typeof window.spartanxQuickStartAscension!=='function'||window.spartanxQuickStartAscension()!==true)
+  if(typeof window.spartanxQuickStartAscension!=='function'||window.spartanxQuickStartAscension('new-workout')!==true)
    alert('AscensionX could not open. Refresh SpartanX and try again.');
  });
  close.addEventListener('click',()=>{closeCalc(false,true);openMenu();});
  overlay.addEventListener('click',e=>{if(e.target===overlay){closeCalc(false,true);openMenu();}});
  document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
-   if(cycleLock){e.preventDefault();closeCycle(true)}
+   if(pending531Start){e.preventDefault();dismiss531Confirmation()}
+   else if(cycleLock){e.preventDefault();closeCycle(true)}
    else if(calcLock){e.preventDefault();closeCalc(false,true);openMenu()}
    else if(!menu.hidden){e.preventDefault();closeMenu()}
   }else if(e.key==='Tab'&&!menu.hidden){
@@ -3775,9 +3781,48 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
    else if(!e.shiftKey&&document.activeElement===els[els.length-1]){e.preventDefault();els[0].focus()}
   }
  });
+
+ function show531Confirmation(detail){
+  if(!confirmOverlay||!confirmText||!confirmCancel||!confirmAccept||!calcLock)return false;
+  const lift=String(detail?.exercise||'Exercise');
+  const week=Number(detail?.week)||1;
+  const count=(detail?.sets?.length||0)+(detail?.warmupSets?.length||0);
+  pending531Start=detail;
+  window.spartanx531StartPending=true;
+  $('sxConfirm531StartTitle').textContent='Start '+lift+' - Week '+week+'?';
+  confirmText.textContent='This will '+(sessionActive?'add to your active workout':'create a new active workout')+
+   ' with '+count+' prescribed sets. Nothing starts until you confirm.';
+  confirmAccept.textContent=sessionActive?'ADD TO WORKOUT':'START WORKOUT';
+  confirmOverlay.hidden=false;
+  confirmCancel.focus({preventScroll:true});
+  return true;
+ }
+ function dismiss531Confirmation(){
+  pending531Start=null;window.spartanx531StartPending=false;
+  if(confirmOverlay)confirmOverlay.hidden=true;
+  if(calcLock)close.focus({preventScroll:true});
+ }
+ confirmCancel?.addEventListener('click',dismiss531Confirmation);
+ confirmOverlay?.addEventListener('click',e=>{
+  if(e.target===confirmOverlay)dismiss531Confirmation();
+ });
  const import531=window.spartanxImport531;
+ confirmAccept?.addEventListener('click',()=>{
+  if(!pending531Start||!calcLock)return;
+  const selected=pending531Start;
+  dismiss531Confirmation();
+  const ok=typeof import531==='function'&&import531(selected);
+  if(ok)closeCalc(true);
+  else {
+   const hint=host.shadowRoot?.getElementById('applyHint');
+   if(hint)hint.textContent='Unable to start workout. Check your training max and try again.';
+  }
+ });
  if(typeof import531==='function')window.spartanxImport531=function(detail){
-  const ok=import531(detail);if(ok&&calcLock)closeCalc(true);return ok;
+  if(calcLock&&onWorkoutSetup())return show531Confirmation(detail);
+  const ok=import531(detail);
+  if(ok&&calcLock)closeCalc(true);
+  return ok;
  };
 })();
 </script>

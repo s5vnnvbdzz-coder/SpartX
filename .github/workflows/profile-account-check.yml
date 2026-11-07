@@ -160,6 +160,7 @@ jobs:
             wait.until(lambda b:evaluate("return document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
             profile=evaluate("return JSON.parse(localStorage.getItem('spartx_db'))?.profile")
             assert profile['birthday']=='2000-02-29',profile
+            assert profile.get('photo','').startswith('data:image/jpeg;base64,'),'Saved profile must use the confirmed circular photo crop'
             assert len(profile['links'])==2,profile
             assert 'instagram.com' in profile['bio'],profile
             assert evaluate("return document.querySelectorAll('#sxProfilePublicLinks a').length")==2

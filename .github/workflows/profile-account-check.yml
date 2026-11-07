@@ -87,8 +87,9 @@ jobs:
             evaluate("db.sessions=[];db.profile.standard='';db.profile.photo='';renderProfile();")
             click('#editProfile')
             wait.until(lambda b:evaluate("return !document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
-            # New photo flow: a circular crop appears instead of auto-saving.
+            # Circular selector: one-finger drag, two-finger pinch, and instant save.
             assert evaluate("return !!window.SpartanXPhotoCrop")
+            assert not evaluate("return !!document.querySelector('#sxPhotoCropSize')"),'Slider must be removed'
             def pick_photo():
               return browser.execute_async_script("""
                 const done=arguments[arguments.length-1];
@@ -113,39 +114,61 @@ jobs:
                 surfaceWidth:surface.clientWidth,surfaceHeight:surface.clientHeight,
                 photoStillUnsaved:!document.querySelector('#editProfileOverlay').dataset.pendingPhoto};""")
             assert initial['size']>70 and initial['photoStillUnsaved'],initial
-            evaluate("""const slider=document.querySelector('#sxPhotoCropSize');
-              slider.value='60';slider.dispatchEvent(new Event('input',{bubbles:true}));""")
-            resized=evaluate("return parseFloat(document.querySelector('#sxPhotoCropCircle').style.width)")
-            assert resized<initial['size'],'Crop-size slider must shrink the selection'
+            # Simulate two iPhone touch pointers moving together to shrink the circle.
+            pinch=evaluate("""const surface=document.querySelector('#sxPhotoCropSurface');
+              const circle=document.querySelector('#sxPhotoCropCircle');
+              const r=surface.getBoundingClientRect();
+              const cx=r.left+r.width/2,cy=r.top+r.height/2;
+              const send=(type,id,x,y)=>surface.dispatchEvent(new PointerEvent(type,{
+                bubbles:true,cancelable:true,pointerId:id,pointerType:'touch',isPrimary:id===91,
+                button:0,buttons:type==='pointerup'?0:1,clientX:x,clientY:y}));
+              send('pointerdown',91,cx-45,cy);
+              send('pointerdown',92,cx+45,cy);
+              send('pointermove',91,cx-24,cy);
+              send('pointermove',92,cx+24,cy);
+              const shrink=parseFloat(circle.style.width);
+              send('pointermove',91,cx-60,cy);
+              send('pointermove',92,cx+60,cy);
+              const grow=parseFloat(circle.style.width);
+              send('pointerup',92,cx+60,cy);
+              send('pointerup',91,cx-60,cy);
+              return {shrink,grow,original:parseFloat(circle.style.width),
+                visible:!document.querySelector('#sxPhotoCropOverlay').hidden};""")
+            print('PINCH TEST:',pinch,flush=True)
+            assert pinch['shrink']<initial['size']-10,pinch
+            assert pinch['grow']>pinch['shrink']+10,pinch
+            # One-finger drag must still work after a completed pinch.
+            original_top=evaluate("return parseFloat(document.querySelector('#sxPhotoCropCircle').style.top)")
             avatar_circle=browser.find_element(By.CSS_SELECTOR,'#sxPhotoCropCircle')
-            ActionChains(browser).move_to_element(avatar_circle).click_and_hold().move_by_offset(0,29).release().perform()
+            ActionChains(browser).move_to_element(avatar_circle).click_and_hold().move_by_offset(0,17).release().perform()
             moved=evaluate("return parseFloat(document.querySelector('#sxPhotoCropCircle').style.top)")
-            assert moved>initial['top']+10,(moved,initial)
-            # Cancelling must preserve the old photo and leave the editor open.
+            assert moved>original_top+4,(moved,original_top)
             click('#sxPhotoCropCancel')
             assert evaluate("return document.querySelector('#sxPhotoCropOverlay').hidden")
-            assert evaluate("return !document.querySelector('#editProfileOverlay').dataset.pendingPhoto")
+            assert not evaluate("return (db.profile||{}).photo"),'Cancel must keep existing profile photo'
             assert not evaluate("return document.querySelector('#editProfileOverlay').classList.contains('hidden')")
-            # Select again and apply: only the editor's pending photo changes.
             assert pick_photo()
             wait.until(lambda b:evaluate("""return !document.querySelector('#sxPhotoCropOverlay').hidden
               && !document.querySelector('#sxPhotoCropApply').disabled"""))
             click('#sxPhotoCropApply')
-            crop_debug=evaluate("""return {
+            result=evaluate("""return {
               hidden:document.querySelector('#sxPhotoCropOverlay').hidden,
-              error:document.querySelector('#sxPhotoCropError').textContent,
-              lastError:document.querySelector('#sxPhotoCropOverlay').dataset.lastCropError,
-              disabled:document.querySelector('#sxPhotoCropApply').disabled,
-              pendingLength:document.querySelector('#editProfileOverlay').dataset.pendingPhoto?.length||0,
-              naturalWidth:document.querySelector('#sxPhotoCropImage').naturalWidth,
-              circle:document.querySelector('#sxPhotoCropCircle').getBoundingClientRect().toJSON()
+              saved:db.profile?.photo||'',
+              persisted:JSON.parse(localStorage.getItem('spartx_db')||'{}').profile?.photo||'',
+              preview:document.querySelector('#editProfileAvatar img')?.getAttribute('src')||'',
+              visible:document.querySelector('#profileAvatar img')?.getAttribute('src')||'',
+              pending:document.querySelector('#editProfileOverlay').dataset.pendingPhoto||''
             };""")
-            print('CROP APPLY DEBUG:',crop_debug,flush=True)
-            assert crop_debug['hidden'],crop_debug
-            crop_data=evaluate("return document.querySelector('#editProfileOverlay').dataset.pendingPhoto")
-            assert crop_data.startswith('data:image/jpeg;base64,')
-            assert evaluate("return !!document.querySelector('#editProfileAvatar img')")
-            assert not evaluate("return (db.profile||{}).photo"),'Crop must not publish until Save Profile'
+            assert result['hidden'],result
+            assert result['saved'].startswith('data:image/jpeg;base64,'),result
+            assert result['persisted']==result['saved'], 'Use This Crop must save before Save Profile'
+            assert result['preview']==result['saved'] and result['visible']==result['saved']
+            assert not result['pending'], 'Do not leave a stale pending-photo overwrite'
+            assert not evaluate("return document.querySelector('#editProfileOverlay').classList.contains('hidden')")
+            # Cancel the Profile editor after cropping; confirmed photo must remain.
+            click('#cancelEditProfile')
+            assert evaluate("return JSON.parse(localStorage.getItem('spartx_db')).profile.photo") == result['saved']
+            click('#editProfile')
             assert evaluate("return document.querySelectorAll('#profileBirthdayMonth option').length")==13
             assert evaluate("return [...document.querySelector('#profileBirthdayYear').options].some(o=>o.value==='1960')")
             change('#profileBirthdayYear','2000');change('#profileBirthdayMonth','2')

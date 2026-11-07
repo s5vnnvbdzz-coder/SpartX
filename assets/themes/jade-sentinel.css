@@ -61,3 +61,22 @@ body.theme-jade :is(.eyebrow,.block-title,.status,.result){color:#baff64!importa
 @keyframes jadeSweep{from{transform:translateX(-110%)}to{transform:translateX(325%)}}
 @media(max-width:430px){body.sx-jade #trackerNav button{margin:0 1px!important;font-size:9px!important}body.sx-jade .sx-energy-start-card{min-height:173px}body.sx-jade .sx-energy-start-card:after{width:32%;opacity:.29}}
 @media(prefers-reduced-motion:reduce){body.sx-jade .sx-gamer-card,body.sx-jade #trackerNav button.active,body.sx-jade #trackerNav:before{animation:none!important}}
+
+
+/* Guardian artwork is rendered as a real asset behind live controls, never as a flat screenshot. */
+body.sx-jade .sx-energy-start-card{
+ background:linear-gradient(90deg,#06190ffd 0%,#062016e8 42%,#06201659 78%),
+ url("./jade-heroine.webp") right center/auto 100% no-repeat,
+ url("./jade-citadel.svg") center/cover no-repeat!important;
+}
+body.sx-jade .sx-energy-start-card:after{right:112px;width:100px;opacity:.18}
+body.sx-jade #homeRankProgression{
+ background:linear-gradient(90deg,#061912fd 0%,#0d281deb 55%,#0b221796),
+ url("./jade-heroine.webp") right center/auto 100% no-repeat,
+ url("./jade-citadel.svg") center/cover no-repeat!important;
+}
+body.sx-jade .sx-jade-theme-preview{
+ background:linear-gradient(90deg,#04160ff5,#0a281acf 70%,#0b241b70),
+ url("./jade-heroine.webp") right center/auto 130% no-repeat,
+ url("./jade-citadel.svg") center/cover no-repeat!important;
+}

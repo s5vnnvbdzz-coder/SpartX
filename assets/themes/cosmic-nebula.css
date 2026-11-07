@@ -1,0 +1,208 @@
+/* COSMIC NEBULA — SpartanX 2026 cinematic trial.
+   Scoped to body.sx-cosmic: no effects leak into any other appearance.
+   All visuals are lightweight CSS; no remotely hosted imagery or fonts. */
+
+body.sx-cosmic{
+  --bg:#070919;--panel:#12162c;--panel2:#202644;--line:#4d567c;
+  --txt:#f2f5ff;--muted:#afb9d8;--lime:#8bdcff;
+  --cosmic-violet:#ba91ff;--cosmic-cyan:#8bdcff;--cosmic-blue:#4d94fa;
+  color-scheme:dark;
+  background-color:#070919!important;
+  background-image:
+    radial-gradient(1.2px 1.2px at 23px 37px,#fff9 98%,transparent),
+    radial-gradient(1px 1px at 118px 172px,#bedfff7a 98%,transparent),
+    radial-gradient(1.4px 1.4px at 205px 69px,#e5ceff8a 98%,transparent),
+    radial-gradient(ellipse at 90% 5%,#704bcb55 0%,transparent 39%),
+    radial-gradient(ellipse at 8% 62%,#16549b44 0%,transparent 48%),
+    radial-gradient(ellipse at 72% 96%,#69319c34 0%,transparent 44%),
+    linear-gradient(168deg,#050615 0%,#0c1230 49%,#050a1a 100%)!important;
+  background-size:233px 201px,307px 273px,391px 311px,auto,auto,auto,auto!important;
+  background-repeat:repeat,repeat,repeat,no-repeat,no-repeat,no-repeat,no-repeat!important;
+  background-attachment:fixed!important;
+}
+body.sx-cosmic :is(.brand span,.eyebrow,.sx-session-label){
+  color:#9edfff!important;
+  text-shadow:0 0 13px #8bdcff55;
+}
+body.sx-cosmic .brand{
+  letter-spacing:2.6px;
+  text-shadow:0 0 18px #9f90ff44;
+}
+body.sx-cosmic .sub{color:#b4b5db}
+body.sx-cosmic > header{
+  background:linear-gradient(110deg,#080c21f7,#191634f7 56%,#0a172cf7)!important;
+  border-bottom:1px solid #827acc8c!important;
+  box-shadow:0 3px 17px #6549b52e,inset 0 -1px 0 #9edfff18!important;
+}
+body.sx-cosmic :is(.card,.exercise-card,.detail-panel,.custom-exercise-box,.stat,.rank-item,.library-record){
+  background:linear-gradient(150deg,#252044eb 0%,#161c38ef 38%,#0b1229f6 100%)!important;
+  border-color:#6d70a468!important;
+  color:var(--txt)!important;
+  box-shadow:inset 0 1px 0 #d6c5ff16,0 7px 23px #0007,0 0 14px #765bc21b!important;
+}
+body.sx-cosmic :is(.card,.exercise-card,.detail-panel,.custom-exercise-box){border-radius:16px!important}
+body.sx-cosmic :is(.stat,.rank-item,.library-record) :is(span,strong,small){color:var(--txt)}
+body.sx-cosmic :is(.stat,.rank-item) span{color:var(--muted)!important}
+body.sx-cosmic .exercise-title{color:#b1dfff!important}
+body.sx-cosmic .previous-value{color:#b5bee0!important}
+body.sx-cosmic .exercise-notes{border-bottom-color:#6d70a43b!important}
+
+/* Nebula highlights on the start-workout hero, but the controls stay readable. */
+body.sx-cosmic .sx-energy-start-card{
+  position:relative;isolation:isolate;
+  background:
+    radial-gradient(ellipse at 91% 16%,#9e6cec53,transparent 42%),
+    radial-gradient(ellipse at 67% 85%,#1385df33,transparent 45%),
+    linear-gradient(132deg,#1a1438fa,#0c1b36f6 56%,#090e24f7)!important;
+  border:1px solid #ad9afa9c!important;
+  box-shadow:0 0 20px #8670db30,inset 0 0 28px #8b80ff18!important;
+  overflow:hidden!important;
+}
+body.sx-cosmic .sx-energy-start-card::after{
+  content:"";position:absolute;right:10px;top:6px;
+  width:105px;height:105px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#c2aeffbb,#6352ab77 32%,#24224b55 60%,transparent 65%);
+  box-shadow:0 0 32px #9468ff44;
+  opacity:.5;pointer-events:none;
+  transform:rotate(-22deg);
+}
+body.sx-cosmic .sx-lock-in-title{color:#f5f5ff!important;text-shadow:0 0 14px #8974e87e}
+body.sx-cosmic .sx-lock-in-title .sx-nav-svg{color:#9edfff!important;filter:drop-shadow(0 0 8px #8bdcff8a)!important}
+
+/* Buttons stay dark charcoal-blue rather than glowing solid fills. */
+body.sx-cosmic button:not(#trackerNav button):not(.danger),
+body.sx-cosmic .back-button,
+body.sx-cosmic .secondary{
+  color:#edf1ff!important;
+  background:linear-gradient(160deg,#30344dad,#171d32eb)!important;
+  border:1px solid #777dac87!important;
+  box-shadow:inset 0 1px 0 #ffffff14,0 0 8px #856bdb15!important;
+}
+body.sx-cosmic button:not(#trackerNav button):not(.danger):active{
+  background:#30375a!important;border-color:#9eb7f8!important;
+}
+body.sx-cosmic button:not(#trackerNav button):focus-visible,
+body.sx-cosmic :is(input,select,textarea):focus-visible{
+  outline:2px solid #a8e2ff!important;outline-offset:2px;
+}
+body.sx-cosmic :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select,.set-number-pad-trigger,.set-rpe-trigger){
+  color:#f6f6ff!important;
+  background:#10172fe8!important;
+  border-color:#67719e88!important;
+}
+body.sx-cosmic :is(input[type="checkbox"],input[type="radio"],input[type="range"]){accent-color:#8bdcff!important}
+body.sx-cosmic .set-entry.is-complete{background:#5d4fab31!important}
+body.sx-cosmic :is(.set-type-display,.set-number,.set-rpe-trigger,.session-summary-bar .summary-metric strong){
+  color:#9edfff!important;
+}
+
+/* Consistent glowing navigation outlines and an understated travelling light. */
+body.sx-cosmic #trackerNav{
+  position:fixed;
+  background:linear-gradient(95deg,#080b20f9,#161432fa 50%,#081326fa)!important;
+  border-top:1px solid #877cceaa!important;
+  box-shadow:0 -4px 18px #6f5bd635,inset 0 1px 0 #d1c8ff1a!important;
+}
+body.sx-cosmic #trackerNav::before{
+  content:"";position:absolute;top:-2px;left:0;
+  width:33%;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#a390ff,#a7e8ff,transparent);
+  filter:drop-shadow(0 0 6px #a6c1ff);
+  animation:sxCosmicNavSweep 5s ease-in-out infinite;
+}
+@keyframes sxCosmicNavSweep{0%,100%{transform:translateX(-105%)}50%{transform:translateX(304%)}}
+body.sx-cosmic #trackerNav button{
+  color:#bbc5e6!important;
+  background:linear-gradient(155deg,#262643db,#11182de8)!important;
+  border:1px solid #686f9b!important;
+  border-radius:12px!important;
+  animation:none!important;
+  box-shadow:inset 0 1px 0 #ffffff12!important;
+}
+body.sx-cosmic #trackerNav button.active{
+  color:#e4f7ff!important;
+  border-color:#9fceff!important;
+  background:linear-gradient(145deg,#2a315e,#161d3f)!important;
+  box-shadow:0 0 12px #86b8ff45,inset 0 0 13px #a384ff2a!important;
+}
+@keyframes sxCosmicIconBreathe{
+  0%,100%{filter:drop-shadow(0 0 2px #b8b3ff4a)}
+  50%{filter:drop-shadow(0 0 7px #8fbdffcb)}
+}
+body.sx-cosmic #trackerNav button .sx-nav-icon{animation:sxCosmicIconBreathe 3.2s ease-in-out infinite}
+body.sx-cosmic #trackerNav button.active .sx-nav-icon{animation-duration:2.5s}
+
+/* Player profile, rank frames and performance indicators. */
+body.sx-cosmic :is(.sx-gamer-card,.profile-identity){
+  background:
+    radial-gradient(ellipse at 100% 0%,#8867e24b,transparent 48%),
+    linear-gradient(135deg,#1e1b40f7,#0c1934f7 66%,#0c1125f9)!important;
+  border-color:#8883c9a0!important;
+  box-shadow:inset 0 1px 0 #d7ccff18,0 0 17px #8475dd40!important;
+}
+body.sx-cosmic .sx-gamer-card::before{
+  background:conic-gradient(from var(--sx-angle),transparent 0 65%,#877ad536 76%,#b0a5ff 86%,#d8f6ff 91%,transparent 98%)!important;
+  filter:drop-shadow(0 0 6px #918fff8c)!important;
+  animation-duration:5.4s!important;
+}
+body.sx-cosmic :is(.sx-gamer-avatar,.profile-avatar){
+  border-color:#a8dfff!important;
+  box-shadow:0 0 0 2px #242244,0 0 15px #9e9bfa5e!important;
+}
+body.sx-cosmic .sx-gamer-emblem>img{
+  filter:drop-shadow(0 0 7px #a68bff80)!important;
+}
+body.sx-cosmic :is(.rank-progress-track,.rank-milestone-track,.progress-track){
+  background:#11152b!important;border-color:#4f547d!important;
+}
+body.sx-cosmic :is(.rank-progress-track span,#rankProgressFill,#rankMilestoneFill,.progress-fill){
+  background:linear-gradient(90deg,#493883,#9a80f0 57%,#8bdcff)!important;
+  box-shadow:0 0 9px #8b9ffc73,0 0 18px #7fa8ff36!important;
+}
+body.sx-cosmic :is(.minimized-session,.session-summary-sticky .session-summary-bar){
+  background:linear-gradient(145deg,#111b38ed,#1b1b3aed)!important;
+  border-color:#9388dcaa!important;
+  box-shadow:0 0 13px #8b77db35,0 7px 22px #0008!important;
+}
+body.sx-cosmic .min-session-indicator{background:#a8e2ff;box-shadow:0 0 11px #8bdcff99}
+body.sx-cosmic .detail-overlay{background:#030617e8!important}
+body.sx-cosmic :is(.detail-overlay .detail-panel,#profileSettingsOverlay .detail-panel){
+  background:linear-gradient(145deg,#242044,#131a32 60%,#0d1129)!important;
+  border:1px solid #8e85c59c!important;
+}
+body.sx-cosmic :is(.sx-session-log,.sx-gamer-top,.sx-gamer-line,.feed-exercise,.feed-exercises){
+  border-color:#8581b852!important;
+}
+body.sx-cosmic .history-line{stroke:#a7dfff!important}
+body.sx-cosmic .history-dot{fill:#b999ff!important}
+body.sx-cosmic :is(.spartanx-page-footer,.sx-page-footer){color:#a4a6cd!important}
+
+/* A small native theme swatch in Settings, displayed only when chosen. */
+.sx-cosmic-theme-preview{display:none}
+body.sx-cosmic .sx-cosmic-theme-preview{
+  display:flex;align-items:center;gap:13px;
+  padding:12px 14px;margin-top:12px;
+  background:radial-gradient(ellipse at 84% 25%,#8352b74d,transparent 52%),linear-gradient(110deg,#101832,#1a1537)!important;
+  border:1px solid #a9a3f9b3;border-radius:14px;
+  box-shadow:inset 0 1px 0 #d7ccff27,0 0 14px #9074db35;
+  color:#f5f5ff;
+}
+.sx-cosmic-theme-preview .sx-cosmic-orb{
+  position:relative;display:block;flex:0 0 49px;width:49px;height:49px;
+  border-radius:50%;
+  background:radial-gradient(circle at 27% 27%,#d8ccff,#8a77ef 25%,#413d9f 65%,#10132f 85%);
+  box-shadow:0 0 13px #8b8eff99;
+}
+.sx-cosmic-theme-preview .sx-cosmic-orb::after{
+  content:"";position:absolute;left:-8px;right:-8px;top:22px;height:5px;
+  border:2px solid #aee5ffbe;border-radius:50%;transform:rotate(-29deg);
+  box-shadow:0 0 7px #96d5ff75;
+}
+.sx-cosmic-theme-preview strong{display:block;font-size:12px;letter-spacing:.7px;color:#bce9ff}
+.sx-cosmic-theme-preview small{display:block;font-size:11px;color:#b9bce4;margin-top:4px;line-height:1.45}
+
+@media(prefers-reduced-motion:reduce){
+ body.sx-cosmic #trackerNav::before,
+ body.sx-cosmic #trackerNav button .sx-nav-icon,
+ body.sx-cosmic .sx-gamer-card::before{animation:none!important}
+}

@@ -2669,7 +2669,85 @@ document.addEventListener('change',e=>{if(e.target.matches('main input,main text
 window.addEventListener('pagehide',saveDraft);setInterval(saveDraft,700);
 document.querySelectorAll('main > section.screen').forEach(screen=>{const footer=document.createElement('footer');footer.className='spartanx-page-footer';footer.textContent='SpartanX TOOLS · TRAIN SMARTER';screen.appendChild(footer);});
 
-window.spartanxOpenTools=()=>switchScreen('tools');window.spartanxOpenHome=()=>switchScreen('home');window.spartanxOpenPlanner=()=>switchScreen('native531');function switchScreen(id){if(window.spartanxCarouselNavigate?.(id))return;if(window.spartanxClearDrag)window.spartanxClearDrag();if(['tools','home','workout','profile'].includes(id)){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}try{localStorage.setItem('spartx_last_screen',id);}catch(e){}try{if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);}catch(e){}document.body.classList.toggle('tools-screen-active',id==='tools');document.querySelectorAll('.screen').forEach(screen=>{screen.classList.remove('drag-preview','dragging','drag-settle');screen.style.transform='';screen.classList.toggle('active',screen.id===id);});document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));updateMinimizedSession();}function swipeBack(){if(screenHistory.length){const target=screenHistory.pop();const current=document.querySelector('.screen.active')?.id;if(current&&target!==current){try{localStorage.setItem('spartx_last_screen',target);}catch(e){}try{if(location.hash!=='#'+target)history.replaceState(null,'','#'+target);}catch(e){}document.body.classList.toggle('tools-screen-active',target==='tools');document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===target));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===target));updateMinimizedSession();}}}
+/* Consistent iPhone navigation: forward opens at top, Back returns to previous scroll position.
+   Keep scroll state in memory only; do not alter the workout draft or user storage. */
+const sxPageScrollPositions=new Map();
+const sxNavigationTrail=[];
+let sxNavigationToken=0;
+function sxReadPageScroll(){
+ const root=document.scrollingElement||document.documentElement;
+ return Math.max(0,window.scrollY||0,root?.scrollTop||0,document.body.scrollTop||0);
+}
+function sxRememberPagePosition(id){
+ if(!id)return;
+ sxPageScrollPositions.set(id,{
+  top:sxReadPageScroll(),
+  inner:document.getElementById(id)?.scrollTop||0
+ });
+}
+function sxScrollToScreenPosition(id,position){
+ const token=++sxNavigationToken;
+ const top=Math.max(0,Number(position?.top)||0);
+ const inner=Math.max(0,Number(position?.inner)||0);
+ const apply=()=>{
+  if(token!==sxNavigationToken||document.querySelector('.screen.active')?.id!==id)return;
+  // Fullscreen popups manage their own body scroll lock.
+  if(document.body.style.position==='fixed')return;
+  window.scrollTo(0,top);
+  document.documentElement.scrollTop=top;
+  document.body.scrollTop=top;
+  const page=document.getElementById(id);
+  if(page)page.scrollTop=inner;
+ };
+ apply();
+ // Wait until the destination's height is laid out, particularly in iOS PWAs.
+ requestAnimationFrame(apply);
+}
+window.spartanxOpenTools=()=>switchScreen('tools');
+window.spartanxOpenHome=()=>switchScreen('home');
+window.spartanxOpenPlanner=()=>switchScreen('native531');
+function switchScreen(id,opts={}){
+ const target=document.getElementById(id);
+ if(!target||!target.classList.contains('screen'))return;
+ const current=document.querySelector('.screen.active')?.id||null;
+ if(current===id)return;
+ // The connected-page carousel calls switchScreen again after finishing its gesture.
+ if(!opts.back&&window.spartanxCarouselNavigate?.(id))return;
+ if(window.spartanxClearDrag)window.spartanxClearDrag();
+ if(current){
+  sxRememberPagePosition(current);
+  if(!opts.back){
+   if(['tools','home','workout','profile'].includes(id))sxNavigationTrail.length=0;
+   else sxNavigationTrail.push({from:current,to:id});
+  }
+ }
+ try{localStorage.setItem('spartx_last_screen',id)}catch(e){}
+ try{if(location.hash!=='#'+id)history.replaceState(null,'','#'+id)}catch(e){}
+ document.body.classList.toggle('tools-screen-active',id==='tools');
+ document.querySelectorAll('.screen').forEach(screen=>{
+  screen.classList.remove('drag-preview','dragging','drag-settle');
+  screen.style.transform='';
+  screen.classList.toggle('active',screen.id===id);
+ });
+ document.querySelectorAll('nav button').forEach(button=>
+  button.classList.toggle('active',button.dataset.screen===id));
+ updateMinimizedSession();
+ const destination=opts.back?sxPageScrollPositions.get(id):null;
+ sxScrollToScreenPosition(id,destination||{top:0,inner:0});
+}
+function returnToScreen(fallback){
+ const current=document.querySelector('.screen.active')?.id;
+ let previous=fallback;
+ // Remove the most recent matching forward navigation and restore its origin.
+ const index=sxNavigationTrail.findLastIndex(entry=>entry.to===current);
+ if(index>=0){
+  previous=sxNavigationTrail[index].from;
+  sxNavigationTrail.length=index;
+ }
+ if(previous&&previous!==current)switchScreen(previous,{back:true});
+}
+function swipeBack(){returnToScreen('home');}
+
 const trackerNav=document.getElementById('trackerNav');
 if(trackerNav){
  trackerNav.addEventListener('click',function(e){
@@ -2932,7 +3010,7 @@ function renderExerciseMetric(points,id){
 $('exerciseMetricTabs').addEventListener('click',e=>{const b=e.target.closest('[data-exercise-metric]');if(!b)return;activeExerciseMetric=b.dataset.exerciseMetric;$('exerciseMetricTabs').querySelectorAll('button').forEach(x=>{const on=x===b;x.classList.toggle('selected',on);x.setAttribute('aria-selected',String(on));});const pts=exerciseHistoryData($('exerciseHistoryTitle').textContent,exerciseHistoryReturn==='activeWorkout');renderExerciseMetric(pts,activeExerciseMetric);});
 let exerciseHistoryReturn='activeWorkout';
 window.showExercisePR=name=>{exerciseHistoryReturn=document.querySelector('.screen.active')?.id||'activeWorkout';activeExerciseMetric='heaviest';renderExerciseHistory(name);switchScreen('exerciseHistoryScreen')};
-$('closeExerciseHistory').onclick=()=>{if(exerciseHistoryReturn==='exerciseStatsScreen')renderExerciseStats();switchScreen(exerciseHistoryReturn);};
+$('closeExerciseHistory').onclick=()=>{if(exerciseHistoryReturn==='exerciseStatsScreen')renderExerciseStats();returnToScreen(exerciseHistoryReturn);};
 function focusLastWorkoutExercise(){
  // Return with ADD EXERCISE just above the fixed bottom navigation.
  const alignWorkoutFooter=()=>{
@@ -2946,10 +3024,9 @@ function focusLastWorkoutExercise(){
  requestAnimationFrame(()=>{alignWorkoutFooter();requestAnimationFrame(alignWorkoutFooter);});
 }
 function returnFromExerciseLibrary(){
- if(libraryMode==='routine'){switchScreen('routineBuilderScreen');return;}
+ if(libraryMode==='routine'){returnToScreen('routineBuilderScreen');return;}
  if(document.activeElement?.blur)document.activeElement.blur();
- switchScreen('activeWorkout');
- focusLastWorkoutExercise();
+ returnToScreen('activeWorkout');
 }
 function openLibrary(){
  libraryCategory='All';$('librarySearch').value='';renderLibrary();
@@ -3064,7 +3141,7 @@ function renderExerciseStats(){
   '<button type="button" class="pr-icon" data-open-exercise-stats="'+esc(name)+'">VIEW STATS</button></div>';
  }).join('')||'<p class="muted tiny">No matching exercises found.</p>';
 }
-$('openExerciseStats').onclick=()=>{statsCategory='All';$('exerciseStatsSearch').value='';renderExerciseStats();switchScreen('exerciseStatsScreen');};$('closeExerciseStats').onclick=()=>switchScreen('profile');$('exerciseStatsSearch').addEventListener('input',renderExerciseStats);$('exerciseStatsCategories').addEventListener('click',e=>{const b=e.target.closest('[data-stats-category]');if(b){statsCategory=b.dataset.statsCategory;renderExerciseStats();}});$('exerciseStatsList').addEventListener('click',e=>{const b=e.target.closest('[data-open-exercise-stats]');if(b){exerciseHistoryReturn='exerciseStatsScreen';renderExerciseHistory(b.dataset.openExerciseStats);switchScreen('exerciseHistoryScreen');}});
+$('openExerciseStats').onclick=()=>{statsCategory='All';$('exerciseStatsSearch').value='';renderExerciseStats();switchScreen('exerciseStatsScreen');};$('closeExerciseStats').onclick=()=>returnToScreen('profile');$('exerciseStatsSearch').addEventListener('input',renderExerciseStats);$('exerciseStatsCategories').addEventListener('click',e=>{const b=e.target.closest('[data-stats-category]');if(b){statsCategory=b.dataset.statsCategory;renderExerciseStats();}});$('exerciseStatsList').addEventListener('click',e=>{const b=e.target.closest('[data-open-exercise-stats]');if(b){exerciseHistoryReturn='exerciseStatsScreen';renderExerciseHistory(b.dataset.openExerciseStats);switchScreen('exerciseHistoryScreen');}});
 $('openMuscleDiagram').onclick=()=>$('muscleOverlay').classList.remove('hidden');$('closeMuscleDiagram').onclick=()=>$('muscleOverlay').classList.add('hidden');$('closePr').onclick=()=>$('prOverlay').classList.add('hidden');const customExerciseDialog=$('customExerciseDialog');
 function closeCustomExerciseDialog(){if(customExerciseDialog.open)customExerciseDialog.close();$('customExerciseName').value='';}
 $('openCustomExercise').addEventListener('click',()=>{$('customExerciseName').value='';customExerciseDialog.showModal();$('customExerciseName').focus();});
@@ -3077,7 +3154,7 @@ $('customExerciseForm').addEventListener('submit',e=>{
  if(!name){$('customExerciseName').focus();return;}
  closeCustomExerciseDialog();
  window.pickExercise(name);
-});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});// Start New Workout now opens the workout-type chooser below.$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>switchScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';switchScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();switchScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
+});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});// Start New Workout now opens the workout-type chooser below.$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>returnToScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';returnToScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();returnToScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
 $('homeRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});$('openExerciseLibrary').onclick=openLibrary;$('closeExerciseLibrary').onclick=returnFromExerciseLibrary;if($('endWorkout'))$('endWorkout').onclick=()=>finishSession();
 if($('finishWorkoutBottom'))$('finishWorkoutBottom').onclick=()=>finishSession();
 // Durable completion queue. A successful SpartanX save creates at most one

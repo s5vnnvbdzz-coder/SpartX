@@ -131,7 +131,16 @@ jobs:
             wait.until(lambda b:evaluate("""return !document.querySelector('#sxPhotoCropOverlay').hidden
               && !document.querySelector('#sxPhotoCropApply').disabled"""))
             click('#sxPhotoCropApply')
-            assert evaluate("return document.querySelector('#sxPhotoCropOverlay').hidden")
+            crop_debug=evaluate("""return {
+              hidden:document.querySelector('#sxPhotoCropOverlay').hidden,
+              error:document.querySelector('#sxPhotoCropError').textContent,
+              disabled:document.querySelector('#sxPhotoCropApply').disabled,
+              pendingLength:document.querySelector('#editProfileOverlay').dataset.pendingPhoto?.length||0,
+              naturalWidth:document.querySelector('#sxPhotoCropImage').naturalWidth,
+              circle:document.querySelector('#sxPhotoCropCircle').getBoundingClientRect().toJSON()
+            };""")
+            print('CROP APPLY DEBUG:',crop_debug,flush=True)
+            assert crop_debug['hidden'],crop_debug
             crop_data=evaluate("return document.querySelector('#editProfileOverlay').dataset.pendingPhoto")
             assert crop_data.startswith('data:image/jpeg;base64,')
             assert evaluate("return !!document.querySelector('#editProfileAvatar img')")

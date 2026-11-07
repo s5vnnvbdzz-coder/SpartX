@@ -116,10 +116,20 @@
     try{persist();}catch(error){console.warn('Unable to save demo social connections',error);}
     renderSearch();
     renderCounts();
+    window.dispatchEvent(new CustomEvent('spartx:socialChanged',{detail:counts()}));
   }
   document.addEventListener('click',event=>{
     const nav=event.target.closest('[data-sx-social-jump]');
-    if(nav){event.preventDefault();openSearch(nav.dataset.sxSocialJump);return;}
+    if(nav){
+      event.preventDefault();
+      const list=nav.dataset.sxSocialJump;
+      if((list==='followers'||list==='following')&&window.SpartanXProfileConnections){
+        window.SpartanXProfileConnections.open(list);
+      } else {
+        openSearch(list);
+      }
+      return;
+    }
     const toggle=event.target.closest('#sxSocialToggle');
     if(toggle){event.preventDefault();setExpanded(!expanded);return;}
     const filter=event.target.closest('[data-sx-social-filter]');
@@ -131,7 +141,15 @@
   });
   const input=document.getElementById('sxAthleteSearchInput');
   if(input)input.addEventListener('input',event=>{searchText=String(event.target.value||'');renderSearch();});
-  window.SpartanXSocial={renderCounts,cardStatsMarkup,openSearch,renderSearch};
+  function connectionList(kind){
+    if(kind!=='followers'&&kind!=='following')return [];
+    const current=state();
+    return current[kind].map(id=>{
+      const athlete=athletes.find(a=>a.id===id);
+      return athlete?{...athlete,isFollowing:current.following.includes(id),followsYou:current.followers.includes(id)}:null;
+    }).filter(Boolean);
+  }
+  window.SpartanXSocial={renderCounts,cardStatsMarkup,openSearch,renderSearch,connectionList,counts};
   state();
   renderCounts();
   setExpanded(false);

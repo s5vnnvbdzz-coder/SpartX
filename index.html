@@ -2735,6 +2735,10 @@ function metricValue(points,metric){
 }
 function renderExerciseHistory(name){
  const points=exerciseHistoryData(name,exerciseHistoryReturn==='activeWorkout'),saved=points.filter(p=>!p.isLive),live=points.find(p=>p.isLive),allSets=points.flatMap(p=>p.sets);
+ if(window.SpartanXExerciseStats?.render){
+  window.SpartanXExerciseStats.render(name,points,exerciseHistoryReturn==='activeWorkout',exerciseMuscles(name));
+  return;
+ }
  $('exerciseHistoryTitle').textContent=name;
  $('exerciseHistorySubtitle').textContent=saved.length+' logged session'+(saved.length===1?'':'s')+' · '+allSets.length+' completed sets'+(live?' · TODAY LIVE: '+live.sets.length+' unsaved set'+(live.sets.length===1?'':'s'):exerciseHistoryReturn==='activeWorkout'?' · Complete a set to see today’s live comparison':'');
  const muscles=exerciseMuscles(name);
@@ -2746,6 +2750,7 @@ function renderExerciseHistory(name){
  renderExerciseMetric(points,activeExerciseMetric);
 }
 function renderExerciseMetric(points,id){
+ if(window.SpartanXExerciseStats?.renderMetric){window.SpartanXExerciseStats.renderMetric(points,id);return;}
  const metric=EXERCISE_METRICS.find(m=>m.id===id)||EXERCISE_METRICS[0];
  let values=[];
  if(metric.id==='heaviest'){
@@ -2823,7 +2828,7 @@ function renderLibrary(){
    '<span class="library-item-name">'+esc(name)+'</span>'+
    '<span class="library-item-meta">Primary: '+esc(muscleNames(muscles.primary)||'Not classified')+'</span>'+
    '<span class="library-item-meta">Secondary: '+esc(muscleNames(muscles.secondary)||'None listed')+'</span>'+
-   '</button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(name)+'" aria-label="Information and personal records for '+esc(name)+'">i</button></div>';
+   '</button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(name)+'" aria-label="Information and personal records for '+esc(name)+'">🏆</button></div>';
  }).join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';
 }
 window.chooseLibraryCategory=cat=>{libraryCategory=cat;renderLibrary()};

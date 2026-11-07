@@ -1538,6 +1538,11 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
   <h1>Add Exercise</h1>
   <button type="button" class="secondary sx-custom-open" id="openCustomExercise">Custom +</button>
 </div>
+<div class="sx-save-header" id="sxHeaderSaveControls" role="group" aria-label="Finish workout controls">
+ <button type="button" id="sxSaveReviewBack" aria-label="Back to active workout">← Back</button>
+ <h1>Finish Workout</h1>
+ <button type="button" id="sxSaveReviewConfirm">SAVE</button>
+</div>
 <div class="sx-active-header" id="sxHeaderActiveControls" role="group" aria-label="Active Session header">
   <button type="button" class="back-button spartan-back-button" id="activeSessionBack" aria-label="Back to workouts">← Back</button>
   <h1>Active Session</h1>
@@ -1671,12 +1676,44 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 <label for="editDurationMinutes">MINUTES<input id="editDurationMinutes" type="number" inputmode="numeric" min="0" max="59" step="1" value="0"></label>
 <label for="editDurationSeconds">SECONDS<input id="editDurationSeconds" type="number" inputmode="numeric" min="0" max="59" step="1" value="0"></label>
 </div><div class="row" style="gap:10px;margin-top:18px"><button type="button" class="secondary" id="cancelDurationEdit" style="flex:1">CANCEL</button><button type="button" id="saveDurationEdit" style="flex:1">SAVE</button></div></div></div>
-<section id="exerciseHistoryScreen" class="screen">
-<div class="row between"><div><div class="eyebrow">PERFORMANCE SUMMARY</div><h1 id="exerciseHistoryTitle">Exercise summary</h1></div><button class="back-button" id="closeExerciseHistory">← Back</button></div>
-<p class="muted tiny" id="exerciseHistorySubtitle">Your progress for this exercise.</p>
-<div class="card" id="exerciseHistoryMuscles" style="padding:12px 14px;margin:8px 0 13px"></div>
-<div class="card" style="padding:13px"><div class="row between"><span class="eyebrow" id="exerciseMetricLabel">HEAVIEST WEIGHT</span><span class="tiny muted" id="exerciseMetricUnit">kg</span></div><div class="result" id="exerciseMetricValue" style="font-size:30px;margin:7px 0 12px">—</div><div id="exerciseHistoryCharts"></div></div>
-<div id="exerciseMetricTabs" class="history-metric-tabs" role="tablist" aria-label="Exercise metrics"></div>
+<section id="workoutSaveReview" class="screen sx-workout-save-review">
+ <div class="sx-review-subhead"><span class="eyebrow">FINISH YOUR SESSION</span><h1>Workout Review</h1><p>Confirm the details before saving to your training history.</p></div>
+ <div class="sx-review-name-panel"><label for="sxReviewWorkoutName">WORKOUT NAME</label><input id="sxReviewWorkoutName" type="text" maxlength="90" autocomplete="off" spellcheck="false" placeholder="Workout name"><p>Tap the name to replace it.</p></div>
+ <div class="sx-review-metrics" aria-label="Workout totals"><div><span>DURATION</span><strong id="sxReviewDuration">00:00:00</strong></div><div><span>VOLUME</span><strong id="sxReviewVolume">0 kg</strong></div><div><span>SETS</span><strong id="sxReviewSets">0</strong></div></div>
+ <section class="sx-review-media-section"><div class="sx-review-media-heading"><h2>Photos &amp; videos</h2><span>Optional</span></div><p>Add moments from your session before saving. Media stays on this device.</p>
+  <label class="sx-review-add-media" for="sxReviewMediaInput"><span aria-hidden="true">＋</span>Add photos or videos</label>
+  <input id="sxReviewMediaInput" type="file" accept="image/*,video/*" multiple hidden>
+  <div id="sxReviewMediaList" class="sx-review-media-list" aria-live="polite"></div>
+  <p class="sx-review-media-note">Photos and videos are saved locally to your device, not your online profile. Exporting a JSON backup does not include them.</p>
+ </section>
+ <p id="sxReviewError" class="sx-review-error" role="alert" hidden></p>
+</section>
+<section id="exerciseHistoryScreen" class="screen sx-exercise-history-screen">
+ <div class="sx-exercise-profile-heading">
+  <button type="button" class="back-button" id="closeExerciseHistory" aria-label="Back to exercise or workout">← Back</button>
+  <h1 id="exerciseHistoryTitle">Exercise</h1>
+  <button type="button" id="sxExerciseStatsShare" aria-label="Share exercise statistics" title="Share statistics">↗</button>
+ </div>
+ <div class="sx-exercise-tabs" id="sxExerciseTopTabs" role="tablist" aria-label="Exercise information">
+  <button type="button" data-sx-exercise-tab="summary" class="selected" aria-selected="true" role="tab">Summary</button>
+  <button type="button" data-sx-exercise-tab="history" aria-selected="false" role="tab">History</button>
+  <button type="button" data-sx-exercise-tab="howto" aria-selected="false" role="tab">How to</button>
+  <button type="button" data-sx-exercise-tab="leaderboard" aria-selected="false" role="tab">Leaderboard</button>
+ </div>
+ <div id="sxExerciseSummaryPanel">
+  <p class="sx-exercise-info-banner" id="exerciseHistorySubtitle">Your progress for this exercise.</p>
+  <div class="sx-exercise-chart-intro"><div class="sx-exercise-chart-headline"><strong id="exerciseMetricValue">—</strong><span id="exerciseMetricDate"></span></div>
+  <select id="sxExerciseChartRange" aria-label="Exercise graph period"><option value="3m">Last 3 months</option><option value="4w">Last 4 weeks</option><option value="6m">Last 6 months</option><option value="1y">Last year</option><option value="all">All time</option></select></div>
+  <div id="exerciseMetricLabel" class="sx-exercise-chart-measure">HEAVIEST WEIGHT</div>
+  <span id="exerciseMetricUnit" class="sx-screenreader-only">kg</span>
+  <div id="exerciseHistoryCharts" class="sx-exercise-trend"></div>
+  <div id="exerciseMetricTabs" class="history-metric-tabs" role="tablist" aria-label="Exercise metrics"></div>
+  <section class="sx-exercise-pr-section" aria-labelledby="sxExercisePRHeading"><div class="sx-exercise-pr-heading"><span aria-hidden="true">🏅</span><h2 id="sxExercisePRHeading">Personal Records</h2></div><div id="sxExercisePersonalRecords"></div></section>
+  <div id="exerciseHistoryMuscles" class="sx-exercise-muscle-summary"></div>
+ </div>
+ <div id="sxExerciseHistoryList" class="sx-exercise-extra-panel" hidden></div>
+ <div id="sxExerciseHowTo" class="sx-exercise-extra-panel" hidden></div>
+ <div id="sxExerciseLeaderboard" class="sx-exercise-extra-panel" hidden></div>
 </section>
 <section id="exerciseLibraryScreen" class="screen">
 <input id="librarySearch" class="library-search" placeholder="Search exercises or muscles (e.g. hamstrings)..." autocomplete="off">

@@ -1,6 +1,6 @@
-/* SpartanX v245: movable circular avatar crop selection.
-   Selected photos are not committed until "Use this crop" and SAVE PROFILE.
-   Source image bytes never leave the browser. */
+/* SpartanX v247: movable circular avatar crop with two-finger pinch resizing.
+   "Use this crop" persists the photo immediately; other Profile form edits
+   remain unsaved until Save Profile. Image processing stays on-device. */
 (()=>{
   'use strict';
   const fileInput=document.getElementById('profilePhotoInput');
@@ -21,7 +21,7 @@
         <button type="button" id="sxPhotoCropBack" class="sx-photo-crop-back">← Back</button>
         <h2 id="sxPhotoCropHeading">Crop profile photo</h2>
       </div>
-      <p class="sx-photo-crop-instruction">Drag the circle over the part of your photo you want to display.</p>
+      <p class="sx-photo-crop-instruction">Drag with one finger to position the circle. Pinch with two fingers to zoom the circle in or out.</p>
       <div class="sx-photo-crop-stage" id="sxPhotoCropStage" aria-label="Photo cropping workspace">
         <div class="sx-photo-crop-surface" id="sxPhotoCropSurface">
           <img id="sxPhotoCropImage" alt="Selected image for cropping" draggable="false">
@@ -34,8 +34,7 @@
         </div>
       </div>
       <div class="sx-photo-crop-tools">
-        <label for="sxPhotoCropSize"><span>Circle size</span><output id="sxPhotoCropSizeValue">85%</output></label>
-        <input type="range" id="sxPhotoCropSize" min="40" max="100" step="1" value="85">
+        <p class="sx-photo-crop-gesture-hint" aria-hidden="true">↔ Drag to move <span>·</span> <span class="sx-photo-pinch-symbol">⇱ ⇲</span> Pinch to resize</p>
         <div class="sx-photo-crop-preview-row">
           <canvas width="104" height="104" id="sxPhotoCropPreview" aria-label="Preview of final profile photo" role="img"></canvas>
           <span><strong>Profile preview</strong><small>Everything inside the circle will fit inside your SpartanX profile frame.</small></span>
@@ -53,15 +52,16 @@
   const surface=document.getElementById('sxPhotoCropSurface');
   const image=document.getElementById('sxPhotoCropImage');
   const circle=document.getElementById('sxPhotoCropCircle');
-  const sizeRange=document.getElementById('sxPhotoCropSize');
-  const sizeValue=document.getElementById('sxPhotoCropSizeValue');
   const preview=document.getElementById('sxPhotoCropPreview');
   const apply=document.getElementById('sxPhotoCropApply');
   const error=document.getElementById('sxPhotoCropError');
 
   let sourceURL=null;
   let active=false;
-  let drag=null;
+  let pan=null;
+  let pinch=null;
+  const pointers=new Map();
+  let sizeRatio=.85;
   let renderedWidth=0;
   let renderedHeight=0;
   let diameter=0;
@@ -71,7 +71,7 @@
 
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   function showError(message){error.textContent=message||'';error.hidden=!message;}
-  function circleSize(){return Math.max(1,Math.min(renderedWidth,renderedHeight)*Number(sizeRange.value)/100);}
+  function circleSize(){return Math.max(1,Math.min(renderedWidth,renderedHeight)*sizeRatio);}
   function placeCircle(){
     diameter=circleSize();
     posX=clamp(posX,0,renderedWidth-diameter);
@@ -81,8 +81,6 @@
     circle.style.left=posX+'px';
     circle.style.top=posY+'px';
     circle.setAttribute('aria-valuenow',String(Math.round(100*(posX+diameter/2)/(renderedWidth||1))));
-    sizeValue.value=sizeRange.value+'%';
-    sizeValue.textContent=sizeRange.value+'%';
     schedulePreview();
   }
   function fitImage(reset){
@@ -117,7 +115,7 @@
     });
   }
   function closeCropper(){
-    drag=null;active=false;
+    pan=null;pinch=null;pointers.clear();active=false;
     cropper.hidden=true;
     document.body.classList.remove('sx-photo-crop-open');
     if(previewRequest){cancelAnimationFrame(previewRequest);previewRequest=0;}
@@ -140,7 +138,7 @@
     cropper.hidden=false;
     document.body.classList.add('sx-photo-crop-open');
     apply.disabled=true;
-    sizeRange.value='85';
+    sizeRatio=.85;
     renderedWidth=0;renderedHeight=0;diameter=0;
     showError('');
     sourceURL=URL.createObjectURL(file);
@@ -156,46 +154,84 @@
     };
     image.src=sourceURL;
   }
-  surface.addEventListener('pointerdown',event=>{
-    if(!active||!image.naturalWidth||event.button>0)return;
-    event.preventDefault();
+  const pointFromEvent=event=>{
     const bounds=surface.getBoundingClientRect();
-    const cursorX=event.clientX-bounds.left,cursorY=event.clientY-bounds.top;
-    const hit=cursorX>=posX&&cursorX<=posX+diameter&&cursorY>=posY&&cursorY<=posY+diameter;
-    const offsetX=hit?cursorX-posX:diameter/2;
-    const offsetY=hit?cursorY-posY:diameter/2;
-    drag={id:event.pointerId,offsetX,offsetY};
-    surface.setPointerCapture(event.pointerId);
-    if(!hit){
-      posX=cursorX-offsetX;posY=cursorY-offsetY;placeCircle();
-    }
+    return {x:event.clientX-bounds.left,y:event.clientY-bounds.top};
+  };
+  const pinchDetails=()=>{
+    const [a,b]=[...pointers.values()];
+    return {distance:Math.hypot(a.x-b.x,a.y-b.y),
+      midpointX:(a.x+b.x)/2,midpointY:(a.y+b.y)/2};
+  };
+  function beginPinch(){
+    if(pointers.size<2)return;
+    const touch=pinchDetails();
+    pinch={...touch,ratio:sizeRatio,cx:posX+diameter/2,cy:posY+diameter/2};
+    pan=null;
+  }
+  surface.addEventListener('pointerdown',event=>{
+    if(!active||!image.naturalWidth||event.button>0||pointers.size>=2)return;
+    event.preventDefault();
+    const p=pointFromEvent(event);
+    pointers.set(event.pointerId,p);
+    try{surface.setPointerCapture(event.pointerId);}catch(_){}
+    if(pointers.size===2){beginPinch();return;}
+    const hit=p.x>=posX&&p.x<=posX+diameter&&p.y>=posY&&p.y<=posY+diameter;
+    pan={id:event.pointerId,offsetX:hit?p.x-posX:diameter/2,offsetY:hit?p.y-posY:diameter/2};
+    if(!hit){posX=p.x-pan.offsetX;posY=p.y-pan.offsetY;placeCircle();}
   });
   surface.addEventListener('pointermove',event=>{
-    if(!active||!drag||drag.id!==event.pointerId)return;
+    if(!active||!pointers.has(event.pointerId))return;
     event.preventDefault();
-    const bounds=surface.getBoundingClientRect();
-    posX=event.clientX-bounds.left-drag.offsetX;
-    posY=event.clientY-bounds.top-drag.offsetY;
-    placeCircle();
+    const p=pointFromEvent(event);
+    pointers.set(event.pointerId,p);
+    if(pointers.size===2){
+      if(!pinch)beginPinch();
+      const touch=pinchDetails();
+      if(pinch.distance>2){
+        // Scaling the selection changes what fits into the saved profile image.
+        // The pinch midpoint can also move the circle while resizing.
+        sizeRatio=clamp(pinch.ratio*touch.distance/pinch.distance,.25,1);
+        const resized=circleSize();
+        posX=pinch.cx+(touch.midpointX-pinch.midpointX)-resized/2;
+        posY=pinch.cy+(touch.midpointY-pinch.midpointY)-resized/2;
+        placeCircle();
+      }
+    }else if(pan&&pan.id===event.pointerId){
+      posX=p.x-pan.offsetX;
+      posY=p.y-pan.offsetY;
+      placeCircle();
+    }
   });
-  const stopDrag=event=>{if(drag?.id===event.pointerId)drag=null;};
-  surface.addEventListener('pointerup',stopDrag);
-  surface.addEventListener('pointercancel',stopDrag);
-  surface.addEventListener('lostpointercapture',()=>{drag=null;});
+  function releasePointer(event){
+    if(!pointers.has(event.pointerId))return;
+    pointers.delete(event.pointerId);
+    if(pointers.size===1){
+      const [id,p]=[...pointers.entries()][0];
+      pan={id,offsetX:p.x-posX,offsetY:p.y-posY};
+    }else{pan=null;}
+    pinch=null;
+  }
+  surface.addEventListener('pointerup',releasePointer);
+  surface.addEventListener('pointercancel',releasePointer);
+  surface.addEventListener('lostpointercapture',releasePointer);
   circle.addEventListener('keydown',event=>{
-    if(!active||!/^Arrow(Up|Down|Left|Right)$/.test(event.key))return;
-    event.preventDefault();
-    const step=event.shiftKey?10:3;
-    if(event.key==='ArrowUp')posY-=step;
-    if(event.key==='ArrowDown')posY+=step;
-    if(event.key==='ArrowLeft')posX-=step;
-    if(event.key==='ArrowRight')posX+=step;
-    placeCircle();
-  });
-  sizeRange.addEventListener('input',()=>{
     if(!active)return;
-    const cx=posX+diameter/2,cy=posY+diameter/2,newD=circleSize();
-    posX=cx-newD/2;posY=cy-newD/2;placeCircle();
+    if(/^Arrow(Up|Down|Left|Right)$/.test(event.key)){
+      event.preventDefault();
+      const step=event.shiftKey?10:3;
+      if(event.key==='ArrowUp')posY-=step;
+      if(event.key==='ArrowDown')posY+=step;
+      if(event.key==='ArrowLeft')posX-=step;
+      if(event.key==='ArrowRight')posX+=step;
+      placeCircle();
+    }else if(event.key==='+'||event.key==='='||event.key==='-'){
+      event.preventDefault();
+      const cx=posX+diameter/2,cy=posY+diameter/2;
+      sizeRatio=clamp(sizeRatio+(event.key==='-'?-.05:.05),.25,1);
+      const resized=circleSize();
+      posX=cx-resized/2;posY=cy-resized/2;placeCircle();
+    }
   });
   window.addEventListener('resize',()=>{if(active)fitImage(false);});
   document.getElementById('sxPhotoCropBack').addEventListener('click',closeCropper);
@@ -209,15 +245,25 @@
       drawCrop(canvas.getContext('2d',{alpha:false}),512);
       const data=canvas.toDataURL('image/jpeg',.88);
       if(!data.startsWith('data:image/jpeg;base64,'))throw Error('Could not create the cropped picture.');
-      // The existing SAVE PROFILE action commits the pending photo along
-      // with all the other fields; cancelling the editor still discards it.
-      editOverlay.dataset.pendingPhoto=data;
-      avatar.innerHTML='<img src="'+data+'" alt="Cropped profile picture preview">';
+      // Commit the cropped photo immediately. Do not save name, bio, birthday
+      // or other unsaved edits from the surrounding Profile editor.
+      db.profile=db.profile||{};
+      const previous=db.profile.photo;
+      db.profile.photo=data;
+      try{
+        persist();
+      }catch(e){
+        db.profile.photo=previous;
+        throw new Error('Device storage is full. Could not save profile photo.');
+      }
+      delete editOverlay.dataset.pendingPhoto;
+      renderProfile();
+      renderWorkoutFeed();
       closeCropper();
     }catch(e){
       cropper.dataset.lastCropError=String(e&&e.message||e);
       console.error('[SpartanX photo crop]',e);
-      showError('Could not save this crop. Try a smaller image or another photo.');
+      showError(e?.message?.startsWith('Device storage')?e.message:'Could not save this crop. Try a smaller image or another photo.');
     }
   });
   // Existing change handler delegates to this event. It never auto-crops.

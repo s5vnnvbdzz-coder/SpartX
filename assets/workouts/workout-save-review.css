@@ -1,0 +1,103 @@
+/* SpartanX v251 — full-page Finish Workout review.
+   Active workout remains in memory until Save is confirmed. */
+body > header #sxHeaderSaveControls{display:none!important}
+body:has(#workoutSaveReview.screen.active)>header #sxBrandHeader,
+body:has(#workoutSaveReview.screen.active)>header #sxHeaderActiveControls,
+body:has(#workoutSaveReview.screen.active)>header #sxHeaderExerciseControls{display:none!important}
+body:has(#workoutSaveReview.screen.active)>header{
+ display:flex!important;align-items:center!important;
+ padding:calc(11px + env(safe-area-inset-top,0px)) 12px 11px!important;
+}
+body:has(#workoutSaveReview.screen.active)>header #sxHeaderSaveControls{
+ display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;
+ align-items:center;gap:8px;width:100%;min-width:0;
+}
+#sxHeaderSaveControls h1{
+ margin:0!important;min-width:0;text-align:center;
+ font-size:clamp(15px,4.25vw,21px);font-weight:850;letter-spacing:-.3px;color:var(--txt);
+}
+#sxHeaderSaveControls button{
+ margin:0!important;display:inline-flex!important;align-items:center!important;
+ justify-content:center!important;min-height:43px;min-width:73px;
+ padding:10px 12px!important;border-radius:12px!important;
+ border:1px solid var(--line)!important;box-shadow:none!important;
+ background:var(--panel2)!important;color:var(--txt)!important;
+ white-space:nowrap;font-size:12px!important;font-weight:820!important;
+}
+#sxHeaderSaveControls #sxSaveReviewConfirm{
+ background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;
+ color:var(--lime)!important;border-color:var(--lime)!important;
+}
+#sxHeaderSaveControls #sxSaveReviewConfirm:disabled{opacity:.5!important}
+body:has(#workoutSaveReview.screen.active) #trackerNav{display:none!important}
+#workoutSaveReview{
+ padding-bottom:calc(35px + env(safe-area-inset-bottom,0px));
+}
+#workoutSaveReview .sx-review-subhead{padding:8px 0 18px}
+#workoutSaveReview .sx-review-subhead h1{margin:7px 0 6px;font-size:24px;font-weight:870;letter-spacing:-.5px;color:var(--txt)}
+#workoutSaveReview .sx-review-subhead p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+#workoutSaveReview .sx-review-name-panel{padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}
+#workoutSaveReview .sx-review-name-panel label{display:block;margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:1px}
+#workoutSaveReview #sxReviewWorkoutName{
+ display:block;width:100%;min-height:50px;margin:0;padding:11px 13px!important;
+ border:1px solid color-mix(in srgb,var(--lime) 45%,var(--line))!important;
+ border-radius:11px!important;background:var(--panel2)!important;
+ color:var(--txt)!important;box-shadow:none!important;
+ font-size:19px!important;font-weight:830!important;line-height:1.2;
+}
+#workoutSaveReview #sxReviewWorkoutName:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+#workoutSaveReview .sx-review-name-panel p{margin:9px 0 0;color:var(--muted);font-size:11px}
+#workoutSaveReview .sx-review-metrics{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+ padding:20px 1px;margin:13px 0 20px;border-bottom:1px solid var(--line);
+}
+#workoutSaveReview .sx-review-metrics>div{display:flex;flex-direction:column;gap:9px;min-width:0;padding:0 4px}
+#workoutSaveReview .sx-review-metrics>div+div{border-left:1px solid var(--line);padding-left:12px}
+#workoutSaveReview .sx-review-metrics span{font-size:10px;color:var(--muted);font-weight:780;letter-spacing:.7px}
+#workoutSaveReview .sx-review-metrics strong{font-size:clamp(15px,4vw,22px);color:var(--txt);font-weight:840;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#workoutSaveReview .sx-review-media-section{margin:0}
+#workoutSaveReview .sx-review-media-heading{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+#workoutSaveReview .sx-review-media-heading h2{margin:0;font-size:20px;font-weight:830;letter-spacing:-.3px}
+#workoutSaveReview .sx-review-media-heading span{font-size:11px;color:var(--muted)}
+#workoutSaveReview .sx-review-media-section>p{
+ margin:10px 0 14px;font-size:12px;line-height:1.6;color:var(--muted);
+}
+#workoutSaveReview .sx-review-add-media{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+ min-height:125px;padding:16px;margin:0;
+ border:1.5px dashed color-mix(in srgb,var(--lime) 42%,var(--line));
+ border-radius:14px;background:color-mix(in srgb,var(--lime) 5%,var(--panel));
+ color:var(--txt);font-size:13px;font-weight:800;text-align:center;cursor:pointer;
+}
+#workoutSaveReview .sx-review-add-media span{font-size:33px;line-height:1;color:var(--lime);font-weight:420}
+#workoutSaveReview .sx-review-media-list{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+ margin-top:13px;
+}
+#workoutSaveReview .sx-review-media-item{
+ position:relative;display:flex;flex-direction:column;gap:6px;
+ min-width:0;padding:6px;border:1px solid var(--line);border-radius:12px;
+ background:var(--panel);
+}
+#workoutSaveReview .sx-review-media-preview{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--panel2)}
+#workoutSaveReview .sx-review-media-filename{color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+#workoutSaveReview .sx-review-remove-media{
+ position:absolute;top:2px;right:2px;
+ display:grid;place-items:center;width:27px;height:27px;min-height:27px;padding:0!important;
+ border:1px solid var(--line)!important;border-radius:50%!important;
+ background:var(--panel2)!important;color:var(--txt)!important;
+ box-shadow:none!important;font-size:20px!important;font-weight:800!important;
+}
+#workoutSaveReview .sx-review-media-note{margin:15px 0;font-size:10px!important;line-height:1.55!important}
+#workoutSaveReview .sx-review-error{padding:10px;border:1px solid #ff7777;border-radius:8px;color:#ffb2af;font-size:12px;line-height:1.5}
+#workoutSaveReview .sx-review-error[hidden]{display:none!important}
+#activeWorkout .sx-active-workout-name>h1#activeWorkoutName{display:none!important}
+#activeWorkout .sx-active-workout-name{min-height:0!important}
+#activeWorkout .sx-active-workout-name:empty{display:none!important}
+.sx-saved-workout-media{margin-top:20px;padding-top:13px;border-top:1px solid var(--line)}
+.sx-saved-workout-media h3{font-size:16px;margin:5px 0 13px;color:var(--txt)}
+.sx-saved-media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.sx-saved-media-item{display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;min-width:0}
+.sx-saved-media-item img,.sx-saved-media-item video{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.sx-saved-media-item small{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:380px){#sxHeaderSaveControls button{min-width:62px;padding-inline:8px!important}#workoutSaveReview .sx-review-metrics strong{font-size:14px}#workoutSaveReview .sx-review-media-list{gap:7px}}

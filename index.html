@@ -1838,6 +1838,7 @@ body.sx-black-yellow .eyebrow,body.sx-black-yellow .brand span{color:#f4cd37}
 body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),inset 0 0 18px rgba(244,205,55,.035)!important}
 @media(prefers-reduced-motion:reduce){body.sx-black-yellow *,body.sx-black-yellow *::before,body.sx-black-yellow *::after{animation-duration:.01ms!important}}
 </style>
+<script src="./assets/cardio/cardio.js?v=255"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -2322,6 +2323,7 @@ function saveRankProfile(){db.profile={...(db.profile||{}),bodyweight:weightValu
 function fmtTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
 function renderWork(){
  $('exerciseList').innerHTML=work.map((e,i)=>{
+  if(window.SpartanXCardio?.isCardio(e.name))return window.SpartanXCardio.render(e,i,preferences.distance,esc);
   const previousSession=db.sessions.find(s=>s.exercises.some(x=>x.name.toLowerCase()===e.name.toLowerCase()));
   const previousExercise=previousSession?.exercises.find(x=>x.name.toLowerCase()===e.name.toLowerCase());
   // The picker always shows the base interval. +1:00 is applied only
@@ -2381,8 +2383,25 @@ window.setRest=(i,v)=>{
  work[i].rest=value;
  updateFloatingRestTimer();saveDraft();
 };
-window.addSet=i=>{work[i].sets.push({weight:'',reps:'',rpe:'',type:'Working Set',done:false});renderWork()};
-window.removeSet=(i,j)=>{work[i].sets.splice(j,1);renderWork()};
+window.addSet=i=>{work[i].sets.push(window.SpartanXCardio?.isCardio(work[i].name)?window.SpartanXCardio.blank():{weight:'',reps:'',rpe:'',type:'Working Set',done:false});renderWork();saveDraft()};
+window.removeSet=(i,j)=>{work[i].sets.splice(j,1);renderWork();saveDraft()};
+window.setCardioValue=(i,j,key,raw)=>{
+ const c=window.SpartanXCardio,ex=work[i],set=ex?.sets?.[j];
+ if(!c?.isCardio(ex?.name)||!set||!['durationSeconds','distanceKm','floors','calories'].includes(key))return;
+ const n=Number(raw),value=raw===''||!Number.isFinite(n)||n<0?0:n;
+ set[key]=key==='durationSeconds'?Math.round(value*60):key==='distanceKm'?
+  Number((preferences.distance==='mi'?value*1.609344:value).toFixed(5)):Math.round(value);
+ set.weight=0;set.reps=0;set.type='Cardio';
+ updateLiveStats();saveDraft();
+};
+window.addCardioInterval=i=>{
+ if(!window.SpartanXCardio?.isCardio(work[i]?.name))return;
+ work[i].sets.push(window.SpartanXCardio.blank());renderWork();saveDraft();
+};
+window.removeCardioInterval=(i,j)=>{
+ if(!window.SpartanXCardio?.isCardio(work[i]?.name)||work[i].sets.length<=1)return;
+ work[i].sets.splice(j,1);renderWork();saveDraft();
+};
 let activeRestExercise=null,restPreviewExercise=null;
 const REST_SOUND_KEY='spartx_rest_sound_enabled_v1';
 let restSoundEnabled=true;
@@ -2458,7 +2477,7 @@ window.completeSet=(i,j,done)=>{
  work[i].sets[j].done=done;
  const row=$('exerciseList').children[i]?.querySelectorAll('.set-entry')[j];
  if(row)row.classList.toggle('is-complete',done);
- if(done&&editingSessionId===null)startRest(i,j);updateLiveStats();saveDraft();
+ if(done&&editingSessionId===null&&!window.SpartanXCardio?.isCardio(work[i].name))startRest(i,j);updateLiveStats();saveDraft();
 };
 function isNumberedWorkoutSet(set){
  // W/B/F are special even when a stored or imported set uses their short codes.
@@ -2536,7 +2555,8 @@ const exerciseNames=[
 'Overhead Press','Seated Barbell Shoulder Press','Seated Dumbbell Shoulder Press','Single-Arm Dumbbell Shoulder Press','Arnold Press','Machine Shoulder Press','Single-Arm Cable Lateral Raise','Lateral Raise','Dumbbell Lateral Raise','Cable Lateral Raise','Rear Delt Fly','Reverse Pec Deck','Face Pull','Upright Row',
 'Barbell Row','Pendlay Row','Chest-Supported Row','Dumbbell Row','Single-Arm Dumbbell Row','Single-Arm Cable Row','Seated Cable Row','Wide-Grip Seated Cable Row','Lat Pulldown','Close-Grip Lat Pulldown','Single-Arm Lat Pulldown','Pull-Up','Chin-Up','Assisted Pull-Up','Straight-Arm Pulldown','Machine High Row','Single-Arm Machine Row',
 'Barbell Curl','Dumbbell Curl','Alternating Dumbbell Curl','Single-Arm Cable Curl','Hammer Curl','Cross-Body Hammer Curl','Preacher Curl','Single-Arm Preacher Curl','Cable Curl','EZ-Bar Curl','Concentration Curl','Triceps Pushdown','Single-Arm Triceps Pushdown','Overhead Triceps Extension','Single-Arm Overhead Triceps Extension','Skull Crusher','Dumbbell Skull Crusher','Close-Grip Push-Up','Bench Dip',
-'Ab Wheel','Cable Crunch','Decline Sit-Up','Hanging Knee Raise','Hanging Leg Raise','Plank','Side Plank','Pallof Press','Single-Arm Farmer Carry','Farmer Carry']
+'Ab Wheel','Cable Crunch','Decline Sit-Up','Hanging Knee Raise','Hanging Leg Raise','Plank','Side Plank','Pallof Press','Single-Arm Farmer Carry','Farmer Carry',
+'StairMaster','Treadmill','Rower','Bike','Recumbent Bike','Cross Trainer','SkiErg']
 // Exercise muscle-role data built from NASM, ACE and StrengthLog exercise references.
 // These roles are exercise-level estimates, not measured individual muscle activation.
 // Primary and secondary sets are kept distinct in the training report.
@@ -2572,6 +2592,7 @@ const BODYWEIGHT_EXERCISES=new Set([
  'Plank','Side Plank','Pallof Press'
 ]);
 function isValidTrackedSet(set,name){
+ if(window.SpartanXCardio?.isCardio(name))return window.SpartanXCardio.valid(set);
  const weight=Number(set?.weight),reps=Number(set?.reps);
  return Number.isFinite(weight)&&Number.isFinite(reps)&&reps>0&&
   (weight>0||(weight===0&&BODYWEIGHT_EXERCISES.has(name)));
@@ -2582,7 +2603,8 @@ const categories={
 'Shoulders':['Overhead Press','Seated Barbell Shoulder Press','Seated Dumbbell Shoulder Press','Single-Arm Dumbbell Shoulder Press','Arnold Press','Machine Shoulder Press','Single-Arm Cable Lateral Raise','Lateral Raise','Dumbbell Lateral Raise','Cable Lateral Raise','Rear Delt Fly','Reverse Pec Deck','Face Pull','Upright Row'],
 'Back':['Barbell Row','Pendlay Row','Chest-Supported Row','Dumbbell Row','Single-Arm Dumbbell Row','Single-Arm Cable Row','Seated Cable Row','Wide-Grip Seated Cable Row','Lat Pulldown','Close-Grip Lat Pulldown','Single-Arm Lat Pulldown','Pull-Up','Chin-Up','Assisted Pull-Up','Straight-Arm Pulldown','Machine High Row','Single-Arm Machine Row'],
 'Arms':['Barbell Curl','Dumbbell Curl','Alternating Dumbbell Curl','Single-Arm Cable Curl','Hammer Curl','Cross-Body Hammer Curl','Preacher Curl','Single-Arm Preacher Curl','Cable Curl','EZ-Bar Curl','Concentration Curl','Triceps Pushdown','Single-Arm Triceps Pushdown','Overhead Triceps Extension','Single-Arm Overhead Triceps Extension','Skull Crusher','Dumbbell Skull Crusher','Close-Grip Push-Up','Bench Dip','Single-Arm Farmer Carry','Farmer Carry'],
- 'Core':['Ab Wheel','Cable Crunch','Decline Sit-Up','Hanging Knee Raise','Hanging Leg Raise','Plank','Side Plank','Pallof Press','Single-Arm Farmer Carry','Farmer Carry']}
+ 'Core':['Ab Wheel','Cable Crunch','Decline Sit-Up','Hanging Knee Raise','Hanging Leg Raise','Plank','Side Plank','Pallof Press','Single-Arm Farmer Carry','Farmer Carry'],
+ 'Cardio':['StairMaster','Treadmill','Rower','Bike','Recumbent Bike','Cross Trainer','SkiErg']}
 let sessionStarted=null,sessionTicker=null,sessionPausedAt=null,sessionActive=false,libraryCategory='All';let routineDraft=[],libraryMode='workout';
 const DRAFT_KEY='spartx_draft_v1';let editingSessionId=null,editingSessionMeta=null,editReturnSnapshot=null;let restoringDraft=false;window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
 const PREF_KEY='spartx_preferences_v1',defaultPrefs={weight:'kg',distance:'km',body:'cm',theme:'dark'};let preferences={...defaultPrefs};try{preferences={...defaultPrefs,...JSON.parse(localStorage.getItem(PREF_KEY)||'{}')}}catch(e){}
@@ -2704,7 +2726,7 @@ function exerciseHistoryData(name,includeLive=false){
  const key=name.toLocaleLowerCase();
  const sessions=db.sessions.map(session=>{
   const entries=(session.exercises||[]).filter(e=>(e.name||'').toLocaleLowerCase()===key);
-  const sets=entries.flatMap(e=>e.sets||[]).filter(x=>(+x.weight||0)>0&&(+x.reps||0)>0);
+  const sets=entries.flatMap(e=>e.sets||[]).filter(x=>isValidTrackedSet(x,name));
   if(!sets.length)return null;
   const bestVolumeSet=sets.reduce((a,b)=>(+b.weight)*(+b.reps)>(+a.weight)*(+a.reps)?b:a);
   const bestRepSet=sets.reduce((a,b)=>(+b.reps)>(+a.reps)?b:a);
@@ -2713,7 +2735,7 @@ function exerciseHistoryData(name,includeLive=false){
  // Today's active working sets are a temporary comparison point, not a saved session.
  if(includeLive&&sessionActive&&editingSessionId===null){
   const sets=work.filter(e=>(e.name||'').toLocaleLowerCase()===key)
-   .flatMap(e=>e.sets||[]).filter(x=>x.done&&isValidTrackedSet(x,name)&&Number(x.weight)>0);
+   .flatMap(e=>e.sets||[]).filter(x=>x.done&&isValidTrackedSet(x,name));
   if(sets.length){
    const bestVolumeSet=sets.reduce((a,b)=>+b.weight*+b.reps>+a.weight*+a.reps?b:a);
    const bestRepSet=sets.reduce((a,b)=>+b.reps>+a.reps?b:a);
@@ -2863,7 +2885,7 @@ function renderLibrary(){
  }).join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';
 }
 window.chooseLibraryCategory=cat=>{libraryCategory=cat;renderLibrary()};
-window.pickExercise=name=>{if(typeof name!=='string'||!name.trim())return;if(libraryMode==='routine'){if(!routineDraft.some(ex=>ex.name===name)){routineDraft.push({name,sets:[{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''}]});}renderRoutineDraft();switchScreen('routineBuilderScreen');saveDraft();return;}libraryMode='workout';if(!sessionActive){sessionActive=true;$('activeWorkoutName').textContent=$('workoutName').value.trim()||defaultWorkoutName();}work.push({name,rest:120,notes:'',sets:Array.from({length:3},()=>({weight:'',reps:'',rpe:'',type:'Working Set',done:false}))});switchScreen('activeWorkout');renderWork();focusLastWorkoutExercise();beginSessionClock();updateMinimizedSession();saveDraft();};
+window.pickExercise=name=>{if(typeof name!=='string'||!name.trim())return;if(libraryMode==='routine'){if(!routineDraft.some(ex=>ex.name===name)){routineDraft.push({name,sets:window.SpartanXCardio?.isCardio(name)?[window.SpartanXCardio.blank()]:[{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''}]});}renderRoutineDraft();switchScreen('routineBuilderScreen');saveDraft();return;}libraryMode='workout';if(!sessionActive){sessionActive=true;$('activeWorkoutName').textContent=$('workoutName').value.trim()||defaultWorkoutName();}work.push({name,rest:120,notes:'',sets:window.SpartanXCardio?.isCardio(name)?[window.SpartanXCardio.blank()]:Array.from({length:3},()=>({weight:'',reps:'',rpe:'',type:'Working Set',done:false}))});switchScreen('activeWorkout');renderWork();focusLastWorkoutExercise();beginSessionClock();updateMinimizedSession();saveDraft();};
 $('exerciseList').addEventListener('click',e=>{const link=e.target.closest('button[data-live-exercise-link]');if(!link)return;e.preventDefault();e.stopPropagation();window.showExercisePR(link.dataset.liveExerciseLink);});
 $('libraryCategories').addEventListener('click',e=>{const b=e.target.closest('button[data-library-category]');if(!b)return;e.preventDefault();libraryCategory=b.dataset.libraryCategory;renderLibrary();});
 $('libraryList').addEventListener('click',e=>{const pr=e.target.closest('[data-pr-exercise]');if(pr){e.preventDefault();e.stopPropagation();window.showExercisePR(pr.dataset.prExercise);return;}const pick=e.target.closest('button[data-add-exercise]');if(pick){e.preventDefault();window.pickExercise(pick.dataset.addExercise);}});
@@ -3111,7 +3133,7 @@ function renderTrainingStats(){
    if(!count)return;
    sets+=count;valid.forEach(set=>{volume+=(+set.weight)*(+set.reps)});
    const muscles=exerciseMuscles(ex.name);
-   if(!muscles.primary.length&&!muscles.secondary.length)unclassified+=count;
+   if(!window.SpartanXCardio?.isCardio(ex.name)&&!muscles.primary.length&&!muscles.secondary.length)unclassified+=count;
    for(const m of muscles.primary)if(breakdown[m])breakdown[m].primary+=count;
    for(const m of muscles.secondary)if(breakdown[m])breakdown[m].secondary+=count;
    TRAINING_AREAS.forEach(area=>{

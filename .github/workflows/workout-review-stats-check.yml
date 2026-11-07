@@ -48,7 +48,16 @@ jobs:
               {type:'Working Set',weight:'120',reps:'5',done:true,rpe:'8'}]});renderWork();saveDraft();""")
             assert run("return document.querySelectorAll('#exerciseList [data-live-pr]').length")==0,'No trophy in live workout'
             assert run("return document.querySelectorAll('#exerciseList button[data-live-exercise-link]').length")==1
-            assert run("return getComputedStyle(document.querySelector('#exerciseList [data-live-exercise-link]')).borderTopWidth")=='0px'
+            appearance=run("""const link=document.querySelector('#exerciseList [data-live-exercise-link]');
+              const rect=link.getBoundingClientRect();
+              const parent=link.closest('.exercise-title-row').getBoundingClientRect();
+              const style=getComputedStyle(link);
+              return {width:rect.width,parentWidth:parent.width,border:style.borderTopWidth,
+                background:style.backgroundColor,display:style.display};""")
+            print('ACTIVE EXERCISE TEXT LINK:',appearance,flush=True)
+            assert appearance['border']=='0px',appearance
+            assert appearance['background'] in ('rgba(0, 0, 0, 0)','transparent'),appearance
+            assert 20<appearance['width']<appearance['parentWidth']/2,appearance
             click('#exerciseList [data-live-exercise-link]')
             assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')"),'Exercise name must open statistics'
             assert run("return document.querySelector('#exerciseHistoryTitle').textContent")=='Squat'
@@ -118,10 +127,15 @@ jobs:
             run("window.pickExercise('Squat')")
             click('#openExerciseLibrary')
             assert run("return document.querySelector('#exerciseLibraryScreen').classList.contains('active')")
-            assert run("return !!document.querySelector('[data-pr-exercise=Squat]')")
-            click('[data-pr-exercise=Squat]')
+            library_item=run("""document.querySelector('#librarySearch').value='squat';
+              chooseLibraryCategory('All');renderLibrary();
+              const element=document.querySelector('#libraryList [data-pr-exercise]');
+              return element?.dataset.prExercise||'';""")
+            assert library_item,'Expected at least one Squat variation in the exercise library'
+            click('#libraryList [data-pr-exercise]')
             assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')")
-            assert run("return document.querySelector('#sxExercisePersonalRecords').textContent.includes('120')")
+            assert run("return document.querySelector('#exerciseHistoryTitle').textContent")==library_item
+            assert run("return document.querySelector('#sxExercisePersonalRecords').textContent.includes('Heaviest Weight')")
             severe=[x['message'] for x in browser.get_log('browser') if x['level']=='SEVERE']
             print('SEVERE BROWSER LOGS',severe,flush=True)
             assert not severe,severe

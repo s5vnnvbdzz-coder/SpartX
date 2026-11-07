@@ -63,7 +63,7 @@ el('openTrainingStats').onclick=function(){
  document.querySelector('#trackerNav button[data-screen="profile"]')?.classList.add('active');
  window.scrollTo(0,0);
 };
-el('closeTrainingStats').onclick=function(){switchScreen('profile');window.scrollTo(0,0)};
+el('closeTrainingStats').onclick=function(){returnToScreen('profile')};
 function imageElement(name,extraClass=''){
  const img=document.createElement('img');
  img.src=window.spartanExerciseImage(name);

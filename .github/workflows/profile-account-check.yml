@@ -47,11 +47,11 @@ jobs:
             click('#editProfile')
             wait.until(lambda b:evaluate("return !document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
             assert evaluate("return document.querySelectorAll('#profileBirthdayMonth option').length")==13
-            assert evaluate("return document.querySelector('#profileBirthdayYear option[value=1960]')!==null")
+            assert evaluate("return [...document.querySelector('#profileBirthdayYear').options].some(o=>o.value==='1960')")
             change('#profileBirthdayYear','2000');change('#profileBirthdayMonth','2')
-            assert evaluate("return !!document.querySelector('#profileBirthdayDay option[value=29]')"),'2000 must allow Feb 29'
+            assert evaluate("return [...document.querySelector('#profileBirthdayDay').options].some(o=>o.value==='29')"),'2000 must allow Feb 29'
             change('#profileBirthdayYear','2001')
-            assert not evaluate("return !!document.querySelector('#profileBirthdayDay option[value=29]')"),'2001 must not allow Feb 29'
+            assert not evaluate("return [...document.querySelector('#profileBirthdayDay').options].some(o=>o.value==='29')"),'2001 must not allow Feb 29'
             change('#profileBirthdayYear','2000');change('#profileBirthdayDay','29')
             evaluate("""document.querySelector('#profileNameInput').value='QA Athlete';
               document.querySelector('#profileBioInput').value='Training and testing https://instagram.com/example';

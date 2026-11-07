@@ -1,0 +1,107 @@
+name: Verify SpartanX Profile Account and Preferences
+on:
+  push:
+    paths:
+      - ".github/workflows/profile-account-check.yml"
+      - "assets/profile/profile-account-preferences.js"
+      - "assets/profile/profile-account-preferences.css"
+      - "index.html"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-profile-controls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install browser checks
+        run: |
+          google-chrome --version
+          python3 -m pip install --quiet --break-system-packages selenium
+      - name: Verify mobile profile, account, birthday and settings on published site
+        run: |
+          python3 - <<'PY'
+          import json,time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_experimental_option('mobileEmulation',{'deviceMetrics':{'width':390,'height':844,'pixelRatio':3}})
+          opts.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+          browser=webdriver.Chrome(options=opts)
+          wait=WebDriverWait(browser,25)
+          def evaluate(code):
+            return browser.execute_script(code)
+          def click(selector):
+            evaluate("document.querySelector(arguments[0]).click()",selector)
+          def change(selector,value):
+            evaluate("const e=document.querySelector(arguments[0]);e.value=arguments[1];e.dispatchEvent(new Event('change',{bubbles:true}));",selector,value)
+          try:
+            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/?profile-account-check=242')
+            wait.until(lambda b:evaluate("return document.querySelector('#sxSettingsDashboard')!==null"))
+            click("#trackerNav button[data-screen='profile']")
+            wait.until(lambda b:evaluate("return document.querySelector('#profile').classList.contains('active')"))
+            assert evaluate("return document.querySelectorAll('#trackerNav button').length")==4
+            click('#editProfile')
+            wait.until(lambda b:evaluate("return !document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
+            assert evaluate("return document.querySelectorAll('#profileBirthdayMonth option').length")==13
+            assert evaluate("return document.querySelector('#profileBirthdayYear option[value=1960]')!==null")
+            change('#profileBirthdayYear','2000');change('#profileBirthdayMonth','2')
+            assert evaluate("return !!document.querySelector('#profileBirthdayDay option[value=29]')"),'2000 must allow Feb 29'
+            change('#profileBirthdayYear','2001')
+            assert not evaluate("return !!document.querySelector('#profileBirthdayDay option[value=29]')"),'2001 must not allow Feb 29'
+            change('#profileBirthdayYear','2000');change('#profileBirthdayDay','29')
+            evaluate("""document.querySelector('#profileNameInput').value='QA Athlete';
+              document.querySelector('#profileBioInput').value='Training and testing https://instagram.com/example';
+              document.querySelector('#profileLinksInput').value='example.com\\ninstagram.com/example';""")
+            click('#saveProfile')
+            wait.until(lambda b:evaluate("return document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
+            profile=evaluate("return JSON.parse(localStorage.getItem('spartx_db'))?.profile")
+            assert profile['birthday']=='2000-02-29',profile
+            assert len(profile['links'])==2,profile
+            assert 'instagram.com' in profile['bio'],profile
+            assert evaluate("return document.querySelectorAll('#sxProfilePublicLinks a').length")==2
+            click('#openProfileSettings')
+            wait.until(lambda b:evaluate("return !document.querySelector('#profileSettingsOverlay').classList.contains('hidden')"))
+            assert evaluate("return !!document.querySelector('#sxSettingsAccount')&&!!document.querySelector('#sxSettingsLanguage')")
+            click('#sxSettingsUnits')
+            assert evaluate("return !document.querySelector('#sxSettingsSubpage').hidden")
+            assert evaluate("return !!document.querySelector('#sxSettingsSubpage #unitWeight')")
+            change('#unitWeight','lb')
+            click('#sxSettingsBack')
+            click('#sxSettingsLanguage')
+            change('#sxLanguageSelection','fr')
+            click('.sx-settings-save')
+            prefs=evaluate("return JSON.parse(localStorage.getItem('spartx_preferences_v1'))")
+            assert prefs['weight']=='lb' and prefs['language']=='fr',prefs
+            click('#sxSettingsAccount')
+            evaluate("""document.querySelector('#sxAccountUsername').value='qa_athlete';
+              document.querySelector('#sxAccountEmail').value='qa@example.test';""")
+            assert evaluate("return !!document.querySelector('.sx-disabled-password:disabled')")
+            click('#sxSaveAccount')
+            db=evaluate("return JSON.parse(localStorage.getItem('spartx_db'))")
+            assert db['account']['email']=='qa@example.test'
+            assert db['profile']['username']=='qa_athlete'
+            assert evaluate("return document.querySelector('#sxProfileHandle').textContent")=='qa_athlete'
+            click('#closeProfileSettings')
+            for kind in ('followers','following'):
+              assert evaluate("return getComputedStyle(document.querySelector('#profile [data-sx-social-jump='+arguments[0]+']')).borderTopWidth",kind)=='0px'
+              click("#profile [data-sx-social-jump='"+kind+"']")
+              assert evaluate("return document.querySelector('#sxProfileConnectionsTitle').textContent")==kind.capitalize()
+              click('#sxProfileConnectionsBack')
+            browser.save_screenshot('/tmp/spartanx-profile-account-242.png')
+            assert evaluate("return document.querySelectorAll('#trackerNav button').length")==4
+            print('PASS: profile editor, birthday leap-year, links, units, language, account, social lists and navigation')
+            print('Browser severe logs:',[x['message'] for x in browser.get_log('browser') if x['level']=='SEVERE'])
+          finally:
+            browser.quit()
+          PY
+      - name: Save profile preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spartanx-profile-account-preview
+          path: /tmp/spartanx-profile-account-242.png
+          if-no-files-found: ignore

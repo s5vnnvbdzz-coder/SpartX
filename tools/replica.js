@@ -147,14 +147,17 @@ function deliverAscensionShortcut(){
  const destination=ascensionQuickPending;ascensionQuickPending=null;
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift,quickImport:destination.quickImport===true},location.origin)}catch(e){}
 }
-window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null)=>{
+window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  const option=mode==='continue'?'continue':'home';
  ascensionQuickCaller=document.activeElement;
- const fromActiveSession=document.querySelector('.screen.active')?.id==='activeWorkout';
- ascensionOverlay.classList.toggle('sx-ascension-quick',fromActiveSession);
- ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:fromActiveSession};
- ascensionCloseButton.textContent=fromActiveSession?'← Back':'← WORKOUT';
- ascensionCloseButton.setAttribute('aria-label',fromActiveSession?'Back to workout options':'Close AscensionX and return to SpartanX');
+ const current=document.querySelector('.screen.active')?.id;
+ const fromActiveSession=current==='activeWorkout';
+ const fromNewWorkout=context==='new-workout'&&current==='workout';
+ const quick=fromActiveSession||fromNewWorkout;
+ ascensionOverlay.classList.toggle('sx-ascension-quick',quick);
+ ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:quick};
+ ascensionCloseButton.textContent=quick?'← Back':'← TOOLS';
+ ascensionCloseButton.setAttribute('aria-label',quick?'Back to workout choices':'Close AscensionX and return to Training Tools');
  openEmbeddedAscensionX();
  if(!ascensionOverlay.classList.contains('open')){ascensionQuickPending=null;return false}
  deliverAscensionShortcut();
@@ -207,14 +210,19 @@ function closeEmbeddedAscensionX(){
  window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
 }
 ascensionOpenButton.addEventListener('click',()=>{ascensionQuickCaller=null;ascensionQuickPending=null;ascensionOverlay.classList.remove('sx-ascension-quick');ascensionCloseButton.textContent='← TOOLS';openEmbeddedAscensionX()});
-ascensionCloseButton.addEventListener('click',()=>{
+function exitAscensionToCaller(){
  const backToChoices=ascensionOverlay.classList.contains('sx-ascension-quick');
  closeEmbeddedAscensionX();
  if(backToChoices)window.dispatchEvent(new CustomEvent('spartx:showSessionOptions'));
+}
+ascensionCloseButton.addEventListener('click',exitAscensionToCaller);
+ascensionOverlay.addEventListener('click',e=>{
+ if(e.target===ascensionOverlay&&ascensionOverlay.classList.contains('sx-ascension-quick'))exitAscensionToCaller();
 });
-ascensionOverlay.addEventListener('click',e=>{if(e.target===ascensionOverlay&&ascensionOverlay.classList.contains('sx-ascension-quick'))closeEmbeddedAscensionX()});
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'&&ascensionOverlay.classList.contains('open'))closeEmbeddedAscensionX();
+ if(e.key==='Escape'&&ascensionOverlay.classList.contains('open')){
+  e.preventDefault();exitAscensionToCaller();
+ }
 });
 window.spartanxCloseEmbeddedAscensionX=closeEmbeddedAscensionX;
 // Handshake only with the AscensionX iframe owned by this Tools card.
@@ -228,7 +236,7 @@ ascensionEmbedFrame.addEventListener('load',()=>{
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || !ascensionOverlay.classList.contains('open'))return;
  if(e.data?.type==='spartx:ascensionQuickCancel'&&ascensionOverlay.classList.contains('sx-ascension-quick')){
-  closeEmbeddedAscensionX();return;
+  exitAscensionToCaller();return;
  }
  if(e.data?.type==='spartx:ascensionEmbedAcknowledged'){
   syncEmbeddedAscensionTheme();
@@ -521,7 +529,10 @@ function apply531ToWorkout(){
  }
  const detail={exercise:$('applyLift').value,week:w,weekLabel:['5s','3s','5/3/1','Deload'][w-1],tm,warmupSets,sets};
  const imported=typeof window.spartanxImport531==='function'&&window.spartanxImport531(detail);
- $('applyHint').textContent=imported?'Added '+detail.exercise+' · Week '+w+' to your workout.':'Could not connect to the workout logger. Refresh the tracker and try again.';
+ $('applyHint').textContent=window.spartanx531StartPending
+  ?'Review the workout details and confirm to start.'
+  :imported?'Added '+detail.exercise+' · Week '+w+' to your workout.'
+  :'Could not connect to the workout logger. Refresh the tracker and try again.';
 }
 $('apply531').addEventListener('click',apply531ToWorkout);
 $('quickCreate531Cycle').addEventListener('click',()=>{

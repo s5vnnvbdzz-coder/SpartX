@@ -46,8 +46,8 @@ jobs:
             run("""work.push({name:'Squat',rest:120,notes:'',sets:[
               {type:'Warm-up',weight:'60',reps:'5',done:true,rpe:''},
               {type:'Working Set',weight:'120',reps:'5',done:true,rpe:'8'}]});renderWork();saveDraft();""")
-            assert run("return document.querySelectorAll('#exerciseList [data-live-pr]').length")==0",'No trophy in live workout'
-            assert run("return document.querySelectorAll('#exerciseList button[data-live-exercise-link]').length")==1"
+            assert run("return document.querySelectorAll('#exerciseList [data-live-pr]').length")==0,'No trophy in live workout'
+            assert run("return document.querySelectorAll('#exerciseList button[data-live-exercise-link]').length")==1
             assert run("return getComputedStyle(document.querySelector('#exerciseList [data-live-exercise-link]')).borderTopWidth")=='0px'
             click('#exerciseList [data-live-exercise-link]')
             assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')"),'Exercise name must open statistics'
@@ -100,7 +100,7 @@ jobs:
             assert run("return db.sessions[0].name")=='Squat Session'
             assert run("return !sessionActive")
             assert run("return document.querySelector('#home').classList.contains('active')")
-            assert run("return document.querySelectorAll('#sxReviewMediaList .sx-review-media-item').length")==0"
+            assert run("return document.querySelectorAll('#sxReviewMediaList .sx-review-media-item').length")==0
             media=browser.execute_async_script("""
               const done=arguments[arguments.length-1];
               const request=indexedDB.open('SpartanXWorkoutMedia',1);

@@ -1,0 +1,131 @@
+name: Verify SpartanX Workout Review and Exercise Statistics
+on:
+  push:
+    paths:
+      - ".github/workflows/workout-review-stats-check.yml"
+      - "assets/workouts/workout-save-review.js"
+      - "assets/workouts/workout-save-review.css"
+      - "assets/exercises/exercise-stats-layout.js"
+      - "assets/exercises/exercise-stats-layout.css"
+      - "index.html"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up mobile Chrome
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+          google-chrome --version
+      - name: Check exercise-name stats, review, back, save, media
+        run: |
+          python3 - <<'PY'
+          import time, json
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_experimental_option('mobileEmulation',{'deviceMetrics':{'width':390,'height':844,'pixelRatio':3}})
+          opts.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+          browser=webdriver.Chrome(options=opts)
+          wait=WebDriverWait(browser,30)
+          run=lambda source,*args:browser.execute_script(source,*args)
+          click=lambda selector:run("document.querySelector(arguments[0]).click()",selector)
+          try:
+            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/?review-check=251')
+            wait.until(lambda b:run("return !!window.SpartanXSaveReview&&!!window.SpartanXExerciseStats"))
+            assert run("return document.querySelector('#home').classList.contains('active')")
+            assert not run("return db.sessions.length")
+            assert run("return document.querySelectorAll('#trackerNav button').length")==4
+            run("startSession()")
+            run("""work.push({name:'Squat',rest:120,notes:'',sets:[
+              {type:'Warm-up',weight:'60',reps:'5',done:true,rpe:''},
+              {type:'Working Set',weight:'120',reps:'5',done:true,rpe:'8'}]});renderWork();saveDraft();""")
+            assert run("return document.querySelectorAll('#exerciseList [data-live-pr]').length")==0",'No trophy in live workout'
+            assert run("return document.querySelectorAll('#exerciseList button[data-live-exercise-link]').length")==1"
+            assert run("return getComputedStyle(document.querySelector('#exerciseList [data-live-exercise-link]')).borderTopWidth")=='0px'
+            click('#exerciseList [data-live-exercise-link]')
+            assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')"),'Exercise name must open statistics'
+            assert run("return document.querySelector('#exerciseHistoryTitle').textContent")=='Squat'
+            assert run("return document.querySelector('#sxExercisePersonalRecords').textContent.includes('Heaviest Weight')")
+            assert run("return document.querySelector('#exerciseHistorySubtitle').textContent.includes('Live sets')")
+            click('#exerciseMetricTabs button[data-exercise-metric=e1rm]')
+            assert run("return document.querySelector('#exerciseMetricValue').textContent.includes('kg')")
+            click('#sxExerciseTopTabs [data-sx-exercise-tab=history]')
+            assert not run("return document.querySelector('#sxExerciseHistoryList').hidden")
+            click('#closeExerciseHistory')
+            assert run("return document.querySelector('#activeWorkout').classList.contains('active')")
+            # Opening review should not persist a session.
+            click('#endWorkout')
+            assert run("return document.querySelector('#workoutSaveReview').classList.contains('active')")
+            assert not run("return db.sessions.length"),'Review must not save workout before confirmation'
+            assert run("return !!document.querySelector('header #sxHeaderSaveControls')")
+            assert run("return document.querySelector('#sxReviewSets').textContent")=='2'
+            assert run("return document.querySelector('#sxReviewVolume').textContent.includes('kg')")
+            assert run("return getComputedStyle(document.querySelector('#activeWorkoutName')).display")=='none','Auto workout name hidden during active session'
+            field=run("return document.querySelector('#sxReviewWorkoutName').value")
+            assert field,'Default name must be populated on review'
+            click('#sxReviewWorkoutName')
+            assert run("return document.querySelector('#sxReviewWorkoutName').selectionStart")==0
+            assert run("return document.querySelector('#sxReviewWorkoutName').selectionEnd")==len(field)
+            run("document.querySelector('#sxReviewWorkoutName').value='Squat Session'")
+            click('#sxSaveReviewBack')
+            assert run("return document.querySelector('#activeWorkout').classList.contains('active')")
+            assert not run("return db.sessions.length")
+            assert run("return sessionActive"),'Back must keep session running'
+            click('#endWorkout')
+            assert run("return document.querySelector('#sxReviewWorkoutName').value")=='Squat Session'
+            # Attach a small generated image to check IndexedDB and review.
+            attached=browser.execute_async_script("""
+              const done=arguments[arguments.length-1];
+              const canvas=document.createElement('canvas');canvas.width=20;canvas.height=20;
+              canvas.getContext('2d').fillRect(0,0,20,20);
+              canvas.toBlob(blob=>{
+                const file=new File([blob],'squat.png',{type:'image/png'});
+                const input=document.querySelector('#sxReviewMediaInput');
+                const dt=new DataTransfer();dt.items.add(file);
+                input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+                done(true);
+              },'image/png');
+            """)
+            assert attached
+            assert run("return document.querySelectorAll('#sxReviewMediaList .sx-review-media-item').length")==1
+            click('#sxSaveReviewConfirm')
+            wait.until(lambda b:run("return db.sessions.length===1"))
+            assert run("return db.sessions[0].name")=='Squat Session'
+            assert run("return !sessionActive")
+            assert run("return document.querySelector('#home').classList.contains('active')")
+            assert run("return document.querySelectorAll('#sxReviewMediaList .sx-review-media-item').length")==0"
+            media=browser.execute_async_script("""
+              const done=arguments[arguments.length-1];
+              const request=indexedDB.open('SpartanXWorkoutMedia',1);
+              request.onsuccess=()=>{
+                const db=request.result,tx=db.transaction('media','readonly');
+                const key=String(JSON.parse(localStorage.getItem('spartx_db')).sessions[0].id);
+                const get=tx.objectStore('media').index('sessionId').getAll(key);
+                get.onsuccess=()=>{done(get.result.map(x=>x.name));db.close();};
+                get.onerror=()=>done(['FAILED']);
+              };
+              request.onerror=()=>done(['FAILED_OPEN']);
+            """)
+            assert media==['squat.png'],media
+            # Exercise library still offers statistics.
+            run("window.pickExercise('Squat')")
+            click('#openExerciseLibrary')
+            assert run("return document.querySelector('#exerciseLibraryScreen').classList.contains('active')")
+            assert run("return !!document.querySelector('[data-pr-exercise=Squat]')")
+            click('[data-pr-exercise=Squat]')
+            assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')")
+            assert run("return document.querySelector('#sxExercisePersonalRecords').textContent.includes('120')")
+            severe=[x['message'] for x in browser.get_log('browser') if x['level']=='SEVERE']
+            print('SEVERE BROWSER LOGS',severe,flush=True)
+            assert not severe,severe
+            print('PASS: exercise name opens stats; no trophy; review back/save; editable title; media persists; library stats')
+          finally:
+            browser.quit()
+          PY

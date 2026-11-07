@@ -66,6 +66,28 @@ jobs:
             click('#openProfileSettings')
             wait.until(lambda b:evaluate("return !document.querySelector('#profileSettingsOverlay').classList.contains('hidden')"))
             assert evaluate("return !!document.querySelector('#sxSettingsAccount')&&!!document.querySelector('#sxSettingsLanguage')")
+            # Settings -> Profile editor must use the Account-style Back header.
+            click('#sxSettingsEditProfile')
+            wait.until(lambda b:evaluate("return !document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
+            assert evaluate("return document.querySelector('#editProfileTitle').textContent.trim()")=='Profile'
+            assert evaluate("return document.querySelector('#closeEditProfile').textContent.trim()")=='← Back'
+            click('#closeEditProfile')
+            assert not evaluate("return document.querySelector('#profileSettingsOverlay').classList.contains('hidden')"),'Back from Settings Profile must return to Settings'
+            assert evaluate("return document.querySelector('#editProfileOverlay').classList.contains('hidden')")
+            # Cancel should likewise return to the original Settings window.
+            click('#sxSettingsEditProfile')
+            click('#cancelEditProfile')
+            assert not evaluate("return document.querySelector('#profileSettingsOverlay').classList.contains('hidden')")
+            # Save should also return to Settings with existing fields retained.
+            click('#sxSettingsEditProfile')
+            click('#saveProfile')
+            assert not evaluate("return document.querySelector('#profileSettingsOverlay').classList.contains('hidden')"),'Save Profile from Settings should reopen Settings'
+            # Direct Profile edit should return to the Profile page, not Settings.
+            click('#closeProfileSettings')
+            click('#editProfile')
+            click('#closeEditProfile')
+            assert evaluate("return document.querySelector('#profileSettingsOverlay').classList.contains('hidden')"),'Direct Profile edit Back should stay on Profile'
+            click('#openProfileSettings')
             click('#sxSettingsUnits')
             assert evaluate("return !document.querySelector('#sxSettingsSubpage').hidden")
             assert evaluate("return !!document.querySelector('#sxSettingsSubpage #unitWeight')")

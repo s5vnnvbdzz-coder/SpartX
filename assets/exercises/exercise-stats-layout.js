@@ -1,8 +1,10 @@
 /* SpartanX exercise statistics — trends + personal records, shared by
-   active workout trophy and the exercise library. All figures from actual sets. */
+   active exercise names and the exercise library. Predicted 1RM derives only from logged set weights/reps; Intelligence data is never used. */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
+// Shared with the logger's fallback renderer; do not read Intelligence summaries.
+const predictedOneRepMax=window.SpartanXPredictedOneRepMax;
 const screen=$('exerciseHistoryScreen');if(!screen)return;
 const globalHeader=document.querySelector('body > header');
 const localHeader=screen.querySelector('.sx-exercise-profile-heading');
@@ -10,7 +12,7 @@ if(globalHeader&&localHeader)globalHeader.appendChild(localHeader);
 let exerciseName='',points=[],metric='heaviest',period='3m',selectedIndex=-1,activeTab='summary';
 const metrics=[
  {id:'heaviest',name:'Heaviest Weight'},
- {id:'e1rm',name:'One Rep Max'},
+ {id:'e1rm',name:'Predicted 1RM'},
  {id:'setVolume',name:'Best Set Volume'},
  {id:'sessionVolume',name:'Session Volume'},
  {id:'totalReps',name:'Total Reps'}
@@ -23,7 +25,7 @@ const longDate=d=>Number.isFinite(new Date(d).getTime())?new Date(d).toLocaleDat
 const metricsFor=p=>{
  const sets=p.sets||[];
  const heavy=Math.max(0,...sets.map(s=>Number(s.weight)||0));
- const e1rm=Math.max(0,...sets.map(s=>{const w=Number(s.weight)||0,r=Number(s.reps)||0;return w>0&&r>0?w*(1+r/30):0;}));
+ const e1rm=Math.max(0,...sets.map(predictedOneRepMax));
  const setVolume=Math.max(0,...sets.map(s=>(Number(s.weight)||0)*(Number(s.reps)||0)));
  return {heaviest:heavy,e1rm,setVolume,sessionVolume:Number(p.volume)||0,totalReps:Number(p.totalReps)||0};
 };
@@ -48,12 +50,12 @@ function records(){
  const rows=allPoints().flatMap(p=>(p.sets||[]).map(s=>({...s,isLive:p.isLive})));
  const weighted=rows.filter(s=>Number(s.weight)>0&&Number(s.reps)>0);
  const heavy=weighted.length?weighted.reduce((a,b)=>Number(a.weight)>=Number(b.weight)?a:b):null;
- const e1rm=weighted.length?Math.max(...weighted.map(s=>Number(s.weight)*(1+Number(s.reps)/30))):0;
+ const e1rm=weighted.length?Math.max(...weighted.map(predictedOneRepMax)):0;
  const bestSet=weighted.length?weighted.reduce((a,b)=>Number(a.weight)*Number(a.reps)>=Number(b.weight)*Number(b.reps)?a:b):null;
  const maxSession=allPoints().reduce((a,b)=>Number(a.volume)>=Number(b.volume)?a:b,{volume:0});
  const rowsOut=[
   ['Heaviest Weight',heavy?weight(heavy.weight):'—'],
-  ['Best 1RM',e1rm?weight(e1rm):'—'],
+  ['Best Predicted 1RM',e1rm?weight(e1rm):'—'],
   ['Best Set Volume',bestSet?weight(bestSet.weight)+' × '+number(bestSet.reps):'—'],
   ['Best Session Volume',Number(maxSession.volume)?weight(maxSession.volume):'—']
  ];

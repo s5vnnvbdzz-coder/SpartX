@@ -44,6 +44,43 @@ jobs:
             click("#trackerNav button[data-screen='profile']")
             wait.until(lambda b:evaluate("return document.querySelector('#profile').classList.contains('active')"))
             assert evaluate("return document.querySelectorAll('#trackerNav button').length")==4
+            # The profile portrait and theme frame must have concentric centres.
+            portrait=evaluate("""const wrap=document.querySelector('#profile .sx-profile-avatar-wrap'),
+              photo=document.querySelector('#profileAvatar'),medal=wrap?.querySelector('.sx-profile-rank-emblem');
+              const r=el=>el.getBoundingClientRect(),a=r(wrap),b=r(photo);
+              return {centred:Math.abs((a.left+a.width/2)-(b.left+b.width/2))<1&&
+                   Math.abs((a.top+a.height/2)-(b.top+b.height/2))<1,
+                   crop:getComputedStyle(photo).overflow==='hidden',
+                   cover:getComputedStyle(photo).clipPath.includes('circle'),
+                   badge:!!medal,
+                   badgeSource:medal?.getAttribute('src'),
+                   expected:'./ranks/'+getWorkoutRank().current.file};""")
+            print('PROFILE AVATAR / RANK EMBLEM:',portrait)
+            assert portrait['centred'] and portrait['crop'] and portrait['cover'] and portrait['badge']
+            assert portrait['badgeSource']==portrait['expected'],'Medal must show the active rank file'
+            # Verify an actual photo covers the entire circular viewport.
+            photo_metrics=evaluate("""db.profile=db.profile||{};
+              db.profile.photo='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+              renderProfile();
+              const c=document.querySelector('#profileAvatar').getBoundingClientRect();
+              const i=document.querySelector('#profileAvatar img').getBoundingClientRect();
+              return {hasImage:!!document.querySelector('#profileAvatar img'),
+                      fullSize:Math.abs(c.width-i.width)<1&&Math.abs(c.height-i.height)<1,
+                      centered:Math.abs((c.left+c.width/2)-(i.left+i.width/2))<1&&
+                        Math.abs((c.top+c.height/2)-(i.top+i.height/2))<1};""")
+            assert all(photo_metrics.values()),photo_metrics
+            # Both workout XP and the gender-specific rank set refresh the badge.
+            badge_refresh=evaluate("""db.profile.standard='female';
+              db.sessions=Array.from({length:3},(_,i)=>({id:'qa-rank-'+i,date:new Date().toISOString(),
+                duration:60,volume:0,exercises:[]}));
+              renderProfile();
+              const female=getWorkoutRank();
+              const image=document.querySelector('.sx-profile-rank-emblem');
+              return {name:female.current.name,expected:'./ranks/'+female.current.file,
+                      actual:image.getAttribute('src')};""")
+            assert badge_refresh['name']=='Huntress' and badge_refresh['expected']==badge_refresh['actual'],badge_refresh
+            # Restore a clean profile before testing the form.
+            evaluate("db.sessions=[];db.profile.standard='';db.profile.photo='';renderProfile();")
             click('#editProfile')
             wait.until(lambda b:evaluate("return !document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
             assert evaluate("return document.querySelectorAll('#profileBirthdayMonth option').length")==13

@@ -2512,6 +2512,7 @@ window.completeSet=(i,j,done)=>{
   work[i].sets[j].done=false;
   const box=$('exerciseList').children[i]?.querySelectorAll('.sx-cardio-check')[j];
   if(box)box.checked=false;
+  if(row)row.classList.remove('is-complete');
   alert('Enter a valid '+window.SpartanXCardio.metricName(work[i].name,preferences.distance).toLowerCase()+' value and time before completing this cardio set.');
   return;
  }

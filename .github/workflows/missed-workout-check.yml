@@ -1,0 +1,92 @@
+name: Verify SpartanX Missed Workout Dates
+on:
+  push:
+    paths:
+      - ".github/workflows/missed-workout-check.yml"
+      - "assets/workouts/workout-date.js"
+      - "assets/workouts/workout-date.css"
+      - "index.html"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  date-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up browser
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+          google-chrome --version
+      - name: Test date/time selection, history correction and Home startup
+        run: |
+          python3 - <<'PY'
+          import time
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+          opts=Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_experimental_option('mobileEmulation',{'deviceMetrics':{'width':390,'height':844,'pixelRatio':3}})
+          opts.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+          browser=webdriver.Chrome(options=opts)
+          wait=WebDriverWait(browser,25)
+          run=lambda source,*args:browser.execute_script(source,*args)
+          try:
+            browser.get('https://s5vnnvbdzz-coder.github.io/SpartX/?missed-workout-test=248')
+            wait.until(lambda b:run("return !!window.SpartanXWorkoutDate"))
+            assert run("return document.querySelector('#home').classList.contains('active')"),'App must start on Home'
+            assert run("return document.querySelector('#editProfileOverlay').classList.contains('hidden')"),'Profile editor must not open automatically'
+            run("document.querySelector('#sxLogMissedWorkout').click()")
+            assert run("return document.querySelector('#activeWorkout').classList.contains('active')")
+            assert not run("return document.querySelector('#sxWorkoutDateOverlay').hidden")
+            assert run("return document.querySelector('#sxWorkoutDateInput').max.length===10")
+            run("""document.querySelector('#sxWorkoutDateInput').value='2026-11-02';
+              document.querySelector('#sxWorkoutTimeInput').value='19:15';
+              document.querySelector('#sxWorkoutDateApply').click();""")
+            assert run("return document.querySelector('#sxWorkoutDateOverlay').hidden")
+            saved_date=run("return window.sxManualWorkoutDate")
+            assert run("return new Date(window.sxManualWorkoutDate).getDate()") == 2
+            assert run("return new Date(window.sxManualWorkoutDate).getHours()") == 19
+            assert run("return new Date(window.sxManualWorkoutDate).getMinutes()") == 15
+            assert run("return document.querySelector('#sxWorkoutDateLabel').textContent.includes('Nov')")
+            # Fill valid completed sets through the app's existing session model.
+            run("""work=[{name:'Bench Press',rest:120,notes:'',
+                   sets:[{type:'Working Set',weight:'80',reps:'5',done:true,rpe:''}]}];
+                   renderWork();finishSession();""")
+            saved=run("return db.sessions[0]")
+            assert saved['date']==saved_date,(saved['date'],saved_date)
+            assert saved['exercises'][0]['sets'][0]['weight']==80
+            assert run("return document.querySelector('#home').classList.contains('active')")
+            assert run("return document.querySelector('#workoutFeed').textContent.includes('2 Nov')")
+            run("document.querySelector('#workoutSavedClose').click()")
+            # Existing workout edit also allows correcting the date without
+            # altering it until SAVE CHANGES.
+            run("beginHistoricalWorkoutEdit(db.sessions[0]);document.querySelector('#sxWorkoutDateButton').click()")
+            assert run("return document.querySelector('#sxWorkoutDateInput').value")=='2026-11-02'
+            run("""document.querySelector('#sxWorkoutDateInput').value='2026-11-03';
+                   document.querySelector('#sxWorkoutTimeInput').value='17:45';
+                   document.querySelector('#sxWorkoutDateApply').click();""")
+            assert run("return db.sessions[0].date")==saved_date,'Historical edits must be transactional'
+            run("saveHistoricalWorkoutEdit()")
+            final=run("return db.sessions[0].date")
+            assert run("return new Date(db.sessions[0].date).getDate()")==3
+            assert run("return new Date(db.sessions[0].date).getHours()")==17
+            assert run("return new Date(db.sessions[0].date).getMinutes()")==45
+            assert run("return JSON.parse(localStorage.getItem('spartx_db')).sessions[0].date")==final
+            # A stale editor draft must not auto-open on a fresh app launch.
+            run("""localStorage.setItem('spartx_draft_v1',JSON.stringify({version:1,
+                 sessionActive:false,work:[],fields:{},profileEditor:{name:'Draft',bio:'Unused'}}));""")
+            browser.refresh()
+            wait.until(lambda b:run("return !!window.SpartanXWorkoutDate"))
+            assert run("return document.querySelector('#editProfileOverlay').classList.contains('hidden')")
+            assert run("return document.querySelector('#home').classList.contains('active')")
+            assert run("return JSON.parse(localStorage.getItem('spartx_db')).sessions[0].date")==final
+            errors=[x['message'] for x in browser.get_log('browser') if x['level']=='SEVERE']
+            print('BROWSER ERRORS:',errors)
+            assert not errors,errors
+            print('PASS: missed-workout backdating, edit, history, persistence and Home-first startup')
+          finally:
+            browser.quit()
+          PY

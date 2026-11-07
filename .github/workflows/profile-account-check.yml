@@ -4,6 +4,8 @@ on:
     paths:
       - ".github/workflows/profile-account-check.yml"
       - "assets/profile/profile-account-preferences.js"
+      - "assets/profile/profile-photo-crop.js"
+      - "assets/profile/profile-photo-crop.css"
       - "assets/profile/profile-account-preferences.css"
       - "index.html"
   workflow_dispatch:
@@ -23,6 +25,8 @@ jobs:
           import json,time
           from selenium import webdriver
           from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.common.action_chains import ActionChains
           from selenium.webdriver.support.ui import WebDriverWait
           opts=Options()
           opts.add_argument('--headless=new')
@@ -83,6 +87,55 @@ jobs:
             evaluate("db.sessions=[];db.profile.standard='';db.profile.photo='';renderProfile();")
             click('#editProfile')
             wait.until(lambda b:evaluate("return !document.querySelector('#editProfileOverlay').classList.contains('hidden')"))
+            # New photo flow: a circular crop appears instead of auto-saving.
+            assert evaluate("return !!window.SpartanXPhotoCrop")
+            def pick_photo():
+              return browser.execute_async_script("""
+                const done=arguments[arguments.length-1];
+                const canvas=document.createElement('canvas');canvas.width=200;canvas.height=400;
+                const ctx=canvas.getContext('2d');
+                ctx.fillStyle='#ef3333';ctx.fillRect(0,0,200,400);
+                ctx.fillStyle='#2d50f1';ctx.fillRect(100,0,100,400);
+                canvas.toBlob(blob=>{
+                  const file=new File([blob],'avatar-test.png',{type:'image/png'});
+                  const input=document.querySelector('#profilePhotoInput');
+                  const data=new DataTransfer();data.items.add(file);
+                  input.files=data.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+                  done(true);
+                },'image/png');
+              """)
+            assert pick_photo()
+            wait.until(lambda b:evaluate("""return !document.querySelector('#sxPhotoCropOverlay').hidden
+              && !document.querySelector('#sxPhotoCropApply').disabled"""))
+            initial=evaluate("""const circle=document.querySelector('#sxPhotoCropCircle'),
+              surface=document.querySelector('#sxPhotoCropSurface');
+              return {size:parseFloat(circle.style.width),top:parseFloat(circle.style.top),
+                surfaceWidth:surface.clientWidth,surfaceHeight:surface.clientHeight,
+                photoStillUnsaved:!document.querySelector('#editProfileOverlay').dataset.pendingPhoto};""")
+            assert initial['size']>70 and initial['photoStillUnsaved'],initial
+            evaluate("""const slider=document.querySelector('#sxPhotoCropSize');
+              slider.value='60';slider.dispatchEvent(new Event('input',{bubbles:true}));""")
+            resized=evaluate("return parseFloat(document.querySelector('#sxPhotoCropCircle').style.width)")
+            assert resized<initial['size'],'Crop-size slider must shrink the selection'
+            avatar_circle=browser.find_element(By.CSS_SELECTOR,'#sxPhotoCropCircle')
+            ActionChains(browser).move_to_element(avatar_circle).click_and_hold().move_by_offset(0,29).release().perform()
+            moved=evaluate("return parseFloat(document.querySelector('#sxPhotoCropCircle').style.top)")
+            assert moved>initial['top']+10,(moved,initial)
+            # Cancelling must preserve the old photo and leave the editor open.
+            click('#sxPhotoCropCancel')
+            assert evaluate("return document.querySelector('#sxPhotoCropOverlay').hidden")
+            assert evaluate("return !document.querySelector('#editProfileOverlay').dataset.pendingPhoto")
+            assert not evaluate("return document.querySelector('#editProfileOverlay').classList.contains('hidden')")
+            # Select again and apply: only the editor's pending photo changes.
+            assert pick_photo()
+            wait.until(lambda b:evaluate("""return !document.querySelector('#sxPhotoCropOverlay').hidden
+              && !document.querySelector('#sxPhotoCropApply').disabled"""))
+            click('#sxPhotoCropApply')
+            assert evaluate("return document.querySelector('#sxPhotoCropOverlay').hidden")
+            crop_data=evaluate("return document.querySelector('#editProfileOverlay').dataset.pendingPhoto")
+            assert crop_data.startswith('data:image/jpeg;base64,')
+            assert evaluate("return !!document.querySelector('#editProfileAvatar img')")
+            assert not evaluate("return (db.profile||{}).photo"),'Crop must not publish until Save Profile'
             assert evaluate("return document.querySelectorAll('#profileBirthdayMonth option').length")==13
             assert evaluate("return [...document.querySelector('#profileBirthdayYear').options].some(o=>o.value==='1960')")
             change('#profileBirthdayYear','2000');change('#profileBirthdayMonth','2')

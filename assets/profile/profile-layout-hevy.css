@@ -97,3 +97,110 @@ body:has(#profile.screen.active)>header,body:has(#profile.screen.active)>#sxMain
 body.sx-jade #profile .sx-profile-xp-panel,body.sx-jade #profile .sx-profile-history-card,body.sx-jade #profile .sx-profile-dashboard-grid button{border-color:#baff7370!important;box-shadow:inset 0 1px 0 #eaffc021,0 0 12px #aaff3733!important}
 @media(max-width:390px){#profile .sx-profile-layout-top{padding-inline:15px}#profile .profile-top{grid-template-columns:86px minmax(0,1fr);gap:11px}#profile .sx-profile-avatar-wrap{width:86px;height:86px}#profile #profileAvatar{width:85px;height:85px;min-width:85px}#profile .sx-profile-numbers{gap:6px}#profile .profile-workouts,#profile .sx-profile-social-metrics button{font-size:10px!important}#profile .sx-profile-chart-bars{gap:5px}#profile .sx-profile-dashboard-grid button{min-height:94px;padding:13px!important}}
 @media(prefers-reduced-motion:reduce){#profile .sx-profile-chart-bars button{transition:none}}
+
+
+/* v244: One concentric portrait frame, with an actual rank insignia.
+   The photo's clipping circle and the theme-coloured frame now share
+   the same centre. No shadows, outlines or grid sizing can offset the crop. */
+#profile .sx-profile-avatar-wrap{
+ position:relative!important;
+ display:block!important;
+ box-sizing:border-box!important;
+ padding:0!important;
+ margin:0!important;
+ flex:none!important;
+ aspect-ratio:1 / 1;
+ isolation:isolate;
+ overflow:visible!important;
+}
+#profile .sx-profile-avatar-wrap::before{
+ content:"";
+ display:block!important;
+ position:absolute;
+ inset:0;
+ box-sizing:border-box;
+ border-radius:50%;
+ border:3px solid var(--lime);
+ background:var(--panel2);
+ box-shadow:0 0 0 2px var(--bg),0 0 14px var(--sx-p-glow);
+ pointer-events:none;
+ z-index:0;
+}
+#profile .sx-profile-avatar-wrap > #profileAvatar{
+ position:absolute!important;
+ inset:5px!important;
+ display:block!important;
+ box-sizing:border-box!important;
+ width:calc(100% - 10px)!important;
+ min-width:0!important;
+ max-width:none!important;
+ height:calc(100% - 10px)!important;
+ min-height:0!important;
+ flex:none!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ outline:0!important;
+ border-radius:50%!important;
+ clip-path:circle(50% at 50% 50%);
+ overflow:hidden!important;
+ background:var(--panel2)!important;
+ box-shadow:none!important;
+ transform:none!important;
+ z-index:1;
+}
+#profile .sx-profile-avatar-wrap > #profileAvatar > img{
+ display:block!important;
+ position:absolute!important;
+ inset:0!important;
+ box-sizing:border-box!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:none!important;
+ min-width:0!important;
+ min-height:0!important;
+ margin:0!important;
+ padding:0!important;
+ object-fit:cover!important;
+ object-position:50% 50%!important;
+ border:0!important;
+ border-radius:50%!important;
+ box-shadow:none!important;
+ transform:none!important;
+}
+#profile .sx-profile-avatar-wrap > .sx-profile-avatar-medal{
+ position:absolute!important;
+ right:-5px!important;
+ bottom:-5px!important;
+ display:grid!important;
+ place-items:center!important;
+ box-sizing:border-box!important;
+ width:39px!important;
+ height:39px!important;
+ padding:3px!important;
+ border:2px solid var(--bg)!important;
+ border-radius:50%!important;
+ background:var(--panel2)!important;
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--lime) 55%,transparent),0 0 11px var(--sx-p-glow)!important;
+ overflow:hidden!important;
+ z-index:3;
+}
+#profile .sx-profile-avatar-wrap .sx-profile-rank-emblem{
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:100%!important;
+ max-height:100%!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ filter:drop-shadow(0 0 3px var(--sx-p-glow));
+}
+@media(max-width:390px){
+ #profile .sx-profile-avatar-wrap > .sx-profile-avatar-medal{
+  width:34px!important;height:34px!important;padding:2px!important;
+ }
+}

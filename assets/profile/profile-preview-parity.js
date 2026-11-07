@@ -7,7 +7,6 @@ if(!root||root.dataset.sxPreviewReady)return;
 root.dataset.sxPreviewReady='true';
 const $=id=>document.getElementById(id);
 const icon={
- trophy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v7a5 5 0 0 1-10 0V4ZM7 6H4v3a4 4 0 0 0 4 4m9-7h3v3a4 4 0 0 1-4 4M12 16v4m-4 1h8"/></svg>',
  share:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
  dumbbell:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6m4-9v12m10-12v12m4-9v6M7 12h10M1 9v6m22-6v6"/></svg>'
 };
@@ -33,7 +32,11 @@ if(!actionPack.querySelector('.sx-profile-share-button')){
 }
 if(!avatar.parentElement.classList.contains('sx-profile-avatar-wrap')){
  const wrap=document.createElement('div');wrap.className='sx-profile-avatar-wrap';avatar.parentNode.insertBefore(wrap,avatar);wrap.appendChild(avatar);
- const medal=document.createElement('span');medal.className='sx-profile-avatar-medal';medal.setAttribute('aria-hidden','true');medal.innerHTML=icon.trophy;wrap.appendChild(medal);
+ const medal=document.createElement('span');
+ medal.className='sx-profile-avatar-medal';
+ medal.setAttribute('role','img');
+ medal.innerHTML='<img class="sx-profile-rank-emblem" alt="" aria-hidden="true" decoding="async">';
+ wrap.appendChild(medal);
 }
 if(!$('sxProfileRankLine')){
  const line=document.createElement('div');line.className='sx-profile-rank-line';line.id='sxProfileRankLine';
@@ -135,6 +138,17 @@ function rankAndIdentity(){
  const p=db.profile||{},display=(p.name||'').trim()||'Your Name';
  $('sxProfileHandle').textContent=(p.username||p.handle||display.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'athlete').slice(0,48);
  const rank=getWorkoutRank();$('sxProfileRankLabel').textContent=spartanxRankLabel(rank.current.name,rank.index);
+ // Reuse the exact rank artwork already displayed on Home and in the badge gallery.
+ // This runs whenever SpartanX refreshes the Profile, including gender/rank changes.
+ const rankMedal=root.querySelector('.sx-profile-avatar-medal');
+ const rankArt=rankMedal?.querySelector('.sx-profile-rank-emblem');
+ if(rankMedal&&rankArt){
+  const expected='./ranks/'+rank.current.file;
+  if(rankArt.getAttribute('src')!==expected)rankArt.setAttribute('src',expected);
+  const label=spartanxRankLabel(rank.current.name,rank.index);
+  rankMedal.setAttribute('aria-label',label+' emblem');
+  rankMedal.title=label;
+ }
  const flag=p.countryPublic===true&&typeof countryFlag==='function'?countryFlag(p.countryCode||p.country||p.countryOfOrigin||''):'';
  $('sxProfileCountryFlag').textContent=flag;
  const prestige=Math.max(0,Number(localStorage.getItem('spartanx_prestige_level_v1'))||0);

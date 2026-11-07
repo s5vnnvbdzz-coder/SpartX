@@ -1,0 +1,139 @@
+/* Exercise stats — familiar Hevy-style hierarchy, SpartanX theme colours.
+ * Self-contained; existing workout, profile, and main navigation markup unchanged. */
+body > header > .sx-exercise-profile-heading{display:none!important}
+body:has(#exerciseHistoryScreen.screen.active)>header #sxBrandHeader{display:none!important}
+body:has(#exerciseHistoryScreen.screen.active)>header{display:flex!important;align-items:center!important;padding:calc(11px + env(safe-area-inset-top,0px)) 12px 11px!important}
+body:has(#exerciseHistoryScreen.screen.active)>header>.sx-exercise-profile-heading{
+ display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:11px;
+ width:100%;min-width:0;
+}
+body:has(#exerciseHistoryScreen.screen.active)>header>.sx-exercise-profile-heading h1{
+ min-width:0;margin:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ font-size:clamp(15px,4.4vw,21px);font-weight:830;color:var(--txt);letter-spacing:-.3px;
+}
+body:has(#exerciseHistoryScreen.screen.active)>header>.sx-exercise-profile-heading button{
+ display:grid!important;place-items:center!important;min-height:43px;min-width:43px;padding:7px 10px!important;
+ margin:0!important;border-radius:13px!important;background:var(--panel2)!important;
+ border:1px solid var(--line)!important;box-shadow:none!important;color:var(--txt)!important;
+ font-weight:800!important;font-size:12px!important;
+}
+body:has(#exerciseHistoryScreen.screen.active)>header>.sx-exercise-profile-heading #sxExerciseStatsShare{font-size:22px!important}
+body:has(#exerciseHistoryScreen.screen.active) #trackerNav{display:none!important}
+#exerciseHistoryScreen{padding-bottom:calc(35px + env(safe-area-inset-bottom,0px));}
+#exerciseHistoryScreen .sx-exercise-tabs{
+ display:flex;align-items:stretch;gap:0;overflow-x:auto;scrollbar-width:none;
+ border-bottom:1px solid var(--line);margin:-5px -16px 18px;padding:0 13px;
+ background:var(--bg);position:relative;
+}
+#exerciseHistoryScreen .sx-exercise-tabs::-webkit-scrollbar{display:none}
+#exerciseHistoryScreen .sx-exercise-tabs button{
+ flex:1;min-width:max-content;padding:14px 11px 12px!important;min-height:48px;
+ border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+ color:var(--muted)!important;font-size:13px!important;font-weight:650!important;
+}
+#exerciseHistoryScreen .sx-exercise-tabs button.selected{
+ color:var(--lime)!important;border-bottom-color:var(--lime)!important;font-weight:820!important;
+}
+#exerciseHistoryScreen .sx-exercise-info-banner{
+ margin:0 0 21px;padding:0;font-size:11px;line-height:1.5;color:var(--muted);
+}
+#exerciseHistoryScreen .sx-exercise-chart-intro{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;
+}
+#exerciseHistoryScreen .sx-exercise-chart-headline{display:flex;gap:8px;align-items:baseline;min-width:0}
+#exerciseHistoryScreen .sx-exercise-chart-headline strong{
+ font-size:clamp(19px,5vw,28px);line-height:1.12;font-weight:860;color:var(--txt);
+ letter-spacing:-.5px;white-space:nowrap;
+}
+#exerciseHistoryScreen .sx-exercise-chart-headline span{
+ color:var(--lime);font-size:12px;font-weight:760;white-space:nowrap;
+}
+#exerciseHistoryScreen #sxExerciseChartRange{
+ flex:none;width:auto;max-width:134px;padding:8px 3px!important;margin:0!important;
+ border:0!important;background:transparent!important;box-shadow:none!important;
+ font-size:12px!important;font-weight:760!important;color:var(--lime)!important;
+ text-align:right;appearance:auto;
+}
+#exerciseHistoryScreen .sx-exercise-chart-measure{
+ font-size:10px;color:var(--muted);font-weight:770;letter-spacing:1.1px;text-transform:uppercase;
+ margin:0 0 6px;
+}
+#exerciseHistoryScreen .sx-exercise-trend{
+ width:100%;padding:6px 0 12px;min-height:190px;
+}
+#exerciseHistoryScreen .sx-exercise-trend svg{
+ display:block;width:100%;height:auto;overflow:visible;
+}
+#exerciseHistoryScreen .sx-ex-chart-grid{stroke:color-mix(in srgb,var(--muted) 23%,transparent);stroke-width:1}
+#exerciseHistoryScreen .sx-ex-chart-axis{fill:var(--muted);font-size:9px}
+#exerciseHistoryScreen .sx-ex-chart-line{
+ fill:none;stroke:var(--lime);stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;
+}
+#exerciseHistoryScreen .sx-ex-chart-dot{
+ fill:var(--lime);stroke:var(--panel);stroke-width:1.7;cursor:pointer;outline:none;
+}
+#exerciseHistoryScreen .sx-ex-chart-dot.is-selected{stroke:var(--txt);stroke-width:2.8;filter:drop-shadow(0 0 5px var(--lime))}
+#exerciseHistoryScreen .sx-ex-chart-dot.is-live{fill:var(--panel);stroke:var(--lime);stroke-width:3}
+#exerciseHistoryScreen .sx-ex-chart-dot:focus-visible{stroke:var(--txt);stroke-width:3}
+#exerciseHistoryScreen .sx-exercise-live-note{
+ margin:6px 0;padding:10px;border:1px solid color-mix(in srgb,var(--lime) 27%,var(--line));
+ border-radius:9px;background:color-mix(in srgb,var(--lime) 7%,transparent);
+ color:var(--lime);font-size:11px;line-height:1.5;
+}
+#exerciseHistoryScreen .sx-exercise-no-history{
+ padding:50px 15px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5;
+}
+#exerciseHistoryScreen #exerciseMetricTabs.history-metric-tabs{
+ display:flex!important;gap:8px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory;
+ margin:3px -16px 34px;padding:0 16px 10px;white-space:nowrap;
+}
+#exerciseHistoryScreen #exerciseMetricTabs::-webkit-scrollbar{display:none}
+#exerciseHistoryScreen #exerciseMetricTabs button{
+ flex:none;scroll-snap-align:start;min-width:max-content;min-height:43px;
+ padding:10px 14px!important;border:1px solid var(--line)!important;
+ border-radius:23px!important;background:var(--panel2)!important;color:var(--txt)!important;
+ box-shadow:none!important;font-size:12px!important;font-weight:760!important;
+}
+#exerciseHistoryScreen #exerciseMetricTabs button.selected{
+ color:var(--bg)!important;border-color:var(--lime)!important;background:var(--lime)!important;
+}
+#exerciseHistoryScreen .sx-exercise-pr-heading{
+ display:flex;align-items:center;gap:9px;margin:0 0 13px;
+}
+#exerciseHistoryScreen .sx-exercise-pr-heading span{font-size:26px}
+#exerciseHistoryScreen .sx-exercise-pr-heading h2{margin:0;font-size:20px;font-weight:850;letter-spacing:-.5px}
+#exerciseHistoryScreen .sx-exercise-pr-row{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:17px 2px;border-bottom:1px solid var(--line);min-height:58px;
+}
+#exerciseHistoryScreen .sx-exercise-pr-row span{font-size:14px;color:var(--txt)}
+#exerciseHistoryScreen .sx-exercise-pr-row strong{
+ font-size:14px;color:var(--lime);font-weight:830;text-align:right;white-space:nowrap;
+}
+#exerciseHistoryScreen .sx-exercise-muscle-summary{
+ display:flex;flex-direction:column;gap:8px;margin:26px 0 0;padding:14px 0;
+ border-top:1px solid var(--line);color:var(--muted);font-size:12px;
+}
+#exerciseHistoryScreen .sx-exercise-muscle-summary strong{font-size:11px;letter-spacing:1px;color:var(--lime)}
+#exerciseHistoryScreen .sx-exercise-extra-panel{padding:12px 0 25px}
+#exerciseHistoryScreen .sx-exercise-extra-panel[hidden],#exerciseHistoryScreen #sxExerciseSummaryPanel[hidden]{display:none!important}
+#exerciseHistoryScreen .sx-exercise-extra-panel h2{font-size:21px;margin:4px 0 17px;color:var(--txt)}
+#exerciseHistoryScreen .sx-exercise-extra-panel p{font-size:13px;line-height:1.6;color:var(--muted)}
+#exerciseHistoryScreen .sx-exercise-history-row{
+ display:flex;justify-content:space-between;align-items:center;gap:10px;
+ padding:14px 0;border-bottom:1px solid var(--line);
+}
+#exerciseHistoryScreen .sx-exercise-history-row>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+#exerciseHistoryScreen .sx-exercise-history-row strong{font-size:13px;color:var(--txt)}
+#exerciseHistoryScreen .sx-exercise-history-row span{font-size:11px;color:var(--muted)}
+#exerciseHistoryScreen .sx-exercise-history-row>div:last-child{text-align:right}
+#exerciseHistoryScreen .sx-screenreader-only{
+ position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;
+ overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+@media(max-width:380px){
+ #exerciseHistoryScreen .sx-exercise-tabs button{font-size:11px!important;padding-inline:9px!important}
+ #exerciseHistoryScreen .sx-exercise-chart-headline{flex-direction:column;gap:4px}
+ #exerciseHistoryScreen .sx-exercise-chart-headline strong{font-size:23px}
+}

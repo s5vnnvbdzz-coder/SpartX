@@ -1,3 +1,5 @@
+body[data-spartx-parent-theme="jade-sentinel"]{--sx-parent-bg:#08130f;--sx-parent-panel:#142820;--sx-parent-panel2:#233b31;--sx-parent-line:#63846b;--sx-parent-text:#f5f7ef;--sx-parent-muted:#bdcec0;--sx-parent-accent:#aaff37}
+
 /* SpartanX linked AscensionX surface theme v207.
    Scoped to data-spartx-parent-theme: standalone AscensionX is untouched.
    Original AscensionX account/theme selection remains persisted separately. */

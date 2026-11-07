@@ -32,8 +32,8 @@ jobs:
           opts.set_capability('goog:loggingPrefs',{'browser':'ALL'})
           browser=webdriver.Chrome(options=opts)
           wait=WebDriverWait(browser,25)
-          def evaluate(code):
-            return browser.execute_script(code)
+          def evaluate(code,*args):
+            return browser.execute_script(code,*args)
           def click(selector):
             evaluate("document.querySelector(arguments[0]).click()",selector)
           def change(selector,value):

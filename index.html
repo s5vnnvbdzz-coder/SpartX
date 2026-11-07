@@ -1525,6 +1525,26 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 #activeWorkout .session-summary-sticky.is-dismissed{
  display:none!important;
 }
+/* Make the active exercise name a text-only, still-accessible stats link.
+   High specificity keeps theme-wide button styles from drawing a box. */
+#activeWorkout .exercise-title-row > button.sx-exercise-stats-link,
+#activeWorkout .exercise-title-row > button.sx-exercise-stats-link:hover,
+#activeWorkout .exercise-title-row > button.sx-exercise-stats-link:active{
+ appearance:none!important;
+ -webkit-appearance:none!important;
+ min-width:0;
+ margin:0!important;
+ padding:0!important;
+ background:transparent!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ text-align:left!important;
+}
+#activeWorkout .exercise-title-row > button.sx-exercise-stats-link:focus-visible{
+ outline:2px solid var(--lime);
+ outline-offset:4px;
+}
 </style>
 <link rel="stylesheet" href="./assets/profile/profile-layout-hevy.css?v=244">
 <link rel="stylesheet" href="./assets/profile/profile-photo-crop.css?v=247">
@@ -2720,9 +2740,18 @@ function historyChart(title,unit,points,valueKey,format){
  const liveLabel=live?'<text x="'+(live.x-7).toFixed(1)+'" y="'+Math.max(11,live.y-13).toFixed(1)+'" text-anchor="end" class="history-live-label">LIVE</text>':'';
  return points.length?'<div class="history-chart-wrap"><svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+title+' progress chart"><line x1="'+left+'" y1="'+(top+innerH)+'" x2="'+(w-right)+'" y2="'+(top+innerH)+'" class="history-axis-line"/><line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+(top+innerH)+'" class="history-axis-line"/><path d="'+path+'" class="history-line"/>'+liveLine+dots+liveLabel+labels+'</svg></div>':'<p class="muted tiny" style="padding:18px 0;text-align:center">No completed sets yet. Complete a set to see today’s live progress.</p>';
 }
+// Predicted 1RM belongs to the workout logger only. Derive it directly from
+// each completed weight/reps set; never use Intelligence's collated metrics.
+function predictedOneRepMax(set){
+ const weight=Number(set?.weight),reps=Number(set?.reps);
+ if(!Number.isFinite(weight)||!Number.isFinite(reps)||weight<=0||reps<1)return 0;
+ // One recorded rep is already a lifted load, so do not inflate it by 3.3%.
+ return reps===1?weight:weight*(1+reps/30); // Epley estimate.
+}
+window.SpartanXPredictedOneRepMax=predictedOneRepMax;
 const EXERCISE_METRICS=[
  {id:'heaviest',label:'Heaviest weight',unit:'weight',scope:'all'},
- {id:'e1rm',label:'1RM',unit:'weight',scope:'session'},
+ {id:'e1rm',label:'Predicted 1RM',unit:'weight',scope:'session'},
  {id:'setVolume',label:'Best set volume',unit:'kg × reps',scope:'session'},
  {id:'sessionVolume',label:'Session volume',unit:'volume',scope:'session'},
  {id:'totalReps',label:'Total reps',unit:'reps',scope:'session'}
@@ -2730,7 +2759,7 @@ const EXERCISE_METRICS=[
 let activeExerciseMetric='heaviest';
 function metricValue(points,metric){
  if(metric.id==='heaviest')return Math.max(0,...points.flatMap(p=>p.sets.map(x=>+x.weight||0)));
- if(metric.id==='e1rm')return Math.max(0,...points.flatMap(p=>p.sets.map(x=>(+x.weight||0)*(1+(+x.reps||0)/30))));
+ if(metric.id==='e1rm')return Math.max(0,...points.flatMap(p=>p.sets.map(predictedOneRepMax)));
  if(metric.id==='setVolume')return Math.max(0,...points.map(p=>p.bestSetVolume));
  if(metric.id==='sessionVolume')return Math.max(0,...points.map(p=>p.volume));
  return Math.max(0,...points.map(p=>p.totalReps));
@@ -2761,7 +2790,7 @@ function renderExerciseMetric(points,id){
   $('exerciseMetricValue').textContent=maxWeight?kg(maxWeight):'—';
   $('exerciseMetricLabel').textContent='ALL-TIME HEAVIEST WEIGHT';
  }else if(metric.id==='e1rm'){
-  values=points.map(p=>({...p,metricValue:Math.max(0,...p.sets.map(x=>(+x.weight||0)*(1+(+x.reps||0)/30)))}));
+  values=points.map(p=>({...p,metricValue:Math.max(0,...p.sets.map(predictedOneRepMax))}));
   $('exerciseMetricValue').textContent=values.length?kg(Math.max(...values.map(p=>p.metricValue))):'—';
   $('exerciseMetricLabel').textContent='BEST PREDICTED 1RM';
  }else{
@@ -3541,7 +3570,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/profile/profile-preview-parity.js?v=244"></script>
 <script src="./assets/profile/profile-photo-crop.js?v=247"></script>
 <script src="./assets/workouts/workout-date.js?v=249"></script>
-<script src="./assets/exercises/exercise-stats-layout.js?v=252"></script>
+<script src="./assets/exercises/exercise-stats-layout.js?v=253"></script>
 <script src="./assets/workouts/workout-save-review.js?v=252"></script>
 <script src="./assets/profile/profile-social-pages.js?v=240"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=243"></script>

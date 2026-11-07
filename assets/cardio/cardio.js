@@ -33,7 +33,12 @@ const formatTime=seconds=>{
 const parseTime=value=>{
  const s=String(value??'').trim();
  if(!s)return 0;
- if(/^\d{1,4}$/.test(s))return Number(s)*60;
+ // Numeric iPhone keypads may not offer a colon: 0300 = 03:00, 3000 = 30:00.
+ if(/^\d{1,2}$/.test(s))return Number(s)*60;
+ if(/^\d{3,6}$/.test(s)){
+  const minutes=Number(s.slice(0,-2)),seconds=Number(s.slice(-2));
+  return seconds<60?minutes*60+seconds:null;
+ }
  const match=s.match(/^(\d{1,4}):([0-5]\d)$/);
  return match?Number(match[1])*60+Number(match[2]):null;
 };

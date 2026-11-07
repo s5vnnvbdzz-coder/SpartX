@@ -6,7 +6,7 @@
  const active=$('activeWorkout'),options=$('sxSessionOptionsLinks');
  if(!active||!options||!$('startNewWorkoutChoice'))return;
  const dateButton=document.createElement('button');
- dateButton.id='sxWorkoutDateButton';dateButton.type='button';dateButton.className='sx-workout-date-button';
+ dateButton.id='sxWorkoutDateButton';dateButton.type='button';dateButton.className='sx-workout-date-button';dateButton.hidden=true;
  dateButton.setAttribute('aria-label','Choose workout date and time');
  dateButton.innerHTML='<span class="sx-date-icon" aria-hidden="true">▦</span><span id="sxWorkoutDateLabel">Today</span><span class="sx-date-chevron" aria-hidden="true">›</span>';
  active.querySelector('.sx-active-workout-name')?.appendChild(dateButton);
@@ -40,7 +40,12 @@
   return Number.isFinite(date.getTime())?date:new Date();
  }
  function updateLabel(){
-  if(!active.classList.contains('active'))return;
+  // The calendar belongs to backdated logging and saved-workout editing,
+  // never to an ordinary live workout started today (including AscensionX).
+  const visible=active.classList.contains('active')&&
+    (editingSessionId!==null||!!window.sxManualWorkoutDate||!!window.sxMissedWorkoutMode);
+  dateButton.hidden=!visible;
+  if(!visible)return;
   const date=effectiveDate(),now=new Date(),isToday=localDay(date)===localDay(now);
   $('sxWorkoutDateLabel').textContent=isToday
     ?'Today · '+localTime(date)
@@ -84,6 +89,7 @@
     editingSessionMeta.date=date.toISOString();
   }else{
     window.sxManualWorkoutDate=date.toISOString();
+    window.sxMissedWorkoutMode=true;
   }
   updateLabel();saveDraft();closeDialog();
  }
@@ -96,6 +102,8 @@
  missed.addEventListener('click',()=>{
    if(sessionActive){alert('Finish or discard your current workout before starting a missed workout.');return;}
    $('startNewWorkoutChoice').click(); // Keep the existing workout setup intact.
+   window.sxMissedWorkoutMode=true;
+   updateLabel();saveDraft();
    openDialog(true);
  });
  const observer=new MutationObserver(()=>{if(active.classList.contains('active'))updateLabel();});

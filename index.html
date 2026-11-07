@@ -1362,6 +1362,48 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
 #sxClose531Quick{flex:none;min-height:38px;padding:8px 11px;background:var(--panel2);color:var(--lime);border:1px solid var(--line);border-radius:10px;font-weight:800}
 #sxQuick531Scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:13px}
 #sxQuick531Mount{width:100%;min-width:0}
+/* Keep the iPhone bottom navigation pinned to the bottom of the viewport.
+   The chooser, calculator and confirmation stop above it, rather than
+   overflowing beneath the navigation or moving it through a fixed body. */
+body:has(#workout.screen.active) #trackerNav,
+body:has(#activeWorkout.screen.active) #trackerNav{
+ position:fixed!important;inset:auto 0 0!important;bottom:0!important;
+ transform:none!important;-webkit-transform:none!important;
+}
+#sessionOptionsMenu,#sxQuick531Overlay,#sxQuick531CycleOverlay,#sxConfirm531StartOverlay{
+ box-sizing:border-box!important;
+ inset:0 0 var(--sx-nav-live-height,calc(76px + env(safe-area-inset-bottom,0px)))!important;
+ height:auto!important;
+ max-height:calc(100dvh - var(--sx-nav-live-height,calc(76px + env(safe-area-inset-bottom,0px))))!important;
+ overflow:hidden;
+}
+#sessionOptionsMenu,#sxQuick531Overlay,#sxQuick531CycleOverlay{
+ padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px!important;
+}
+#sxQuick531Dialog,#sxQuick531CycleDialog,#sxSessionOptionsDialog{
+ max-height:100%!important;min-height:0!important;
+}
+#sxQuick531Scroll,#sxQuick531CycleScroll,#sxSessionOptionsLinks{
+ min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain;
+}
+#sxConfirm531StartOverlay{
+ position:fixed;z-index:270000;display:flex;
+ align-items:center;justify-content:center;
+ padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;
+ background:#030508e8;backdrop-filter:blur(7px);
+}
+#sxConfirm531StartOverlay[hidden]{display:none!important}
+#sxConfirm531StartDialog{
+ width:min(100%,430px);max-height:100%;overflow-y:auto;min-height:0;
+ padding:22px 16px;border-radius:16px;
+ border:1px solid var(--lime);background:var(--panel);
+ box-shadow:0 20px 60px #000b;
+}
+#sxConfirm531StartTitle{margin:10px 0 8px}
+#sxConfirm531StartDescription{margin:0;line-height:1.65;font-size:13px}
+#sxConfirm531StartDialog button{min-width:0;padding:12px 6px}
+@media(max-height:580px){#sxQuick531Heading,#sxQuick531CycleHeader{padding:8px 11px}#sxQuick531Scroll,#sxQuick531CycleScroll{padding:8px}}
+
 #sxQuick531Mount #toolsReplica{display:block;width:100%}
 @media(max-width:370px){#sxHeaderActiveControls h1{font-size:14px}#sxHeaderActiveControls #activeSessionBack{padding:7px!important;font-size:10px!important}#sxHeaderActiveControls #endWorkout{padding:7px!important;font-size:10px!important}}
 </style>
@@ -1775,8 +1817,8 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
     <div id="sxSessionOptionsHeader"><div><div class="eyebrow">WORKOUT LOGGER</div><h2 id="sxSessionOptionsTitle">Start a Workout</h2></div><button type="button" id="sxCloseSessionOptions" aria-label="Close workout choices">✕ Close</button></div>
     <div id="sxSessionOptionsLinks">
       <button type="button" id="startNewWorkoutChoice"><strong>New Workout</strong><span>Start an empty session and add exercises as you go.</span></button>
-      <button type="button" id="start531Shortcut"><strong>Start 5/3/1</strong><span>Open the calculator and add sets to this session.</span></button>
-      <button type="button" id="startAscensionShortcut"><strong>Start AscensionX</strong><span>Choose a cycle lift and load sets into this workout.</span></button>
+      <button type="button" id="start531Shortcut"><strong>Start 5/3/1</strong><span>Choose your training week and review the sets before starting.</span></button>
+      <button type="button" id="startAscensionShortcut"><strong>Start AscensionX</strong><span>Choose a cycle lift; the session starts only when you load it.</span></button>
     </div>
   </section>
 </div>
@@ -1785,6 +1827,17 @@ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls{display:
     <div id="sxQuick531Heading"><h2 id="sxQuick531Title">5/3/1 Calculator</h2><button type="button" id="sxClose531Quick" aria-label="Back to workout options">← Back</button></div>
     <div id="sxQuick531Scroll" tabindex="0" aria-label="Scrollable 5/3/1 calculator"><div id="sxQuick531Mount"></div></div>
   </div>
+</div>
+<div id="sxConfirm531StartOverlay" role="dialog" aria-modal="true" aria-labelledby="sxConfirm531StartTitle" hidden>
+  <section id="sxConfirm531StartDialog">
+    <div class="eyebrow">5/3/1 · WORKOUT LOGGER</div>
+    <h2 id="sxConfirm531StartTitle">Start this workout?</h2>
+    <p id="sxConfirm531StartDescription" class="muted">Review the sets before starting a new active session.</p>
+    <div class="row" style="gap:10px;margin-top:18px">
+      <button type="button" class="secondary" id="sxCancel531Start" style="flex:1">CANCEL</button>
+      <button type="button" id="sxAccept531Start" style="flex:1">START WORKOUT</button>
+    </div>
+  </section>
 </div>
 <div id="sxQuick531CycleOverlay" role="dialog" aria-modal="true" aria-labelledby="sxQuick531CycleTitle" hidden>
   <div id="sxQuick531CycleDialog">

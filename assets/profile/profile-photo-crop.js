@@ -215,6 +215,8 @@
       avatar.innerHTML='<img src="'+data+'" alt="Cropped profile picture preview">';
       closeCropper();
     }catch(e){
+      cropper.dataset.lastCropError=String(e&&e.message||e);
+      console.error('[SpartanX photo crop]',e);
       showError('Could not save this crop. Try a smaller image or another photo.');
     }
   });

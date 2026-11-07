@@ -5,6 +5,7 @@ on:
       - ".github/workflows/missed-workout-check.yml"
       - "assets/workouts/workout-date.js"
       - "assets/workouts/workout-date.css"
+      - ".github/workflows/missed-workout-check.yml"
       - "index.html"
   workflow_dispatch:
 permissions:
@@ -38,7 +39,38 @@ jobs:
             wait.until(lambda b:run("return !!window.SpartanXWorkoutDate"))
             assert run("return document.querySelector('#home').classList.contains('active')"),'App must start on Home'
             assert run("return document.querySelector('#editProfileOverlay').classList.contains('hidden')"),'Profile editor must not open automatically'
+            # A normal live workout must not display a calendar button.
+            run("startSession()")
+            assert run("return document.querySelector('#sxWorkoutDateButton').hidden"),'Live session calendar should be hidden'
+            run("resetSession();switchScreen('home')")
+            # AscensionX sends the squat as "Squat" (not "Back Squat").
+            # The final W and every numbered working set must gain 60 seconds.
+            imported=run("""return window.spartanxImport531({
+              source:'AscensionX',exercise:'Squat',cycleId:'2026-11-07T12:00:00.000Z',
+              tm:150,week:1,weekLabel:'5s',targetRpe:8,
+              warmupSets:[{weight:20,reps:5},{weight:50,reps:5},{weight:70,reps:3}],
+              sets:[{weight:110,reps:5},{weight:120,reps:3},{weight:130,reps:1}]
+            });""")
+            assert imported,'AscensionX squat import should succeed'
+            assert run("return document.querySelector('#sxWorkoutDateButton').hidden"),'Calendar must also be hidden for a live AscensionX session'
+            results=run("""const result=[];
+              const actual=i=>({set:i,rest:exerciseTimers[0]?.remaining,
+                 phase:exerciseTimers[0]?.phase,preview:ascensionRestPlan(0,i).seconds});
+              for(let i=0;i<6;i++){
+                completeSet(0,i,true);result.push(actual(i));
+              }
+              return result;""")
+            print('ASCENSIONX SQUAT REST RESULTS:',results,flush=True)
+            assert [s['rest'] for s in results]==[120,120,180,180,180,180],results
+            assert results[2]['phase']=='MAIN SETS' and results[3]['phase']=='MAIN SETS',results
+            # The shorter "W" label in historical or imported sets isn't a working set.
+            alias=run("""work[0].sets=[{type:'W',done:false},{type:'Working Set',done:false}];
+              return ascensionRestPlan(0,0).seconds;""")
+            assert alias==180,'W to working-set transition also needs +60 seconds'
+            run("resetSession();switchScreen('home')")
             run("document.querySelector('#sxLogMissedWorkout').click()")
+            assert not run("return document.querySelector('#sxWorkoutDateButton').hidden"),'Missed workout must retain editable date'
+
             assert run("return document.querySelector('#activeWorkout').classList.contains('active')")
             assert not run("return document.querySelector('#sxWorkoutDateOverlay').hidden")
             assert run("return document.querySelector('#sxWorkoutDateInput').max.length===10")

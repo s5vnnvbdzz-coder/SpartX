@@ -32,14 +32,15 @@ const field=(i,j,key,label,value,step,unit,escape)=>{
 const render=(ex,i,unit,escape)=>{
  const sets=(ex.sets||[]);
  const entries=sets.map((set,j)=>{
-  const minutes=Number(set.durationSeconds)>0?+(Number(set.durationSeconds)/60).toFixed(2):'';
+  const minutes=Number(set.durationSeconds)>0?Math.floor(Number(set.durationSeconds)/60):'';
+  const seconds=Number(set.durationSeconds)>0?Math.round(Number(set.durationSeconds))%60:'';
   const km=Number(set.distanceKm)>0?+(unit==='mi'?Number(set.distanceKm)/1.609344:Number(set.distanceKm)).toFixed(2):'';
   const floors=Number(set.floors)>0?set.floors:'';
   const calories=Number(set.calories)>0?set.calories:'';
   return '<div class="sx-cardio-interval set-entry '+(set.done?'is-complete':'')+'">'+
    '<div class="sx-cardio-interval-title"><strong>INTERVAL '+(j+1)+'</strong>'+
    (sets.length>1?'<button type="button" class="secondary small" onclick="removeCardioInterval('+i+','+j+')">REMOVE</button>':'')+'</div>'+
-   '<div class="sx-cardio-fields">'+field(i,j,'durationSeconds','Time',minutes,'0.1','min',escape)+
+   '<div class="sx-cardio-fields">'+field(i,j,'minutes','Min',minutes,'1','',escape)+field(i,j,'seconds','Sec',seconds,'1','',escape)+
    (ex.name==='StairMaster'?field(i,j,'floors','Floors',floors,'1','',escape):
     field(i,j,'distanceKm','Distance',km,'0.01',unit,escape))+
    field(i,j,'calories','Calories',calories,'1','kcal',escape)+'</div>'+
@@ -59,7 +60,7 @@ css.textContent=`
 #activeWorkout .sx-cardio-card .sx-cardio-subtitle{font-size:10px;letter-spacing:.75px;color:var(--muted);font-weight:850;margin:-3px 0 8px}
 #activeWorkout .sx-cardio-interval{border-top:1px solid var(--line);padding:13px 2px 10px;margin-top:9px}
 #activeWorkout .sx-cardio-interval-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;color:var(--lime);font-size:11px;letter-spacing:.65px}
-#activeWorkout .sx-cardio-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#activeWorkout .sx-cardio-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 #activeWorkout .sx-cardio-field{display:flex;flex-direction:column;gap:6px;min-width:0;font-weight:800;font-size:10px;color:var(--muted)}
 #activeWorkout .sx-cardio-field .sx-cardio-input{width:100%;min-width:0;min-height:42px;padding:9px 5px;font-weight:750;font-size:16px;color:var(--txt);border:1px solid var(--line);background:var(--panel2);border-radius:9px;text-align:center}
 #activeWorkout .sx-cardio-field .sx-cardio-input:focus{outline:2px solid var(--lime);outline-offset:1px}

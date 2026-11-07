@@ -34,7 +34,8 @@
  const pageHeading=document.getElementById('sxProfileConnectionsTitle');
  const desc=document.getElementById('sxProfileConnectionsDescription');
  const list=document.getElementById('sxProfileConnectionsList');
- let current=null,addedHistoryEntry=false;
+ let current=null,addedHistoryEntry=false,profileReturnScroll=null;
+ const readScroll=()=>Math.max(0,window.scrollY||0,document.documentElement.scrollTop||0,document.body.scrollTop||0);
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const rankMale=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
  const rankFemale=['Initiate','Huntress','Amazon','Valkyrie','Athena','Olympian'];
@@ -75,11 +76,23 @@
   root.classList.remove('sx-connections-open');
   document.body.classList.remove('sx-profile-list-open');
   title.textContent='';
+  const previous=profileReturnScroll;
+  profileReturnScroll=null;
+  if(previous!==null&&root.classList.contains('active')){
+   const restore=()=>{
+    if(root.classList.contains('active')&&!root.classList.contains('sx-connections-open')){
+     window.scrollTo(0,previous);
+     document.documentElement.scrollTop=previous;
+    }
+   };
+   restore();requestAnimationFrame(restore);
+  }
  }
  function show(kind,push){
   if(kind!=='followers'&&kind!=='following')return;
   // The established screen switcher keeps the real nav's Profile tab active.
   if(!root.classList.contains('active')&&typeof switchScreen==='function')switchScreen('profile');
+  if(!current)profileReturnScroll=readScroll();
   current=kind;
   page.hidden=false;
   root.classList.add('sx-connections-open');

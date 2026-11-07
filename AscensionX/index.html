@@ -224,7 +224,7 @@ body[data-theme="christmas"]{--bg:#080e0c;--panel:#12201b;--panel2:#1b3026;--red
 body[data-theme="monster"]{--bg:#070a07;--panel:#101710;--panel2:#1b261a;--red:#67b52a;--red2:#a0e64b;--redDeep:#335c16}
 body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0b0b0;--red2:#f4f4f4;--redDeep:#555}
 </style>
-<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=211">
+<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=236">
 </head>
 <body>
 <header>
@@ -407,7 +407,7 @@ const ASC_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
 const ASC_RANK_NUMERALS=['I','II','III','IV','V','VIII'];
 function ascRankLabel(level){return ASC_RANKS[level]+' - Rank '+ASC_RANK_NUMERALS[level];}
 const SX_SHARED_THEME_KEY='spartanx_shared_active_theme_v1';
-const SX_THEME_MAP={'dark':'dark','light':'light','spartan-red':'spartan','spartan-bronze':'bronze','spartan-gold':'gold','spartan-blue':'athena','spartan-amethyst':'amethyst','sx-black-yellow':'black-yellow','spartan-olympian':'gold','olympian-athena':'gold','sx-halloween':'halloween','sx-christmas':'christmas','sx-monster':'monster','sx-obsidian-white':'obsidian','premium-monster':'monster','premium-olympus':'gold','amazonian-crimson':'spartan','athenas-aegis':'athena'};
+const SX_THEME_MAP={'dark':'dark','light':'light','spartan-red':'spartan','spartan-bronze':'bronze','spartan-gold':'gold','spartan-blue':'athena','spartan-amethyst':'amethyst','sx-black-yellow':'black-yellow','spartan-olympian':'gold','olympian-athena':'gold','sx-halloween':'halloween','sx-christmas':'christmas','sx-monster':'monster','sx-obsidian-white':'obsidian','premium-monster':'monster','premium-olympus':'gold','amazonian-crimson':'spartan','athenas-aegis':'athena','jade-sentinel':'athena'};
 function ascOpenedFromSpartanX(){const params=new URLSearchParams(location.search);if(params.get('from')==='spartanx')return true;try{const ref=new URL(document.referrer);return ref.origin===location.origin&&ref.pathname.replace(/\/$/,'')===location.pathname.replace(/AscensionX\/index\.html$|AscensionX\/$/,'').replace(/\/$/,'')}catch(e){return false}}
 function applyAscTheme(){let theme=state.theme||'dark';if(ascOpenedFromSpartanX()){let main='';try{main=localStorage.getItem(SX_SHARED_THEME_KEY)||''}catch(e){}if(main)theme=SX_THEME_MAP[main]||'dark'}document.body.dataset.theme=theme;document.body.dataset.inheritedTheme=ascOpenedFromSpartanX()?'true':'false';return theme}
 function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;applyAscTheme();persist(false);renderSettings()}

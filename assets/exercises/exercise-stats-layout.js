@@ -4,6 +4,9 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const screen=$('exerciseHistoryScreen');if(!screen)return;
+const globalHeader=document.querySelector('body > header');
+const localHeader=screen.querySelector('.sx-exercise-profile-heading');
+if(globalHeader&&localHeader)globalHeader.appendChild(localHeader);
 let exerciseName='',points=[],metric='heaviest',period='3m',selectedIndex=-1,activeTab='summary';
 const metrics=[
  {id:'heaviest',name:'Heaviest Weight'},
@@ -167,7 +170,7 @@ $('sxExerciseStatsShare').addEventListener('click',async()=>{
 });
 window.SpartanXExerciseStats={
  render,
- renderMetric(){drawMetric();},
+ renderMetric(_points,id){metric=id||metric;selectedIndex=-1;drawMetric();},
  renderRecords:records
 };
 })();

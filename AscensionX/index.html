@@ -243,7 +243,7 @@ body[data-theme="christmas"]{--bg:#080e0c;--panel:#12201b;--panel2:#1b3026;--red
 body[data-theme="monster"]{--bg:#070a07;--panel:#101710;--panel2:#1b261a;--red:#67b52a;--red2:#a0e64b;--redDeep:#335c16}
 body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0b0b0;--red2:#f4f4f4;--redDeep:#555}
 </style>
-<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=261">
+<link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=271">
 </head>
 <body>
 <header>
@@ -254,13 +254,15 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
 <div id="cycleConfirmBackdrop" class="cycle-confirm-backdrop" role="presentation"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleConfirmTitle"><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleConfirmTitle" style="margin:9px 0">Start your cycle?</h2><p class="tiny" id="cycleConfirmSummary"></p><div class="cycle-confirm-actions"><button class="secondary" onclick="discardCycleConfirmation()">Discard</button><button id="cycleConfirmAction" onclick="confirmCycleStart()">Start</button></div></section></div>
 <div id="ascSpartanImportBackdrop" class="cycle-confirm-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)cancelAscSpartanImport()">
   <section class="cycle-confirm-dialog asc-spartan-import-dialog" role="dialog" aria-modal="true" aria-labelledby="ascSpartanImportTitle">
-    <div class="eyebrow">ASCENSIONX × SPARTANX</div>
-    <h2 id="ascSpartanImportTitle" style="margin:9px 0">Log this workout in SpartanX?</h2>
-    <p class="tiny" style="margin:0 0 12px">Choose the lift to load as an active SpartanX workout. All four recommended warm-up sets are placed before the prescribed working sets.</p>
-    <label for="ascSpartanImportLift">Exercise</label>
-    <select id="ascSpartanImportLift" onchange="renderAscSpartanImportPreview()"></select>
-    <div id="ascSpartanImportPreview" class="asc-spartan-import-preview" aria-live="polite"></div>
-    <p class="tiny">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets in SpartanX</strong> to record the session in AscensionX and advance this lift to the next week. Partial sessions are saved but do not advance.</p>
+    <div class="asc-spartan-import-scroll">
+      <div class="eyebrow">ASCENSIONX × SPARTANX</div>
+      <h2 id="ascSpartanImportTitle" style="margin:9px 0">Log this workout in SpartanX?</h2>
+      <p class="tiny" style="margin:0 0 12px">Choose the lift to load as an active SpartanX workout. All four recommended warm-up sets are placed before the prescribed working sets.</p>
+      <label for="ascSpartanImportLift">Exercise</label>
+      <select id="ascSpartanImportLift" onchange="renderAscSpartanImportPreview()"></select>
+      <div id="ascSpartanImportPreview" class="asc-spartan-import-preview" aria-live="polite"></div>
+      <p class="tiny">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets in SpartanX</strong> to record the session in AscensionX and advance this lift to the next week. Partial sessions are saved but do not advance.</p>
+    </div>
     <div class="asc-spartan-import-actions">
       <button type="button" class="secondary" onclick="cancelAscSpartanImport()">CANCEL</button>
       <button type="button" id="ascSpartanImportConfirm" onclick="requestAscensionSpartanImport()">LOAD INTO SPARTANX</button>

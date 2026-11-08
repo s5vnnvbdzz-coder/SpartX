@@ -106,3 +106,45 @@ body[data-active-theme] #profileSettingsOverlay :is(button,input,select,textarea
  outline:2px solid var(--lime)!important;
  outline-offset:2px;
 }
+
+
+/* Cosmic Nebula settings palette — Settings pages and Profile Settings popup. */
+body[data-sx-settings-theme="cosmic-nebula"]{
+ --sx-settings-bg:#070919;--sx-settings-panel:#12162c;
+ --sx-settings-panel2:#202644;--sx-settings-line:#6367a0;
+ --sx-settings-text:#f2f5ff;--sx-settings-muted:#afb9d8;
+ --sx-settings-accent:#8bdcff;color-scheme:dark
+}
+body[data-sx-settings-theme="cosmic-nebula"]{
+ background:radial-gradient(ellipse at 93% 6%,#674fc06b,transparent 44%),
+ radial-gradient(ellipse at 14% 72%,#1b5d9844,transparent 48%),
+ linear-gradient(155deg,#070919,#121a38 57%,#070919)!important;
+ background-attachment:fixed!important
+}
+body[data-sx-settings-theme="cosmic-nebula"] :is(
+ .card,.settings-modal,.detail-panel,.plate-setting,.profile-icon,.setting-row
+ ){
+ background:linear-gradient(145deg,#272143,#171e39 55%,#0b1128)!important;
+ border-color:#7e83b9!important;color:#f2f5ff!important;
+ box-shadow:inset 0 1px 0 #e1dbff1b,0 0 15px #866fd42d!important
+}
+body[data-sx-settings-theme="cosmic-nebula"] :is(button:not(.danger),.spartan-back-button,#settingsBack){
+ background:linear-gradient(155deg,#303653,#17203b)!important;
+ border:1px solid #7c87b8!important;color:#f2f5ff!important
+}
+body[data-sx-settings-theme="cosmic-nebula"] :is(input,select,textarea){
+ background:#111a35!important;border:1px solid #7180ad!important;color:#f3f6ff!important
+}
+body[data-active-theme="cosmic-nebula"] #profileSettingsOverlay{
+ background:#030719df!important;
+ -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)
+}
+body[data-active-theme="cosmic-nebula"] #profileSettingsOverlay .detail-panel{
+ background:linear-gradient(140deg,#282147,#171e39 62%,#090f27)!important;
+ border:1px solid #8986c4!important;
+ box-shadow:0 20px 55px #000a,0 0 17px #937be334!important
+}
+body[data-active-theme="cosmic-nebula"] #profileSettingsOverlay button:not(.danger){
+ background:linear-gradient(155deg,#303653,#17203b)!important;
+ border-color:#8187b8!important;color:#f4f6ff!important
+}

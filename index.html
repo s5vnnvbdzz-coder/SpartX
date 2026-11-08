@@ -3066,7 +3066,7 @@ function backfillActiveAscensionWeek2PausedBench(){
 }
 // Deadlift accessory: Romanian Deadlift is never linked to week completion.
 function romanianDeadliftFromAscensionImport(d){
- if(d?.source!=='AscensionX'||d.exercise!=='Deadlift')return null;
+ if(d?.source!=='AscensionX'||d.exercise!=='Deadlift'||d.cycleAccessories?.romanianDeadlift===false)return null;
  const api=window.SpartanXRomanianDeadlift;
  const plan=api?.fromTopSet({week:Number(d.week),topLoad:Number(d.sets?.[0]?.weight),
   cycleId:String(d.cycleId||''),tm:Number(d.tm)});
@@ -3092,6 +3092,7 @@ function backfillActiveAscensionWeek2RomanianDeadlift(){
  try{state=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null')}catch(_){return false}
  const cycle=state?.cycle;
  if(!cycle?.created||!Array.isArray(cycle.exercises)||!cycle.exercises.includes('Deadlift')||
+  cycle.accessories?.romanianDeadlift===false||
   Number(cycle.weeks?.Deadlift??cycle.currentWeek)!==2)return false;
  const plan=api.fromAscensionState(state,2);
  if(!plan)return false;

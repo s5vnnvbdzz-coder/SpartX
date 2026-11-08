@@ -212,3 +212,106 @@ body.sx-ascension-embedded[data-spartx-parent-theme] #ascSpartanImportBackdrop #
   font-size:19px!important;
  }
 }
+
+
+/* Cosmic Nebula parity throughout embedded AscensionX.
+   Scoped to SpartanX's parent-theme handshake; standalone stays unchanged. */
+body[data-spartx-parent-theme="cosmic-nebula"]{
+ --sx-parent-bg:#070919;--sx-parent-panel:#12162c;--sx-parent-panel2:#202644;
+ --sx-parent-line:#6367a0;--sx-parent-text:#f2f5ff;
+ --sx-parent-muted:#afb9d8;--sx-parent-accent:#8bdcff;
+ --bg:#070919;--panel:#12162c;--panel2:#202644;--panel3:#202644;
+ --line:#6367a0;--text:#f2f5ff;--muted:#afb9d8;
+ --red:#8bdcff;--red2:#8bdcff;--redDeep:#202644;
+ color-scheme:dark;
+ background:radial-gradient(ellipse at 90% 0%,#7957c453,transparent 46%),
+ radial-gradient(ellipse at 8% 73%,#1c66ab44,transparent 51%),
+ linear-gradient(160deg,#070919,#121a38 55%,#070919)!important;
+ background-attachment:fixed!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ header,nav[aria-label="Main navigation"],.settings-modal .modal-head
+ ){
+ background:linear-gradient(110deg,#090c25fa,#1b173bfb 55%,#0c1630fc)!important;
+ border-color:#827ccc!important;color:#f2f5ff!important;
+ box-shadow:0 0 13px #8772d02b!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .card,.hero,.stat,.week-card,.week-tile,.workout-panel,
+ .settings-modal,.cycle-confirm-dialog,.cycle-editor-dialog,
+ .asc-spartan-import-dialog,.set-popup,.number-pad-panel,
+ .cycle-details .card,.metrics-card,.workout-history-card,
+ .asc-recovery-dialog,.cycle-review-dialog
+ ){
+ background:radial-gradient(ellipse at 100% 0%,#8259d04b,transparent 49%),
+ linear-gradient(150deg,#262243,#151c38 57%,#0b122b)!important;
+ border:1px solid #7d83b6!important;color:#f2f5ff!important;
+ box-shadow:inset 0 1px 0 #e5dcff1b,0 0 14px #8c73cf29!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .cycle-confirm-backdrop,.settings-backdrop,
+ #cycleEditorBackdrop,#ascSpartanImportBackdrop,.set-popup-backdrop
+ ){
+ background:#030617df!important;
+ -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .cycle-editor-header,.cycle-editor-actions,.modal-head,.settings-modal .modal-head
+ ){
+ background:linear-gradient(145deg,#1e2243,#10172f)!important;
+ border-color:#777caf!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .eyebrow,.brand span,.progress>i,.asc-spartan-import-label,
+ .cycle-lift-row .current strong,.rpe-popup-value,.number-pad-display,
+ .cycle-editor-dialog .eyebrow
+ ){color:#9bdeff!important}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ button:not(.danger):not(.ghost),.secondary,.seg button,
+ .cycle-editor-actions button,.asc-spartan-import-actions button,
+ .settings-modal button:not(.danger)
+ ){
+ background:linear-gradient(155deg,#323751,#181f3a)!important;
+ color:#f0f5ff!important;border:1px solid #7c85b2!important;
+ box-shadow:inset 0 1px 0 #ddd8ff16,0 0 10px #8679d51b!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .seg button.active,.unit-choice button.active,.weektile.current,
+ nav[aria-label="Main navigation"] button.active
+ ){
+ color:#d3efff!important;background:linear-gradient(150deg,#333d6c,#17203c)!important;
+ border-color:#a7dfff!important;box-shadow:0 0 12px #84b8ff51!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ input,select,textarea,.set-control .set-value,.number-pad-keys button
+ ){
+ background:#111933!important;border:1px solid #6f80b3!important;
+ color:#f3f7ff!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ input[type="checkbox"],input[type="radio"],input[type="range"]
+ ){accent-color:#8bdcff!important}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .settable td,.settable th,.listitem,.asc-cycle-strength-editor,
+ .asc-spartan-import-preview,.cycle-lift-row,.cycle-editor-body
+ ){border-color:#6977a9!important;color:#eff3ff}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ #ascSpartanImportBackdrop .asc-spartan-import-dialog,
+ #cycleEditorBackdrop .cycle-editor-dialog
+ ){
+ background:linear-gradient(150deg,#272144,#181d38 60%,#0c122a)!important;
+ border:1px solid #8985c9!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] #ascSpartanImportConfirm{
+ background:linear-gradient(140deg,#315c87,#24405d)!important;
+ color:#f0f8ff!important;border-color:#a2e4ff!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(
+ .progress>i,.stat .progress-fill,.weekgrid .weektile.done
+ ){
+ background:linear-gradient(90deg,#47377f,#9e8bf4 60%,#8bdcff)!important
+}
+body[data-spartx-parent-theme="cosmic-nebula"] :is(button.danger,#confirmDeleteCycleButton){
+ background:linear-gradient(140deg,#593045,#2d1b34)!important;
+ color:#ffd6e1!important;border-color:#b47796!important
+}

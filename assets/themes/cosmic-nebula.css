@@ -340,3 +340,71 @@ body.sx-cosmic .detail-panel :is(h2,h3,strong){
 @media(prefers-reduced-motion:reduce){
  body.sx-cosmic :is(.sx-gamer-card,.detail-panel,.sx-session-menu){animation:none!important}
 }
+
+
+/* Remaining pages and nested settings surfaces. */
+body.sx-cosmic{
+ --sx-rank-frame-metal:grayscale(1) sepia(.75) saturate(2.5) hue-rotate(166deg) brightness(1.13) contrast(1.08);
+ --sx-rank-frame-halo:#9f9cff8c;
+ --sx-rank-frame-halo-size:6px;
+}
+body.sx-cosmic :is(
+ #profileSettingsOverlay .sx-settings-menu button,
+ #profileSettingsOverlay .sx-settings-subpage,
+ #profileSettingsOverlay .sx-settings-form,
+ #editProfileOverlay .sx-edit-profile-group,
+ #editProfileOverlay .sx-edit-field,
+ #profile .sx-profile-connections-list,
+ #profile .sx-profile-connection-row,
+ #workoutSaveReview .sx-review-name-panel,
+ #workoutSaveReview .sx-review-media-item,
+ #workoutSaveReview .sx-review-add-media,
+ #exerciseHistoryScreen .sx-exercise-extra-panel,
+ #exerciseHistoryScreen .sx-exercise-history-row,
+ #trainingStatsScreen .sx-stats-module,
+ .sx-stats-module,.sx-body-map-panel,.sx-overview-metric,
+ .muscle-breakdown-item,.sx-recent-exercise,.sx-stats-breakdown
+ ){
+ color:#f1f5ff!important;
+ background:linear-gradient(150deg,#252244e8,#121a36f2)!important;
+ border-color:#737fb5!important;
+ box-shadow:inset 0 1px 0 #efebff0f,0 0 12px #7a7fd51c!important;
+}
+body.sx-cosmic :is(
+ #profileSettingsOverlay .sx-settings-menu button,
+ #profile .sx-profile-connection-follow,
+ #exerciseHistoryScreen .sx-exercise-tabs button,
+ #exerciseHistoryScreen .history-metric-tabs button,
+ #workoutSaveReview .sx-review-add-media,
+ #workoutSaveReview .sx-review-remove-media
+ ){
+ color:#edf3ff!important;
+ background:linear-gradient(145deg,#343550,#161d36)!important;
+ border-color:#818bb8!important;
+}
+body.sx-cosmic :is(
+ #exerciseHistoryScreen .sx-exercise-tabs button.selected,
+ #exerciseHistoryScreen .history-metric-tabs button.selected,
+ #profile .sx-profile-connection-follow.is-following,
+ #profileSettingsOverlay .sx-settings-menu-icon
+ ){
+ border-color:#9cdbff!important;color:#9cdeff!important;
+ box-shadow:0 0 11px #8bdcff32!important;
+}
+body.sx-cosmic :is(
+ #workoutSaveReview .sx-review-metrics,
+ #exerciseHistoryScreen .sx-exercise-trend,
+ .sx-stats-week,.sx-week-strip,.sx-seven-day-header
+ ){
+ border-color:#7c80bb!important;
+ color:#dce8ff!important
+}
+body.sx-cosmic :is(
+ .sx-exercise-chart-line,.sx-ex-chart-line,.sx-history-line
+ ){stroke:#a5dfff!important}
+body.sx-cosmic :is(
+ .sx-exercise-chart-dot,.sx-ex-chart-dot
+ ){fill:#ac96f6!important}
+body.sx-cosmic :is(#profileSettingsOverlay,#editProfileOverlay) :is(.eyebrow,.sx-settings-menu-icon,.sx-edit-profile-section-heading){
+ color:#a1e2ff!important
+}

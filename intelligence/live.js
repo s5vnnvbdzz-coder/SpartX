@@ -43,7 +43,7 @@
    else if(rising)fatigue={kind:'caution',title:'Effort rising',detail:'RPE is higher in later sets. Different loads, rest periods and fatigue may all contribute.'};
    else if(high>=2||maxRpe>=9.5)fatigue={kind:'caution',title:'High perceived effort',detail:'One or more working sets were near maximal effort. Monitor form and recovery.'};
    else fatigue={kind:'positive',title:'Effort appears manageable',detail:'Logged RPE suggests controlled work so far. RPE is not a direct measure of recovery.'};
-   const step=E.MOVES[group.name]?.step||2.5;
+   const step=E.MOVES[group.name]?.step??2.5;
    let advice;
    if(group.programmed)advice={kind:'neutral',title:'Follow your cycle progression',detail:'This lift belongs to a programmed cycle. Use its prescribed progression rather than an automatic increase.'};
    else if(!work.length)advice={kind:'neutral',title:'Complete working sets first',detail:'There is not enough performance data to recommend a load change.'};

@@ -485,6 +485,7 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
 </main>
 <nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
+<script src="../assets/ascension/paused-bench.js?v=279"></script>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='ascensionx_strength_v1';
@@ -904,7 +905,15 @@ function renderAscSpartanImportPreview(){
  if(!prescription){panel.textContent='Select an active cycle exercise.';return}
  const warmup=prescription.warmupSets.map((x,i)=>'W'+(i+1)+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
  const main=prescription.sets.map((x,i)=>(i===0?'Main '+(i+1):'Set '+(i+1))+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
- panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>';
+ const paused=prescription.exercise==='Bench Press'
+  ?window.SpartanXPausedBench?.fromTopSet({week:prescription.week,
+    topLoad:prescription.sets[0]?.weight,tm:prescription.tm,cycleId:prescription.cycleId})
+  :null;
+ const accessory=paused?
+  '<span class="asc-spartan-import-label">NEXT EXERCISE · PAUSED BENCH PRESS</span>'+
+  '<div>'+paused.sets+' × '+paused.reps+' @ '+kg(paused.weight)+' · 2-second pause · RPE 6–7</div>'+
+  '<div class="tiny" style="margin-top:5px">Added as an independent SpartanX accessory after Bench Press. It does not affect AscensionX week completion.</div>':'';
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+accessory;
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;

@@ -1417,6 +1417,30 @@ body:has(#sxConfirm531StartOverlay:not([hidden])) #trackerNav{
 @media(max-width:370px){#sxHeaderActiveControls h1{font-size:14px}#sxHeaderActiveControls #activeSessionBack{padding:7px!important;font-size:10px!important}#sxHeaderActiveControls #endWorkout{padding:7px!important;font-size:10px!important}}
 </style>
 
+<style id="sx-start-menu-navigation-v265">
+/* Build 265: session chooser owns the screen; hide main SpartanX navigation.
+   Each popup uses the entire usable iPhone viewport and scrolls internally. */
+body:has(#sessionOptionsMenu:not([hidden])) #trackerNav,
+body:has(#sxQuick531Overlay:not([hidden])) #trackerNav,
+body:has(#sxQuick531CycleOverlay:not([hidden])) #trackerNav,
+body:has(#sxConfirm531StartOverlay:not([hidden])) #trackerNav{
+ display:none!important;
+}
+#sessionOptionsMenu,#sxQuick531Overlay,#sxQuick531CycleOverlay,#sxConfirm531StartOverlay{
+ inset:0!important;top:0!important;bottom:0!important;
+ height:100dvh!important;max-height:100dvh!important;
+ box-sizing:border-box!important;
+}
+#sessionOptionsMenu,#sxQuick531Overlay,#sxQuick531CycleOverlay{
+ padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))!important;
+}
+#sxConfirm531StartOverlay{
+ padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))!important;
+}
+#sxSessionOptionsDialog,#sxQuick531Dialog,#sxQuick531CycleDialog,#sxConfirm531StartDialog{
+ max-height:100%!important;
+}
+</style>
 <style id="sx-compact-session-summary">
 /* Compact Active Session metrics. Diagram remains interactive, without captions. */
 #activeWorkout .session-summary-bar{
@@ -2774,7 +2798,7 @@ function switchScreen(id,opts={}){
  const current=document.querySelector('.screen.active')?.id||null;
  if(current===id)return;
  // The connected-page carousel calls switchScreen again after finishing its gesture.
- if(!opts.back&&window.spartanxCarouselNavigate?.(id))return;
+ if(!opts.back&&!opts.instant&&window.spartanxCarouselNavigate?.(id))return;
  if(window.spartanxClearDrag)window.spartanxClearDrag();
  if(current){
   sxRememberPagePosition(current);
@@ -2832,7 +2856,7 @@ if(trackerNav){
   e.preventDefault();
   const target=button.dataset.screen;
   if(!document.getElementById(target))return;
-  switchScreen(target);
+  switchScreen(target,{instant:true});
  },{passive:false});
 }
 function defaultWorkoutName(date=new Date()){const hour=date.getHours();if(hour>=5&&hour<12)return 'Morning Workout';if(hour>=12&&hour<17)return 'Afternoon Workout';return 'Evening Workout';}

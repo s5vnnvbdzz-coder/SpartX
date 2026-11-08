@@ -223,6 +223,18 @@ body.sx-spartan-quick-import #ascSpartanImportBackdrop .asc-spartan-import-dialo
 .asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
 
+/* Embedded AscensionX is hosted in a viewport-filling SpartanX iframe.
+   The parent already handles the iPhone home-indicator inset. Do not reserve
+   the full safe-area a second time below the embedded bottom navigation. */
+body.sx-ascension-embedded:not(.sx-spartan-quick-import) > nav[aria-label="Main navigation"]{
+ bottom:0!important;
+ padding-bottom:max(7px,calc(env(safe-area-inset-bottom,0px) - 16px))!important;
+ transform:none!important;
+}
+body.sx-ascension-embedded:not(.sx-spartan-quick-import){
+ padding-bottom:calc(68px + max(7px,env(safe-area-inset-bottom,0px) - 16px))!important;
+}
+
 /* Theme bridge: additional SpartanX palettes for integrated AscensionX */
 body[data-theme="amethyst"]{--bg:#0b0911;--panel:#17121f;--panel2:#292037;--line:#4b385f;--red:#9162c9;--red2:#b58ae9;--redDeep:#43275f}
 body[data-theme="black-yellow"]{--bg:#050505;--panel:#101010;--panel2:#1c1c1a;--line:#45432c;--red:#c9a51c;--red2:#ffe044;--redDeep:#685411}

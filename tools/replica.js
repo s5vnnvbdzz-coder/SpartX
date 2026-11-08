@@ -92,15 +92,22 @@ ascensionStyle.textContent=[
 ].join('\n');
 ascensionStyle.textContent+='\n'+"\n/* iPhone/PWA viewport fit for Quick Start from a workout.\n   Safe-area padding must be INSIDE the 100dvh viewport, not added onto it. */\n#ascensionXOverlay,#ascensionXOverlay *,#ascensionXOverlay *::before,#ascensionXOverlay *::after{box-sizing:border-box}\n#ascensionXOverlay{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important}\n#ascensionXOverlay.sx-ascension-quick{\n  padding:calc(8px + env(safe-area-inset-top,0px))\n          calc(8px + env(safe-area-inset-right,0px))\n          calc(8px + env(safe-area-inset-bottom,0px))\n          calc(8px + env(safe-area-inset-left,0px))!important\n}\n#ascensionXOverlay.sx-ascension-quick .sx-ascension-window{\n  flex:0 1 auto!important;\n  width:min(100%,660px)!important;\n  height:min(100%,790px)!important;\n  max-height:100%!important;\n  min-width:0!important;\n  min-height:0!important;\n  overflow:hidden!important;\n}\n#ascensionXOverlay.sx-ascension-quick .ascensionx-embedded-toolbar{\n  flex:0 0 auto!important;min-height:48px!important;padding:7px 10px!important\n}\n#ascensionXOverlay #ascensionXEmbedFrame{\n  display:block!important;flex:1 1 auto!important;\n  width:100%!important;height:0!important;min-height:0!important;\n  max-height:100%!important;overflow:auto!important;touch-action:pan-y;\n}\n@media(max-height:560px){\n #ascensionXOverlay.sx-ascension-quick{padding-top:calc(4px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px))!important}\n #ascensionXOverlay.sx-ascension-quick .ascensionx-embedded-toolbar{min-height:42px!important;padding:4px 8px!important}\n}\n";
 ascensionStyle.textContent+='\n'+"\n/* Build 265: one header only. AscensionX's own header and navigation own the\n   entire embedded viewport; remove the duplicate SpartanX Tools toolbar. */\n#ascensionXOverlay .ascensionx-embedded-toolbar{display:none!important}\n#ascensionXOverlay,\n#ascensionXOverlay.sx-ascension-quick{\n inset:0!important;width:100vw!important;height:100dvh!important;\n max-width:100vw!important;max-height:100dvh!important;\n padding:0!important;margin:0!important;\n align-items:stretch!important;justify-content:stretch!important;\n background:var(--bg,#08090c)!important;backdrop-filter:none!important\n}\n#ascensionXOverlay .sx-ascension-window,\n#ascensionXOverlay.sx-ascension-quick .sx-ascension-window{\n flex:1 1 auto!important;display:flex!important;flex-direction:column!important;\n width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;\n min-width:0!important;min-height:0!important;overflow:hidden!important;\n padding:0!important;margin:0!important;\n border:0!important;border-radius:0!important;box-shadow:none!important\n}\n#ascensionXOverlay #ascensionXEmbedFrame{\n flex:1 1 auto!important;width:100%!important;height:0!important;\n min-height:0!important;max-height:100%!important;overflow:hidden!important\n}\n";
+/* Build 282: use both viewport edges, not visualViewport.height.
+   On iOS Home Screen apps visualViewport may stop above the home-indicator
+   region, which used to shorten the iframe and leave a blank strip below
+   the AscensionX navigation. The fixed inset stretches as the screen changes. */
 ascensionStyle.textContent+=`
 #ascensionXOverlay,#ascensionXOverlay.sx-ascension-quick{
- top:var(--sx-asc-viewport-top,0px)!important;bottom:auto!important;
- height:var(--sx-asc-viewport-height,100dvh)!important;
- max-height:var(--sx-asc-viewport-height,100dvh)!important
+ inset:0!important;
+ top:0!important;bottom:0!important;
+ left:0!important;right:0!important;
+ height:auto!important;max-height:none!important;
+ min-height:0!important
 }
 #ascensionXOverlay .sx-ascension-window,
 #ascensionXOverlay.sx-ascension-quick .sx-ascension-window{
- height:100%!important;max-height:100%!important
+ height:100%!important;max-height:100%!important;
+ min-height:0!important
 }`;
 shadow.appendChild(ascensionStyle);
 ascensionPortal.appendChild(ascensionStyle.cloneNode(true));
@@ -112,23 +119,9 @@ document.head.appendChild(ascensionRootStyle);
 const ascensionEmbedFrame=ascensionPortal.getElementById('ascensionXEmbedFrame');
 const ascensionOpenButton=$('openAscensionX');
 const ascensionCloseButton=ascensionPortal.getElementById('closeAscensionX');
-function syncAscensionViewport(){
- const viewport=window.visualViewport;
- const visibleHeight=viewport?.height||window.innerHeight||document.documentElement.clientHeight;
- const offsetTop=Math.max(0,Number(viewport?.offsetTop)||0);
- // A positive visualViewport offset used to push the *entire* embedded
- // dashboard down on iOS. The portal is fixed to the top of the layout
- // viewport, while still sizing to the visible area as browser chrome changes.
- const fittedHeight=Math.max(0,visibleHeight+offsetTop);
- if(Number.isFinite(fittedHeight)&&fittedHeight>0)
-  ascensionPortalHost.style.setProperty('--sx-asc-viewport-height',Math.round(fittedHeight)+'px');
- ascensionPortalHost.style.setProperty('--sx-asc-viewport-top','0px');
-}
-syncAscensionViewport();
-window.visualViewport?.addEventListener('resize',syncAscensionViewport,{passive:true});
-window.visualViewport?.addEventListener('scroll',syncAscensionViewport,{passive:true});
-window.addEventListener('resize',syncAscensionViewport,{passive:true});
-window.addEventListener('orientationchange',syncAscensionViewport,{passive:true});
+// The AscensionX overlay now tracks the layout viewport with fixed insets.
+// No visualViewport height/scroll listeners: iOS reports a shorter visible
+// viewport when browser chrome or the home indicator is present.
 
 function syncEmbeddedAscensionTheme(){
  let theme=document.body.dataset.activeTheme||'dark';
@@ -193,7 +186,6 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
 };
 
 function openEmbeddedAscensionX(){
- syncAscensionViewport();
  if(ascensionOverlay.classList.contains('open'))return;
  if(shadow.querySelector('main').classList.contains('reorder-mode'))return;
  ascensionReturnScroll=window.scrollY||document.documentElement.scrollTop||0;

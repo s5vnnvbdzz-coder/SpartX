@@ -795,8 +795,9 @@ window.addEventListener('message',e=>{
  }
 
  if(e.data?.type==='spartx:ascensionQuickExit'&&ascensionEmbeddedBySpartanX){
-  document.body.classList.remove('sx-spartan-quick-import');
+  document.body.classList.remove('sx-spartan-quick-import','sx-ascension-view-cycle');
   closeAscSpartanImport();
+  closeCycleEditor();
   return;
  }
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){

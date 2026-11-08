@@ -206,7 +206,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=268';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=271';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});
@@ -300,7 +300,7 @@ window.addEventListener('message',e=>{
 // Preload the original app to prevent a blank iframe on first launch.
 window.addEventListener('load',()=>{
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=268';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=271';
 },{once:true});
 
 // The child stays mounted after leaving its overlay. Notify it immediately

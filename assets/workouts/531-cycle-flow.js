@@ -94,7 +94,7 @@ const card=document.createElement('section');card.id='sx531WorkoutCard';card.cla
 const workout=$('workout'),start=workout?.querySelector('.start-card');
 if(start)start.before(card);
 let cycleId=null,selectedLift=null,selectedCardId=null,returnMenu=false,oldOverflow=null,bypass=false;
-function chosenCycle(){return read().find(c=>c.id===cycleId)||read()[0]}
+function chosenCycle(){const all=read();return all.find(c=>String(c.id)===String(cycleId))||all[0]}
 function renderPreview(){
  const all=read(),c=chosenCycle();
  if(!c){closePreview(false);return}
@@ -139,7 +139,7 @@ function renderPreview(){
 }
 function openPreview(fromMenu=false,requestedId=null){
  const all=read();if(!all.length)return false;
- returnMenu=fromMenu;const c=all.find(x=>x.id===requestedId)||all[0];cycleId=c.id;selectedLift=selectDefault(c)?.lift||null;
+ returnMenu=fromMenu;const c=all.find(x=>String(x.id)===String(requestedId))||all[0];cycleId=c.id;selectedLift=selectDefault(c)?.lift||null;
  oldOverflow={body:document.body.style.overflow,html:document.documentElement.style.overflow,scroll:window.scrollY||0};
  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
  renderPreview();overlay.hidden=false;$('sx531Cancel').focus({preventScroll:true});

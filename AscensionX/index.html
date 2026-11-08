@@ -758,26 +758,50 @@ function saveCycleSelection(){
  const chosen=[...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].map(x=>x.value);
  if(!chosen.length){toast('Select at least one exercise');return}
  const existing=!!state.cycle.created;
- if(existing&&chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x))){toast('Cycle selection unchanged · 1RM and TM changes already saved');closeCycleEditor();return}
+ const romanianDeadlift=!!$('cycleRomanianDeadliftEnabled').checked;
+ const sameLifts=chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x));
+ const accessoryChanged=romanianDeadlift!==cycleRomanianDeadliftEnabled();
+ if(existing&&sameLifts){
+  if(!accessoryChanged){
+   toast('Cycle selection unchanged · 1RM and TM changes already saved');
+   closeCycleEditor();return;
+  }
+  // Toggling an accessory must not restart the active lift's week.
+  const previous=state.cycle;
+  state.cycle={...previous,accessories:{...(previous.accessories||{}),romanianDeadlift}};
+  if(!persist(false)){state.cycle=previous;toast('Could not save the accessory setting');return}
+  renderWorkout();renderCycleLoads();renderCycle();renderDashboard();
+  closeCycleEditor();
+  toast(romanianDeadlift?'Romanian Deadlift added to Deadlift weeks 1–5':'Romanian Deadlift removed from future Deadlift sessions');
+  return;
+ }
  const added=chosen.filter(x=>!selectedLifts().includes(x));
  const removed=selectedLifts().filter(x=>!chosen.includes(x));
  const prompt=existing
   ? 'Update your active cycle?'+(added.length?'\n\nNew exercises start at Week 1.':'')+(removed.length?'\n\nRemoved exercises leave the active cycle, but their workout history will be kept.':'')
   : 'Create a six-week cycle for '+chosen.join(', ')+'?';
- pendingCycleSelection={chosen,existing,prompt};
+ pendingCycleSelection={chosen,existing,prompt,romanianDeadlift};
  $('cycleConfirmTitle').textContent=existing?'Save cycle changes?':'Start your six-week cycle?';
  $('cycleConfirmAction').textContent=existing?'Save':'Start';
  $('cycleConfirmSummary').textContent=prompt;
  $('cycleConfirmBackdrop').classList.add('open');
- return;
 }
 let pendingCycleSelection=null;
 function discardCycleConfirmation(){pendingCycleSelection=null;$('cycleConfirmBackdrop').classList.remove('open')}
-function confirmCycleStart(){if(!pendingCycleSelection)return;const {chosen,existing}=pendingCycleSelection;discardCycleConfirmation();applyCycleSelection(chosen,existing);closeCycleEditor();if(!existing)showScreen('workout')}
-function applyCycleSelection(chosen,existing){
+function confirmCycleStart(){
+ if(!pendingCycleSelection)return;
+ const {chosen,existing,romanianDeadlift}=pendingCycleSelection;
+ discardCycleConfirmation();
+ applyCycleSelection(chosen,existing,romanianDeadlift);
+ closeCycleEditor();
+ if(!existing)showScreen('workout');
+}
+function applyCycleSelection(chosen,existing,romanianDeadlift=cycleRomanianDeadliftEnabled()){
  const weeks={...(state.cycle.weeks||{})};
  chosen.forEach(x=>{if(!weeks[x])weeks[x]=1});
- state.cycle={...state.cycle,created:state.cycle.created||new Date().toISOString(),currentWeek:1,exercises:chosen,weeks};
+ state.cycle={...state.cycle,created:state.cycle.created||new Date().toISOString(),
+  currentWeek:1,exercises:chosen,weeks,
+  accessories:{...(state.cycle.accessories||{}),romanianDeadlift}};
  if(state.draft&&!chosen.includes(state.draft.lift))state.draft=null;
  const current=$('liftSelect').value;
  const next=chosen.includes(current)?current:chosen[0];
@@ -979,7 +1003,7 @@ function buildAscSpartanWorkout(lift){
  // Carry the human-readable cycle label across the app boundary.
  const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
  const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
- return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
+ return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,cycleAccessories:{romanianDeadlift:cycleRomanianDeadliftEnabled()}};
 }
 function renderAscSpartanImportPreview(){
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
@@ -991,7 +1015,7 @@ function renderAscSpartanImportPreview(){
   ?window.SpartanXPausedBench?.fromTopSet({week:prescription.week,
     topLoad:prescription.sets[0]?.weight,tm:prescription.tm,cycleId:prescription.cycleId})
   :null;
- const rdl=prescription.exercise==='Deadlift'
+ const rdl=prescription.exercise==='Deadlift'&&prescription.cycleAccessories?.romanianDeadlift!==false
   ?window.SpartanXRomanianDeadlift?.fromTopSet({week:prescription.week,
     topLoad:prescription.sets[0]?.weight,tm:prescription.tm,cycleId:prescription.cycleId})
   :null;
@@ -1287,7 +1311,21 @@ function renderCycle(){
 }
 function renderCycleLoads(){
  const lift=$('cycleLift').value;
- $('cycleLoads').innerHTML=`<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr></thead><tbody>${PLAN.map(p=>{const x=prescribed(lift,p.week);return `<tr><td>W${p.week}</td><td>${kg(tm(lift))}</td><td>${kg(x.topLoad)} · ${p.deload?'3×5':`1×${p.topReps}`}</td><td>${x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps}</td></tr>`}).join('')}</tbody></table></div>`;
+ const isDeadlift=lift==='Deadlift';
+ const enabled=isDeadlift&&selectedLifts().includes('Deadlift')&&cycleRomanianDeadliftEnabled();
+ const accessoryColumn=isDeadlift?'<th>After deadlift</th>':'';
+ const rows=PLAN.map(p=>{
+  const x=prescribed(lift,p.week);
+  const a=enabled?cycleRomanianDeadliftPlan(p.week):null;
+  const accessory=isDeadlift?'<td>'+
+    (enabled?(a?a.sets+'×'+a.reps+' @ '+kg(a.weight):'— · deload'):'Not enabled')+'</td>':'';
+  return '<tr><td>W'+p.week+'</td><td>'+kg(tm(lift))+'</td><td>'+
+    kg(x.topLoad)+' · '+(p.deload?'3×5':'1×'+p.topReps)+'</td><td>'+
+    (x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps)+
+    '</td>'+accessory+'</tr>';
+ }).join('');
+ const note=isDeadlift?'<p class="tiny" style="margin:10px 0 0">Romanian Deadlift is optional assistance, calculated from each week’s main top deadlift set. It does not affect week completion or strength trends.</p>':'';
+ $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th>'+accessoryColumn+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+note;
 }
 function renderProgress(){
  const sets=state.logs.flatMap(l=>l.sets),volume=sets.reduce((a,s)=>a+s.weight*s.reps,0),bestW=Math.max(0,...sets.map(s=>s.weight)),bestE=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));

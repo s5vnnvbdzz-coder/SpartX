@@ -187,10 +187,17 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 #cycleStrengthFeedback[data-error="true"]{color:#ff9898}
 @media(max-width:375px){.asc-cycle-strength-editor{padding:12px 9px}.asc-cycle-strength-editor .fields{gap:7px}.asc-cycle-strength-editor select,.asc-cycle-strength-editor input{padding:11px 7px}.asc-cycle-tm-result{padding:10px 8px;font-size:14px}}
 
-/* The embedded workout-options popup owns its header and Back navigation. */
-body.sx-spartan-quick-import > header,
+/* SpartanX now hides its wrapper, not the original AscensionX header. */
 body.sx-spartan-quick-import > nav[aria-label="Main navigation"]{display:none!important}
 body.sx-spartan-quick-import{padding-bottom:0!important}
+#ascEmbeddedClose[hidden]{display:none!important}
+body:not(.sx-ascension-embedded) #ascEmbeddedClose{display:none!important}
+body.sx-ascension-embedded #ascStandaloneSettings{display:none!important}
+body.sx-ascension-embedded #ascEmbeddedClose:not([hidden]){display:grid!important}
+body.sx-ascension-embedded.sx-spartan-quick-import #ascSpartanImportBackdrop{
+ top:var(--sx-asc-native-header-height,calc(65px + env(safe-area-inset-top,0px)))!important;
+ bottom:0!important;height:auto!important;
+}
 body.sx-spartan-quick-import main{padding-top:10px}
 body.sx-spartan-quick-import .rest-timer{bottom:12px}
 
@@ -229,7 +236,7 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
 <body>
 <header>
  <button class="ghost" style="text-align:left;padding:0;background:none;box-shadow:none" onclick="showScreen('home')" aria-label="Open dashboard"><div class="brand">ASCENSION<span>X</span></div><div class="sub">THE STRENGTH METHOD · BUILD BEYOND</div></button>
- <div class="row" style="gap:9px"><button class="iconbtn" onclick="openSettings()" aria-label="Settings" title="Settings">⚙</button></div>
+ <div class="row" style="gap:9px"><button class="iconbtn" id="ascStandaloneSettings" onclick="openSettings()" aria-label="Settings" title="Settings">⚙</button><button type="button" class="iconbtn" id="ascEmbeddedClose" onclick="closeEmbeddedAscensionFromHeader()" aria-label="Close AscensionX and return to SpartanX" title="Back to SpartanX" hidden>✕</button></div>
 </header>
 <div id="setPopupBackdrop" class="set-popup-backdrop" onclick="if(event.target===this)closeSetPopup()"><div class="set-popup" role="dialog" aria-modal="true" aria-labelledby="setPopupTitle"><div class="row between"><h2 id="setPopupTitle" style="margin:0">Set value</h2><button class="ghost" onclick="closeSetPopup()" aria-label="Close">✕</button></div><div id="setPopupContent"></div><div class="set-popup-actions"><button class="secondary" onclick="closeSetPopup()">Cancel</button><button onclick="applySetPopup()">Apply</button></div></div></div>
 <div id="cycleConfirmBackdrop" class="cycle-confirm-backdrop" role="presentation"><section class="cycle-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleConfirmTitle"><div class="eyebrow">SIX-WEEK PROGRAMME</div><h2 id="cycleConfirmTitle" style="margin:9px 0">Start your cycle?</h2><p class="tiny" id="cycleConfirmSummary"></p><div class="cycle-confirm-actions"><button class="secondary" onclick="discardCycleConfirmation()">Discard</button><button id="cycleConfirmAction" onclick="confirmCycleStart()">Start</button></div></section></div>
@@ -640,6 +647,16 @@ function setupProfileCollapse(){
 function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max['Back Squat'])).toFixed(1);$('maxBench').value=Number(toDisplay(state.profile.max['Bench Press'])).toFixed(1);$('maxDeadlift').value=Number(toDisplay(state.profile.max['Deadlift'])).toFixed(1);$('maxOHP').value=Number(toDisplay(state.profile.max['Overhead Press'])).toFixed(1);$('profileTm').value=state.profile.tmPct;$('rounding').value=state.profile.rounding;document.querySelectorAll('#profile label').forEach(l=>{if(/1RM/.test(l.textContent))l.textContent=l.textContent.replace(/\(kg\)/,'('+unit()+')')});[...$('rounding').options].forEach(o=>o.textContent=Number(toDisplay(+o.value)).toLocaleString(undefined,{maximumFractionDigits:2})+' '+unit());}
 // Standalone mode is unchanged; SpartanX sends a verified embedded handshake.
 let ascensionEmbeddedBySpartanX=false,ascSpartanImportPending=null;
+function syncAscensionNativeHeaderHeight(){
+ if(!ascensionEmbeddedBySpartanX)return;
+ const height=document.querySelector('body > header')?.getBoundingClientRect().height||0;
+ if(height>0)document.documentElement.style.setProperty('--sx-asc-native-header-height',Math.ceil(height)+'px');
+}
+window.addEventListener('resize',syncAscensionNativeHeaderHeight,{passive:true});
+function closeEmbeddedAscensionFromHeader(){
+ if(!ascensionEmbeddedBySpartanX)return;
+ try{window.parent.postMessage({type:'spartx:ascensionRequestClose'},location.origin)}catch(e){}
+}
 const ASC_WARMUP_PCTS=[40,55,65,75],ASC_WARMUP_REPS=[5,3,2,1];
 // Keep every suggested warm-up BELOW the prescribed main set, including deload.
 function ascWarmupPlan(lift,week){
@@ -651,6 +668,10 @@ window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
  if(e.data?.type==='spartx:ascensionEmbedReady'){
   ascensionEmbeddedBySpartanX=true;
+  document.body.classList.add('sx-ascension-embedded');
+  const closeButton=$('ascEmbeddedClose');
+  if(closeButton)closeButton.hidden=false;
+  syncAscensionNativeHeaderHeight();
   processAscensionSpartanCompletionQueue();
   renderDashboard();
   // Ask the verified host to resend its theme after iframe initialization.

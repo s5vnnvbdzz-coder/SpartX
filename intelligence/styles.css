@@ -337,3 +337,25 @@ tr:last-child td{border:0}
  .sx-live-advice{grid-template-columns:1fr}
  .sx-live-set-row{gap:4px;padding:7px 4px;font-size:10px;grid-template-columns:minmax(31px,.55fr) minmax(0,1.75fr) minmax(43px,.7fr) minmax(52px,.8fr)}
 }
+
+
+/* Mobile Intelligence header safe-area fix.
+   In iPhone Home Screen mode the status bar overlays the viewport. Keep the
+   header background behind it, but move all controls below the status icons. */
+@media(max-width:760px){
+ .topbar{
+  --sx-intelligence-top-inset:env(safe-area-inset-top,0px);
+  box-sizing:border-box;
+  height:calc(61px + var(--sx-intelligence-top-inset));
+  min-height:calc(61px + var(--sx-intelligence-top-inset));
+  padding:var(--sx-intelligence-top-inset) 15px 0;
+  top:0;
+ }
+}
+@media(max-width:760px) and (display-mode:standalone){
+ .topbar{
+  /* iOS PWA fallback for devices that report a zero safe-area inset
+     despite running beneath their translucent status bar. */
+  --sx-intelligence-top-inset:max(48px, env(safe-area-inset-top,0px));
+ }
+}

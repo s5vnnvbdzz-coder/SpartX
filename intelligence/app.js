@@ -155,13 +155,15 @@
     const hasLive=['live','waiting'].includes(state.live?.status);
     $('modePill').textContent=hasLive?'● LIVE SESSION':connected?'● CONNECTED':'● '+(status==='empty'?'NO WORKOUTS':'NOT CONNECTED');
     const line=connected
-      ?'<strong>Connected to SpartanX · '+result.sessions.length+' saved workouts.</strong> The Live Session panel separately reads completed sets from an active workout. Historical strength charts only use saved sessions; your records are not changed.'
+      ?'<strong>Connected to SpartanX · '+result.sessions.length+' saved workouts.</strong> The Live Session panel separately reads completed sets from an active workout. Historical charts only use saved sessions; your records are not changed.'
+      :hasLive
+      ?'<strong>Active SpartanX workout connected.</strong> Live completed sets are available below. You have no saved workout history in this browser yet, so comparisons remain unavailable until Finish &amp; Save.'
       :'<strong>SpartanX history not available here.</strong> '+escapeHtml(result?.reason||'Unable to read this device’s workouts.')+' Open Intelligence using the button on SpartanX Home on the same device, or import a backup. iPhone Safari and Home Screen apps can use separate storage.';
     $('dataBanner').innerHTML='<span class="banner-symbol">ⓘ</span><span>'+line+' <a class="sx-back-link" href="../">Back to SpartanX</a></span>';
     const detail=$('connectionDetails');
     if(detail)detail.textContent=connected
-      ?'Connected to '+result.sessions.length+' valid completed workouts on this device (read-only).'
-      :result?.reason||'Unable to find SpartanX workout history in this browser.';
+      ?'Connected to '+result.sessions.length+' valid completed workouts (read-only)'+(hasLive?' and an active draft.':'.')
+      :hasLive?'Active unsaved workout connected; no prior saved sessions found.':result?.reason||'Unable to find SpartanX workout history in this browser.';
     renderAll();
     if(!silent)toast(hasLive?'Live workout connected':connected?'SpartanX workouts loaded: '+result.sessions.length:'No local workout history found.');
     return connected||hasLive;

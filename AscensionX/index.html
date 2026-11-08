@@ -138,6 +138,11 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 }
 
 .cycle-details[hidden]{display:none!important}.cycle-details{margin-top:12px}.cycle-details>.card{margin-top:12px}.cycle-details{padding-top:14px}
+/* View Cycle from SpartanX opens the dashboard with the redundant
+   Exercise-Specific Cycle hero hidden. Other entry points are unchanged. */
+body.sx-ascension-view-cycle #homeHero{display:none!important}
+.asc-cycle-progress-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.asc-cycle-progress-actions button{flex:1 1 120px;min-width:0}
 #homeWeeks.weekgrid{display:block}.cycle-lift-row{display:block;width:100%;margin-top:14px}.cycle-lift-row .weekgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%}.cycle-lift-name{font-size:13px;font-weight:800;margin-bottom:7px}.cycle-lift-row .weektile{cursor:default;user-select:none;padding:10px 3px}.cycle-lift-row .weekgrid{gap:5px}.home-hero-actions{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap}.home-hero-actions button{flex:1;min-width:120px}
 
 /* AscensionX themes: aligned with SpartanX dark, red, bronze, gold and blue palettes */
@@ -384,7 +389,10 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
   <div class="row between"><div><h2 style="margin:0">Cycle progress</h2><div class="tiny" id="cycleProgressText">Create a cycle to begin.</div></div><span class="pill red" id="cycleProgressPct">0%</span></div>
   <div class="progress" style="margin-top:12px"><i id="cycleProgressBar" style="width:0%"></i></div>
   <div class="weekgrid" id="homeWeeks" style="margin-top:14px"></div>
-  <button class="secondary small" style="margin-top:14px" id="cycleExpandButton" aria-expanded="false" aria-controls="cycleDetails" onclick="toggleCycleDetails()">View full cycle</button>
+  <div class="asc-cycle-progress-actions">
+   <button class="secondary small" id="cycleExpandButton" aria-expanded="false" aria-controls="cycleDetails" onclick="toggleCycleDetails()">View full cycle</button>
+   <button type="button" class="secondary small" id="ascEditProgrammeCycle" onclick="openCycleEditor()">Edit programme</button>
+  </div>
    <button type="button" class="secondary small asc-recovery-trigger" id="ascRecoveryOpen" onclick="openAscWorkoutRecovery()" hidden>RECOVER PAST SPARTANX WORKOUTS</button>
  <div id="cycleDetails" class="cycle-details" hidden>
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
@@ -793,6 +801,7 @@ window.addEventListener('message',e=>{
  }
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
+  document.body.classList.remove('sx-ascension-view-cycle');
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
    if(requestedLift){
@@ -804,8 +813,11 @@ window.addEventListener('message',e=>{
    // User confirms the exact lift and sets before importing; no duplicate sessions.
    continueAscensionTraining();
   }else{
-   // Open the actual cycle planner/details on Home, not merely the dashboard.
-   showScreen('cycle');
+   // VIEW CYCLE opens the AscensionX dashboard, never the programme editor.
+   // On the Workout-page View Cycle entry hide only the oversized hero card.
+   document.body.classList.toggle('sx-ascension-view-cycle',e.data.quickImport!==true);
+   closeCycleEditor();
+   showScreen('home');
    renderDashboard();
   }
   resetEmbeddedAscensionOpening();

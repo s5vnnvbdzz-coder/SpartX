@@ -322,16 +322,16 @@ body.sx-spartan-quick-import #ascSpartanImportBackdrop .asc-spartan-import-dialo
 .asc-recovery-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .asc-recovery-actions button{min-height:47px;padding:10px 7px;font-size:11px}
 
-/* Embedded AscensionX is hosted in a viewport-filling SpartanX iframe.
-   The parent already handles the iPhone home-indicator inset. Do not reserve
-   the full safe-area a second time below the embedded bottom navigation. */
+/* Build 282: The parent iframe now truly reaches the viewport's bottom.
+   Anchor the nav background to that bottom edge, and keep its buttons
+   above the iPhone home indicator inside the SAME footer surface. */
 body.sx-ascension-embedded:not(.sx-spartan-quick-import) > nav[aria-label="Main navigation"]{
  position:fixed!important;inset:auto 0 0!important;
- margin:0!important;padding:7px 7px max(7px,calc(env(safe-area-inset-bottom,0px) * .45))!important;
+ margin:0!important;padding:7px 7px calc(7px + env(safe-area-inset-bottom,0px))!important;
  transform:none!important;box-sizing:border-box!important;
 }
 body.sx-ascension-embedded:not(.sx-spartan-quick-import){
- padding-bottom:calc(70px + max(7px,calc(env(safe-area-inset-bottom,0px) * .45)))!important;
+ padding-bottom:calc(77px + env(safe-area-inset-bottom,0px))!important;
 }
 
 /* Theme bridge: additional SpartanX palettes for integrated AscensionX */

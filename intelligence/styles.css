@@ -273,3 +273,67 @@ tr:last-child td{border:0}
  .bottom-nav button small{font-size:7px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* SpartanX Intelligence Live Session — checked sets only, never saved history. */
+.sx-live-section[hidden]{display:none!important}
+.sx-live-section{
+ margin:16px 0 25px;padding:19px 20px 17px;
+ background:radial-gradient(ellipse at 100% 0%,#77603629,transparent 55%),
+ linear-gradient(145deg,#1b1b20,#101114 70%);
+ border:1px solid #8d793d;border-radius:17px;
+ box-shadow:inset 0 1px 0 #fff3,0 0 22px #bda03b13
+}
+.sx-live-top{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.sx-live-top h2{margin:6px 0 4px;font-size:21px;color:var(--txt);line-height:1.2}
+.sx-live-top p{margin:0;font-size:12px;color:var(--muted)}
+.sx-live-kicker{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1.3px;font-weight:900;color:var(--gold)}
+.sx-live-beacon{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px #f4cd376b;animation:sxLiveBeacon 2s ease-in-out infinite}
+@keyframes sxLiveBeacon{0%,100%{opacity:.5;transform:scale(.84)}50%{opacity:1;transform:scale(1.15)}}
+.sx-live-provisional{flex:none;max-width:135px;padding:6px 8px;text-align:center;border:1px solid #79672f;background:#3129167a;color:#f7df8a;font-size:9px;font-weight:800;letter-spacing:.8px;border-radius:20px}
+.sx-live-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:17px}
+.sx-live-metric{padding:12px 12px 11px;background:#14171c;border:1px solid #35363c;border-radius:11px;min-width:0}
+.sx-live-metric small{display:block;font-size:10px;color:#aab0bd;letter-spacing:.35px;line-height:1.4}
+.sx-live-metric strong{display:block;margin-top:5px;color:#f6f8ff;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2;overflow-wrap:anywhere}
+.sx-live-metric span{display:block;margin-top:6px;font-size:10px;color:#a3a8b0;line-height:1.4}
+.sx-live-workout-details{margin-top:17px;border:1px solid #3b3b45;border-radius:12px;padding:16px;background:#131519e8}
+.sx-live-lift-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:12px}
+.sx-live-lift-heading h3{margin:5px 0 0;font-size:18px}
+.sx-live-select-label{display:flex;flex-direction:column;gap:5px;min-width:170px;max-width:45%;font-size:9px;font-weight:900;color:#999ea8;letter-spacing:.7px}
+.sx-live-select-label select{width:100%;min-width:0;padding:10px 12px;background:#1d2026;border:1px solid #6b5a34;border-radius:9px;color:#f9f5e8;font-size:12px}
+.sx-live-compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sx-live-mini{min-width:0;padding:10px;border-radius:9px;border:1px solid #343741;background:#1a1c21}
+.sx-live-mini small{display:block;color:#9ca2ac;font-size:9px;line-height:1.3}
+.sx-live-mini strong{display:block;margin-top:5px;color:#f3f5fc;font-size:16px;overflow-wrap:anywhere}
+.sx-live-mini em{display:block;margin-top:3px;font-size:10px;font-style:normal;color:#9fa4b0}
+.sx-live-mini em.positive{color:var(--good)}
+.sx-live-mini em.negative{color:var(--warn)}
+.sx-live-set-list{margin-top:14px}
+.sx-live-set-list>strong{display:block;font-size:11px;letter-spacing:1px;color:#d6d8e2;margin-bottom:8px}
+.sx-live-set-row{display:grid;grid-template-columns:minmax(38px,.6fr) minmax(0,2fr) minmax(54px,.8fr) minmax(65px,1fr);gap:8px;align-items:center;padding:8px 10px;border-top:1px solid #30323a;font-size:11px;color:#dce1e7}
+.sx-live-set-row .sx-live-set-tag{font-size:10px;color:#a4a9b5}
+.sx-live-set-row span:last-child{text-align:right;color:#b5bad0}
+.sx-live-note{font-size:11px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+.sx-live-advice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px}
+.sx-live-advice article{padding:13px;background:#1b1c22;border:1px solid #444048;border-radius:11px}
+.sx-live-advice article.caution{border-color:#775b41}
+.sx-live-advice article.positive{border-color:#39684e}
+.sx-live-advice .sx-live-advice-tag{display:block;font-size:9px;letter-spacing:1.1px;color:var(--gold);font-weight:900;margin-bottom:6px}
+.sx-live-advice h4{margin:0 0 5px;color:#f1f3f8;font-size:13px}
+.sx-live-advice p{margin:0;font-size:11px;line-height:1.55;color:#abb0bb}
+.sx-live-footnote{margin:13px 0 0;font-size:10px;line-height:1.6;color:#8f949c}
+.sx-live-waiting{padding:12px;border:1px dashed #50452e;border-radius:10px;color:#cfc2a0;font-size:12px}
+@media(max-width:850px){.sx-live-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+ .sx-live-section{padding:15px 12px;margin:14px 0 20px}
+ .sx-live-provisional{font-size:8px;max-width:100px}
+ .sx-live-metrics{gap:7px}
+ .sx-live-metric{padding:10px}
+ .sx-live-metric strong{font-size:20px}
+ .sx-live-workout-details{padding:12px}
+ .sx-live-lift-heading{align-items:stretch;flex-direction:column;gap:9px}
+ .sx-live-select-label{max-width:100%;width:100%}
+ .sx-live-compare{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sx-live-advice{grid-template-columns:1fr}
+ .sx-live-set-row{gap:4px;padding:7px 4px;font-size:10px;grid-template-columns:minmax(31px,.55fr) minmax(0,1.75fr) minmax(43px,.7fr) minmax(52px,.8fr)}
+}

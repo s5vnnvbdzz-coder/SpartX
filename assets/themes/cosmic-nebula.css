@@ -206,3 +206,137 @@ body.sx-cosmic .sx-cosmic-theme-preview{
  body.sx-cosmic #trackerNav button .sx-nav-icon,
  body.sx-cosmic .sx-gamer-card::before{animation:none!important}
 }
+
+
+/* Build 274 — complete Cosmic Nebula surface coverage.
+   Keep this stylesheet LAST in the main <head> so later component defaults
+   cannot silently replace the active Cosmic palette. Scoped to Cosmic only. */
+body.sx-cosmic{
+ --bg:#070919;--panel:#12162c;--panel2:#202644;--line:#6367a0;
+ --txt:#f2f5ff;--muted:#afb9d8;--lime:#8bdcff;
+ --sx-cosmic-dialog:linear-gradient(148deg,#292148 0%,#161d39 53%,#090f26 100%);
+ --sx-cosmic-control:linear-gradient(155deg,#303653ee,#151d37fa);
+ --sx-cosmic-edge:#8385c0;
+}
+/* Overlays intentionally retain their established size, position and scroll. */
+body.sx-cosmic :is(
+ #sessionOptionsMenu,#sxQuick531Overlay,#sxQuick531CycleOverlay,#sxConfirm531StartOverlay,
+ #sx531CyclePreview,.detail-overlay,.set-type-sheet,.set-popup-backdrop,
+ #workoutSavedOverlay,#rankUnlockedOverlay,#profileSettingsOverlay,#editProfileOverlay,
+ #workoutCalendarOverlay,#trainingStatsOverlay,#deleteProgramOverlay,#completedWorkoutOverlay
+ ){
+ --bg:#070919;--panel:#12162c;--panel2:#202644;--line:#6367a0;
+ --txt:#f2f5ff;--muted:#afb9d8;--lime:#8bdcff;
+ color:var(--txt);
+}
+body.sx-cosmic :is(
+ #sxSessionOptionsDialog,#sxQuick531Dialog,#sxQuick531CycleDialog,#sxConfirm531StartDialog,
+ #sx531CyclePreview .sx531-dialog,
+ .detail-overlay .detail-panel,.set-type-sheet .set-type-sheet-panel,
+ .workout-saved-dialog,.rank-unlocked-dialog,
+ .set-popup,.feed-menu,.home-cycle-menu,.sx-session-menu,
+ .sx-social-modal,.sx-profile-modal,.sx-profile-menu,
+ .sx-session-options-dialog,.sx-modal-dialog,.sx-calendar-dialog,
+ .sx-settings-dialog,.profile-edit-dialog
+ ){
+ color:#f2f5ff!important;
+ background:var(--sx-cosmic-dialog)!important;
+ border-color:#8385c0!important;
+ box-shadow:inset 0 1px 0 #dddaff24,0 15px 50px #000a,0 0 19px #8e7be42a!important;
+}
+body.sx-cosmic :is(
+ #sxSessionOptionsHeader,#sxQuick531Heading,#sxQuick531CycleHeader,
+ #sxConfirm531StartDialog .eyebrow,
+ .detail-panel .card-head,.detail-panel .modal-head,
+ .set-type-sheet-title,.number-pad-heading,.rpe-sheet-title,
+ .sx-profile-modal-header,.sx-settings-modal-header
+ ){
+ border-color:#7177a68c!important;
+}
+body.sx-cosmic :is(
+ #sxSessionOptionsLinks,#sxQuick531Scroll,#sxQuick531CycleScroll,
+ #sx531CyclePreview .sx531-content,
+ .detail-panel .listitem,.detail-panel .stat,.sx-session-menu-item,
+ .performance-chart,.sx-social-card,.sx-social-list-item,
+ .sx-quick-stat,.workout-preview-card,.cycle-detail,.week-card,
+ .set-row,.set-head,.muscle-breakdown,.exercise-history,
+ .calendar-day,.calendar-workout,.feed-item,.profile-dashboard-grid>button
+ ){
+ border-color:#6d76ad80!important;
+}
+body.sx-cosmic :is(.feed-menu,.home-cycle-menu,.sx-session-menu,.sx-profile-menu) button:not(.danger){
+ background:var(--sx-cosmic-control)!important;
+ color:#edf4ff!important;border:1px solid #6f78a4!important;
+}
+body.sx-cosmic :is(.feed-more,.home-cycle-menu-button,.sx-social-filters button){
+ color:#d4dfff!important;
+}
+body.sx-cosmic :is(
+ #sxSessionOptionsLinks button,#sxCloseSessionOptions,#sxClose531Quick,
+ #sxQuick531CycleClose,.set-type-sheet-options button,.number-pad-keys button,
+ .number-pad-actions button,.rpe-sheet-options button,
+ .detail-panel button:not(.danger),.profile-dashboard-grid button,
+ .sx-social-home button,.sx-social-filters button,
+ .sx-gamer-card button,.sx-session-log button,.home-cycle-actions button,
+ #sx531CyclePreview button:not(.danger)
+ ){
+ background:var(--sx-cosmic-control)!important;
+ border:1px solid #7982ae!important;color:#f1f5ff!important;
+ box-shadow:inset 0 1px 0 #ffffff18,0 0 10px #9e83f81c!important;
+}
+body.sx-cosmic :is(
+ #sxSessionOptionsLinks button:hover,#sxSessionOptionsLinks button:focus-visible,
+ #sxCloseSessionOptions:focus-visible,.set-type-sheet-options button[aria-selected="true"],
+ .number-pad-keys button:active,.performance-tabs button.selected,
+ .library-categories button.active,.sx-social-filters button.is-selected
+ ){
+ border-color:#a9dfff!important;
+ background:linear-gradient(150deg,#344476,#171f3e)!important;
+ color:#d5f3ff!important;box-shadow:0 0 13px #80bfff45!important;
+}
+body.sx-cosmic :is(
+ #sx531CyclePreview .sx531-set,#sx531CyclePreview .sx531-sets,
+ #sx531CyclePreview .sx531-bars,
+ #sx531CyclePreview .sx531-plan,
+ .workout-saved-summary,.rank-unlocked-summary,
+ .set-type-sheet-options,.number-pad-layout,.rpe-sheet-panel,
+ .home-cycle-item,.sx-social-entry,.sx-session-log,
+ .sx-statistics-card,.sx-history-card,.performance-card
+ ){
+ background:linear-gradient(160deg,#202646eb,#111833eb)!important;
+ border-color:#6f78ac94!important;color:#f3f6ff!important;
+}
+body.sx-cosmic :is(.sx531-caption,.sx531-section,#sx531CycleStatus,
+ .set-type-sheet-title,.rpe-sheet-value,.number-pad-value,
+ .cycle-week-done,.sx-social-count,.sx-session-stat strong,
+ .performance-card .metric,.sx-statistics-card strong){
+ color:#9cdeff!important;
+}
+body.sx-cosmic :is(
+ #sxQuick531Dialog input,#sxQuick531Dialog select,
+ #sxQuick531CycleDialog input,#sxQuick531CycleDialog select,
+ #sx531CyclePreview select,.detail-panel input,.detail-panel select,
+ .detail-panel textarea,.set-type-sheet input,.set-type-sheet select,
+ .sx-social-filters input
+ ){
+ background:#111a35!important;border:1px solid #7483b1!important;
+ color:#f5f6ff!important;
+}
+body.sx-cosmic :is(.detail-overlay .detail-panel,.profile-identity,.sx-gamer-card,
+ .sx-social-home,.sx-ascension-quick-card,#sx531WorkoutCard){
+ background:radial-gradient(ellipse at 100% 0%,#7d55d547,transparent 50%),
+ linear-gradient(150deg,#282047,#101b39 60%,#0a1028)!important;
+ border-color:#8883c9!important;
+}
+/* Danger remains visibly a destructive action, while matching panel chrome. */
+body.sx-cosmic :is(button.danger,.feed-delete,#deleteProgramOverlay #confirmDeleteProgram){
+ background:linear-gradient(140deg,#553044,#2d1a32)!important;
+ border-color:#b66b91!important;color:#ffd5e3!important;
+}
+body.sx-cosmic :is(#sxSessionOptionsDialog,#sxQuick531Dialog,#sxQuick531CycleDialog) :is(h2,strong),
+body.sx-cosmic .detail-panel :is(h2,h3,strong){
+ color:#f4f5ff;
+}
+@media(prefers-reduced-motion:reduce){
+ body.sx-cosmic :is(.sx-gamer-card,.detail-panel,.sx-session-menu){animation:none!important}
+}

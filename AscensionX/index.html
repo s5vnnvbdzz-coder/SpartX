@@ -236,6 +236,28 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 #cycleStrengthFeedback[data-error="true"]{color:#ff9898}
 @media(max-width:375px){.asc-cycle-strength-editor{padding:12px 9px}.asc-cycle-strength-editor .fields{gap:7px}.asc-cycle-strength-editor select,.asc-cycle-strength-editor input{padding:11px 7px}.asc-cycle-tm-result{padding:10px 8px;font-size:14px}}
 
+
+/* Embedded AscensionX: pin the native dashboard header to the true top
+   of its iframe viewport. iOS Safari does not reliably keep a sticky
+   header at 0 when the body is also a momentum-scroll container. */
+body.sx-ascension-embedded > header{
+ position:fixed!important;
+ inset:0 0 auto 0!important;
+ top:0!important;left:0!important;right:0!important;
+ width:100%!important;margin:0!important;
+ transform:none!important;
+ z-index:20!important;
+}
+body.sx-ascension-embedded > main{
+ /* Reserve the real measured header height instead of overlapping cards. */
+ padding-top:calc(var(--sx-asc-native-header-height,70px) + 14px)!important;
+}
+body.sx-ascension-embedded.sx-spartan-quick-import > main{
+ padding-top:calc(var(--sx-asc-native-header-height,70px) + 10px)!important;
+}
+body.sx-ascension-embedded > header .brand,
+body.sx-ascension-embedded > header .sub{max-width:100%}
+
 /* SpartanX now hides its wrapper, not the original AscensionX header. */
 body.sx-spartan-quick-import > nav[aria-label="Main navigation"]{display:none!important}
 body.sx-spartan-quick-import{padding-bottom:0!important}
@@ -692,9 +714,11 @@ function resetAscensionScrollTop(){
 }
 function resetEmbeddedAscensionOpening(){
  if(!ascensionEmbeddedBySpartanX)return;
+ syncAscensionNativeHeaderHeight();
  resetAscensionScrollTop();
  // First iframe layout can occur after navigation; correct the first paint.
  requestAnimationFrame(()=>{
+  syncAscensionNativeHeaderHeight();
   resetAscensionScrollTop();
   requestAnimationFrame(resetAscensionScrollTop);
  });
@@ -752,10 +776,12 @@ function renderProfile(){ $('maxSquat').value=Number(toDisplay(state.profile.max
 let ascensionEmbeddedBySpartanX=false,ascSpartanImportPending=null;
 function syncAscensionNativeHeaderHeight(){
  if(!ascensionEmbeddedBySpartanX)return;
- const height=document.querySelector('body > header')?.getBoundingClientRect().height||0;
+ const header=document.querySelector('body > header');
+ const height=header?.getBoundingClientRect().height||0;
  if(height>0)document.documentElement.style.setProperty('--sx-asc-native-header-height',Math.ceil(height)+'px');
 }
 window.addEventListener('resize',syncAscensionNativeHeaderHeight,{passive:true});
+window.addEventListener('pageshow',syncAscensionNativeHeaderHeight,{passive:true});
 function closeEmbeddedAscensionFromHeader(){
  if(!ascensionEmbeddedBySpartanX)return;
  try{window.parent.postMessage({type:'spartx:ascensionRequestClose'},location.origin)}catch(e){}

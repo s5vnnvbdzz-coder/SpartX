@@ -1998,6 +1998,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 </style>
 <script src="./assets/cardio/cardio.js?v=258"></script>
 <script src="./assets/ascension/paused-bench.js?v=279"></script>
+<script src="./assets/ascension/romanian-deadlift.js?v=280"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -3063,6 +3064,62 @@ function backfillActiveAscensionWeek2PausedBench(){
  }catch(_){}
  return true;
 }
+// Deadlift accessory: Romanian Deadlift is never linked to week completion.
+function romanianDeadliftFromAscensionImport(d){
+ if(d?.source!=='AscensionX'||d.exercise!=='Deadlift')return null;
+ const api=window.SpartanXRomanianDeadlift;
+ const plan=api?.fromTopSet({week:Number(d.week),topLoad:Number(d.sets?.[0]?.weight),
+  cycleId:String(d.cycleId||''),tm:Number(d.tm)});
+ return plan?api.createExercise(plan):null;
+}
+function ensureAscensionRomanianDeadlift(deadliftIndex,d){
+ if(deadliftIndex<0||deadliftIndex>=work.length)return false;
+ // Never replace sets, notes or technique adjustments already entered.
+ if(work.some(ex=>ex.ascensionAccessory?.id==='ascensionx-romanian-deadlift-v1'||
+  /^Romanian Deadlift$/i.test(String(ex.name||'').trim())))return false;
+ const accessory=romanianDeadliftFromAscensionImport(d);
+ if(!accessory)return false;
+ work.splice(deadliftIndex+1,0,accessory);
+ return true;
+}
+// Attach Week 2 RDL to an existing current Deadlift session after app update.
+// No edits of historic, backdated or other programmed sessions.
+function backfillActiveAscensionWeek2RomanianDeadlift(){
+ if(!sessionActive||editingSessionId!==null||window.sxMissedWorkoutMode||window.sxManualWorkoutDate)return false;
+ const api=window.SpartanXRomanianDeadlift;
+ if(!api)return false;
+ let state;
+ try{state=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null')}catch(_){return false}
+ const cycle=state?.cycle;
+ if(!cycle?.created||!Array.isArray(cycle.exercises)||!cycle.exercises.includes('Deadlift')||
+  Number(cycle.weeks?.Deadlift??cycle.currentWeek)!==2)return false;
+ const plan=api.fromAscensionState(state,2);
+ if(!plan)return false;
+ const marker='spartx_asc_rdls_w2_once_v1_'+cycle.created;
+ try{if(localStorage.getItem(marker))return false}catch(_){}
+ const deadliftIndex=work.findIndex(ex=>{
+  const link=ex?.ascensionLink;
+  if(link)return link.lift==='Deadlift'&&Number(link.week)===2&&link.cycleId===cycle.created;
+  return /^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex?.name||'').trim());
+ });
+ if(deadliftIndex<0)return false;
+ if(work.some(ex=>ex?.ascensionAccessory?.id==='ascensionx-romanian-deadlift-v1'||
+  /^Romanian Deadlift$/i.test(String(ex?.name||'').trim()))){
+  try{localStorage.setItem(marker,'already-present')}catch(_){}
+  return false;
+ }
+ const accessory=api.createExercise(plan);
+ if(!accessory)return false;
+ work.splice(deadliftIndex+1,0,accessory);
+ renderWork();updateMinimizedSession();saveDraft();
+ try{
+  const persisted=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
+  if(persisted?.work?.some(ex=>ex?.ascensionAccessory?.id===accessory.ascensionAccessory.id))
+   localStorage.setItem(marker,'applied');
+ }catch(_){}
+ return true;
+}
+
 function import531IntoWorkout(d){
  if(!d||!Array.isArray(d.sets)||!d.sets.length||!d.exercise)return false;
  const source=d.source==='AscensionX'?'AscensionX':'SpartanX Tools';
@@ -3092,12 +3149,25 @@ function import531IntoWorkout(d){
    return true;
   }
  }
+ if(source==='AscensionX'&&d.exercise==='Deadlift'){
+  const linkedIndex=work.findIndex(ex=>ex.ascensionLink?.lift==='Deadlift'&&
+   ex.ascensionLink.cycleId===d.cycleId&&Number(ex.ascensionLink.week)===Number(d.week));
+  const unlinkedIndex=linkedIndex<0?work.findIndex(ex=>!ex.ascensionLink&&
+   /^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex.name||'').trim())):-1;
+  const deadliftIndex=linkedIndex>=0?linkedIndex:unlinkedIndex;
+  if(deadliftIndex>=0){
+   ensureAscensionRomanianDeadlift(deadliftIndex,d);
+   switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
+   return true;
+  }
+ }
  const imported={name:d.exercise,rest:120,notes:'Imported from '+source+' · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')'+(d.source==='AscensionX'?' · Target RPE '+d.targetRpe:''),sets:[...warmups.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Warm-up',done:false})),...d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))]};
  if(source==='AscensionX'){
   imported.ascensionLink={cycleId:d.cycleId,cycleTitle:String(d.cycleTitle||d.cycleName||'').trim().slice(0,75),lift:d.exercise,week:Number(d.week),plannedSets:d.sets.map(x=>({weight:Number(x.weight),reps:Number(x.reps)})),targetRpe:Number(d.targetRpe)||null};
  }
  work.unshift(imported);
  if(source==='AscensionX'&&d.exercise==='Bench Press')ensureAscensionPausedBench(0,d);
+ if(source==='AscensionX'&&d.exercise==='Deadlift')ensureAscensionRomanianDeadlift(0,d);
  beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return true;
 }
 window.spartanxImport531=import531IntoWorkout;
@@ -3508,7 +3578,7 @@ $('import').onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text
 $('minimizedSession').onclick=resumeSession;$('resumeSession').onclick=e=>{e.stopPropagation();resumeSession();};$('minimizedSession').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();resumeSession();}};
 restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
 // Attach Week 2 paused bench once to an existing live bench workout after hydration.
-requestAnimationFrame(backfillActiveAscensionWeek2PausedBench);
+requestAnimationFrame(()=>{backfillActiveAscensionWeek2PausedBench();backfillActiveAscensionWeek2RomanianDeadlift()});
 try{if(JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')?.screen==='routineBuilderScreen')renderRoutineDraft();}catch(e){}stats();renderSavedRoutines();renderHomeCycles();$('rankSex').addEventListener('change',saveRankProfile);$('rankBodyweight').addEventListener('change',saveRankProfile);$('rankSex').value=db.profile?.standard||'male';$('rankSex').dataset.loaded='1';$('rankBodyweight').value=db.profile?.bodyweight||'';$('rankBodyweight').dataset.loaded='1';$('measureBodyweight').value=db.profile?.bodyweight||'';$('measureBodyweight').addEventListener('change',()=>{$('rankBodyweight').value=$('measureBodyweight').value;saveRankProfile();});
 let calendarCursor=new Date();calendarCursor.setDate(1);let selectedCalendarDate='';
 function calendarKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}

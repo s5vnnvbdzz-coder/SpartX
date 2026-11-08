@@ -36,16 +36,67 @@ const style=document.createElement('style');
 style.id='sx531CycleFlowStyle';
 style.textContent='body:has(#sx531CyclePreview:not([hidden])) #trackerNav{display:none!important}#sx531CyclePreview[hidden],#sx531WorkoutCard[hidden]{display:none!important}#sx531CyclePreview{position:fixed;inset:0;z-index:290000;height:100dvh;display:flex;justify-content:center;align-items:stretch;background:var(--bg);padding:calc(8px + env(safe-area-inset-top,0px)) 10px calc(6px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}#sx531CyclePreview *{box-sizing:border-box}#sx531CyclePreview .sx531-dialog{display:flex;flex-direction:column;width:min(100%,660px);min-height:0;max-height:100%;border:1px solid var(--line);border-radius:16px;background:var(--bg);overflow:hidden;color:var(--txt);box-shadow:0 15px 50px #0007}#sx531CyclePreview header{position:static!important;flex:0 0 auto;padding:12px 14px!important;margin:0!important;background:var(--panel)!important;border-bottom:1px solid var(--line)!important;display:flex!important;justify-content:space-between;align-items:center}#sx531CyclePreview h2{font-size:18px;margin:5px 0 0}#sx531CyclePreview .sx531-content{overflow:auto;overscroll-behavior:contain;min-height:0;flex:1;padding:12px;-webkit-overflow-scrolling:touch}#sx531CyclePreview .sx531-caption{font-size:10px;letter-spacing:1px;font-weight:850;color:var(--lime)}#sx531CyclePreview .sx531-select{margin:10px 0}#sx531CyclePreview select{width:100%;font-size:15px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:10px;border-radius:10px}#sx531CyclePreview .sx531-lifts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}#sx531CyclePreview .sx531-lifts button{padding:10px 7px;min-height:56px;background:var(--panel2)!important;color:var(--txt)!important;border:1px solid var(--line)!important;display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center;font-size:11px}#sx531CyclePreview .sx531-lifts button.current{border-color:var(--lime)!important;box-shadow:inset 0 0 0 1px var(--lime)}#sx531CyclePreview .sx531-lifts button:disabled{opacity:.45}#sx531CyclePreview .sx531-lifts small{font-size:10px;color:var(--muted)}#sx531CyclePreview .sx531-week-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 8px}#sx531CyclePreview .sx531-week-head strong{font-size:17px}#sx531CyclePreview .sx531-week-head span{font-size:12px;color:var(--lime)}#sx531CyclePreview .sx531-bars{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(11px,1fr);gap:3px;align-items:end;min-height:105px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 7px 8px;overflow:hidden}#sx531CyclePreview .sx531-bar{height:85px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}#sx531CyclePreview .sx531-bar i{display:block;width:100%;min-height:5px;border-radius:4px 4px 2px 2px;background:color-mix(in srgb,var(--lime) 42%,var(--panel2))}#sx531CyclePreview .sx531-bar.current i{background:var(--lime);box-shadow:0 0 8px color-mix(in srgb,var(--lime) 35%,transparent)}#sx531CyclePreview .sx531-bar small{font-size:8px;color:var(--muted)}#sx531CyclePreview .sx531-legend{font-size:10px;color:var(--muted);margin:7px 0 13px;line-height:1.5}#sx531CyclePreview .sx531-sets{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}#sx531CyclePreview .sx531-set{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-bottom:1px solid var(--line);font-size:12px}#sx531CyclePreview .sx531-set:last-child{border-bottom:0}#sx531CyclePreview .sx531-set strong{white-space:nowrap;font-size:13px;color:var(--lime)}#sx531CyclePreview .sx531-section{font-size:10px;letter-spacing:.9px;color:var(--muted);padding:12px 11px 5px;font-weight:900}#sx531CyclePreview .sx531-footer{display:grid;grid-template-columns:1fr 1.5fr;gap:8px;padding:10px 12px 12px;background:var(--panel);border-top:1px solid var(--line);flex:0 0 auto}#sx531CyclePreview .sx531-footer button{min-height:45px;padding:10px 5px;font-size:11px;border-radius:10px;font-weight:900}#sx531CyclePreview #sx531Cancel{background:var(--panel2)!important;color:var(--txt)!important;border:1px solid var(--line)!important}#sx531CyclePreview #sx531Load{background:var(--lime)!important;color:var(--bg)!important;border:1px solid var(--lime)!important}#sx531CyclePreview .sx531-sub-actions{display:flex;justify-content:space-between;gap:8px;margin:10px 0}#sx531CyclePreview .sx531-sub-actions button{font-size:10px;padding:10px;flex:1;color:var(--txt);background:var(--panel2);border:1px solid var(--line)}#sx531WorkoutCard{border:1px solid color-mix(in srgb,var(--lime) 40%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--lime) 9%,var(--panel)),var(--panel));padding:15px}#sx531WorkoutCard h2{font-size:18px;margin:5px 0 9px}#sx531WorkoutCard .sx531-quick-row{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}#sx531WorkoutCard .sx531-quick-row span{flex:1;min-width:65px;text-align:center;border:1px solid var(--line);border-radius:9px;padding:9px 4px;font-size:10px;background:var(--panel2)}#sx531WorkoutCard .sx531-quick-row strong{display:block;margin-top:5px;color:var(--lime);font-size:13px}#sx531WorkoutCard .sx531-progress{height:6px;border-radius:5px;background:var(--panel2);overflow:hidden;margin:10px 0}#sx531WorkoutCard .sx531-progress i{display:block;height:100%;background:var(--lime)}#sx531WorkoutCard .sx531-actions{display:flex;gap:8px}#sx531WorkoutCard .sx531-actions button{flex:1;min-width:0;font-size:10px;padding:12px 8px}#sx531WorkoutCard .sx531-actions button:first-child{background:var(--lime)!important;color:var(--bg)!important}@media(max-height:580px){#sx531CyclePreview .sx531-content{padding:8px}}';
 style.textContent+=`
-#sx531CyclePreview{padding:0!important;animation:none!important;transition:none!important}
-#sx531CyclePreview .sx531-dialog{width:100%!important;max-width:none!important;height:100%!important;max-height:100%!important;
- border:0!important;border-radius:0!important;box-shadow:none!important}
-#sx531CyclePreview header{padding:calc(12px + env(safe-area-inset-top,0px)) 14px 12px!important}
-#sx531CyclePreview .sx531-footer{padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px))!important}
+/* 5/3/1 uses the AscensionX workout-import layout, coloured by the
+   SAME active SpartanX theme tokens as the existing 5/3/1 page. */
+#sx531CyclePreview{
+ height:100dvh!important;width:100vw!important;inset:0!important;
+ padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))!important;
+ align-items:center!important;justify-content:center!important;
+ background:rgba(0,0,0,.84)!important;
+ -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+ animation:none!important;transition:none!important;
+}
+#sx531CyclePreview .sx531-dialog{
+ flex:0 1 auto!important;
+ width:min(100%,440px)!important;height:auto!important;min-height:0!important;
+ max-width:440px!important;max-height:100%!important;
+ border:1px solid color-mix(in srgb,var(--lime) 30%,var(--line))!important;
+ border-radius:20px!important;box-shadow:0 20px 65px #000b!important;
+ background:linear-gradient(145deg,var(--panel2),var(--panel) 60%,var(--bg))!important;
+}
+#sx531CyclePreview header{
+ padding:22px 22px 9px!important;align-items:flex-start!important;
+ background:transparent!important;border:0!important;
+}
+#sx531CyclePreview header h2{font-size:21px!important;line-height:1.28!important;margin:9px 0 0!important}
+#sx531CyclePreview #sx531CycleStatus{padding-top:3px;white-space:nowrap}
+#sx531CyclePreview .sx531-content{
+ flex:1 1 auto!important;overflow-x:hidden!important;overflow-y:auto!important;
+ min-height:0!important;padding:10px 22px 15px!important;-webkit-overflow-scrolling:touch;
+}
+#sx531CyclePreview .sx531-intro{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.65}
+#sx531CyclePreview .sx531-input-label{display:block;margin:10px 0 7px;color:var(--muted);font-size:12px}
+#sx531CyclePreview .sx531-select{
+ width:100%;margin:0 0 12px!important;border:1px solid var(--line);
+ border-radius:11px;background:var(--panel2)!important;color:var(--txt)!important;
+ padding:13px 12px!important;font-size:15px!important;
+}
+#sx531CyclePreview .sx531-plan{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:14px;margin:10px 0}
+#sx531CyclePreview .sx531-plan-head{display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:13px}
+#sx531CyclePreview .sx531-plan-head strong{font-size:13px}
+#sx531CyclePreview .sx531-plan-head span{color:var(--lime);white-space:nowrap}
+#sx531CyclePreview .sx531-plan-group+.sx531-plan-group{margin-top:13px}
+#sx531CyclePreview .sx531-plan-group>strong{display:block;color:var(--lime);font-size:10px;letter-spacing:1.4px;margin-bottom:5px}
+#sx531CyclePreview .sx531-plan-group>p{font-size:12px;line-height:1.75;margin:0;color:var(--txt);overflow-wrap:anywhere}
+#sx531CyclePreview .sx531-help{font-size:12px;line-height:1.6;color:var(--muted);margin:13px 0 11px}
+#sx531CyclePreview .sx531-expand{margin:12px 0;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}
+#sx531CyclePreview .sx531-expand summary{cursor:pointer;font-size:11px;font-weight:850;color:var(--txt);list-style-position:inside}
+#sx531CyclePreview .sx531-expand .sx531-bars{margin:12px 0}
+#sx531CyclePreview .sx531-footer{background:transparent!important;border-color:var(--line)!important;padding:13px 22px 19px!important}
+#sx531CyclePreview .sx531-footer button{min-height:49px;font-size:11px}
+#sx531CyclePreview .sx531-sub-actions{margin:12px 0 0}
+#sx531CyclePreview .sx531-sub-actions button{font-size:10px}
+@media(max-width:380px){
+ #sx531CyclePreview header{padding:17px 15px 8px!important}
+ #sx531CyclePreview .sx531-content{padding:8px 15px 11px!important}
+ #sx531CyclePreview .sx531-footer{padding:11px 15px 14px!important}
+ #sx531CyclePreview header h2{font-size:19px!important}
+}
 `;
 document.head.appendChild(style);
 const overlay=document.createElement('div');
 overlay.id='sx531CyclePreview';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','5/3/1 programme preview');
-overlay.innerHTML='<div class="sx531-dialog"><header><div><div class="sx531-caption">SPARTANX · 5/3/1</div><h2>Current cycle</h2></div><span class="sx531-caption" id="sx531CycleStatus"></span></header><div class="sx531-content" id="sx531CycleContent"></div><footer class="sx531-footer"><button type="button" id="sx531Cancel">CANCEL</button><button type="button" id="sx531Load">LOAD INTO SPARTANX</button></footer></div>';
+overlay.innerHTML='<div class="sx531-dialog"><header><div><div class="sx531-caption">5/3/1 × SPARTANX</div><h2>Log this workout in SpartanX?</h2></div><span class="sx531-caption" id="sx531CycleStatus"></span></header><div class="sx531-content" id="sx531CycleContent"></div><footer class="sx531-footer"><button type="button" id="sx531Cancel">CANCEL</button><button type="button" id="sx531Load">LOAD INTO SPARTANX</button></footer></div>';
 document.body.appendChild(overlay);
 const card=document.createElement('section');card.id='sx531WorkoutCard';card.className='card';card.hidden=true;
 const workout=$('workout'),start=workout?.querySelector('.start-card');
@@ -62,24 +113,32 @@ function renderPreview(){
  if(!w){$('sx531CycleContent').textContent='The selected cycle has no stored sets for this week.';$('sx531Load').disabled=true;return}
  $('sx531Load').disabled=false;
  $('sx531CycleStatus').textContent=n+'/'+c.weeks+' WEEKS';
- const selector=all.length>1?'<label class="sx531-caption" for="sx531ProgrammeSelect">PROGRAMME</label><select id="sx531ProgrammeSelect" class="sx531-select">'+all.map(x=>'<option value="'+safe(x.id)+'" '+(x.id===c.id?'selected':'')+'>'+safe(x.name)+'</option>').join('')+'</select>':'';
- const cards='<div class="sx531-lifts">'+lifts(c).map(l=>{
+ const selector=all.length>1?'<label class="sx531-input-label" for="sx531ProgrammeSelect">Programme</label><select id="sx531ProgrammeSelect" class="sx531-select">'+all.map(x=>'<option value="'+safe(x.id)+'" '+(x.id===c.id?'selected':'')+'>'+safe(x.name)+'</option>').join('')+'</select>':'';
+ const liftPicker='<label class="sx531-input-label" for="sx531LiftSelect">Exercise</label><select id="sx531LiftSelect" class="sx531-select">'+lifts(c).map(l=>{
   const week=nextWeek(c,l);
-  return '<button type="button" data-sx531-lift="'+safe(l)+'" '+(week===null?'disabled':'')+' class="'+(l===selectedLift?'current':'')+'"><strong>'+LABEL[l]+'</strong><small>'+(week===null?'✓ COMPLETE':'WEEK '+week)+'</small></button>';
- }).join('')+'</div>';
+  return '<option value="'+safe(l)+'" '+(l===selectedLift?'selected':'')+' '+(week===null?'disabled':'')+'>'+safe(l)+' · '+(week===null?'Completed':'Week '+week)+'</option>';
+ }).join('')+'</select>';
+ const human=(s,prefix,i)=>prefix+(i+1)+' · '+Number(s.weight).toLocaleString()+' kg × '+minimumReps(s)+(String(s.rep||'').includes('+')?'+':'');
+ const group=(title,rows)=>'<div class="sx531-plan-group"><strong>'+title+'</strong><p>'+rows.join(' · ')+'</p></div>';
+ let preview='<div class="sx531-plan"><div class="sx531-plan-head"><strong>WEEK '+n+' · '+safe(w.name?.split('·').at(-1)?.trim()||'5/3/1')+'</strong><span>TM '+w.tm+' kg</span></div>';
+ if(w.warmups?.length)preview+=group('WARM-UP · '+w.warmups.length+' SETS',w.warmups.map((x,i)=>human(x,'W',i)));
+ preview+=group('WORKING SETS · '+w.sets.length,w.sets.map((x,i)=>human(x,'Set ',i)));
+ if(w.bbb)preview+=group('BORING BUT BIG · '+w.bbb.sets+' SETS',[w.bbb.sets+' × '+w.bbb.reps+' @ '+w.bbb.weight+' kg']);
+ preview+='</div>';
  const vols=Array.from({length:c.weeks},(_,i)=>volumeOf(weekData(c,selectedLift,i+1)));
  const maximum=Math.max(...vols,1);
  const bars='<div class="sx531-bars" aria-label="Estimated weekly training volume">'+vols.map((v,i)=>'<div class="sx531-bar '+(i+1===n?'current':'')+'" title="Week '+(i+1)+': '+v.toLocaleString()+' kg estimated volume"><i style="height:'+Math.max(5,Math.round(v/maximum*62))+'px"></i><small>'+(completed(c,selectedLift).has(i+1)?'✓':i+1)+'</small></div>').join('')+'</div>';
  const row=(label,weight,reps)=>'<div class="sx531-set"><span>'+safe(label)+'</span><strong>'+safe(reps)+' × '+Number(weight).toLocaleString()+' kg</strong></div>';
- let sets='<div class="sx531-sets">';
- if(w.warmups.length){sets+='<div class="sx531-section">WARM-UP SETS</div>'+w.warmups.map(s=>row(Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('')}
- sets+='<div class="sx531-section">WORKING SETS</div>'+w.sets.map((s,i)=>row('Set '+(i+1)+' · '+Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('');
- if(w.bbb){sets+='<div class="sx531-section">BORING BUT BIG · '+w.bbb.pct+'% TM</div>'+Array.from({length:Number(w.bbb.sets)},(_,i)=>row('BBB Set '+(i+1),w.bbb.weight,String(w.bbb.reps))).join('')}
- sets+='</div>';
- $('sx531CycleContent').innerHTML=selector+'<div class="sx531-caption">'+safe(c.name)+'</div>'+cards+
-  '<div class="sx531-week-head"><strong>WEEK '+n+' · '+safe(w.name?.split('·').at(-1)?.trim()||'5/3/1')+'</strong><span>TM '+w.tm+' kg</span></div>'+
-  bars+'<p class="sx531-legend">Weekly volume estimate (kg × minimum prescribed reps, including warm-ups and BBB where programmed). AMRAP sets may exceed this estimate. Current week highlighted.</p>'+sets+
-  '<div class="sx531-sub-actions"><button type="button" id="sx531EditCycle">EDIT PROGRAMME / LIFTS</button><button type="button" id="sx531OpenCalculator">5/3/1 CALCULATOR</button></div>';
+ let detail='<div class="sx531-sets">';
+ if(w.warmups.length)detail+='<div class="sx531-section">WARM-UP SETS</div>'+w.warmups.map(s=>row(Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('');
+ detail+='<div class="sx531-section">WORKING SETS</div>'+w.sets.map((s,i)=>row('Set '+(i+1)+' · '+Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('');
+ detail+='</div>';
+ const expanded='<details class="sx531-expand"><summary>VIEW WEEKLY VOLUME &amp; DETAILED SETS</summary>'+bars+
+  '<p class="sx531-legend">Weekly volume estimate (kg × minimum prescribed reps, including warm-ups and BBB where programmed). AMRAP sets may exceed this estimate.</p>'+detail+'</details>';
+ $('sx531CycleContent').innerHTML='<p class="sx531-intro">Choose the lift to load as an active SpartanX workout. Prescribed warm-up and working sets will be added automatically.</p>'+
+  selector+liftPicker+preview+
+  '<p class="sx531-help">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets</strong> to advance this lift to the next week. Partial sessions are saved but do not advance.</p>'+
+  expanded+'<div class="sx531-sub-actions"><button type="button" id="sx531EditCycle">EDIT PROGRAMME / LIFTS</button><button type="button" id="sx531OpenCalculator">5/3/1 CALCULATOR</button></div>';
 }
 function openPreview(fromMenu=false,requestedId=null){
  const all=activeCycles();if(!all.length)return false;
@@ -162,7 +221,7 @@ $('sx531CycleContent').addEventListener('click',e=>{
   bypass=true;$('start531Shortcut')?.click();bypass=false;
  }
 });
-$('sx531CycleContent').addEventListener('change',e=>{if(e.target.id==='sx531ProgrammeSelect'){cycleId=e.target.value;selectedLift=null;renderPreview()}});
+$('sx531CycleContent').addEventListener('change',e=>{if(e.target.id==='sx531ProgrammeSelect'){cycleId=e.target.value;selectedLift=null;renderPreview()}else if(e.target.id==='sx531LiftSelect'){selectedLift=e.target.value;renderPreview()}});
 $('start531Shortcut')?.addEventListener('click',e=>{
  if(bypass||!activeCycles().length)return;
  e.preventDefault();e.stopImmediatePropagation();

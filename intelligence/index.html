@@ -6,10 +6,11 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
-  <link rel="stylesheet" href="./styles.css?v=5">
+  <link rel="stylesheet" href="./styles.css?v=6">
   <script src="./engine.js?v=3" defer></script>
-  <script src="./bridge.js?v=2" defer></script>
-  <script src="./app.js?v=4" defer></script>
+  <script src="./bridge.js?v=3" defer></script>
+  <script src="./live.js?v=1" defer></script>
+  <script src="./app.js?v=5" defer></script>
 </head>
 <body data-theme="black-yellow">
 <div class="app-shell">
@@ -50,6 +51,30 @@
 
       <a class="sx-return-app" href="../" aria-label="Return to SpartanX workout app">← BACK TO SPARTANX</a>
 
+      <section class="sx-live-section" id="liveSessionSection" aria-label="Live completed-set statistics" hidden>
+        <div class="sx-live-top">
+          <div>
+            <div class="sx-live-kicker"><span class="sx-live-beacon" aria-hidden="true"></span> LIVE SESSION · UNSAVED</div>
+            <h2 id="liveWorkoutTitle">Active Workout</h2>
+            <p id="liveWorkoutStatus">Only checked, valid sets are included.</p>
+          </div>
+          <span class="sx-live-provisional">PROVISIONAL DATA</span>
+        </div>
+        <div class="sx-live-metrics" id="liveSessionMetrics" aria-live="polite"></div>
+        <div class="sx-live-workout-details" id="liveWorkoutDetails">
+          <div class="sx-live-lift-heading">
+            <div><div class="eyebrow">COMPLETED SET ANALYSIS</div><h3 id="liveExerciseTitle">Exercise breakdown</h3></div>
+            <label class="sx-live-select-label" for="liveExerciseSelect">EXERCISE
+              <select id="liveExerciseSelect" aria-label="Choose live exercise"></select>
+            </label>
+          </div>
+          <div class="sx-live-compare" id="liveExerciseCompare"></div>
+          <div class="sx-live-set-list" id="liveExerciseSets"></div>
+          <div class="sx-live-advice" id="liveExerciseAdvice"></div>
+        </div>
+        <p class="sx-live-footnote">Live metrics use completed sets from your active workout draft. Warm-ups count towards total volume but not working-set strength estimates. The historical charts and goals change only after Finish &amp; Save. RPE-based fatigue signals and estimated 1RM are approximations.</p>
+      </section>
+
       <section class="page active" id="overviewPage" data-page="overview" aria-labelledby="pageTitle">
         <div class="hero-card">
           <div class="hero-text">
@@ -61,7 +86,7 @@
           <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div><span class="hero-tag">S T R O N G E R &nbsp; E V E R Y &nbsp; D A Y</span></div>
         </div>
 
-        <div class="section-top"><div><h3 id="snapshotTitle">Bench Press performance snapshot</h3><p id="snapshotSubtitle">All four metrics reflect your selected exercise.</p></div><span class="micro-tag">LIVE CALCULATIONS</span></div>
+        <div class="section-top"><div><h3 id="snapshotTitle">Bench Press performance snapshot</h3><p id="snapshotSubtitle">All four metrics reflect your selected exercise.</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
         <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
         <div class="two-col">
           <article class="panel">

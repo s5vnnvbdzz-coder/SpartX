@@ -93,6 +93,50 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 .set-control .rpe-value{display:flex;align-items:center;justify-content:center;gap:3px;border-color:transparent;background:transparent;box-shadow:none}.set-control .rpe-value svg{color:var(--red);flex-shrink:0}.rpe-popup-icon{text-align:center;color:var(--red);margin-top:18px}.rpe-popup-value{text-align:center;font-size:54px;font-weight:900;color:var(--red)}.rpe-popup-description{text-align:center;min-height:26px}.rpe-popup-scale input{width:100%;accent-color:var(--red)}.rpe-popup-ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 .settable .set-control .set-value{width:100%;min-width:0;min-height:38px;font-size:16px;font-weight:750}.settable .set-control .rpe-value{width:100%;min-height:38px}.settable th,.settable td{text-align:center}.settable td:first-child{text-align:left}.number-pad-keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.number-pad-keys button,.number-pad-actions button{min-height:52px;background:rgba(110,115,120,.12);border:1px solid #444954;border-radius:11px;color:var(--text);font-size:22px;font-weight:700}.number-pad-actions button{color:var(--red);font-size:26px}.number-pad-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(60px,1fr);gap:10px}.number-pad-actions{display:grid;grid-template-rows:repeat(3,1fr);gap:7px}.number-pad-display{text-align:center;color:var(--red);font-size:36px;font-weight:850;min-height:55px}.number-pad-heading{text-align:center;color:var(--muted);font-size:12px;letter-spacing:1.3px;font-weight:800;margin-top:12px}
 .settable .inline-set-label{font-size:11px;font-weight:750;color:var(--muted);white-space:nowrap}.settable .set-control{gap:4px}.settable .set-control .set-value{flex:1}.settable .rpe-inline{display:flex;align-items:center;gap:4px}.settable .rpe-inline .rpe-value{flex:1;min-width:0}.settable .inline-set-label{flex-shrink:0}@media(max-width:430px){.settable .inline-set-label{font-size:10px}.settable .set-control .set-value{font-size:14px;padding:6px 2px}}
+
+/* Dedicated six-week programme editor. The dashboard's full-cycle roadmap
+   remains read-only; only Edit Programme opens this isolated card. */
+#cycleEditorBackdrop{
+ position:fixed;inset:0;z-index:64;display:none;align-items:center;justify-content:center;
+ box-sizing:border-box;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));
+ background:rgba(0,0,0,.84);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+ overflow:hidden;overscroll-behavior:contain
+}
+#cycleEditorBackdrop.open{display:flex}
+#cycleEditorBackdrop *{box-sizing:border-box}
+.cycle-editor-dialog{
+ display:flex;flex-direction:column;width:min(100%,540px);max-height:100%;min-height:0;
+ background:linear-gradient(145deg,var(--panel2),var(--panel) 55%,var(--bg));color:var(--text);
+ border:1px solid color-mix(in srgb,var(--red2) 32%,var(--line));border-radius:19px;
+ overflow:hidden;box-shadow:0 20px 65px #000b
+}
+.cycle-editor-header{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;flex:0 0 auto;
+ padding:17px 17px 13px;border-bottom:1px solid var(--line)
+}
+.cycle-editor-header h2{margin:6px 0 0;font-size:20px}
+.cycle-editor-header .iconbtn{flex:none}
+.cycle-editor-body{
+ flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+ overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:4px 13px 12px
+}
+.cycle-editor-body #cycleBuilderCard{
+ width:100%;margin:10px 0 0;background:transparent;border:none;border-radius:0;
+ padding:0 3px;box-shadow:none
+}
+.cycle-editor-body #cycleBuilderCard .asc-cycle-strength-editor{margin-top:14px}
+.cycle-editor-actions{
+ flex:0 0 auto;display:grid;grid-template-columns:1fr 1.5fr;gap:9px;
+ background:var(--panel);border-top:1px solid var(--line);padding:12px 17px
+}
+.cycle-editor-actions button{min-height:46px;min-width:0;padding:9px 6px;font-size:12px;border-radius:10px}
+@media(max-width:380px){
+ .cycle-editor-header{padding:13px}
+ .cycle-editor-body{padding:4px 9px 10px}
+ .cycle-editor-actions{padding:10px 13px}
+ .cycle-editor-actions button{font-size:11px}
+}
+
 .cycle-details[hidden]{display:none!important}.cycle-details{margin-top:12px}.cycle-details>.card{margin-top:12px}.cycle-details{padding-top:14px}
 #homeWeeks.weekgrid{display:block}.cycle-lift-row{display:block;width:100%;margin-top:14px}.cycle-lift-row .weekgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%}.cycle-lift-name{font-size:13px;font-weight:800;margin-bottom:7px}.cycle-lift-row .weektile{cursor:default;user-select:none;padding:10px 3px}.cycle-lift-row .weekgrid{gap:5px}.home-hero-actions{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap}.home-hero-actions button{flex:1;min-width:120px}
 
@@ -292,6 +336,36 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
   <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.3 · WORKOUT HISTORY RECOVERY · LOCAL STORAGE</div></div>
  </section>
 </div>
+<div id="cycleEditorBackdrop" class="cycle-editor-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeCycleEditor()">
+ <section class="cycle-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleEditorTitle">
+  <div class="cycle-editor-header">
+   <div><div class="eyebrow">ASCENSIONX · PROGRAMME</div><h2 id="cycleEditorTitle">Edit programme</h2></div>
+   <button type="button" id="cycleEditorClose" class="iconbtn" onclick="closeCycleEditor()" aria-label="Close programme editor">×</button>
+  </div>
+  <div class="cycle-editor-body" id="cycleEditorScroll">
+<div class="card" id="cycleBuilderCard"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p>
+  <div class="asc-cycle-strength-editor" id="cycleStrengthEditor" aria-label="Starting strength for your cycle">
+    <div class="eyebrow">SET YOUR STARTING STRENGTH</div>
+    <p class="tiny" style="margin:6px 0 12px">Each lift remembers its own 1RM. Your Training Max and cycle weights recalculate automatically.</p>
+    <div class="fields">
+      <div class="field"><label for="cycleStrengthLift">Exercise</label><select id="cycleStrengthLift" onchange="selectCycleStrengthLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+      <div class="field"><label id="cycleStrengthOneRmLabel" for="cycleStrengthOneRm">1RM (kg)</label><input id="cycleStrengthOneRm" type="number" min="0.5" step="any" inputmode="decimal" placeholder="Enter your 1RM" oninput="saveCycleStrengthOneRm()"></div>
+    </div>
+    <div class="fields">
+      <div class="field"><label for="cycleStrengthPercent">TM percentage</label><select id="cycleStrengthPercent" onchange="saveCycleStrengthPercent()"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95">95%</option></select></div>
+      <div class="field"><label id="cycleStrengthTmLabel" for="cycleStrengthTm">Calculated TM (kg)</label><output id="cycleStrengthTm" for="cycleStrengthOneRm cycleStrengthPercent" class="asc-cycle-tm-result" aria-live="polite">—</output></div>
+    </div>
+    <div id="cycleStrengthFeedback" class="tiny" role="status" aria-live="polite">Changes save automatically.</div>
+    <div id="cycleStrengthRoundNote" class="tiny" style="margin-top:5px"></div>
+  </div>
+  <div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="deleteCycleButton" type="button" class="secondary full" style="margin-top:9px;border-color:#934a50;color:#ff9ca2" onclick="openDeleteCycle()" hidden>DELETE PROGRAMME</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
+  </div>
+  <div class="cycle-editor-actions">
+   <button type="button" class="secondary" onclick="closeCycleEditor()">CANCEL</button>
+   <button type="button" id="saveCycleSelectionBtn" onclick="saveCycleSelection()">SAVE CYCLE CHANGES</button>
+  </div>
+ </section>
+</div>
 <main>
 <section id="home" class="screen active">
  <div class="eyebrow">TRAINING HQ</div><h1>Ascension dashboard</h1><p class="muted tiny" id="todayDate"></p>
@@ -314,22 +388,6 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
    <button type="button" class="secondary small asc-recovery-trigger" id="ascRecoveryOpen" onclick="openAscWorkoutRecovery()" hidden>RECOVER PAST SPARTANX WORKOUTS</button>
  <div id="cycleDetails" class="cycle-details" hidden>
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
- <div class="card"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p>
-  <div class="asc-cycle-strength-editor" id="cycleStrengthEditor" aria-label="Starting strength for your cycle">
-    <div class="eyebrow">SET YOUR STARTING STRENGTH</div>
-    <p class="tiny" style="margin:6px 0 12px">Each lift remembers its own 1RM. Your Training Max and cycle weights recalculate automatically.</p>
-    <div class="fields">
-      <div class="field"><label for="cycleStrengthLift">Exercise</label><select id="cycleStrengthLift" onchange="selectCycleStrengthLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
-      <div class="field"><label id="cycleStrengthOneRmLabel" for="cycleStrengthOneRm">1RM (kg)</label><input id="cycleStrengthOneRm" type="number" min="0.5" step="any" inputmode="decimal" placeholder="Enter your 1RM" oninput="saveCycleStrengthOneRm()"></div>
-    </div>
-    <div class="fields">
-      <div class="field"><label for="cycleStrengthPercent">TM percentage</label><select id="cycleStrengthPercent" onchange="saveCycleStrengthPercent()"><option value="90">90%</option><option value="92.5">92.5%</option><option value="95">95%</option></select></div>
-      <div class="field"><label id="cycleStrengthTmLabel" for="cycleStrengthTm">Calculated TM (kg)</label><output id="cycleStrengthTm" for="cycleStrengthOneRm cycleStrengthPercent" class="asc-cycle-tm-result" aria-live="polite">—</output></div>
-    </div>
-    <div id="cycleStrengthFeedback" class="tiny" role="status" aria-live="polite">Changes save automatically.</div>
-    <div id="cycleStrengthRoundNote" class="tiny" style="margin-top:5px"></div>
-  </div>
-  <div id="cycleExerciseOptions" style="margin-top:12px"></div><button id="saveCycleSelectionBtn" class="full" style="margin-top:12px" onclick="saveCycleSelection()">Create six-week cycle</button><button id="deleteCycleButton" type="button" class="secondary full" style="margin-top:9px;border-color:#934a50;color:#ff9ca2" onclick="openDeleteCycle()" hidden>DELETE PROGRAMME</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
  <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
  <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
  <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
@@ -436,6 +494,38 @@ function ascRankState(){const total=state.logs.length,prestige=state.prestige||{
 function renderAscRank(){const r=ascRankState();$('ascRankName').textContent=ascRankLabel(r.level);document.body.dataset.sxRankTier=String(r.level===5?8:r.level+1);$('ascRankXp').textContent=r.xp+' XP';$('ascRankBar').style.width=(r.level===5?100:r.xp%3/3*100)+'%';$('ascRankNext').textContent=r.level===5?'Olympian achieved — prestige available':(3-r.xp%3)+' XP to '+ascRankLabel(r.level+1);$('ascPrestigeLevel').textContent=r.prestige;$('ascRankSessions').textContent=r.total+' saved workouts';$('ascRankEmblem').src='../ranks/'+['mortal.svg','spartan.svg','hero.svg','demigod.svg','titan.svg','olympian.svg'][r.level];$('ascRankEmblem').alt=ASC_RANKS[r.level]+' rank emblem';$('navRankEmblem').src=$('ascRankEmblem').src;$('ascPrestigeButton').disabled=r.level<5;$('ascPrestigeButton').textContent=r.level===5?'Prestige · Ascend to level '+(r.prestige+1):'Reach Olympian to prestige'}
 function prestigeAscRank(){const r=ascRankState();if(r.level!==5)return;if(!confirm('Prestige to level '+(r.prestige+1)+'? Your rank resets to Mortal, but your workouts and training history are preserved.'))return;state.prestige={level:r.prestige+1,xpOffset:r.total};persist();toast('Prestige '+(r.prestige+1)+' unlocked!')}
 
+let cycleEditorLock=null,cycleEditorCaller=null;
+function openCycleEditor(){
+ const overlay=$('cycleEditorBackdrop');
+ if(!overlay||overlay.classList.contains('open'))return;
+ // Always start from saved data; unchecked edits are not retained after Cancel.
+ renderCycle();
+ $('cycleEditorTitle').textContent=state.cycle.created?'Edit programme':'Build your cycle';
+ cycleEditorCaller=document.activeElement;
+ cycleEditorLock={body:document.body.style.overflow,html:document.documentElement.style.overflow};
+ document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
+ overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+ $('cycleEditorScroll').scrollTop=0;
+ $('cycleEditorClose').focus({preventScroll:true});
+}
+function closeCycleEditor(){
+ const overlay=$('cycleEditorBackdrop');
+ if(!overlay||!overlay.classList.contains('open'))return;
+ overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
+ if(cycleEditorLock){
+  document.body.style.overflow=cycleEditorLock.body;
+  document.documentElement.style.overflow=cycleEditorLock.html;
+ }
+ cycleEditorLock=null;
+ const caller=cycleEditorCaller;cycleEditorCaller=null;
+ if(caller?.isConnected)caller.focus({preventScroll:true});
+}
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Escape'||!$('cycleEditorBackdrop')?.classList.contains('open'))return;
+ if($('cycleConfirmBackdrop')?.classList.contains('open')||$('deleteCycleBackdrop')?.classList.contains('open'))return;
+ event.preventDefault();closeCycleEditor();
+});
+
 function openCycleReview(){renderCycleReview();$('cycleReviewBackdrop').classList.add('open')}
 function closeCycleReview(){$('cycleReviewBackdrop').classList.remove('open')}
 function openSettings(){$('settingsBackdrop').classList.add('open');renderSettings()}
@@ -536,6 +626,7 @@ function confirmDeleteCycle(){
  }
  stopRestTimer();
  closeDeleteCycle();
+ closeCycleEditor();
  const panel=$('cycleDetails'),expand=$('cycleExpandButton');
  if(panel&&expand){
   panel.hidden=true;
@@ -554,7 +645,7 @@ function saveCycleSelection(){
  const chosen=[...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].map(x=>x.value);
  if(!chosen.length){toast('Select at least one exercise');return}
  const existing=!!state.cycle.created;
- if(existing&&chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x))){toast('Cycle selection unchanged · 1RM and TM changes already saved');return}
+ if(existing&&chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x))){toast('Cycle selection unchanged · 1RM and TM changes already saved');closeCycleEditor();return}
  const added=chosen.filter(x=>!selectedLifts().includes(x));
  const removed=selectedLifts().filter(x=>!chosen.includes(x));
  const prompt=existing
@@ -569,7 +660,7 @@ function saveCycleSelection(){
 }
 let pendingCycleSelection=null;
 function discardCycleConfirmation(){pendingCycleSelection=null;$('cycleConfirmBackdrop').classList.remove('open')}
-function confirmCycleStart(){if(!pendingCycleSelection)return;const {chosen,existing}=pendingCycleSelection;discardCycleConfirmation();applyCycleSelection(chosen,existing);if(!existing)showScreen('workout')}
+function confirmCycleStart(){if(!pendingCycleSelection)return;const {chosen,existing}=pendingCycleSelection;discardCycleConfirmation();applyCycleSelection(chosen,existing);closeCycleEditor();if(!existing)showScreen('workout')}
 function applyCycleSelection(chosen,existing){
  const weeks={...(state.cycle.weeks||{})};
  chosen.forEach(x=>{if(!weeks[x])weeks[x]=1});
@@ -601,35 +692,25 @@ function resetEmbeddedAscensionOpening(){
  });
 }
 function showScreen(id,addHistory=true){
- // The cycle builder is a panel on Home, not its own .screen.
- // Resolve the alias BEFORE finding the target and switching screens.
- const openingCycleBuilder=id==='cycle';
+ // The programme editor is a separate modal, not part of View Full Cycle.
+ if(id==='cycle'){
+  if(!document.querySelector('#home.screen.active'))showScreen('home',addHistory);
+  openCycleEditor();
+  return;
+ }
  if(id==='progress')id='profile';
- if(openingCycleBuilder)id='home';
  const target=$(id);if(!target)return;
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
- if(openingCycleBuilder){
-  const panel=$('cycleDetails'),button=$('cycleExpandButton');
-  if(panel&&button){
-   panel.hidden=false;
-   button.textContent='Hide full cycle';
-   button.setAttribute('aria-expanded','true');
-  }
-  renderCycle();
- }
  if(id==='workout')renderWorkout();if(id==='profile')renderProgress();if(id==='metrics')renderMetrics();
  if(addHistory&&history.state?.screen!==id)history.pushState({screen:id},'',`#${id}`);
- // In the SpartanX iframe, every opened screen starts at the top.
- // Standalone AscensionX still jumps to its exercise-selection card.
+ // In both embedded and standalone modes, page navigation begins at the top.
+ // Programme editing now uses its own scrollable window.
  if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();
  document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';
  resetAscensionScrollTop();
  requestAnimationFrame(()=>{
-  if(openingCycleBuilder&&!ascensionEmbeddedBySpartanX){
-   const builder=$('cycleExerciseOptions')?.closest('.card');
-   if(builder)builder.scrollIntoView({block:'start',behavior:'auto'});
-  }else resetAscensionScrollTop();
+  resetAscensionScrollTop();
  });
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));

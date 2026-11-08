@@ -3802,7 +3802,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=267',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./tools/replica.js?v=280"></script><script src="./tools/531-native.js?v=274"></script><script src="./tools/531-multilift.js?v=268"></script><script src="./assets/ascension/quick-access.js?v=264"></script>
+</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./tools/replica.js?v=281"></script><script src="./tools/531-native.js?v=274"></script><script src="./tools/531-multilift.js?v=268"></script><script src="./assets/ascension/quick-access.js?v=264"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -4119,7 +4119,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/531-cycle-flow.js?v=271"></script>
 <script id="sx-pwa-update-controller">
 (()=>{
- const BUILD=280;
+ const BUILD=281;
  const status=document.getElementById('sxUpdateStatus');
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;

@@ -67,7 +67,7 @@ function renderPreview(){
  let sets='<div class="sx531-sets">';
  if(w.warmups.length){sets+='<div class="sx531-section">WARM-UP SETS</div>'+w.warmups.map(s=>row(Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('')}
  sets+='<div class="sx531-section">WORKING SETS</div>'+w.sets.map((s,i)=>row('Set '+(i+1)+' · '+Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('');
- if(w.bbb){sets+='<div class="sx531-section">BORING BUT BIG</div>'+row('5 sets · '+w.bbb.pct+'% TM',w.bbb.weight,'5 × 10')}
+ if(w.bbb){sets+='<div class="sx531-section">BORING BUT BIG · '+w.bbb.pct+'% TM</div>'+Array.from({length:Number(w.bbb.sets)},(_,i)=>row('BBB Set '+(i+1),w.bbb.weight,String(w.bbb.reps))).join('')}
  sets+='</div>';
  $('sx531CycleContent').innerHTML=selector+'<div class="sx531-caption">'+safe(c.name)+'</div>'+cards+
   '<div class="sx531-week-head"><strong>WEEK '+n+' · '+safe(w.name?.split('·').at(-1)?.trim()||'5/3/1')+'</strong><span>TM '+w.tm+' kg</span></div>'+

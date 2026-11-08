@@ -39,5 +39,52 @@
       return {status:'unavailable',reason:'This browser blocked access to SpartanX workout storage.',sessions:[],rawCount:0};
     }
   }
-  global.SXBridge=Object.freeze({read,storageKey:KEY});
+  // Live read is separate from saved history. It reads the workout logger's
+  // existing autosaved draft without writing to or modifying either database.
+  const DRAFT_KEY='spartx_draft_v1';
+  const CARDIO=/^(?:stairmaster(?:\s*\(|\b)|treadmill\b|rowing machine\b|bike\b|recumbent bike\b|cross trainer\b|skierg\b|elliptical\b)/i;
+  function readLive(storage){
+    try{
+      const store=storage===undefined?global.localStorage:storage;
+      if(!store||typeof store.getItem!=='function')
+        return {status:'unavailable',reason:'Workout draft storage is unavailable.',exercises:[],sets:0};
+      const text=store.getItem(DRAFT_KEY);
+      if(!text)return {status:'idle',reason:'No active workout in this browser.',exercises:[],sets:0};
+      if(text.length>4*1024*1024)
+        return {status:'unavailable',reason:'Workout draft exceeds the live-preview limit.',exercises:[],sets:0};
+      const draft=JSON.parse(text);
+      if(!draft||draft.version!==1||draft.sessionActive!==true||draft.editingSessionId!=null||!Array.isArray(draft.work)){
+        return {status:'idle',reason:'No active, unsaved workout. Editing historical sessions is excluded.',exercises:[],sets:0};
+      }
+      const E=global.SXEngine;
+      const exercises=draft.work.slice(0,80).flatMap(ex=>{
+        const originalName=String(ex?.name||'').trim().slice(0,100);
+        if(!originalName||CARDIO.test(originalName)||!Array.isArray(ex.sets))return [];
+        const name=typeof E?.canonical==='function'?E.canonical(originalName):originalName;
+        const sets=ex.sets.slice(0,80).flatMap((set,index)=>{
+          // Only a checked set with valid load/reps is eligible; no future sets.
+          if(set?.done!==true||String(set?.type||'').toLowerCase()==='cardio')return [];
+          if(set.weight===''||set.weight==null||set.reps===''||set.reps==null)return [];
+          const weight=Number(set.weight),reps=Number(set.reps);
+          if(!Number.isFinite(weight)||weight<0||weight>1500||!Number.isInteger(reps)||reps<1||reps>100)return [];
+          const rawRpe=set.rpe===''||set.rpe==null?null:Number(set.rpe);
+          const rpe=rawRpe!=null&&Number.isFinite(rawRpe)&&rawRpe>=6&&rawRpe<=10?rawRpe:null;
+          return [{weight,reps,rpe,type:String(set.type||'Working Set').slice(0,40),index:index+1,done:true}];
+        });
+        return sets.length?[{name,originalName,sets,programmed:!!ex.ascensionLink||/cycle|5\/3\/1|ascensionx/i.test(String(ex.notes||''))}]:[];
+      });
+      const completed=exercises.reduce((n,ex)=>n+ex.sets.length,0);
+      const elapsed=Math.max(0,Math.min(7*86400,Number(draft.elapsed)||0));
+      return {
+        status:completed?'live':'waiting',
+        reason:completed?'':'Workout is active; finish a valid set to see live metrics.',
+        name:String(draft.activeWorkoutName||'Active workout').slice(0,100),
+        exercises,sets:completed,elapsed,paused:draft.sessionPaused===true,
+        draftKey:DRAFT_KEY
+      };
+    }catch(_){
+      return {status:'unavailable',reason:'Live workout draft could not be read.',exercises:[],sets:0};
+    }
+  }
+  global.SXBridge=Object.freeze({read,readLive,storageKey:KEY,draftKey:DRAFT_KEY});
 })(window);

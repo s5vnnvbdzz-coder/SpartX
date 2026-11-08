@@ -114,11 +114,15 @@ const ascensionOpenButton=$('openAscensionX');
 const ascensionCloseButton=ascensionPortal.getElementById('closeAscensionX');
 function syncAscensionViewport(){
  const viewport=window.visualViewport;
- const height=viewport?.height||window.innerHeight||document.documentElement.clientHeight;
- const top=viewport?.offsetTop||0;
- if(Number.isFinite(height)&&height>0)
-  ascensionPortalHost.style.setProperty('--sx-asc-viewport-height',Math.round(height)+'px');
- ascensionPortalHost.style.setProperty('--sx-asc-viewport-top',Math.max(0,Math.round(top))+'px');
+ const visibleHeight=viewport?.height||window.innerHeight||document.documentElement.clientHeight;
+ const offsetTop=Math.max(0,Number(viewport?.offsetTop)||0);
+ // A positive visualViewport offset used to push the *entire* embedded
+ // dashboard down on iOS. The portal is fixed to the top of the layout
+ // viewport, while still sizing to the visible area as browser chrome changes.
+ const fittedHeight=Math.max(0,visibleHeight+offsetTop);
+ if(Number.isFinite(fittedHeight)&&fittedHeight>0)
+  ascensionPortalHost.style.setProperty('--sx-asc-viewport-height',Math.round(fittedHeight)+'px');
+ ascensionPortalHost.style.setProperty('--sx-asc-viewport-top','0px');
 }
 syncAscensionViewport();
 window.visualViewport?.addEventListener('resize',syncAscensionViewport,{passive:true});

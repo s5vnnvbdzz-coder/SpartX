@@ -210,6 +210,39 @@ body.spartanx-light .rank-progress-track span{background:linear-gradient(90deg,#
 .rank-tier span{font-size:9px;color:var(--muted);text-align:center;white-space:nowrap}
 .rank-tier.current span{color:var(--lime);font-weight:900}
 .rank-xp-note{font-size:10px;color:var(--muted);margin:12px 0 0;line-height:1.4}
+
+/* Compact, accessible Rank Progression card. Progress and rank icons always
+   remain visible; only the explanatory detail collapses. */
+.spartan-rank-card .rank-card-heading{gap:10px;align-items:center}
+.spartan-rank-card .rank-card-heading>div:first-child{min-width:0}
+.spartan-rank-card .rank-card-actions{display:flex;align-items:center;justify-content:flex-end;flex:none;gap:8px}
+.spartan-rank-card .rank-collapse-toggle{
+ display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;
+ padding:0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel2);color:var(--txt);font:inherit;
+ cursor:pointer;box-shadow:none
+}
+.spartan-rank-card .rank-collapse-chevron{
+ display:block;font-size:24px;line-height:1;transform:translateY(-3px);
+ transition:transform .18s ease
+}
+.spartan-rank-card:not(.is-collapsed) .rank-collapse-chevron{transform:translateY(2px) rotate(180deg)}
+.spartan-rank-card .rank-collapse-toggle:focus-visible{
+ outline:2px solid var(--lime);outline-offset:3px
+}
+.spartan-rank-card.is-collapsed .rank-expanded-detail{display:none!important}
+.spartan-rank-card.is-collapsed .rank-progress-track{margin-top:16px}
+.spartan-rank-card.is-collapsed .rank-tier-strip{margin-top:13px}
+.spartan-rank-card.is-collapsed .rank-milestone-track{margin-top:12px}
+@media(max-width:380px){
+ .spartan-rank-card .rank-card-actions{gap:5px}
+ .spartan-rank-card .rank-collapse-toggle{width:34px;height:34px;flex-basis:34px}
+ .spartan-rank-card .rank-xp-total{padding:7px 8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .spartan-rank-card .rank-collapse-chevron{transition:none}
+}
+
 .badge-collection-card{padding:13px 15px}
 .badge-collection-card summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
 .badge-collection-card summary::-webkit-details-marker{display:none}
@@ -1674,7 +1707,21 @@ body:has(#sxConfirm531StartOverlay:not([hidden])) #trackerNav{
 <div id="sxMainHeaderSpacer" aria-hidden="true"></div>
 <main>
 <section id="home" class="screen active">
-<div class="eyebrow">YOUR TRAINING, TRACKED</div><h1>Home</h1><div class="card spartan-rank-card" id="homeRankProgression"><div class="row between"><div><div class="eyebrow">YOUR JOURNEY</div><h2 style="margin:5px 0 0">Rank Progression</h2></div><span class="rank-xp-total" id="rankXP">0 XP</span></div><div class="rank-current-row"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div></div><div class="rank-progress-track"><span id="rankProgressFill"></span></div><div class="row between rank-progress-labels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div><div class="rank-tier-strip" id="homeRankTiers"></div><div class="rank-milestone-track" aria-label="Ranks achieved"><span id="rankMilestoneFill"></span></div><p class="rank-xp-note">Progress is earned through completed workouts. XP values and rank thresholds can be fine-tuned later.</p></div>
+<div class="eyebrow">YOUR TRAINING, TRACKED</div><h1>Home</h1><div class="card spartan-rank-card is-collapsed" id="homeRankProgression">
+  <div class="row between rank-card-heading">
+    <div><div class="eyebrow">YOUR JOURNEY</div><h2 style="margin:5px 0 0">Rank Progression</h2></div>
+    <div class="rank-card-actions">
+      <span class="rank-xp-total" id="rankXP">0 XP</span>
+      <button type="button" class="rank-collapse-toggle" id="rankCollapseToggle" aria-expanded="false" aria-label="Expand Rank Progression" aria-controls="rankCurrentDetails rankProgressLabels rankXpHelp" title="Expand Rank Progression"><span aria-hidden="true" class="rank-collapse-chevron">⌄</span></button>
+    </div>
+  </div>
+  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div></div>
+  <div class="rank-progress-track" id="rankExperienceTrack" role="progressbar" aria-label="Experience towards next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rankProgressFill"></span></div>
+  <div class="row between rank-progress-labels rank-expanded-detail" id="rankProgressLabels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div>
+  <div class="rank-tier-strip" id="homeRankTiers"></div>
+  <div class="rank-milestone-track" aria-label="Ranks achieved"><span id="rankMilestoneFill"></span></div>
+  <p class="rank-xp-note rank-expanded-detail" id="rankXpHelp">Progress is earned through completed workouts. XP values and rank thresholds can be fine-tuned later.</p>
+</div>
 
 <section class="card sx-intelligence-entry" id="sxIntelligenceEntry" aria-label="SpartanX Intelligence">
   <div class="row between" style="align-items:center;gap:12px">
@@ -2323,6 +2370,29 @@ function renderLatestSessionRank(){
  box.innerHTML='<span class="tiny">LATEST SESSION RANK</span>'+(bw&&gender?rankEmblem(SpartanX_RANKS.indexOf(rank)):'')+'<strong>'+(bw&&gender?spartanxRankLabel(rank,SpartanX_RANKS.indexOf(rank)):rank)+'</strong><small>'+volume.toLocaleString(undefined,{maximumFractionDigits:1})+' kg total volume'+(bw&&gender?' · '+score.toFixed(1)+'× bodyweight':!gender?' · Choose gender in Edit Profile for standards':' · Enter bodyweight above to rank this session')+'</small>';
 }
 
+const RANK_COLLAPSE_KEY='spartx_rank_card_collapsed_v1';
+function setHomeRankCollapsed(collapsed,save=false){
+ const card=$('homeRankProgression'),button=$('rankCollapseToggle');
+ if(!card||!button)return;
+ card.classList.toggle('is-collapsed',!!collapsed);
+ button.setAttribute('aria-expanded',String(!collapsed));
+ const label=collapsed?'Expand Rank Progression':'Collapse Rank Progression';
+ button.setAttribute('aria-label',label);
+ button.title=label;
+ if(save)try{localStorage.setItem(RANK_COLLAPSE_KEY,collapsed?'1':'0')}catch(_){}
+}
+(function initializeHomeRankCollapse(){
+ const button=$('rankCollapseToggle');
+ if(!button)return;
+ let collapsed=true;
+ try{const saved=localStorage.getItem(RANK_COLLAPSE_KEY);if(saved!==null)collapsed=saved==='1'}catch(_){}
+ setHomeRankCollapsed(collapsed);
+ button.addEventListener('click',()=>{
+  const card=$('homeRankProgression');
+  setHomeRankCollapsed(!card.classList.contains('is-collapsed'),true);
+ });
+})();
+
 let activePerformanceMetric='duration';
 
 const SPARTANX_PROGRESS_RANKS=[
@@ -2347,7 +2417,7 @@ function renderSpartanProgress(){
  $('rankXP').textContent=xp+' XP';document.body.dataset.sxRankTier=String(state.index===5?8:state.index+1);$('currentRankName').textContent=spartanxRankLabel(state.current.name,state.index);
  $('currentRankEmblem').src='./ranks/'+state.current.file;$('currentRankEmblem').alt=state.current.name+' rank emblem';
  $('rankWorkoutCount').textContent=state.workouts+' completed '+(state.workouts===1?'workout':'workouts');
- $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=spartanxRankLabel(state.current.name,state.index);
+ $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankExperienceTrack')?.setAttribute('aria-valuenow',String(Math.round(state.progress*100)));$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=spartanxRankLabel(state.current.name,state.index);
  $('rankProgressTo').textContent=state.next?'Next: '+spartanxRankLabel(state.next.name,state.index+1)+' · '+(state.next.workouts-state.count)+' XP to go':'MAXIMUM RANK';
  $('homeRankTiers').innerHTML=activeProgressRanks().map((r,i)=>'<div class="rank-tier '+(i<=state.index?'earned':'')+(i===state.index?' current':'')+'"><img src="./ranks/'+r.file+'" alt=""><span class="rank-tier-name">'+esc(r.name)+'</span><span class="rank-tier-level">Rank '+(SPARTANX_RANK_NUMERALS[i]||'I')+'</span></div>').join('');
  const badges=activeProgressRanks().map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.index}));

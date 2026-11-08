@@ -1,4 +1,4 @@
-# SpartanX Intelligence — Athlete Dashboard (v0.1)
+# SpartanX Intelligence — Athlete Dashboard
 
 A standalone, static, zero-dependency prototype of **SpartanX Intelligence** and the **Athlete Dashboard** as a single system.
 
@@ -7,6 +7,19 @@ A standalone, static, zero-dependency prototype of **SpartanX Intelligence** and
 - Source: [index.html](./index.html)
 
 This is an independent app in the \`intelligence/\` directory. The original SpartanX workout logger remains the only place users log workouts. This module now **automatically reads** saved completed sessions from the same-origin browser storage key `spartx_db` on launch and when the app returns to the foreground. It never modifies existing workout records. If browser storage is separate (e.g. iPhone Safari versus Home Screen app), it shows a clear no-connection state rather than fictional results.
+
+## Live Session upgrade (November 2026)
+
+SpartanX Intelligence now reads **completed sets in an active workout** from the existing same-origin autosaved draft `spartx_draft_v1`, in addition to reading saved training history from `spartx_db`.
+
+- A provisional Live Session panel appears during an active workout in the same browser/PWA storage context.
+- Only checked, valid resistance sets contribute. Warm-ups count towards total volume, but not working-set estimated strength.
+- Each selected exercise shows completed sets, working volume, top-set estimated 1RM, comparison with the last saved session, logged RPE, effort signals and cautious progression guidance.
+- The current draft is **never added to saved historical graphs or permanent records** until Finish & Save.
+- Discarded workouts disappear from the live panel; editing an old saved workout is explicitly excluded.
+- This is read-only and local. No data is transmitted, and separate iPhone Safari and Home Screen storage contexts may not share workouts.
+
+Run `node intelligence/live.test.js` to check live-set filtering, history isolation and RPE-based advice. The relevant modules are `bridge.js`, `live.js` and `app.js`.
 
 ## Included in v0.1
 - Four responsive pages: Athlete Overview, Performance, Muscle Workload and Intelligence.
@@ -44,7 +57,7 @@ Automatic local reading is available now, but this is **not** cloud sync or acco
 - Load suggestions are based on very limited signals and need human judgement. They cannot account for injuries, pain, sleep, velocity, technique or fatigue.
 - Muscle counts attribute a set to the exercise's *primary* muscle only. This isn't a complete biomechanical model.
 - Demo goals are stored under `sx_intelligence_demo_goals_v1` and linked-user goals under `sx_intelligence_linked_goals_v1`. Neither key is part of the original SpartanX workout database. Imported workouts remain in memory, not persistent storage.
-- All training data shown by default is fictional.
+- Fictional demo data is used only when demonstration mode is explicitly selected; connected SpartanX training data is not replaced with fictional sessions.
 
 ## Test
 \`\`\`bash

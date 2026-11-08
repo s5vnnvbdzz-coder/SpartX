@@ -1046,9 +1046,8 @@ body:has(>main>.screen.active:is(#home,#workout,#tools,#profile)):not(:has(#mini
 
 <link rel="stylesheet" href="./assets/themes/theme-rank-frames.css?v=206">
 <link rel="stylesheet" href="./assets/navigation/main-carousel.css">
-<link rel="stylesheet" href="./assets/themes/spartanx-settings-surface.css?v=236">
+<link rel="stylesheet" href="./assets/themes/spartanx-settings-surface.css?v=274">
 <link rel="stylesheet" href="./assets/themes/jade-sentinel.css?v=237">
-<link rel="stylesheet" href="./assets/themes/cosmic-nebula.css?v=261">
 <style id="sx-active-set-compact-grid">
 /* Active workout: reserve meaningful room for PREV instead of six equal columns.
    Scoped to the workout logger to avoid affecting other set tables or themes. */
@@ -1654,6 +1653,7 @@ body:has(#sxConfirm531StartOverlay:not([hidden])) #trackerNav{
 <link rel="stylesheet" href="./assets/exercises/exercise-stats-layout.css?v=252">
 <link rel="stylesheet" href="./assets/profile/profile-social-pages.css?v=241">
 <link rel="stylesheet" href="./assets/profile/profile-account-preferences.css?v=243">
+<link rel="stylesheet" href="./assets/themes/cosmic-nebula.css?v=274">
 </head>
 <body class="sx-main-header-layout">
 <header><div id="sxBrandHeader"><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div><div class="sx-add-exercise-header" id="sxHeaderExerciseControls" role="group" aria-label="Add Exercise header">
@@ -3587,7 +3587,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=267',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./tools/replica.js?v=273"></script><script src="./tools/531-native.js?v=232"></script><script src="./tools/531-multilift.js?v=268"></script><script src="./assets/ascension/quick-access.js?v=264"></script>
+</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./tools/replica.js?v=274"></script><script src="./tools/531-native.js?v=274"></script><script src="./tools/531-multilift.js?v=268"></script><script src="./assets/ascension/quick-access.js?v=264"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -3904,7 +3904,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/531-cycle-flow.js?v=271"></script>
 <script id="sx-pwa-update-controller">
 (()=>{
- const BUILD=273;
+ const BUILD=274;
  const status=document.getElementById('sxUpdateStatus');
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;

@@ -142,11 +142,21 @@ function build(){
   completedSessions:{},completedWeeks:[]};
  if(editing){
   const current=getPriorCurrentWeek(editing);
-  for(const lift of lifts){
-   data.completedSessions[lift]=editing.exercises?.includes(lift)||editing.lift===lift?
-    priorSessions(editing,lift).filter(n=>n>=1&&n<=count):
-    Array.from({length:Math.min(count,current-1)},(_,i)=>i+1);
+  const archived={...(editing.archivedSessions||{})};
+  // Removing a lift preserves its previous completed weeks for possible re-adding.
+  for(const oldLift of LIFTS){
+   if(!lifts.includes(oldLift)&&(editing.exercises?.includes(oldLift)||editing.lift===oldLift))
+    archived[oldLift]=priorSessions(editing,oldLift);
   }
+  for(const lift of lifts){
+   const already=editing.exercises?.includes(lift)||editing.lift===lift;
+   const restored=Array.isArray(archived[lift])?archived[lift]:null;
+   data.completedSessions[lift]=(already?priorSessions(editing,lift):
+    restored||Array.from({length:Math.min(count,current-1)},(_,i)=>i+1))
+    .filter(n=>Number.isInteger(Number(n))&&n>=1&&n<=count).map(Number);
+   delete archived[lift];
+  }
+  data.archivedSessions=archived;
   data.completedWeeks=Array.from({length:count},(_,i)=>i+1).filter(n=>lifts.every(l=>data.completedSessions[l].includes(n)));
  }
  return data;
@@ -199,7 +209,7 @@ root.addEventListener('click',event=>{
    const items=read(),idx=items.findIndex(c=>c.id===editing.id);
    if(idx<0){alert('This programme no longer exists.');return}
    items[idx]=next;
-   if(write(items)){finishEditor();el('programmeCard').classList.remove('visible');saveDraft()}
+   if(write(items)){finishEditor();el('programmeCard').classList.remove('visible');saveDraft();window.dispatchEvent(new Event('spartx:quickCycleSaved'))}
   }else{showPreview(next);el('programmeCard').scrollIntoView({block:'start',behavior:'instant'})}
  }
  else if(target.id==='saveCycle'){

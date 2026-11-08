@@ -1441,7 +1441,7 @@ body:has(#sxConfirm531StartOverlay:not([hidden])) #trackerNav{
  max-height:100%!important;
 }
 </style>
-<style id="sx-workout-fullscreen-workflow-v267">
+<style id="sx-workout-fullscreen-workflow-v268">
 /* A consistent, immediate full-screen transition from Start a Workout. */
 #sxQuick531Overlay,#sxQuick531CycleOverlay{
  align-items:stretch!important;justify-content:stretch!important;
@@ -3587,7 +3587,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=267',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./tools/replica.js?v=267"></script><script src="./tools/531-native.js?v=232"></script><script src="./tools/531-multilift.js?v=267"></script><script src="./assets/ascension/quick-access.js?v=264"></script>
+</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./tools/replica.js?v=268"></script><script src="./tools/531-native.js?v=232"></script><script src="./tools/531-multilift.js?v=268"></script><script src="./assets/ascension/quick-access.js?v=264"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -3718,7 +3718,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  const nativeHost=$('native531Host'),nativeHome=$('native531');
  const confirmOverlay=$('sxConfirm531StartOverlay'),confirmText=$('sxConfirm531StartDescription');
  const confirmCancel=$('sxCancel531Start'),confirmAccept=$('sxAccept531Start');
- let cycleLock=null;
+ let cycleLock=null,cycleEditorReturn=null;
 
  if(!button||!menu||!menuClose||!overlay||!host?.shadowRoot||!tools||!mount||!cycleOverlay||!cycleMount||!cycleClose||!nativeHost?.shadowRoot||!nativeHome)return;
  const calc=host.shadowRoot.querySelector('section[aria-labelledby="531Title"]');
@@ -3783,10 +3783,15 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  }
  function closeCycle(returnToCalculator=false){
   if(!cycleLock)return;
+  const editorReturn=cycleEditorReturn;cycleEditorReturn=null;
   cycleOverlay.hidden=true;
   nativeHost.classList.remove('sx-531-cycle-quick-mode');
   nativeHome.appendChild(nativeHost);
   unlock(cycleLock);cycleLock=null;
+  if(editorReturn){
+   window.spartanxOpen531SavedPreview?.(editorReturn.id,editorReturn.returnToMenu);
+   return;
+  }
   if(returnToCalculator&&(onWorkout()||onWorkoutSetup()))openCalc();
   else if(onWorkout())$('openExerciseLibrary')?.focus({preventScroll:true});
   else if(onWorkoutSetup())openMenu();
@@ -3803,6 +3808,25 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   cycleClose.focus({preventScroll:true});
  }
  window.addEventListener('spartx:create531CycleFromCalculator',e=>openCycleFromCalculator(e.detail));
+ window.addEventListener('spartx:open531CycleEditor',e=>{
+  const id=e.detail?.id;
+  if(!id)return;
+  const launchEdit=()=>{
+   const edit=nativeHost.shadowRoot?.querySelector('[data-edit="'+CSS.escape(String(id))+'"]');
+   edit?.click();
+  };
+  if(!(onWorkout()||onWorkoutSetup())){
+   switchScreen('native531',{instant:true});launchEdit();return;
+  }
+  if(cycleLock||calcLock)return;
+  cycleEditorReturn={id,returnToMenu:e.detail?.returnToMenu===true};
+  nativeHost.classList.add('sx-531-cycle-quick-mode');
+  cycleMount.appendChild(nativeHost);
+  cycleLock=lock();cycleOverlay.hidden=false;
+  $('sxQuick531CycleScroll').scrollTop=0;
+  launchEdit();
+  cycleClose.focus({preventScroll:true});
+ });
  window.addEventListener('spartx:quickCycleSaved',()=>closeCycle(false));
  window.addEventListener('spartx:quickCycleCancel',()=>closeCycle(true));
  cycleClose.addEventListener('click',()=>closeCycle(true));
@@ -3812,7 +3836,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  $('startNewWorkoutChoice').addEventListener('click',()=>{closeMenu(false);startSession();});
  menuClose.addEventListener('click',()=>closeMenu());
  menu.addEventListener('click',e=>{if(e.target===menu)closeMenu()});
- $('start531Shortcut').addEventListener('click',()=>{closeMenu(false);openCalc();});
+ $('start531Shortcut').addEventListener('click',()=>openCalc());
  $('startAscensionShortcut').addEventListener('click',()=>{
   closeMenu(false);
   if(typeof window.spartanxQuickStartAscension!=='function'||window.spartanxQuickStartAscension('new-workout')!==true)
@@ -3877,10 +3901,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  };
 })();
 </script>
-<script src="./assets/workouts/531-cycle-flow.js?v=267"></script>
+<script src="./assets/workouts/531-cycle-flow.js?v=268"></script>
 <script id="sx-pwa-update-controller">
 (()=>{
- const BUILD=267;
+ const BUILD=268;
  const status=document.getElementById('sxUpdateStatus');
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;

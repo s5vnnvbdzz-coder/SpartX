@@ -11,7 +11,7 @@
   const fmtKg=n=>Number.isFinite(n)?format(n,1)+' kg':'—';
   const formatPct=n=>n==null?'—':(n>0?'+':'')+format(n,1)+'%';
   const core=E.CORE;
-  const state={tab:'overview',range:90,selectedLift:'Bench Press',overviewLift:'Bench Press',athlete:'strength',goals:{},source:'demo',profile:null,analysis:null};
+  const state={tab:'overview',range:90,selectedLift:'Bench Press',overviewLift:'Bench Press',athlete:'strength',goals:{},source:'demo',profile:null,analysis:null,live:null,liveSummary:null,liveLift:'',liveSignature:''};
   const titles={
     overview:['YOUR TRAINING, DECODED','Athlete Dashboard','Every set is data. Every session is progress.'],
     performance:['STRENGTH & PROGRESSION','Performance Analytics','Understand your strength trends and track meaningful goals.'],
@@ -59,6 +59,85 @@
     state.analysis=E.analyse(state.profile.sessions,state.range);
     renderAll();
   }
+
+  // The provisional panel NEVER enters state.profile.sessions or E.analyse().
+  // SpartanX's historical charts use finished and saved workouts only.
+  function renderLivePanel(){
+    const section=$('liveSessionSection');
+    if(!section)return;
+    const live=state.live,summary=state.liveSummary;
+    const active=state.source.startsWith('spartanx')&&['live','waiting'].includes(live?.status);
+    section.hidden=!active;
+    if(!active)return;
+    $('liveWorkoutTitle').textContent=live.name||'Active workout';
+    const elapsed=Math.floor(Math.max(0,Number(live.elapsed)||0)/60);
+    $('liveWorkoutStatus').textContent=(live.paused?'Paused · ':'')+
+      (elapsed>=60?Math.floor(elapsed/60)+' h '+elapsed%60+' min':elapsed+' min')+
+      ' · '+summary.sets+' completed sets · not saved yet';
+    const metric=(label,value,sub)=>
+      '<div class="sx-live-metric"><small>'+escapeHtml(label)+'</small><strong>'+escapeHtml(String(value))+
+      '</strong><span>'+escapeHtml(sub)+'</span></div>';
+    $('liveSessionMetrics').innerHTML=
+      metric('Completed sets',format(summary.sets),summary.workingSets+' working · '+summary.warmupSets+' other')+
+      metric('Total volume',format(summary.volumeKg,1)+' kg','All checked resistance sets')+
+      metric('Working volume',format(summary.workingVolumeKg,1)+' kg','Completed working sets only')+
+      metric('Average RPE',summary.avgRpe==null?'—':format(summary.avgRpe,1),
+       summary.avgRpe==null?'Log RPE on working sets':summary.highEffort+' sets at RPE 9+');
+    const detail=$('liveWorkoutDetails');
+    if(!summary.selected){
+      detail.hidden=false;
+      $('liveExerciseTitle').textContent='Waiting for completed sets';
+      $('liveExerciseSelect').innerHTML='<option value="">No completed exercises</option>';
+      $('liveExerciseSelect').disabled=true;
+      $('liveExerciseCompare').innerHTML='<div class="sx-live-waiting">Finish and tick a valid set in SpartanX to start live exercise analysis.</div>';
+      $('liveExerciseSets').innerHTML='';
+      $('liveExerciseAdvice').innerHTML='';
+      return;
+    }
+    detail.hidden=false;
+    $('liveExerciseSelect').disabled=false;
+    const exercise=summary.selected;
+    state.liveLift=exercise.name;
+    $('liveExerciseTitle').textContent=exercise.name;
+    $('liveExerciseSelect').innerHTML=summary.exercises.map(ex=>
+      '<option value="'+escapeHtml(ex.name)+'" '+(ex.name===exercise.name?'selected':'')+'>'+escapeHtml(ex.name)+'</option>').join('');
+    const deltaText=n=>n==null?'No comparison':(n>0?'+':'')+format(n,1)+'%';
+    const deltaClass=n=>n==null?'':n>0?'positive':n<0?'negative':'';
+    const mini=(title,value,sub,cls='')=>'<div class="sx-live-mini"><small>'+escapeHtml(title)+
+      '</small><strong>'+escapeHtml(value)+'</strong><em class="'+cls+'">'+escapeHtml(sub)+'</em></div>';
+    $('liveExerciseCompare').innerHTML=
+      mini('Estimated top-set 1RM',exercise.bestE1rm==null?'—':fmtKg(exercise.bestE1rm),
+        exercise.bestE1rm==null?'Needs a 1–12 rep working set':'Epley estimate; not a verified max')+
+      mini('Vs last saved top set',deltaText(exercise.estimateDelta),
+        exercise.estimateDelta==null?'No comparable saved set':'Estimated 1RM comparison',deltaClass(exercise.estimateDelta))+
+      mini('Working volume',fmtKg(exercise.workVolumeKg),
+        exercise.volumeDelta==null?'Live partial session':deltaText(exercise.volumeDelta)+' vs previous full session',deltaClass(exercise.volumeDelta));
+    $('liveExerciseSets').innerHTML='<strong>COMPLETED SETS · '+exercise.completed+'</strong>'+
+      exercise.sets.map((set,index)=>{
+        const main=window.SXLive.working(set);
+        return '<div class="sx-live-set-row"><span class="sx-live-set-tag">'+(main?'SET':'OTHER')+' '+escapeHtml(String(set.index||index+1))+
+        '</span><span>'+escapeHtml(format(set.weight,1)+' kg × '+set.reps+' reps')+
+        '</span><span>'+escapeHtml(String(set.type||'Working Set'))+
+        '</span><span>'+(set.rpe==null?'RPE —':'RPE '+escapeHtml(format(set.rpe,1)))+'</span></div>';
+      }).join('');
+    const signals=[{tag:'EFFORT / FATIGUE SIGNAL',data:exercise.fatigue},{tag:'NEXT-SESSION GUIDANCE',data:exercise.advice}];
+    $('liveExerciseAdvice').innerHTML=signals.map(item=>
+      '<article class="'+escapeHtml(item.data.kind)+'"><span class="sx-live-advice-tag">'+item.tag+
+      '</span><h4>'+escapeHtml(item.data.title)+'</h4><p>'+escapeHtml(item.data.detail)+'</p></article>').join('');
+  }
+  function refreshLiveOnly(repaint=true){
+    if(!state.source.startsWith('spartanx'))return;
+    const live=window.SXBridge?.readLive?.()||{status:'idle',exercises:[]};
+    // SpartanX saves its draft frequently. Avoid rerendering for irrelevant
+    // elapsed-second changes when no set, RPE, or exercise data has changed.
+    const signature=JSON.stringify([live.status,live.name,live.paused,Math.floor((live.elapsed||0)/60),live.exercises]);
+    if(repaint&&signature===state.liveSignature)return;
+    state.liveSignature=signature;
+    state.live=live;
+    state.liveSummary=window.SXLive.summarise(live,state.profile?.sessions||[],state.liveLift);
+    if(repaint)renderLivePanel();
+  }
+
   function loadSpartanX(silent=false){
     const result=Bridge?.read();
     const status=result?.status||'unavailable';
@@ -72,9 +151,11 @@
     };
     state.source=connected?'spartanx':'spartanx-'+status;
     state.goals=Object.assign({},defaultGoal,readLinkedGoals());
-    $('modePill').textContent=connected?'● CONNECTED':'● '+(status==='empty'?'NO WORKOUTS':'NOT CONNECTED');
+    refreshLiveOnly(false);
+    const hasLive=['live','waiting'].includes(state.live?.status);
+    $('modePill').textContent=hasLive?'● LIVE SESSION':connected?'● CONNECTED':'● '+(status==='empty'?'NO WORKOUTS':'NOT CONNECTED');
     const line=connected
-      ?'<strong>Connected to SpartanX · '+result.sessions.length+' workouts.</strong> Training history is read from this device whenever Intelligence opens or returns to the foreground. Completed workouts only; no changes are made to your records.'
+      ?'<strong>Connected to SpartanX · '+result.sessions.length+' saved workouts.</strong> The Live Session panel separately reads completed sets from an active workout. Historical strength charts only use saved sessions; your records are not changed.'
       :'<strong>SpartanX history not available here.</strong> '+escapeHtml(result?.reason||'Unable to read this device’s workouts.')+' Open Intelligence using the button on SpartanX Home on the same device, or import a backup. iPhone Safari and Home Screen apps can use separate storage.';
     $('dataBanner').innerHTML='<span class="banner-symbol">ⓘ</span><span>'+line+' <a class="sx-back-link" href="../">Back to SpartanX</a></span>';
     const detail=$('connectionDetails');
@@ -82,8 +163,8 @@
       ?'Connected to '+result.sessions.length+' valid completed workouts on this device (read-only).'
       :result?.reason||'Unable to find SpartanX workout history in this browser.';
     renderAll();
-    if(!silent)toast(connected?'SpartanX workouts loaded: '+result.sessions.length:'No local workout history found.');
-    return connected;
+    if(!silent)toast(hasLive?'Live workout connected':connected?'SpartanX workouts loaded: '+result.sessions.length:'No local workout history found.');
+    return connected||hasLive;
   }
   function loadImported(raw){
     const src=Array.isArray(raw)?raw:raw?.sessions||raw?.db?.sessions||raw?.data?.sessions;
@@ -214,11 +295,16 @@
   function renderAll(){
     if(!state.profile)return;
     state.analysis=E.analyse(state.profile.sessions,state.range);
-    renderOverview();renderPerformance();renderMuscles();renderIntelligence();
+    renderOverview();renderPerformance();renderMuscles();renderIntelligence();renderLivePanel();
   }
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.go)));
   $('rangeSelect').addEventListener('change',e=>{state.range=Number(e.target.value);renderAll()});
+  $('liveExerciseSelect').addEventListener('change',e=>{
+    state.liveLift=e.target.value;
+    state.liveSummary=window.SXLive.summarise(state.live,state.profile?.sessions||[],state.liveLift);
+    renderLivePanel();
+  });
   $('overviewLift').addEventListener('change',e=>{state.overviewLift=e.target.value;renderOverview()});
   $('liftTabs').addEventListener('click',e=>{const target=e.target.closest('[data-lift]');if(target)selectLift(target.dataset.lift)});
   const goalField=$('goalInput');
@@ -272,7 +358,13 @@
   // Same-origin local storage is shared only within the same browser/app context.
   // No timer polling: re-read after another tab edits the DB or when app regains focus.
   window.addEventListener('storage',event=>{
-    if(event.key===Bridge?.storageKey && state.source.startsWith('spartanx'))loadSpartanX(true);
+    if(!state.source.startsWith('spartanx'))return;
+    if(event.key===Bridge?.storageKey)loadSpartanX(true);
+    else if(event.key===Bridge?.draftKey){
+      refreshLiveOnly(true);
+      $('modePill').textContent=['live','waiting'].includes(state.live?.status)?'● LIVE SESSION':
+        state.profile?.sessions?.length?'● CONNECTED':'● NO WORKOUTS';
+    }
   });
   window.addEventListener('pageshow',()=>{
     if(state.source.startsWith('spartanx'))loadSpartanX(true);

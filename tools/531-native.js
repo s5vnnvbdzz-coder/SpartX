@@ -170,8 +170,25 @@ function cycleDetailsHtml(data){
 }
 function renderDetails(data){$('cycleDetail').innerHTML=cycleDetailsHtml(data);}
 function readSaved(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return Array.isArray(d)?d:[];}catch(e){return[];}}
+function creationBlocked(){return window.spartanxHasActive531Cycle?.()===true}
+const creationNote=document.createElement('p');
+creationNote.className='hint';
+creationNote.textContent='A 5/3/1 cycle is already active. Open Saved Cycles to view or edit it.';
+creationNote.hidden=true;
+$('generate').after(creationNote);
+const cycleGuardStyle=document.createElement('style');
+cycleGuardStyle.textContent='#generate[hidden],#saveCycle[hidden],.sx531-cycle-create-note[hidden]{display:none!important}';
+shadow.appendChild(cycleGuardStyle);
+function sync531CreationControls(){
+ const blocked=creationBlocked(),editing=!$('editModal').hidden;
+ $('generate').hidden=blocked&&!editing;
+ $('saveCycle').hidden=blocked;
+ creationNote.hidden=!blocked||editing;
+}
+window.spartanxSync531CreationAvailability=sync531CreationControls;
 function writeSaved(items){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items));return true;}catch(e){$('saveStatus').textContent='Could not save. Check device storage settings.';return false;}}
 function renderSaved(){
+ sync531CreationControls();
  const items=readSaved();$('savedCount').textContent=items.length+' SAVED';
  if(!items.length){$('savedList').className='empty';$('savedList').textContent='Your saved programmes will appear here.';return;}
  $('savedList').className='';
@@ -180,13 +197,14 @@ function renderSaved(){
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
 function syncBbbOptions(){$('bbbOptions').hidden=!$('bbb').checked;}
-function openEditForm(){ $('editModalBody').appendChild($('setupCard')); $('setupCard').hidden=false; $('generate').textContent='SAVE CHANGES'; $('editModal').hidden=false; host.style.overflow='hidden'; $('tm').focus(); }
-function closeEditForm(){ $('setupPlaceholder').after($('setupCard')); $('setupCard').hidden=false; $('editModal').hidden=true; host.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; }
+function openEditForm(){ $('editModalBody').appendChild($('setupCard')); $('setupCard').hidden=false; $('generate').textContent='SAVE CHANGES'; $('editModal').hidden=false; sync531CreationControls(); host.style.overflow='hidden'; $('tm').focus(); }
+function closeEditForm(){ $('setupPlaceholder').after($('setupCard')); $('setupCard').hidden=false; $('editModal').hidden=true; host.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; sync531CreationControls(); }
 $('bbb').addEventListener('change',()=>{syncBbbOptions();saveDraft();});
 ['tm','increase','bbbPct'].forEach(id=>$(id).addEventListener('input',saveDraft));
 $('lift').addEventListener('change',selectPlannerLift);
 $('oneRm').addEventListener('input',recalcPlannerTM);
 $('generate').addEventListener('click',()=>{
+ if(!editingId&&creationBlocked()){sync531CreationControls();return}
  const tm=+$('tm').value,inc=+$('increase').value;
  if(!(tm>0)||tm>1000||inc<0||inc>50){alert('Enter a valid Training Max and a TM increase of 0 kg or more.');return;}
  generated=buildCycle(getDraft());
@@ -199,6 +217,7 @@ $('generate').addEventListener('click',()=>{
 });
 $('expandCycle').addEventListener('click',()=>{expanded=!expanded;$('cycleDetail').classList.toggle('open',expanded);$('expandCycle').textContent=expanded?'HIDE FULL CYCLE ↑':'VIEW ENTIRE CYCLE ↓';});
 $('saveCycle').addEventListener('click',()=>{
+ if(creationBlocked()){sync531CreationControls();return}
  if(!generated)return;
  const items=readSaved();const copy=JSON.parse(JSON.stringify(generated));copy.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);copy.created=new Date().toISOString();
  copy.completedWeeks=[];items.unshift(copy);if(writeSaved(items)){renderSaved();{window.dispatchEvent(new Event('spartx:cycleUpdated'));window.dispatchEvent(new Event('spartx:cycleSaved'));}$('programmeCard').classList.remove('visible');$('saveStatus').textContent='Cycle saved on this device. You can reopen it from Saved Cycles.';}
@@ -209,7 +228,9 @@ $('savedList').addEventListener('click',e=>{
  if(edit){const item=readSaved().find(x=>x.id===edit.dataset.edit);if(item){editingId=item.id;$('lift').value=item.lift;$('tm').value=item.startTM;$('increase').value=item.increase;weeks=[4,8,12].includes(+item.weeks)?+item.weeks:4;$('bbb').checked=!!item.bbb;$('bbbPct').value=String([50,60,70].includes(+item.bbbPct)?item.bbbPct:60);syncBbbOptions();setLength();saveDraft();openEditForm();}}
  if(del){const items=readSaved().filter(x=>x.id!==del.dataset.delete);if(writeSaved(items)){if(editingId===del.dataset.delete){closeEditForm();}renderSaved();window.dispatchEvent(new Event('spartx:cycleUpdated'));}}
 });
-window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)renderSaved()});window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:cycleUpdated')renderSaved()});
+window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)renderSaved()});
+window.addEventListener('spartx:cycleUpdated',sync531CreationControls);
+window.addEventListener('pageshow',sync531CreationControls);window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:cycleUpdated')renderSaved()});
 $('closeEdit').addEventListener('click',closeEditForm);$('cancelEdit').addEventListener('click',closeEditForm);$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditForm();});shadow.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditForm();});
 $('plannerBack').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(host.classList.contains('sx-531-cycle-quick-mode')){window.dispatchEvent(new Event('spartx:quickCycleCancel'));return;}if(typeof window.spartanxOpenTools==='function')window.spartanxOpenTools();else document.querySelector('#trackerNav [data-screen="tools"]')?.click();});
 restoreDraft();if(!$('oneRm').value){const stored=calculatorOneRm($('lift').value);if(stored)$('oneRm').value=String(stored);}setLength();$('bbbOptions').hidden=!$('bbb').checked;$('setupCard').hidden=false;renderSaved();

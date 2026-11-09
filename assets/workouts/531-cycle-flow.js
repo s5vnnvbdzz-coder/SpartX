@@ -247,7 +247,7 @@ function renderCard(){
  card.innerHTML=
   '<div class="sx-programme-head"><div><div class="sx-programme-kicker">5/3/1 · POWERLIFTING</div><h2 class="sx-programme-title">'+safe(c.name||'5/3/1 Strength Cycle')+'</h2></div>'+
   '<div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sx531QuickMenu" aria-label="5/3/1 programme options" aria-expanded="false" aria-controls="sx531QuickOptions">•••</button>'+
-  '<div class="sx-programme-options" id="sx531QuickOptions" hidden><button type="button" id="sx531QuickView">VIEW CYCLE</button><button type="button" id="sx531QuickManage">MANAGE SAVED CYCLES</button></div></div></div>'+
+  '<div class="sx-programme-options" id="sx531QuickOptions" hidden><button type="button" id="sx531QuickView">VIEW CYCLE</button><button type="button" id="sx531QuickManage">MANAGE CYCLE</button></div></div></div>'+
   '<p class="sx-programme-meta">5/3/1 · Powerlifting · Week '+(next?.week||'—')+' of '+c.weeks+(all.length>1?' · '+(all.length-1)+' more active':'')+'</p>'+
   '<div class="sx-programme-progressline"><span>CYCLE PROGRESS</span><strong>'+percent+'%</strong></div>'+
   '<div class="sx-programme-progress" role="progressbar" aria-label="5/3/1 cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><span style="width:'+percent+'%"></span></div>'+
@@ -261,10 +261,17 @@ card.addEventListener('click',e=>{
   const pop=$('sx531QuickOptions');pop.hidden=!pop.hidden;
   menuButton.setAttribute('aria-expanded',String(!pop.hidden));return;
  }
- if(e.target.closest('#sx531QuickView')){openPreview(false);return}
+ if(e.target.closest('#sx531QuickView')){
+  const pop=$('sx531QuickOptions');if(pop)pop.hidden=true;
+  $('sx531QuickMenu')?.setAttribute('aria-expanded','false');
+  openPreview(false);return;
+ }
  if(e.target.closest('#sx531QuickManage')){
-  const details=$('homeCycleCard');
-  if(details){details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'})}
+  const pop=$('sx531QuickOptions');if(pop)pop.hidden=true;
+  $('sx531QuickMenu')?.setAttribute('aria-expanded','false');
+  const active=activeCycles()[0];
+  if(active)window.dispatchEvent(new CustomEvent('spartx:open531CycleEditor',{detail:{id:active.id,returnToMenu:false,skipPreview:true}}));
+  return;
  }
 });
 window.addEventListener('spartx:cycleUpdated',renderCard);

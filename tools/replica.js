@@ -184,16 +184,17 @@ function deliverAscensionShortcut(){
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift,quickImport:destination.quickImport===true},location.origin)}catch(e){}
 }
 window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
- const option=mode==='continue'?'continue':'home';
+ const option=mode==='continue'?'continue':mode==='setup'?'setup':'home';
  ascensionQuickCaller=document.activeElement;
  const current=document.querySelector('.screen.active')?.id;
  const fromActiveSession=current==='activeWorkout';
  const fromNewWorkout=context==='new-workout'&&current==='workout';
+ const fromProgrammeSetup=context==='workout'&&current==='workout';
  const quick=fromActiveSession||fromNewWorkout;
  ascensionOverlay.classList.toggle('sx-ascension-quick',quick);
  ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:quick};
- ascensionCloseButton.textContent=quick?'← Back':'← TOOLS';
- ascensionCloseButton.setAttribute('aria-label',quick?'Back to workout choices':'Close AscensionX and return to Training Tools');
+ ascensionCloseButton.textContent=quick?'← Back':fromProgrammeSetup?'← WORKOUT':'← TOOLS';
+ ascensionCloseButton.setAttribute('aria-label',quick?'Back to workout choices':fromProgrammeSetup?'Close AscensionX and return to Workout':'Close AscensionX and return to Training Tools');
  openEmbeddedAscensionX();
  if(!ascensionOverlay.classList.contains('open')){ascensionQuickPending=null;return false}
  deliverAscensionShortcut();
@@ -217,7 +218,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=282';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=286';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});
@@ -311,7 +312,7 @@ window.addEventListener('message',e=>{
 // Preload the original app to prevent a blank iframe on first launch.
 window.addEventListener('load',()=>{
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=282';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=286';
 },{once:true});
 
 // The child stays mounted after leaving its overlay. Notify it immediately

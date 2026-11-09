@@ -11,24 +11,24 @@ const workout=document.getElementById('workout');
 if(!workout||document.getElementById('sxAscensionQuickCard'))return;
 const card=document.createElement('section');
 card.id='sxAscensionQuickCard';
-card.className='card sx-ascension-quick-card';
+card.className='card sx-ascension-quick-card sx-programme-card';
 card.setAttribute('aria-label','Active AscensionX cycle');
 card.hidden=true;
 card.innerHTML=`
- <div class="sx-asc-quick-head">
-  <div><div class="eyebrow">YOUR ACTIVE PROGRAMME</div><h2>ASCENSION<span style="color:var(--lime)">X</span> CYCLE</h2></div>
-  <span class="sx-asc-quick-tag">ACTIVE</span>
+ <div class="sx-programme-head">
+  <div><div class="sx-programme-kicker">ASCENSIONX · POWERLIFTING</div><h2 class="sx-programme-title" id="sxAscensionTitle">AscensionX</h2></div>
+  <div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sxAscensionOptions" aria-label="AscensionX programme options" aria-expanded="false" aria-controls="sxAscensionOptionsMenu">•••</button>
+   <div class="sx-programme-options" id="sxAscensionOptionsMenu" hidden><button type="button" id="sxAscensionView">VIEW CYCLE</button></div>
+  </div>
  </div>
- <p class="sx-asc-quick-summary" id="sxAscensionSummary">Your current six-week strength programme.</p>
- <div class="sx-asc-quick-lifts" id="sxAscensionLifts" aria-label="Current week for each lift"></div>
- <div class="sx-asc-quick-progress-top"><span>OVERALL CYCLE PROGRESS</span><strong id="sxAscensionPercent">0%</strong></div>
- <div class="sx-asc-quick-progress" role="progressbar" aria-label="AscensionX cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sxAscensionProgress"><span id="sxAscensionProgressFill"></span></div>
- <div class="sx-asc-quick-actions">
-  <button type="button" id="sxAscensionContinue">⚡ CONTINUE TRAINING</button>
-  <button type="button" id="sxAscensionView">VIEW CYCLE</button>
- </div>`;
+ <p class="sx-programme-meta" id="sxAscensionSummary">AscensionX · Powerlifting · Week 1 of 6</p>
+ <div class="sx-programme-progressline"><span>CYCLE PROGRESS</span><strong id="sxAscensionPercent">0%</strong></div>
+ <div class="sx-programme-progress" role="progressbar" aria-label="AscensionX cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sxAscensionProgress"><span id="sxAscensionProgressFill"></span></div>
+ <div class="sx-programme-footer"><div class="sx-programme-next" id="sxAscensionNext">NEXT: Select lift</div><button type="button" class="sx-programme-continue" id="sxAscensionContinue">CONTINUE ›</button></div>`;
+const slot=document.getElementById('sxAscensionProgrammeSlot');
 const startCard=workout.querySelector('.start-card');
-if(startCard)startCard.before(card);
+if(slot)slot.prepend(card);
+else if(startCard)startCard.before(card);
 else workout.appendChild(card);
 const byId=id=>document.getElementById(id);
 function readCycle(){
@@ -54,18 +54,21 @@ function readCycle(){
  if(items.every(x=>x.done))return null;
  const upNext=items.filter(x=>!x.done).sort((a,b)=>a.week-b.week||LIFTS.indexOf(a.lift)-LIFTS.indexOf(b.lift))[0];
  const percent=Math.min(100,Math.max(0,Math.round(items.reduce((sum,x)=>sum+x.completed,0)/(items.length*6)*100)));
- return {created:cycle.created,items,upNext,percent};
+ return {created:cycle.created,title:String(cycle.title||cycle.name||'AscensionX').trim().slice(0,80)||'AscensionX',items,upNext,percent};
 }
 function refresh(){
  const cycle=readCycle();
- if(!cycle){card.hidden=true;card.dataset.cycleId='';return}
- const {items,upNext,percent}=cycle;
+ if(!cycle){
+  card.hidden=true;card.dataset.cycleId='';
+  const empty=byId('sxAscensionEmpty');if(empty)empty.hidden=false;
+  return;
+ }
+ const {upNext,percent}=cycle;
  card.hidden=false;card.dataset.cycleId=cycle.created;
- const names=items.map(x=>SHORT[x.lift]||x.lift).join(', ');
- byId('sxAscensionSummary').textContent='6-week strength programme · '+items.length+' '+(items.length===1?'lift':'lifts')+' · Next: '+upNext.lift+' (Week '+upNext.week+')';
- const host=byId('sxAscensionLifts');
- host.style.gridTemplateColumns='repeat('+items.length+',minmax(0,1fr))';
- host.innerHTML=items.map(x=>'<div class="sx-asc-quick-lift'+(x.lift===upNext.lift?' is-up-next':'')+'" aria-label="'+x.lift+', '+(x.done?'completed':'week '+x.week)+'"><span>'+SHORT[x.lift]+'</span><strong>'+(x.done?'✓':'W'+x.week)+'</strong></div>').join('');
+ const empty=byId('sxAscensionEmpty');if(empty)empty.hidden=true;
+ byId('sxAscensionTitle').textContent=cycle.title;
+ byId('sxAscensionSummary').textContent='AscensionX · Powerlifting · Week '+upNext.week+' of 6';
+ byId('sxAscensionNext').textContent='NEXT: '+upNext.lift+' · Week '+upNext.week;
  byId('sxAscensionPercent').textContent=percent+'%';
  byId('sxAscensionProgressFill').style.width=percent+'%';
  byId('sxAscensionProgress').setAttribute('aria-valuenow',String(percent));
@@ -85,7 +88,16 @@ function launch(mode,context='auto'){
 // lift/week; without one: open the real AscensionX cycle setup.
 window.spartanxQuickStartAscension=(context='auto')=>launch(readCycle()?'continue':'home',context);
 byId('sxAscensionContinue').addEventListener('click',()=>launch('continue'));
-byId('sxAscensionView').addEventListener('click',()=>launch('home'));
+byId('sxAscensionOptions').addEventListener('click',()=>{
+ const menu=byId('sxAscensionOptionsMenu');
+ menu.hidden=!menu.hidden;
+ byId('sxAscensionOptions').setAttribute('aria-expanded',String(!menu.hidden));
+});
+byId('sxAscensionView').addEventListener('click',()=>{
+ byId('sxAscensionOptionsMenu').hidden=true;
+ byId('sxAscensionOptions').setAttribute('aria-expanded','false');
+ launch('home');
+});
 window.addEventListener('spartx:ascensionCycleUpdated',refresh);
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY||e.key===null)refresh()});
 window.addEventListener('pageshow',refresh);

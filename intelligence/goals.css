@@ -85,3 +85,52 @@ body.sx-goals{background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:
 @media(max-width:760px) and (display-mode:standalone){
  .gx-topbar{padding-top:max(48px,env(safe-area-inset-top,0px))}
 }
+
+/* Shared Intelligence shell: Powerlifting, Bodybuilding and Weight Loss. */
+.sx-goals .main-shell{min-width:0}
+.sx-goals .gx-nav-page{animation:fadeIn .18s ease}
+.sx-goals .gx-metrics.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:17px}
+.sx-goals .gx-metric.kpi{background:linear-gradient(160deg,#1b1d20,#121316);border-color:#323338;box-shadow:none}
+.sx-goals .gx-metric.kpi span{font-size:10px;text-transform:uppercase;letter-spacing:.7px;min-height:auto}
+.sx-goals .gx-metric.kpi strong{font-size:clamp(19px,2.3vw,28px);letter-spacing:-.6px}
+.sx-goals .gx-metric.kpi small{font-size:10px;color:#a4a5a7}
+.sx-goals .gx-nav-page .panel{margin-bottom:14px}
+.sx-goals .gx-nav-page .panel.gx-card{margin-top:0;background:linear-gradient(155deg,#1a1c20,#111215 75%);border:1px solid #32343a;padding:20px}
+.sx-goals .gx-chart{min-height:235px;margin:10px 0 4px}
+.sx-goals .gx-overview-grid{margin-top:15px}
+.sx-goals .gx-overview-grid .gx-chart{min-height:220px}
+.sx-goals .gx-overview-grid .gx-overview-insight{font-size:13px;line-height:1.75;color:#d0d2d4;margin:0 0 16px}
+.sx-goals .gx-nav-page .gx-insight{background:linear-gradient(120deg,rgba(244,205,55,.085),rgba(20,21,24,.95));padding:23px;border-color:rgba(244,205,55,.25)}
+.sx-goals .gx-nav-page .gx-insight p{color:#e1e1e1}
+.sx-goals .gx-banner{align-items:center;justify-content:space-between}
+.sx-goals .gx-settings{align-items:start}
+.sx-goals .gx-settings form{min-width:0}
+.sx-goals .gx-settings button:disabled{opacity:.45}
+.sx-goals .gx-muscle-breakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.sx-goals .gx-muscle-row{display:flex;justify-content:space-between;gap:8px;border:1px solid #32343a;background:#181a1d;padding:11px 13px;border-radius:9px;font-size:12px}
+.sx-goals .gx-muscle-row strong{color:var(--gold)}
+.sx-goals .gx-nav-page .gx-chart-heading label select{border:1px solid #45474c;min-height:40px}
+.sx-goals .gx-nav-page .gx-settings button{background:#292619;color:var(--gold);border:1px solid #6a5524}
+.sx-goals .gx-weight-settings #gxWeightForm>button{width:100%}
+.sx-goals .gx-empty{min-height:190px}
+.sx-goals #gxWeightLog{max-height:260px;overflow:auto}
+@media(max-width:760px){
+ .sx-goals .main-shell{margin-left:0}
+ .sx-goals .gx-metrics.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .sx-goals .gx-metric.kpi{padding:12px 9px}
+ .sx-goals .gx-metric.kpi span{font-size:9px;min-height:27px}
+ .sx-goals .gx-metric.kpi strong{font-size:clamp(17px,4vw,24px)}
+ .sx-goals .gx-metric.kpi small{font-size:9px}
+ .sx-goals .gx-nav-page .panel.gx-card{padding:15px 12px}
+ .sx-goals .gx-chart{min-height:170px}
+ .sx-goals .gx-overview-grid .gx-chart{min-height:170px}
+ .sx-goals .gx-overview-grid{grid-template-columns:1fr}
+ .sx-goals .gx-muscle-breakdown{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+ .sx-goals .gx-metric.kpi{padding:10px 7px}
+ .sx-goals .gx-metric.kpi span{font-size:8px}
+ .sx-goals .gx-metric.kpi strong{font-size:17px}
+ .sx-goals .gx-metric.kpi small{font-size:8px}
+ .sx-goals .gx-chart-heading label{min-width:109px}
+}

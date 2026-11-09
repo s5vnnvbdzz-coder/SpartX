@@ -284,13 +284,13 @@ function deliverAscensionShortcut(){
 }
 window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  const option=mode==='continue'?'continue':mode==='setup'?'setup':'home';
- ascensionQuickCaller=document.activeElement;
  const current=document.querySelector('.screen.active')?.id;
  const fromActiveSession=current==='activeWorkout';
  const fromNewWorkout=context==='new-workout'&&current==='workout';
  const fromProgrammeSetup=context==='workout'&&current==='workout';
  const importOnly=option==='continue'&&current==='workout'&&context==='auto';
  if(importOnly)return openSXAscWorkout(lift);
+ ascensionQuickCaller=document.activeElement;
  const quick=fromActiveSession||fromNewWorkout||importOnly;
  ascensionOverlay.classList.toggle('sx-ascension-quick',quick);
  ascensionOverlay.classList.toggle('sx-ascension-import-only',importOnly);

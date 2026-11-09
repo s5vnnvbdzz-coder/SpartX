@@ -295,6 +295,38 @@
   }
   function renderMuscles(){
     const rows=state.analysis.muscleRows;
+    // Reuse SpartanX's existing anatomy renderer rather than a second,
+    // simplified silhouette. Only genuinely logged recent working sets are
+    // highlighted; the detailed counts below remain the authoritative data.
+    const mapNode=$('sxIntelligenceBodyMap');
+    const anatomy=window.SpartanXAnatomy;
+    if(mapNode && anatomy && typeof anatomy.render==='function'){
+      const muscleKeys={
+        'chest':['chest'],'quads':['quads'],'hamstrings':['hamstrings'],
+        'glutes':['glutes'],'calves':['calves'],'back':['back'],
+        'shoulders':['shoulders'],'triceps':['triceps'],
+        'biceps':['biceps'],'traps':['traps'],'core':['core'],
+        'posterior chain':['glutes','hamstrings']
+      };
+      const primary=new Set(rows.filter(row=>row.sets>0)
+        .flatMap(row=>muscleKeys[String(row.name).toLowerCase()]||[]));
+      let gender='male';
+      // The SpartanX profile's anatomy preference is already saved locally.
+      // Read without modifying the existing athlete profile or workouts.
+      if(state.source.startsWith('spartanx')){
+        try{
+          const saved=localStorage.getItem('spartx_db');
+          if(saved && saved.length<=12*1024*1024){
+            const profile=JSON.parse(saved)?.profile;
+            if(profile?.standard==='female')gender='female';
+          }
+        }catch(_){}
+      }
+      mapNode.innerHTML=anatomy.render(primary,new Set(),{gender});
+      mapNode.setAttribute('aria-label',primary.size
+        ?'Front and back SpartanX muscle map: '+[...primary].join(', ')+' highlighted as trained in the last seven days.'
+        :'Front and back SpartanX muscle map: no recognised muscle groups trained in the last seven days.');
+    }
     $('muscleGrid').innerHTML=rows.length?rows.map(row=>{
       const pct=Math.min(100,row.sets/16*100);
       const days=row.daysSince===0?'Trained today':row.daysSince===1?'Last trained yesterday':'Last trained '+row.daysSince+' days ago';

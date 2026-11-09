@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#090a0c">
+  <title>SpartanX Intelligence — Training Goal Models</title>
+  <link rel="stylesheet" href="./styles.css?v=7">
+  <link rel="stylesheet" href="./goals.css?v=1">
+  <script src="./engine.js?v=3" defer></script>
+  <script src="./bridge.js?v=3" defer></script>
+  <script src="./goal-models.js?v=1" defer></script>
+  <script src="./goals-ui.js?v=1" defer></script>
+</head>
+<body class="sx-goals">
+  <header class="gx-topbar">
+    <a href="./" class="gx-back" aria-label="Back to Intelligence">← INTELLIGENCE</a>
+    <strong>SPARTAN<span class="accent">X</span> <small>INTELLIGENCE</small></strong>
+    <a class="gx-back gx-app" href="../">APP ↗</a>
+  </header>
+  <main class="gx-main">
+    <div class="eyebrow">GOAL-BASED ATHLETE ANALYTICS</div>
+    <h1>TRAINING INTELLIGENCE</h1>
+    <p class="gx-intro">Your workouts, interpreted for your goal. Only line graphs. No changes to your strength cycle or saved workout history.</p>
+    <div class="gx-tabs" role="group" aria-label="Select Intelligence model">
+      <button type="button" id="gxBodyButton" class="active" aria-pressed="true">BODYBUILDING</button>
+      <button type="button" id="gxWeightButton" aria-pressed="false">WEIGHT LOSS</button>
+    </div>
+    <div class="gx-source">
+      <div><span class="gx-dot"></span><strong id="gxSourceLabel">CHECKING SAVED WORKOUTS</strong><p id="gxSourceDescription">The training data is read directly from SpartanX, on this device.</p></div>
+      <button class="gx-demo-button" type="button" id="gxDemo">TRY DEMO DATA</button>
+    </div>
+    <section id="gxBodybuilding" aria-label="Bodybuilding Intelligence">
+      <div class="gx-heading"><div><div class="eyebrow">HYPERTROPHY ANALYTICS</div><h2>Bodybuilding Model</h2></div><span class="gx-chip">WORKING SETS</span></div>
+      <div class="gx-metrics">
+        <article class="gx-metric"><span>Selected muscle / week</span><strong id="gxMuscleSets">—</strong><small>Primary working-set estimates</small></article>
+        <article class="gx-metric"><span>Target / week</span><strong id="gxSetGoal">—</strong><small>User-defined training target</small></article>
+        <article class="gx-metric"><span>Exercise trend</span><strong id="gxRepDelta">—</strong><small>Best reps at one load</small></article>
+      </div>
+      <article class="gx-card">
+        <div class="gx-chart-heading"><div><div class="eyebrow">12-WEEK TREND</div><h3>Muscle training volume</h3></div>
+          <label>Muscle group<select id="gxMuscle" aria-label="Select muscle group"></select></label></div>
+        <div id="gxVolumeChart" class="gx-chart" role="img" aria-label="Weekly primary working-set volume line graph"></div>
+        <p class="gx-hint">Counts completed non-warm-up sets mapped to the exercise's primary muscle. This is training exposure, not a direct measure of muscle growth.</p>
+      </article>
+      <article class="gx-card">
+        <div class="gx-chart-heading"><div><div class="eyebrow">COMPARABLE PERFORMANCE</div><h3>Progressive overload</h3></div>
+          <label>Exercise<select id="gxExercise" aria-label="Select exercise"></select></label></div>
+        <div class="gx-chart" id="gxProgressChart" role="img" aria-label="Best repetitions at a consistent load line graph"></div>
+        <p class="gx-hint" id="gxProgressDescription">Uses matched working-set loads. Missing comparable weeks are not interpolated.</p>
+      </article>
+      <article class="gx-card gx-settings">
+        <div><div class="eyebrow">YOUR TARGET</div><h3>Weekly working sets</h3><p>Set your own goal for the selected muscle. This target is not a universal prescription.</p></div>
+        <form id="gxSetForm"><label for="gxTarget">Weekly set target</label><div class="gx-form-row"><input id="gxTarget" type="number" inputmode="numeric" min="1" max="50" step="1" required value="12"><button type="submit">SAVE TARGET</button></div></form>
+      </article>
+      <div class="gx-insight" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your training shows</h3><p id="gxBodyInsight"></p><small id="gxBodyCoverage"></small></div>
+    </section>
+    <section id="gxWeightLoss" hidden aria-label="Weight Loss Intelligence">
+      <div class="gx-heading"><div><div class="eyebrow">ACTIVITY &amp; WEIGHT TRENDS</div><h2>Weight Loss Model</h2></div><span class="gx-chip">CONSISTENCY</span></div>
+      <div class="gx-metrics">
+        <article class="gx-metric"><span>Weight trend</span><strong id="gxWeightChange">—</strong><small>Change in available 7-day averages</small></article>
+        <article class="gx-metric"><span>Training days / 28d</span><strong id="gxDays">—</strong><small>Unique dates with saved sessions</small></article>
+        <article class="gx-metric"><span>Cardio this week</span><strong id="gxCardioMinutes">—</strong><small>Logged machine intervals</small></article>
+      </div>
+      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">ROLLING AVERAGE</div><h3>Bodyweight trend</h3></div><span class="gx-chip">7 DAYS</span></div><div class="gx-chart" id="gxWeightChart" role="img" aria-label="Seven-day average weight line graph"></div><p class="gx-hint">Uses only optional weight logs, averaging available readings from the previous seven days. Gaps remain where there are no readings.</p></article>
+      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">12-WEEK TREND</div><h3>Cardio minutes</h3></div></div><div class="gx-chart" id="gxCardioChart" role="img" aria-label="Weekly cardio minutes line graph"></div><p class="gx-hint">Time comes from saved SpartanX cardio intervals, not estimated calories burned.</p></article>
+      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">RECENT CONSISTENCY</div><h3>Training days per week</h3></div></div><div class="gx-chart" id="gxConsistencyChart" role="img" aria-label="Weekly training consistency line graph"></div></article>
+      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">RESISTANCE TRAINING</div><h3>Strength retention</h3></div></div><div class="gx-chart" id="gxRetentionChart" role="img" aria-label="Repetitions at consistent load line graph"></div><p id="gxRetentionDescription" class="gx-hint">Shows comparable performance where a consistent load is available. It cannot prove muscle retention.</p></article>
+      <article class="gx-card gx-settings">
+        <div><div class="eyebrow">OPTIONAL TRACKING</div><h3>Log bodyweight</h3><p>Entries are stored only in Intelligence on this browser. No weight log is required to use workout trends.</p></div>
+        <form id="gxWeightForm">
+          <div class="gx-two"><label>Date<input id="gxWeightDate" type="date" required></label><label>Weight (kg)<input id="gxWeightInput" type="number" min="20" max="500" step=".1" inputmode="decimal" required placeholder="e.g. 88.5"></label></div>
+          <button type="submit" id="gxAddWeight">SAVE WEIGHT</button>
+        </form>
+        <div class="gx-weight-log" id="gxWeightLog" aria-live="polite"></div>
+        <form id="gxFrequencyForm"><label for="gxFrequency">Weekly workout target</label><div class="gx-form-row"><input type="number" inputmode="numeric" id="gxFrequency" min="1" max="14" step="1" value="3" required><button type="submit">SAVE TARGET</button></div></form>
+      </article>
+      <div class="gx-insight" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your trend shows</h3><p id="gxWeightInsight"></p><small>Weight loss requires more than workout volume. Nutrition, daily activity and individual circumstances affect results.</small></div>
+    </section>
+    <div class="gx-footer"><a href="./">← EXISTING POWERLIFTING INTELLIGENCE</a><p>SpartanX workout history is read-only. Only optional goal settings and weight entries are saved by these models.</p></div>
+  </main>
+</body>
+</html>

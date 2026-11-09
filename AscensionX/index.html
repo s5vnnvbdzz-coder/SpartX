@@ -1023,6 +1023,10 @@ window.addEventListener('message',e=>{
    closeCycleEditor();
    showScreen('home');
    renderDashboard();
+   if(e.data.mode==='manage'&&state.cycle.created){
+    // Existing editor: allow changes to the current programme, not creation of a second cycle.
+    openCycleEditor();
+   }
    // View Cycle still reveals the detailed roadmap without displaying the
    // removed Cycle Progress card; Set Up keeps the build action visible.
    const panel=$('cycleDetails'),expand=$('cycleExpandButton'),view=$('ascBuildCycleView');

@@ -47,5 +47,23 @@
     window.dispatchEvent(new CustomEvent('sx:intelligence-goal-change',{detail:{goal:value}}));
   }
   select.addEventListener('change',()=>setMode(select.value));
+  // Both layouts use the same time-range preference, without sharing or
+  // rewriting any athlete workout records.
+  const RANGE_KEY='sx_intelligence_range_v1';
+  const rangeSelect=document.getElementById('rangeSelect');
+  if(rangeSelect){
+    let preferred=null;
+    try{const saved=window.localStorage.getItem(RANGE_KEY);if(saved!==null&&['0','30','90'].includes(saved))preferred=saved}catch(_){}
+    if(preferred!==null && rangeSelect.value!==preferred){
+      rangeSelect.value=preferred;
+      // On Powerlifting the existing controller is loaded before this module.
+      rangeSelect.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    rangeSelect.addEventListener('change',()=>{
+      if(['0','30','90'].includes(rangeSelect.value)){
+        try{window.localStorage.setItem(RANGE_KEY,rangeSelect.value)}catch(_){}
+      }
+    });
+  }
   window.SXGoalNavigation=Object.freeze({currentGoal:goal,storageKey:STORAGE_KEY});
 })();

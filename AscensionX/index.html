@@ -144,7 +144,8 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 .asc-build-cycle-entry{border-color:color-mix(in srgb,var(--red2) 36%,var(--line))}
 .asc-build-cycle-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
 .asc-build-cycle-actions button{flex:1 1 135px;min-height:44px}
-.asc-build-cycle-actions button[hidden]{display:none!important}
+ .asc-build-cycle-actions button[hidden]{display:none!important}
+#ascBuildCycleEntry[hidden]{display:none!important}
 /* View Cycle from SpartanX hides only the redundant active-cycle hero. */
 body.sx-ascension-view-cycle #homeHero{display:none!important}
 .asc-cycle-progress-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
@@ -961,13 +962,14 @@ window.addEventListener('message',e=>{
  }
 
  if(e.data?.type==='spartx:ascensionQuickExit'&&ascensionEmbeddedBySpartanX){
-  document.body.classList.remove('sx-spartan-quick-import','sx-ascension-view-cycle');
+  document.body.classList.remove('sx-spartan-quick-import','sx-spartan-import-only','sx-ascension-view-cycle');
   closeAscSpartanImport();
   closeCycleEditor();
   return;
  }
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
+  document.body.classList.toggle('sx-spartan-import-only',e.data.mode==='continue'&&e.data.importOnly===true);
   document.body.classList.remove('sx-ascension-view-cycle');
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
@@ -1028,6 +1030,10 @@ function continueAscensionTraining(){
  $('ascSpartanImportBackdrop').classList.add('open');
  $('ascSpartanImportBackdrop').setAttribute('aria-hidden','false');
  picker.focus({preventScroll:true});
+ // Tell SpartanX the true import dialog is ready before making its transparent iframe visible.
+ if(document.body.classList.contains('sx-spartan-import-only')){
+  try{window.parent.postMessage({type:'spartx:ascensionImportReady'},location.origin)}catch(e){}
+ }
 }
 function closeAscSpartanImport(){
  $('ascSpartanImportBackdrop').classList.remove('open');
@@ -1258,6 +1264,7 @@ function renderDashboard(){
  const buildView=$('ascBuildCycleView');
  const activeCreated=!!state.cycle.created;
  if($('ascBuildCycleOpen'))$('ascBuildCycleOpen').hidden=activeCreated;
+ if($('ascBuildCycleEntry'))$('ascBuildCycleEntry').hidden=activeCreated;
  if($('ascEditActiveCycle'))$('ascEditActiveCycle').hidden=!activeCreated;
  if(buildView)buildView.hidden=!activeCreated;
  if(!state.cycle.created&&$('cycleDetails')&&!$('cycleDetails').hidden){

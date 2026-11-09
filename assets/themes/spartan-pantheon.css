@@ -150,3 +150,204 @@ body.spartanx-pantheon .sx-pantheon-preview{
 @media(prefers-reduced-motion:reduce){
  body.spartanx-pantheon #trackerNav::before{animation:none!important;transform:none!important;left:35%}
 }
+
+/* SPARTAN PANTHEON II — identifiable Hellenic architectural language.
+   Deliberately lightweight for iPhone: vector friezes, engraved bronze and
+   shield reliefs; no full-screen art obscuring training data. */
+body.spartanx-pantheon{
+ --pantheon-iron:#111819;
+ --pantheon-stone:#242725;
+ --pantheon-oxblood:#722e2a;
+ --pantheon-parchment:#f2e1bb;
+}
+body.spartanx-pantheon > header{
+ background:
+   linear-gradient(90deg,rgba(218,179,107,.06) 0 1px,transparent 1px 29px),
+   linear-gradient(120deg,#0c1011,#322920 53%,#111819)!important;
+ background-size:30px 100%,auto!important;
+ border-bottom:3px solid #977547!important;
+}
+body.spartanx-pantheon > header::after{
+ height:10px;bottom:-2px;
+ background:url("./pantheon-meander.svg") left center / 80px 14px repeat-x!important;
+ opacity:.88!important;
+ filter:drop-shadow(0 0 2px #ae7d47);
+}
+/* Etched tablet surfaces. Fine-key friezes are inside the borders. */
+body.spartanx-pantheon :is(
+ .card,.exercise-card,.detail-panel,.custom-exercise-box,.stat,.rank-item,.library-record
+ ){
+ background:
+   url("./pantheon-meander.svg") top left / 80px 11px repeat-x,
+   linear-gradient(145deg,rgba(203,144,73,.12),transparent 23%),
+   repeating-linear-gradient(170deg,rgba(244,223,186,.016) 0 1px,transparent 1px 8px),
+   linear-gradient(165deg,#292923 0%,#1b211f 56%,#111819 100%)!important;
+ border:1px solid #af8653!important;
+ border-radius:10px!important;
+ box-shadow:
+   inset 0 0 0 2px rgba(8,10,10,.77),
+   inset 0 0 0 3px rgba(205,164,103,.16),
+   inset 0 1px 0 rgba(255,226,161,.25),
+   0 8px 18px rgba(0,0,0,.28)!important;
+}
+body.spartanx-pantheon .screen > h1,
+body.spartanx-pantheon .screen > .page-title-row h1,
+body.spartanx-pantheon .card h2,
+body.spartanx-pantheon .brand{
+ font-family:Georgia,"Times New Roman",serif!important;
+ font-variant:small-caps;
+ letter-spacing:.07em!important;
+}
+body.spartanx-pantheon .screen > .eyebrow::before{
+ content:"Λ  ·  ";color:#d3a15f;
+ font-family:Georgia,serif;font-size:13px;
+}
+body.spartanx-pantheon :is(.card h2,.exercise-title){
+ color:#f3d9a6!important;
+ text-shadow:0 1px 1px #000b;
+}
+body.spartanx-pantheon :is(.brand span,.eyebrow){
+ text-shadow:0 1px 2px #000a,0 0 7px #aa713c46!important;
+}
+/* Hero: the helmet and Greek-key frieze make the Spartan imagery obvious. */
+body.spartanx-pantheon .sx-energy-start-card{
+ position:relative;isolation:isolate;overflow:hidden!important;
+ min-height:152px;
+ background:
+  url("./pantheon-meander.svg") top left / 80px 14px repeat-x,
+  radial-gradient(ellipse at 95% 20%,rgba(138,53,36,.32),transparent 57%),
+  linear-gradient(128deg,#3a2821 0%,#202723 48%,#101a19 100%)!important;
+ border:2px solid #d2a063!important;
+ box-shadow:inset 0 0 0 3px #1c201d,inset 0 0 0 4px #ab85513a,0 0 20px #0007!important;
+ padding-top:24px!important;
+}
+body.spartanx-pantheon .sx-energy-start-card::after{
+ content:""!important;
+ display:block!important;
+ position:absolute;
+ width:132px;height:146px;
+ right:1px;top:4px;
+ background:url("./pantheon-helmet.svg") center / contain no-repeat!important;
+ opacity:.26!important;
+ pointer-events:none;
+ transform:rotate(-8deg);
+ z-index:-1;
+}
+body.spartanx-pantheon .sx-energy-start-card > *{
+ position:relative;z-index:1;
+}
+body.spartanx-pantheon .sx-start-energy-label{
+ color:#ecd19b!important;
+ font-family:Georgia,serif;
+ letter-spacing:.12em!important;
+ font-size:12px!important;
+}
+body.spartanx-pantheon #startWorkout,
+body.spartanx-pantheon #startBlankWorkout,
+body.spartanx-pantheon #endWorkout,
+body.spartanx-pantheon button.start-workout-button{
+ background:
+  linear-gradient(90deg,transparent,rgba(255,223,167,.18) 50%,transparent) left top / 100% 2px no-repeat,
+  linear-gradient(150deg,#a34839,#762d2a 48%,#3e1f1d)!important;
+ border:1px solid #e1b676!important;
+ border-radius:8px!important;
+ box-shadow:inset 0 0 0 1px rgba(25,14,12,.85),inset 0 1px 0 #f8daab41,0 5px 12px #190c0b77!important;
+ color:#fff1d4!important;
+ letter-spacing:.07em!important;
+ font-weight:900!important;
+ text-shadow:0 1px #331511!important;
+}
+/* Dark forged-iron option buttons, inspired by shield edging. */
+body.spartanx-pantheon button:not(#trackerNav button):not(.danger):not(.start-workout-button),
+body.spartanx-pantheon :is(.back-button,.secondary){
+ border:1px solid #9f8054!important;
+ border-radius:8px!important;
+ background:
+  linear-gradient(140deg,rgba(235,196,128,.13),transparent 40%),
+  linear-gradient(145deg,#38372e,#232925 55%,#151c1b)!important;
+ box-shadow:inset 0 0 0 1px rgba(8,11,11,.6),inset 0 1px 0 #f1c98d1b,0 2px 5px #0005!important;
+ color:#eddfbf!important;
+}
+body.spartanx-pantheon button:not(#trackerNav button):focus-visible{
+ outline:2px solid #ffd68f!important;outline-offset:2px;
+}
+/* Shield medallion in a profile card, with room for portrait and rank UI. */
+body.spartanx-pantheon .sx-gamer-card{
+ position:relative;isolation:isolate;
+ background:
+  linear-gradient(90deg,rgba(23,27,25,.99) 0%,rgba(30,31,26,.95) 61%,rgba(24,26,24,.75) 100%),
+  url("./pantheon-shield.svg") 96% center / 124px auto no-repeat,
+  linear-gradient(150deg,#302a24,#131c1a)!important;
+ border:2px solid #d0a568!important;
+ border-radius:10px!important;
+ box-shadow:inset 0 0 0 2px #171d1b,inset 0 0 0 3px #ab875348,0 0 14px #b2843b2a!important;
+}
+body.spartanx-pantheon .sx-gamer-card .sx-gamer-top strong{
+ font-family:Georgia,"Times New Roman",serif!important;
+ letter-spacing:.03em;
+}
+body.spartanx-pantheon .spartan-rank-card{
+ background:
+   url("./pantheon-meander.svg") top left / 80px 12px repeat-x,
+   linear-gradient(150deg,#352b23,#1d2421 60%,#121b18)!important;
+}
+body.spartanx-pantheon :is(.rank-progress-track span,.rank-milestone-track span){
+ background:linear-gradient(90deg,#5d2926 0%,#a2663d 55%,#f4d391 100%)!important;
+ box-shadow:0 0 10px #d4a15b88!important;
+}
+body.spartanx-pantheon #trackerNav{
+ border-top:3px solid #aa8050!important;
+ background:
+  repeating-linear-gradient(90deg,transparent 0 34px,rgba(236,202,145,.05) 35px 36px),
+  linear-gradient(95deg,#0e1615,#322820 50%,#0e1615)!important;
+ box-shadow:0 -5px 20px #0009,inset 0 1px 0 #f2d8a021!important;
+}
+body.spartanx-pantheon #trackerNav::after{
+ content:""!important;display:block!important;position:absolute;
+ left:0;right:0;top:0;height:9px;
+ background:url("./pantheon-meander.svg") center / 80px 14px repeat-x!important;
+ pointer-events:none;opacity:.66;
+}
+body.spartanx-pantheon #trackerNav button{
+ border:1px solid #b18c55!important;
+ border-radius:9px!important;
+ background:
+   linear-gradient(135deg,transparent 8px,#34372f 8px) top left / 100% 100% no-repeat,
+   linear-gradient(160deg,#37332b,#151d1b)!important;
+ box-shadow:inset 0 0 0 1px #171e1a,inset 0 1px 0 #ffe1aa30!important;
+ color:#d4c09c!important;
+}
+body.spartanx-pantheon #trackerNav button.active{
+ background:linear-gradient(145deg,#66382d,#312921 62%,#1c2320)!important;
+ color:#ffe1a3!important;
+ border-color:#ffe0a1!important;
+ box-shadow:inset 0 0 0 1px #5e412d,0 0 12px #d59b5c60!important;
+}
+body.spartanx-pantheon #trackerNav button.active .sx-nav-svg{
+ filter:drop-shadow(0 0 6px #e7b976)!important;
+}
+/* The Settings preview now shows an actual shield instead of plain Lambda. */
+body.spartanx-pantheon .sx-pantheon-preview{
+ background:
+  url("./pantheon-meander.svg") top left / 80px 12px repeat-x,
+  linear-gradient(145deg,#392d22,#17201c)!important;
+ border:1px solid #d4a366!important;
+ padding-top:20px;
+}
+.sx-pantheon-preview .sx-pantheon-mark{
+ font-size:0!important;
+ clip-path:none!important;
+ border-radius:50%!important;
+ background:url("./pantheon-shield.svg") center / contain no-repeat!important;
+ filter:drop-shadow(0 0 5px #bb8a4a77);
+ width:52px;height:52px;flex-basis:52px;
+}
+/* Responsive so imagery never competes with controls or causes horizontal scroll. */
+@media(max-width:390px){
+ body.spartanx-pantheon .sx-energy-start-card::after{width:110px;right:-8px;opacity:.18!important}
+ body.spartanx-pantheon .sx-gamer-card{background-size:auto,110px auto,auto!important}
+ body.spartanx-pantheon .card{border-radius:9px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ body.spartanx-pantheon #trackerNav::before{animation:none!important}
+}

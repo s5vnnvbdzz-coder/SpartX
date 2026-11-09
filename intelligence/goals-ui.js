@@ -6,19 +6,32 @@
   if(!M||!E){document.body.insertAdjacentText('afterbegin','Unable to load Intelligence models.');return}
   const initialGoal=window.SXGoalNavigation?.currentGoal;
   const UI_KEY='sx_intelligence_goal_view_v1';
+  const SECTION_KEY='sx_intelligence_active_section_v1';
+  const VALID_SECTIONS=['overview','performance','muscles','intelligence'];
+  function readStartingSection(){
+    const urlTab=new URLSearchParams(window.location.search).get('tab');
+    if(VALID_SECTIONS.includes(urlTab))return urlTab;
+    try{
+      const remembered=localStorage.getItem(SECTION_KEY);
+      if(VALID_SECTIONS.includes(remembered))return remembered;
+    }catch(_){}
+    return null;
+  }
   const RANGE_KEY='sx_intelligence_range_v1';
   function readUI(){try{const x=JSON.parse(localStorage.getItem(UI_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(_){return {}}}
   const ui=readUI();
   let range=90;
   try{const saved=localStorage.getItem(RANGE_KEY);if(saved!==null&&['0','30','90'].includes(saved))range=Number(saved)}catch(_){}
   const state={mode:initialGoal==='weight-loss'?'weight-loss':'bodybuilding',source:'spartanx',demo:false,imported:[],tab:'overview',range,muscle:ui.muscle||'Chest',exercise:ui.exercise||'',settings:M.loadSettings(),weights:M.loadWeights(),raw:[]};
-  state.tab=['overview','performance','muscles','intelligence'].includes(ui.tabs?.[state.mode])?ui.tabs[state.mode]:'overview';
+  state.tab=readStartingSection()||
+    (VALID_SECTIONS.includes(ui.tabs?.[state.mode])?ui.tabs[state.mode]:'overview');
   function persistUI(){
     try{
       const tabs=readUI().tabs||{};
       tabs[state.mode]=state.tab;
       localStorage.setItem(UI_KEY,JSON.stringify({tabs,muscle:state.muscle,exercise:state.exercise}));
       localStorage.setItem(RANGE_KEY,String(state.range));
+      localStorage.setItem(SECTION_KEY,state.tab);
     }catch(_){}
   }
   const headings={
@@ -51,6 +64,11 @@
     document.querySelectorAll('.gx-muscle-label').forEach(n=>{n.textContent=state.mode==='bodybuilding'?'Muscle workload':'Training consistency'});
     $('gxMobileMuscleLabel').textContent=state.mode==='bodybuilding'?'MUSCLES':'HABITS';
     persistUI();
+    try{
+      const url=new URL(window.location.href);
+      url.searchParams.set('tab',next);
+      window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+    }catch(_){}
     if(scroll && typeof window.scrollTo==='function')window.scrollTo(0,0);
   }
   const fmt=(n,d=0)=>Number.isFinite(n)?Number(n).toLocaleString('en-GB',{maximumFractionDigits:d}):'—';
@@ -214,9 +232,10 @@
   window.addEventListener('sx:intelligence-goal-change',event=>{
     const goal=event.detail?.goal;
     if(goal!=='bodybuilding'&&goal!=='weight-loss')return;
+    // Training focus changes never jump to Overview or to a different
+    // goal's last-viewed tab. Keep this exact section selected.
     state.mode=goal;
-    const pref=readUI();
-    state.tab=['overview','performance','muscles','intelligence'].includes(pref.tabs?.[goal])?pref.tabs[goal]:'overview';
+    if(VALID_SECTIONS.includes(event.detail?.tab))state.tab=event.detail.tab;
     render();
   });
   document.querySelectorAll('.sidebar-nav [data-tab],.bottom-nav [data-tab], [data-go]').forEach(btn=>{

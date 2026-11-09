@@ -1,0 +1,152 @@
+/* SPARTAN PANTHEON — A battle-worn Hellenic theme for SpartanX.
+   Inspired by hoplite bronze, temple stone, oxblood cloaks and Athena's aegis.
+   Opt-in preview; all selectors are scoped to this body class. */
+body.spartanx-pantheon{
+ --bg:#090c0d;--panel:#181a1b;--panel2:#282925;--line:#766044;
+ --txt:#f1eadb;--muted:#b7aa96;--lime:#dbb66e;
+ --pantheon-bronze:#c29a5c;--pantheon-gold:#e5c989;--pantheon-red:#79302b;
+ color-scheme:dark;
+ background-color:var(--bg)!important;
+ background-image:
+  radial-gradient(ellipse at 50% -18%,rgba(176,120,61,.19),transparent 53%),
+  radial-gradient(ellipse at 105% 65%,rgba(104,32,30,.20),transparent 48%),
+  repeating-linear-gradient(130deg,transparent 0 78px,rgba(217,170,89,.013) 79px 80px),
+  linear-gradient(160deg,#080b0c 0%,#171b1b 50%,#0c0d0e 100%)!important;
+ background-attachment:fixed!important;
+}
+body.spartanx-pantheon :is(.brand span,.eyebrow,.sx-session-label){
+ color:var(--pantheon-gold)!important;
+ text-shadow:0 0 10px rgba(225,169,88,.18)!important;
+}
+body.spartanx-pantheon .brand{letter-spacing:2.9px;text-shadow:0 2px 1px #000b}
+body.spartanx-pantheon .sub{color:#bdaf92}
+body.spartanx-pantheon > header{
+ background:linear-gradient(108deg,rgba(13,15,15,.97),rgba(46,34,27,.96) 55%,rgba(18,20,20,.97))!important;
+ border-bottom:1px solid #a58150!important;
+ box-shadow:0 3px 16px rgba(0,0,0,.4),inset 0 -1px 0 rgba(236,196,122,.12)!important;
+}
+body.spartanx-pantheon > header::after{
+ content:"";position:absolute;bottom:0;left:0;right:0;height:3px;pointer-events:none;
+ background:repeating-linear-gradient(90deg,#af8651 0 8px,transparent 8px 11px,#af8651 11px 14px,transparent 14px 22px);
+ opacity:.45;
+}
+/* Aged metal frames: restrained double-line trim, never obscuring workout content. */
+body.spartanx-pantheon :is(.card,.exercise-card,.detail-panel,.custom-exercise-box,.stat,.rank-item,.library-record){
+ background:
+  linear-gradient(135deg,rgba(220,164,82,.10),transparent 29%),
+  linear-gradient(160deg,#272724 0%,#1c1e1d 43%,#141717 100%)!important;
+ border:1px solid #86704c!important;
+ color:var(--txt)!important;
+ box-shadow:inset 0 0 0 1px rgba(226,184,112,.09),inset 0 1px 0 rgba(255,221,153,.09),0 7px 20px rgba(0,0,0,.35)!important;
+}
+body.spartanx-pantheon :is(.card,.exercise-card,.detail-panel,.custom-exercise-box){border-radius:12px!important}
+body.spartanx-pantheon :is(.card,.exercise-card,.detail-panel,.custom-exercise-box):focus-within{
+ border-color:#d0a568!important;
+ box-shadow:inset 0 0 0 1px rgba(236,192,113,.16),0 0 15px rgba(190,120,60,.13)!important;
+}
+body.spartanx-pantheon :is(.exercise-title,.rank-current-row strong){color:#f3d69c!important}
+body.spartanx-pantheon :is(.previous-value,.exercise-notes,.tiny,.muted){color:#baaf9d}
+body.spartanx-pantheon .sx-energy-start-card{
+ background:
+  radial-gradient(ellipse at 90% 14%,rgba(167,72,49,.26),transparent 46%),
+  linear-gradient(130deg,#31221c,#212221 45%,#121717)!important;
+ border:1px solid #b18a51!important;
+ box-shadow:inset 0 0 0 1px #eac4881a,0 0 19px #8b51382a!important;
+}
+body.spartanx-pantheon :is(.sx-lock-in-title,.sx-lock-in-title .sx-nav-svg){
+ color:#f1d49b!important;filter:drop-shadow(0 0 4px #d0a45a40);
+}
+/* Charcoal iron buttons with gold bevels; prominent CTAs use Spartan oxblood. */
+body.spartanx-pantheon button:not(#trackerNav button):not(.danger),
+body.spartanx-pantheon :is(.back-button,.secondary){
+ background:linear-gradient(160deg,#39352d,#242522 48%,#1a1d1d)!important;
+ border:1px solid #90764f!important;
+ color:#f3e5cb!important;
+ box-shadow:inset 0 1px 0 rgba(247,210,139,.13),0 1px 3px #0007!important;
+}
+body.spartanx-pantheon button.primary:not(#trackerNav button),
+body.spartanx-pantheon :is(.btn-primary,.primary-action){
+ background:linear-gradient(135deg,#8f3930,#642824 65%,#3d211e)!important;
+ border:1px solid #d3a767!important;
+ color:#fff1d5!important;
+ box-shadow:inset 0 1px 0 rgba(255,229,173,.18),0 0 11px rgba(147,54,43,.20)!important;
+}
+body.spartanx-pantheon button:not(#trackerNav button):active{filter:brightness(1.13)}
+body.spartanx-pantheon button:not(#trackerNav button):focus-visible,
+body.spartanx-pantheon :is(input,textarea,select):focus-visible{
+ outline:2px solid #e4bb76!important;outline-offset:2px;
+}
+body.spartanx-pantheon :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select,.set-number-pad-trigger,.set-rpe-trigger){
+ color:#f1e8da!important;
+ background:#151a1ae8!important;
+ border-color:#856d4e!important;
+}
+body.spartanx-pantheon :is(input[type="checkbox"],input[type="radio"],input[type="range"]){accent-color:#cba15f!important}
+body.spartanx-pantheon .set-entry.is-complete{background:rgba(91,65,33,.43)!important}
+body.spartanx-pantheon :is(.set-type-display,.set-number,.rest-label,.session-summary-bar .summary-metric strong){color:#e2bc79!important}
+body.spartanx-pantheon .session-summary-sticky{background:#101414!important}
+body.spartanx-pantheon .session-summary-bar{border-color:#8c704b!important}
+/* Profile rank and XP: bronze shield, ancient red glow, no changes to rank logic. */
+body.spartanx-pantheon .sx-gamer-card{
+ background:linear-gradient(145deg,#302923,#1b201f 58%,#111716)!important;
+ border:1px solid #be9559!important;
+ box-shadow:inset 0 0 0 1px #e4bf8c1f,0 0 15px #bb7c4229!important;
+}
+body.spartanx-pantheon :is(.sx-gamer-emblem,.rank-emblem){filter:drop-shadow(0 0 6px rgba(219,177,102,.32))!important}
+body.spartanx-pantheon .rank-progress-track{background:#3c342b!important}
+body.spartanx-pantheon .rank-progress-track span{
+ background:linear-gradient(90deg,#6a2c28,#aa7540 58%,#f2d18a)!important;
+ box-shadow:0 0 8px rgba(214,158,76,.45)!important;
+}
+body.spartanx-pantheon .rank-xp-total{color:#f4d294!important;border-color:#9d774a!important}
+body.spartanx-pantheon #profileAvatar{border-color:#be965c!important}
+/* Bottom navigation: carved-iron framed keys, subtle moving bronze tracing. */
+body.spartanx-pantheon #trackerNav{
+ background:linear-gradient(95deg,rgba(12,16,17,.98),rgba(42,34,29,.98),rgba(12,16,17,.98))!important;
+ border-top:1px solid #a7804f!important;
+ box-shadow:0 -5px 21px rgba(117,65,38,.20),inset 0 1px 0 rgba(232,190,121,.18)!important;
+}
+body.spartanx-pantheon #trackerNav::before{
+ content:"";position:absolute;top:-2px;left:0;width:31%;height:2px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,#b98242,#f0d391,transparent);
+ filter:drop-shadow(0 0 5px rgba(223,172,101,.75));
+ animation:sxPantheonSweep 5.2s ease-in-out infinite;
+}
+@keyframes sxPantheonSweep{0%,100%{transform:translateX(-110%)}50%{transform:translateX(340%)}}
+body.spartanx-pantheon #trackerNav button{
+ border:1px solid #786444!important;
+ border-radius:10px!important;
+ background:linear-gradient(155deg,#32312b,#1b201f)!important;
+ color:#c9b99d!important;
+ box-shadow:inset 0 1px 0 #e2bd771b!important;
+}
+body.spartanx-pantheon #trackerNav button.active{
+ border-color:#e6bd77!important;
+ color:#f4d79e!important;
+ background:linear-gradient(145deg,#56362c,#292723)!important;
+ box-shadow:0 0 11px rgba(206,142,72,.29),inset 0 0 9px #e4ac6125!important;
+}
+body.spartanx-pantheon #trackerNav button.active b,
+body.spartanx-pantheon #trackerNav button.active .sx-nav-svg{
+ filter:drop-shadow(0 0 6px #e2b77588);
+}
+/* Greek key motif used only in the theme preview, not over content. */
+.sx-pantheon-preview{display:none;margin-top:12px;padding:12px 14px;align-items:center;gap:12px;border-radius:12px}
+body.spartanx-pantheon .sx-pantheon-preview{
+ display:flex;
+ color:#efd4a5;
+ background:linear-gradient(130deg,#312820,#171e1c);
+ border:1px solid #b88d56;
+ box-shadow:inset 0 0 0 1px #e3bf8220;
+}
+.sx-pantheon-preview .sx-pantheon-mark{
+ display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;
+ clip-path:polygon(50% 0,94% 19%,87% 74%,50% 100%,13% 74%,6% 19%);
+ background:linear-gradient(135deg,#f3d38b,#8b6638 52%,#51362e);
+ color:#1a1a17;font:900 29px Georgia,serif;text-shadow:0 1px #eed59d;
+}
+.sx-pantheon-preview strong{display:block;font-size:12px;letter-spacing:1.3px}
+.sx-pantheon-preview small{display:block;margin-top:4px;color:#c3ad87;font-size:11px;line-height:1.4}
+@media(prefers-reduced-motion:reduce){
+ body.spartanx-pantheon #trackerNav::before{animation:none!important;transform:none!important;left:35%}
+}

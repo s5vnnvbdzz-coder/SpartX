@@ -351,3 +351,33 @@ body.spartanx-pantheon .sx-pantheon-preview{
 @media(prefers-reduced-motion:reduce){
  body.spartanx-pantheon #trackerNav::before{animation:none!important}
 }
+
+/* The Home tab opens by default: make its first rank panel a hoplite plaque. */
+body.spartanx-pantheon #homeRankProgression{
+ position:relative;overflow:hidden;
+ border:2px solid #c9a06a!important;
+ background:
+   url("./pantheon-meander.svg") top left / 80px 13px repeat-x,
+   radial-gradient(ellipse at 0 0,rgba(138,65,46,.20),transparent 70%),
+   linear-gradient(145deg,#332a21,#18211c 65%,#111917)!important;
+}
+body.spartanx-pantheon #homeRankProgression::after{
+ content:"";position:absolute;right:-25px;top:-12px;
+ width:160px;height:160px;pointer-events:none;
+ background:url("./pantheon-shield.svg") center / contain no-repeat;
+ opacity:.11;
+}
+/* Profile and Home headers use a Spartan heraldic accent, not extra text. */
+body.spartanx-pantheon #home > .eyebrow,
+body.spartanx-pantheon #profile .sx-profile-layout-top .eyebrow{
+ color:#eac588!important;letter-spacing:.16em!important;
+}
+body.spartanx-pantheon #profile .sx-profile-layout-top .eyebrow::before{
+ content:"Λ  ·  ";font-family:Georgia,serif;color:#daac6d;
+}
+/* Iron-red active set marking, with gold-check controls for quick scanning. */
+body.spartanx-pantheon .set-entry.is-complete{
+ background:linear-gradient(90deg,rgba(105,43,38,.45),rgba(64,55,35,.24))!important;
+ border-left:2px solid #d1a467;
+}
+body.spartanx-pantheon :is(.set-row input.done,.done:checked){accent-color:#d6aa70!important}

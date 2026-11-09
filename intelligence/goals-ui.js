@@ -10,7 +10,7 @@
   function readUI(){try{const x=JSON.parse(localStorage.getItem(UI_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(_){return {}}}
   const ui=readUI();
   let range=90;
-  try{const chosen=Number(localStorage.getItem(RANGE_KEY));if([0,30,90].includes(chosen))range=chosen}catch(_){}
+  try{const saved=localStorage.getItem(RANGE_KEY);if(saved!==null&&['0','30','90'].includes(saved))range=Number(saved)}catch(_){}
   const state={mode:initialGoal==='weight-loss'?'weight-loss':'bodybuilding',source:'spartanx',demo:false,imported:[],tab:'overview',range,muscle:ui.muscle||'Chest',exercise:ui.exercise||'',settings:M.loadSettings(),weights:M.loadWeights(),raw:[]};
   state.tab=['overview','performance','muscles','intelligence'].includes(ui.tabs?.[state.mode])?ui.tabs[state.mode]:'overview';
   function persistUI(){

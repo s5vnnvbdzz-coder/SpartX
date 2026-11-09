@@ -124,6 +124,23 @@ ascensionStyle.textContent+=`
  height:100%!important;max-height:100%!important;
  min-height:0!important
 }`;
+ascensionStyle.textContent+=`
+/* Workout-page AscensionX Continue: display only the existing import modal
+   over the live SpartanX workout page, like the native 5/3/1 preview. */
+#ascensionXOverlay.sx-ascension-import-only{
+ background:rgba(0,0,0,.84)!important;
+ -webkit-backdrop-filter:blur(8px)!important;backdrop-filter:blur(8px)!important
+}
+#ascensionXOverlay.sx-ascension-import-only .sx-ascension-window{
+ background:transparent!important;border:0!important;box-shadow:none!important
+}
+#ascensionXOverlay.sx-ascension-import-only #ascensionXEmbedFrame{
+ background:transparent!important
+}
+#ascensionXOverlay.sx-ascension-import-only:not(.sx-ascension-import-visible) #ascensionXEmbedFrame{
+ visibility:hidden!important
+}
+`;
 shadow.appendChild(ascensionStyle);
 ascensionPortal.appendChild(ascensionStyle.cloneNode(true));
 
@@ -181,7 +198,7 @@ let ascensionQuickCaller=null,ascensionQuickPending=null,ascensionEmbedReadyForS
 function deliverAscensionShortcut(){
  if(!ascensionQuickPending||!ascensionEmbedReadyForShortcut||!ascensionOverlay.classList.contains('open'))return;
  const destination=ascensionQuickPending;ascensionQuickPending=null;
- try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift,quickImport:destination.quickImport===true},location.origin)}catch(e){}
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift,quickImport:destination.quickImport===true,importOnly:destination.importOnly===true},location.origin)}catch(e){}
 }
 window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  const option=mode==='continue'?'continue':mode==='setup'?'setup':'home';
@@ -190,9 +207,12 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  const fromActiveSession=current==='activeWorkout';
  const fromNewWorkout=context==='new-workout'&&current==='workout';
  const fromProgrammeSetup=context==='workout'&&current==='workout';
- const quick=fromActiveSession||fromNewWorkout;
+ const importOnly=option==='continue'&&current==='workout'&&context==='auto';
+ const quick=fromActiveSession||fromNewWorkout||importOnly;
  ascensionOverlay.classList.toggle('sx-ascension-quick',quick);
- ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:quick};
+ ascensionOverlay.classList.toggle('sx-ascension-import-only',importOnly);
+ ascensionOverlay.classList.remove('sx-ascension-import-visible');
+ ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:quick,importOnly};
  ascensionCloseButton.textContent=quick?'← Back':fromProgrammeSetup?'← WORKOUT':'← TOOLS';
  ascensionCloseButton.setAttribute('aria-label',quick?'Back to workout choices':fromProgrammeSetup?'Close AscensionX and return to Workout':'Close AscensionX and return to Training Tools');
  openEmbeddedAscensionX();
@@ -218,14 +238,14 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=287';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=288';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});
 }
 function closeEmbeddedAscensionX(){
  if(!ascensionOverlay.classList.contains('open'))return;
- ascensionOverlay.classList.remove('open','sx-ascension-quick');
+ ascensionOverlay.classList.remove('open','sx-ascension-quick','sx-ascension-import-only','sx-ascension-import-visible');
  ascensionOverlay.setAttribute('aria-hidden','true');
  if(ascensionEmbedFrame.getAttribute('src')!=='about:blank'){
   try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickExit'},location.origin)}catch(e){}
@@ -248,7 +268,7 @@ function closeEmbeddedAscensionX(){
 }
 ascensionOpenButton.addEventListener('click',()=>{ascensionQuickCaller=null;ascensionQuickPending=null;ascensionOverlay.classList.remove('sx-ascension-quick');ascensionCloseButton.textContent='← TOOLS';openEmbeddedAscensionX()});
 function exitAscensionToCaller(){
- const backToChoices=ascensionOverlay.classList.contains('sx-ascension-quick');
+ const backToChoices=ascensionOverlay.classList.contains('sx-ascension-quick')&&!ascensionOverlay.classList.contains('sx-ascension-import-only');
  closeEmbeddedAscensionX();
  if(backToChoices)window.dispatchEvent(new CustomEvent('spartx:showSessionOptions'));
 }
@@ -277,6 +297,10 @@ window.addEventListener('message',e=>{
  }
  if(e.data?.type==='spartx:ascensionQuickCancel'&&ascensionOverlay.classList.contains('sx-ascension-quick')){
   exitAscensionToCaller();return;
+ }
+ if(e.data?.type==='spartx:ascensionImportReady'){
+  if(ascensionOverlay.classList.contains('sx-ascension-import-only'))ascensionOverlay.classList.add('sx-ascension-import-visible');
+  return;
  }
  if(e.data?.type==='spartx:ascensionEmbedAcknowledged'){
   syncEmbeddedAscensionTheme();
@@ -312,7 +336,7 @@ window.addEventListener('message',e=>{
 // Preload the original app to prevent a blank iframe on first launch.
 window.addEventListener('load',()=>{
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=287';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=288';
 },{once:true});
 
 // The child stays mounted after leaving its overlay. Notify it immediately

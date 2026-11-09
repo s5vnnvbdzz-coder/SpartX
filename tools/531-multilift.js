@@ -198,12 +198,14 @@ function finishEditor(){
  el('generate').textContent='GENERATE CYCLE';
  host.style.overflow='';
  editing=null;proposed=null;
+ window.spartanxSync531CreationAvailability?.();
 }
 root.addEventListener('click',event=>{
  const target=event.target.closest('button');
  if(!target)return;
  if(target.id==='generate'){
   event.preventDefault();event.stopImmediatePropagation();
+  if(!editing&&window.spartanxHasActive531Cycle?.()){window.spartanxSync531CreationAvailability?.();return}
   const next=build();if(!next)return;
   if(editing){
    const items=read(),idx=items.findIndex(c=>c.id===editing.id);
@@ -214,6 +216,7 @@ root.addEventListener('click',event=>{
  }
  else if(target.id==='saveCycle'){
   event.preventDefault();event.stopImmediatePropagation();
+  if(window.spartanxHasActive531Cycle?.()){window.spartanxSync531CreationAvailability?.();return}
   if(!proposed)return;
   const d=JSON.parse(JSON.stringify(proposed));
   d.id='sx531_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);
@@ -244,6 +247,7 @@ root.addEventListener('click',event=>{
   el('editModalBody').appendChild(el('setupCard'));
   el('generate').textContent='SAVE CHANGES';
   el('editModal').hidden=false;
+  window.spartanxSync531CreationAvailability?.();
   saveDraft();
  }
  else if(target.hasAttribute('data-load')){

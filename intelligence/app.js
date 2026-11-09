@@ -11,6 +11,18 @@
   const fmtKg=n=>Number.isFinite(n)?format(n,1)+' kg':'—';
   const formatPct=n=>n==null?'—':(n>0?'+':'')+format(n,1)+'%';
   const core=E.CORE;
+  const SECTION_KEY='sx_intelligence_active_section_v1';
+  const SECTION_NAMES=['overview','performance','muscles','intelligence'];
+  const sectionValid=value=>SECTION_NAMES.includes(value);
+  function initialSection(){
+    const query=new URLSearchParams(window.location.search).get('tab');
+    if(sectionValid(query))return query;
+    try{
+      const stored=localStorage.getItem(SECTION_KEY);
+      if(sectionValid(stored))return stored;
+    }catch(_){}
+    return 'overview';
+  }
   const state={tab:'overview',range:90,selectedLift:'Bench Press',overviewLift:'Bench Press',athlete:'strength',goals:{},source:'demo',profile:null,analysis:null,live:null,liveSummary:null,liveLift:'',liveSignature:''};
   const titles={
     overview:['YOUR TRAINING, DECODED','Athlete Dashboard','Every set is data. Every session is progress.'],
@@ -186,6 +198,12 @@
   function setTab(tab){
     if(!titles[tab])return;
     state.tab=tab;
+    try{localStorage.setItem(SECTION_KEY,tab)}catch(_){}
+    try{
+      const url=new URL(window.location.href);
+      url.searchParams.set('tab',tab);
+      window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+    }catch(_){}
     document.querySelectorAll('[data-page]').forEach(el=>{const active=el.dataset.page===tab;el.hidden=!active;el.classList.toggle('active',active)});
     document.querySelectorAll('[data-tab]').forEach(btn=>{const active=btn.dataset.tab===tab;btn.classList.toggle('active',active);if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current')});
     const title=titles[tab];$('sectionKicker').textContent=title[0];$('pageTitle').textContent=title[1];$('pageSubtitle').textContent=title[2];
@@ -357,6 +375,13 @@
     finally{e.target.value=''}
   });
   loadSpartanX(true);
+  // Restore the exact section selected before switching training focus.
+  // Goal switching never resets the Powerlifting analysis or its workout data.
+  const openingSection=initialSection();
+  if(openingSection!=='overview')setTab(openingSection);
+  else{
+    try{localStorage.setItem(SECTION_KEY,'overview')}catch(_){}
+  }
   // Same-origin local storage is shared only within the same browser/app context.
   // No timer polling: re-read after another tab edits the DB or when app regains focus.
   window.addEventListener('storage',event=>{

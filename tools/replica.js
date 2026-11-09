@@ -581,7 +581,12 @@ function apply531ToWorkout(){
   :'Could not connect to the workout logger. Refresh the tracker and try again.';
 }
 $('apply531').addEventListener('click',apply531ToWorkout);
+function sync531CalculatorCreate(){
+ const create=$('quickCreate531Cycle');
+ if(create)create.hidden=window.spartanxHasActive531Cycle?.()===true;
+}
 $('quickCreate531Cycle').addEventListener('click',()=>{
+ if(window.spartanxHasActive531Cycle?.()){sync531CalculatorCreate();return}
  const currentTm=toKg(Number($('tm').value)),rm=toKg(Number($('tmFinderOneRm').value));
  // The planner also supports entering a new 1RM from scratch; no TM prerequisite.
  // Open the existing 4 / 8 / 12 week planner; never duplicate its saved data.
@@ -590,6 +595,10 @@ $('quickCreate531Cycle').addEventListener('click',()=>{
  }));
 });
 $('target').addEventListener('input',calcPlates);$('bar').addEventListener('input',calcPlates);
+window.addEventListener('spartx:cycleUpdated',sync531CalculatorCreate);
+window.addEventListener('storage',e=>{if(e.key==='spartanx_531_saved_cycles_v1')sync531CalculatorCreate()});
+window.addEventListener('pageshow',sync531CalculatorCreate);
+sync531CalculatorCreate();
 calcOrm();calcTrainingMaxFinder();calc531();calcPlates();
 window.addEventListener('spartx:preferencesChanged',e=>{const next=e.detail?.weight||'kg',old=unitPrefs.weight||'kg';if(next!==old){const factor=next==='lb'?2.2046226218:1/2.2046226218;['ormWeight','tmFinderOneRm','tm','target','bar'].forEach(id=>{const el=$(id);if(el.value!=='')el.value=fmt(+el.value*factor)});unitPrefs.weight=next;saveCalculatorInputs();}const finderLabel=shadow.querySelector('label[for="tmFinderOneRm"]');if(finderLabel)finderLabel.textContent='One-rep max ('+unit()+')';const labels=[['ormWeight','Weight ('+unit()+')'],['tm','Training max ('+unit()+')'],['target','Target bar weight ('+unit()+')'],['bar','Bar weight ('+unit()+')']];labels.forEach(([id,value])=>{const label=shadow.querySelector('label[for="'+id+'"]');if(label)label.textContent=value});calcOrm();calc531();calcPlates();});
 

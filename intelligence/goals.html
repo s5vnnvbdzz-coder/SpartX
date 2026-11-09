@@ -6,88 +6,191 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#090a0c">
-  <title>SpartanX Intelligence — Training Goal Models</title>
+  <meta name="description" content="SpartanX Intelligence: switch between Powerlifting, Bodybuilding and Weight Loss without losing workout history.">
+  <title>SpartanX Intelligence — Training Goals</title>
   <link rel="stylesheet" href="./styles.css?v=7">
-  <link rel="stylesheet" href="./goals.css?v=1">
+  <link rel="stylesheet" href="./goals.css?v=2">
   <link rel="stylesheet" href="./goal-navigation.css?v=1">
   <script src="./engine.js?v=3" defer></script>
   <script src="./bridge.js?v=3" defer></script>
-  <script src="./goal-models.js?v=1" defer></script>
+  <script src="./goal-models.js?v=2" defer></script>
   <script src="./goal-navigation.js?v=1" defer></script>
-  <script src="./goals-ui.js?v=2" defer></script>
+  <script src="./goals-ui.js?v=3" defer></script>
 </head>
-<body class="sx-goals">
-  <header class="gx-topbar">
-    <a href="./?goal=powerlifting" class="gx-back" aria-label="Back to Powerlifting Intelligence">← POWERLIFTING</a>
-    <strong>SPARTAN<span class="accent">X</span> <small>INTELLIGENCE</small></strong>
-    <a class="gx-back gx-app" href="../">APP ↗</a>
-  </header>
-  <main class="gx-main">
-    <div class="eyebrow">GOAL-BASED ATHLETE ANALYTICS</div>
-    <h1>TRAINING INTELLIGENCE</h1>
-    <p class="gx-intro">Your workouts, interpreted for your goal. Only line graphs. No changes to your strength cycle or saved workout history.</p>
-    <div class="sx-goal-picker" role="group" aria-label="Choose your training goal">
-      <div><div class="sx-goal-label">YOUR TRAINING GOAL</div><p id="sxGoalDescription">Choose how Intelligence analyses your workouts.</p></div>
-      <label class="sx-goal-select-label" for="sxGoalSelect">TRAINING FOCUS
-        <select id="sxGoalSelect" aria-label="Training goal">
-          <option value="powerlifting">Powerlifting</option>
-          <option value="bodybuilding" selected>Bodybuilding</option>
-          <option value="weight-loss">Weight Loss</option>
-        </select>
-      </label>
+<body data-theme="black-yellow" class="sx-goals">
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Intelligence navigation">
+    <a class="brand" href="./" aria-label="SpartanX Intelligence Home"><span class="brand-symbol">X</span><span><strong>SPARTAN<span class="accent">X</span></strong><small>INTELLIGENCE</small></span></a>
+    <div class="sidebar-label">PERFORMANCE CENTER</div>
+    <nav class="sidebar-nav" aria-label="Intelligence sections">
+      <button type="button" class="nav-item active" data-tab="overview" aria-current="page"><span class="nav-icon">◈</span> Overview</button>
+      <button type="button" class="nav-item" data-tab="performance"><span class="nav-icon">↗</span> Performance</button>
+      <button type="button" class="nav-item" data-tab="muscles"><span class="nav-icon">▧</span> <span class="gx-muscle-label">Muscle workload</span></button>
+      <button type="button" class="nav-item" data-tab="intelligence"><span class="nav-icon">✦</span> Intelligence</button>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="status-dot"></span> ATHLETE DATA · READ-ONLY
+      <p>All three goals use the same saved SpartanX training history. Switching goals never clears workouts or targets.</p>
     </div>
-    <div class="gx-source">
-      <div><span class="gx-dot"></span><strong id="gxSourceLabel">CHECKING SAVED WORKOUTS</strong><p id="gxSourceDescription">The training data is read directly from SpartanX, on this device.</p></div>
-      <button class="gx-demo-button" type="button" id="gxDemo">TRY DEMO DATA</button>
-    </div>
-    <section id="gxBodybuilding" aria-label="Bodybuilding Intelligence">
-      <div class="gx-heading"><div><div class="eyebrow">HYPERTROPHY ANALYTICS</div><h2>Bodybuilding Model</h2></div><span class="gx-chip">WORKING SETS</span></div>
-      <div class="gx-metrics">
-        <article class="gx-metric"><span>Selected muscle / week</span><strong id="gxMuscleSets">—</strong><small>Primary working-set estimates</small></article>
-        <article class="gx-metric"><span>Target / week</span><strong id="gxSetGoal">—</strong><small>User-defined training target</small></article>
-        <article class="gx-metric"><span>Exercise trend</span><strong id="gxRepDelta">—</strong><small>Best reps at one load</small></article>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="mobile-brand"><span class="brand-symbol">X</span><span>SPARTAN<span class="accent">X</span> <small>INTELLIGENCE</small></span></div>
+      <div class="topbar-title"><span class="eyebrow">TRAIN SMARTER · PROGRESS FURTHER</span><strong>ATHLETE PERFORMANCE CENTER</strong></div>
+      <div class="topbar-actions">
+        <span class="mode-pill" id="gxSourceLabel">● CHECKING CONNECTION</span>
+        <button class="icon-button" type="button" id="gxOpenSource" aria-label="Select training data" title="Select training data">⚙</button>
       </div>
-      <article class="gx-card">
-        <div class="gx-chart-heading"><div><div class="eyebrow">12-WEEK TREND</div><h3>Muscle training volume</h3></div>
-          <label>Muscle group<select id="gxMuscle" aria-label="Select muscle group"></select></label></div>
-        <div id="gxVolumeChart" class="gx-chart" role="img" aria-label="Weekly primary working-set volume line graph"></div>
-        <p class="gx-hint">Counts completed non-warm-up sets mapped to the exercise's primary muscle. This is training exposure, not a direct measure of muscle growth.</p>
-      </article>
-      <article class="gx-card">
-        <div class="gx-chart-heading"><div><div class="eyebrow">COMPARABLE PERFORMANCE</div><h3>Progressive overload</h3></div>
-          <label>Exercise<select id="gxExercise" aria-label="Select exercise"></select></label></div>
-        <div class="gx-chart" id="gxProgressChart" role="img" aria-label="Best repetitions at a consistent load line graph"></div>
-        <p class="gx-hint" id="gxProgressDescription">Uses matched working-set loads. Missing comparable weeks are not interpolated.</p>
-      </article>
-      <article class="gx-card gx-settings">
-        <div><div class="eyebrow">YOUR TARGET</div><h3>Weekly working sets</h3><p>Set your own goal for the selected muscle. This target is not a universal prescription.</p></div>
-        <form id="gxSetForm"><label for="gxTarget">Weekly set target</label><div class="gx-form-row"><input id="gxTarget" type="number" inputmode="numeric" min="1" max="50" step="1" required value="12"><button type="submit">SAVE TARGET</button></div></form>
-      </article>
-      <div class="gx-insight" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your training shows</h3><p id="gxBodyInsight"></p><small id="gxBodyCoverage"></small></div>
-    </section>
-    <section id="gxWeightLoss" hidden aria-label="Weight Loss Intelligence">
-      <div class="gx-heading"><div><div class="eyebrow">ACTIVITY &amp; WEIGHT TRENDS</div><h2>Weight Loss Model</h2></div><span class="gx-chip">CONSISTENCY</span></div>
-      <div class="gx-metrics">
-        <article class="gx-metric"><span>Weight trend</span><strong id="gxWeightChange">—</strong><small>Change in available 7-day averages</small></article>
-        <article class="gx-metric"><span>Training days / 28d</span><strong id="gxDays">—</strong><small>Unique dates with saved sessions</small></article>
-        <article class="gx-metric"><span>Cardio this week</span><strong id="gxCardioMinutes">—</strong><small>Logged machine intervals</small></article>
+    </header>
+    <main class="main-content" id="appContent">
+      <div class="page-heading">
+        <div><div class="eyebrow" id="sectionKicker">YOUR TRAINING, DECODED</div><h1 id="pageTitle">Athlete Dashboard</h1><p class="subtitle" id="pageSubtitle">Every set is data. Every session is progress.</p></div>
+        <div class="select-row"><label for="rangeSelect">TIME RANGE</label><select id="rangeSelect" aria-label="Analysis time range"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="0">All time</option></select></div>
       </div>
-      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">ROLLING AVERAGE</div><h3>Bodyweight trend</h3></div><span class="gx-chip">7 DAYS</span></div><div class="gx-chart" id="gxWeightChart" role="img" aria-label="Seven-day average weight line graph"></div><p class="gx-hint">Uses only optional weight logs, averaging available readings from the previous seven days. Gaps remain where there are no readings.</p></article>
-      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">12-WEEK TREND</div><h3>Cardio minutes</h3></div></div><div class="gx-chart" id="gxCardioChart" role="img" aria-label="Weekly cardio minutes line graph"></div><p class="gx-hint">Time comes from saved SpartanX cardio intervals, not estimated calories burned.</p></article>
-      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">RECENT CONSISTENCY</div><h3>Training days per week</h3></div></div><div class="gx-chart" id="gxConsistencyChart" role="img" aria-label="Weekly training consistency line graph"></div></article>
-      <article class="gx-card"><div class="gx-chart-heading"><div><div class="eyebrow">RESISTANCE TRAINING</div><h3>Strength retention</h3></div></div><div class="gx-chart" id="gxRetentionChart" role="img" aria-label="Repetitions at consistent load line graph"></div><p id="gxRetentionDescription" class="gx-hint">Shows comparable performance where a consistent load is available. It cannot prove muscle retention.</p></article>
-      <article class="gx-card gx-settings">
-        <div><div class="eyebrow">OPTIONAL TRACKING</div><h3>Log bodyweight</h3><p>Entries are stored only in Intelligence on this browser. No weight log is required to use workout trends.</p></div>
-        <form id="gxWeightForm">
-          <div class="gx-two"><label>Date<input id="gxWeightDate" type="date" required></label><label>Weight (kg)<input id="gxWeightInput" type="number" min="20" max="500" step=".1" inputmode="decimal" required placeholder="e.g. 88.5"></label></div>
-          <button type="submit" id="gxAddWeight">SAVE WEIGHT</button>
-        </form>
-        <div class="gx-weight-log" id="gxWeightLog" aria-live="polite"></div>
-        <form id="gxFrequencyForm"><label for="gxFrequency">Weekly workout target</label><div class="gx-form-row"><input type="number" inputmode="numeric" id="gxFrequency" min="1" max="14" step="1" value="3" required><button type="submit">SAVE TARGET</button></div></form>
-      </article>
-      <div class="gx-insight" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your trend shows</h3><p id="gxWeightInsight"></p><small>Weight loss requires more than workout volume. Nutrition, daily activity and individual circumstances affect results.</small></div>
-    </section>
-    <div class="gx-footer"><a href="./?goal=powerlifting">← POWERLIFTING INTELLIGENCE</a><p>SpartanX workout history is read-only. Only optional goal settings and weight entries are saved by these models.</p></div>
-  </main>
+      <div class="sx-goal-picker" role="group" aria-label="Choose your training goal">
+        <div><div class="sx-goal-label">YOUR TRAINING GOAL</div><p id="sxGoalDescription">Choose how Intelligence analyses your workouts.</p></div>
+        <label class="sx-goal-select-label" for="sxGoalSelect">TRAINING FOCUS
+          <select id="sxGoalSelect" aria-label="Training goal"><option value="powerlifting">Powerlifting</option><option value="bodybuilding" selected>Bodybuilding</option><option value="weight-loss">Weight Loss</option></select>
+        </label>
+      </div>
+      <div class="demo-banner gx-banner" id="dataBanner"><span class="banner-symbol">ⓘ</span><span id="gxSourceDescription">Checking the SpartanX workout history saved in this browser.</span></div>
+      <a class="sx-return-app" href="../" aria-label="Return to SpartanX workout app">← BACK TO SPARTANX</a>
+      <section id="gxBodybuilding" aria-label="Bodybuilding Intelligence">
+        <div class="gx-nav-page" data-tab-page="overview">
+          <article class="hero-card">
+            <div class="hero-text"><div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">BODYBUILDING</span></div><h2>BUILD WITH <em>PURPOSE.</em><br>PROGRESS WITH PROOF.</h2>
+              <p>See how consistently you're training each muscle and whether your exercises are progressing.</p>
+              <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
+            </div><div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div></div>
+          </article>
+          <div class="section-top"><div><h3>Your hypertrophy snapshot</h3><p>Working sets, individual targets and comparable performance</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
+          <div class="gx-metrics kpi-grid">
+            <article class="gx-metric kpi"><span>Selected muscle / week</span><strong id="gxMuscleSets">—</strong><small>Primary working-set estimates</small></article>
+            <article class="gx-metric kpi"><span>Target / week</span><strong id="gxSetGoal">—</strong><small>Personal training target</small></article>
+            <article class="gx-metric kpi"><span>Exercise trend</span><strong id="gxRepDelta">—</strong><small>Best reps at a consistent load</small></article>
+          </div>
+          <div class="two-col gx-overview-grid">
+            <article class="panel">
+              <div class="panel-head"><div><div class="eyebrow">MUSCLE TRAINING</div><h3>Weekly working-set trend</h3></div></div>
+              <div class="gx-chart" id="gxOverviewVolumeChart" role="img" aria-label="Recent working-set trend line graph"></div>
+              <div class="panel-foot">Counts completed working sets mapped to the selected primary muscle group.</div>
+            </article>
+            <article class="panel panel-insights">
+              <div class="panel-head"><div><div class="eyebrow">PERFORMANCE INTELLIGENCE</div><h3>Your training insight</h3></div><span class="spark-icon">✦</span></div>
+              <p id="gxBodyOverviewInsight" class="gx-overview-insight">Analysing completed sets…</p>
+              <button class="text-button" type="button" data-go="intelligence">EXPLORE INSIGHTS <span>↗</span></button>
+            </article>
+          </div>
+        </div>
+        <div class="gx-nav-page" data-tab-page="performance" hidden>
+          <div class="section-top"><div><h3>Exercise progression</h3><p>Compare repetitions at the same weight over time</p></div></div>
+          <article class="panel gx-card">
+            <div class="gx-chart-heading"><div><div class="eyebrow">COMPARABLE PERFORMANCE</div><h3>Progressive overload</h3></div>
+              <label>EXERCISE<select id="gxExercise" aria-label="Select exercise"></select></label></div>
+            <div class="gx-chart" id="gxProgressChart" role="img" aria-label="Best repetitions at a consistent load"></div>
+            <div class="panel-foot" id="gxProgressDescription">Weeks without a comparable load remain blank.</div>
+          </article>
+          <article class="panel disclaimer"><div class="eyebrow">WHAT PROGRESSION MEANS</div><h3>Strength and muscle growth aren't identical.</h3><p>More repetitions at a given load are evidence of improved exercise performance. Workouts alone do not measure how much muscle has grown.</p></article>
+        </div>
+        <div class="gx-nav-page" data-tab-page="muscles" hidden>
+          <div class="section-top"><div><h3>Muscle workload</h3><p>Training exposure across muscles and weeks</p></div></div>
+          <article class="panel gx-card">
+            <div class="gx-chart-heading"><div><div class="eyebrow">WORKING-SET DISTRIBUTION</div><h3>Muscle volume trend</h3></div>
+              <label>MUSCLE GROUP<select id="gxMuscle" aria-label="Select muscle group"></select></label></div>
+            <div id="gxVolumeChart" class="gx-chart" role="img" aria-label="Weekly primary working-set volume"></div>
+            <div class="panel-foot">Warm-up sets are excluded. Compound exercise mapping is simplified, with unmapped exercises noted in Insights.</div>
+          </article>
+          <article class="panel gx-card gx-settings">
+            <div><div class="eyebrow">YOUR TARGET</div><h3>Weekly working sets</h3><p>Set a personal target for the selected muscle. Targets are retained when you switch goals.</p></div>
+            <form id="gxSetForm"><label for="gxTarget">WEEKLY SET TARGET</label><div class="gx-form-row"><input id="gxTarget" type="number" inputmode="numeric" min="1" max="50" step="1" required value="12"><button type="submit">SAVE TARGET</button></div></form>
+          </article>
+          <article class="panel"><div class="panel-head"><div><div class="eyebrow">THIS WEEK</div><h3>Muscle workload breakdown</h3></div></div><div id="gxMuscleBreakdown" class="gx-muscle-breakdown"></div></article>
+        </div>
+        <div class="gx-nav-page" data-tab-page="intelligence" hidden>
+          <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Train the muscle, track the progress.</h3><p>Explanations from saved sets, not automatic programme changes.</p></div></div>
+          <div class="gx-insight panel" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your training shows</h3><p id="gxBodyInsight"></p><small id="gxBodyCoverage"></small></div>
+          <article class="panel disclaimer"><div class="eyebrow">DATA LIMITATIONS</div><h3>Workload is not a direct growth or recovery score.</h3><p>Training-set counts are simplified, and the primary muscle mapping may need refining for different exercise variants. Progression recommendations should consider technique, effort, sleep and individual recovery.</p></article>
+        </div>
+      </section>
+      <section id="gxWeightLoss" hidden aria-label="Weight Loss Intelligence">
+        <div class="gx-nav-page" data-tab-page="overview">
+          <article class="hero-card">
+            <div class="hero-text"><div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">WEIGHT LOSS</span></div><h2>BUILD BETTER <em>HABITS.</em><br>TRACK REAL PROGRESS.</h2>
+              <p>Follow bodyweight trends, cardio, consistency and strength performance without obsessing over individual weigh-ins.</p>
+              <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
+            </div><div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div></div>
+          </article>
+          <div class="section-top"><div><h3>Your weight-management snapshot</h3><p>Bodyweight averages, training days and cardio time</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
+          <div class="gx-metrics kpi-grid">
+            <article class="gx-metric kpi"><span>Bodyweight trend</span><strong id="gxWeightChange">—</strong><small>Available rolling averages</small></article>
+            <article class="gx-metric kpi"><span>Training days / 28d</span><strong id="gxDays">—</strong><small>Unique saved training dates</small></article>
+            <article class="gx-metric kpi"><span>Cardio this week</span><strong id="gxCardioMinutes">—</strong><small>Recorded machine intervals</small></article>
+          </div>
+          <div class="two-col gx-overview-grid">
+            <article class="panel gx-card">
+              <div class="panel-head"><div><div class="eyebrow">BODYWEIGHT TREND</div><h3>7-day average weight</h3></div></div>
+              <div class="gx-chart" id="gxWeightChart" role="img" aria-label="Seven-day average bodyweight line graph"></div>
+              <div class="panel-foot">The rolling average uses available measurements, with gaps for days without recent readings.</div>
+            </article>
+            <article class="panel panel-insights">
+              <div class="panel-head"><div><div class="eyebrow">PERFORMANCE INTELLIGENCE</div><h3>Your weight trend insight</h3></div><span class="spark-icon">✦</span></div>
+              <p id="gxWeightOverviewInsight" class="gx-overview-insight">Analysing training data…</p>
+              <button class="text-button" type="button" data-go="intelligence">EXPLORE INSIGHTS <span>↗</span></button>
+            </article>
+          </div>
+          <article class="panel gx-card gx-settings gx-weight-settings">
+            <div><div class="eyebrow">OPTIONAL TRACKING</div><h3>Log bodyweight</h3><p>Readings are stored on this device under Intelligence data. They won't be deleted when you switch training goals.</p></div>
+            <div>
+              <form id="gxWeightForm"><div class="gx-two"><label>DATE<input id="gxWeightDate" type="date" required></label><label>WEIGHT (KG)<input id="gxWeightInput" type="number" min="20" max="500" step=".1" inputmode="decimal" required placeholder="e.g. 88.5"></label></div><button type="submit" id="gxAddWeight">SAVE WEIGHT</button></form>
+              <div class="gx-weight-log" id="gxWeightLog" aria-live="polite"></div>
+            </div>
+          </article>
+        </div>
+        <div class="gx-nav-page" data-tab-page="performance" hidden>
+          <div class="section-top"><div><h3>Fitness &amp; strength performance</h3><p>Track cardio time and maintain resistance-training performance</p></div></div>
+          <article class="panel gx-card"><div class="panel-head"><div><div class="eyebrow">CARDIO PROGRESSION</div><h3>Weekly cardio minutes</h3></div></div><div class="gx-chart" id="gxCardioChart" role="img" aria-label="Weekly cardio minutes"></div><div class="panel-foot">Based on saved cardio intervals. SpartanX does not estimate calorie burn from this graph.</div></article>
+          <article class="panel gx-card"><div class="panel-head"><div><div class="eyebrow">RESISTANCE TRAINING</div><h3>Strength retention</h3></div></div><div class="gx-chart" id="gxRetentionChart" role="img" aria-label="Best repetitions at the same load"></div><div class="panel-foot" id="gxRetentionDescription">Comparable performance helps contextualise training during weight loss.</div></article>
+        </div>
+        <div class="gx-nav-page" data-tab-page="muscles" hidden>
+          <div class="section-top"><div><h3>Training consistency</h3><p>Completed sessions compared with your own target</p></div></div>
+          <article class="panel gx-card"><div class="panel-head"><div><div class="eyebrow">RECENT TRAINING</div><h3>Training days per week</h3></div></div><div class="gx-chart" id="gxConsistencyChart" role="img" aria-label="Weekly training consistency"></div><div class="panel-foot">A training day is counted once even if more than one session was saved.</div></article>
+          <article class="panel gx-card gx-settings"><div><div class="eyebrow">PERSONAL GOAL</div><h3>Weekly workout target</h3><p>Setting a training-frequency goal doesn't alter your programme or workout history.</p></div>
+            <form id="gxFrequencyForm"><label for="gxFrequency">DAYS / WEEK</label><div class="gx-form-row"><input type="number" inputmode="numeric" id="gxFrequency" min="1" max="14" step="1" value="3" required><button type="submit">SAVE TARGET</button></div></form>
+          </article>
+        </div>
+        <div class="gx-nav-page" data-tab-page="intelligence" hidden>
+          <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>See trends, not daily fluctuations.</h3><p>Review long-term progress and training habits before making changes.</p></div></div>
+          <div class="gx-insight panel" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your trend shows</h3><p id="gxWeightInsight"></p><small>Workout activity alone cannot explain fat loss. Nutrition, sleep, daily activity and individual circumstances influence results.</small></div>
+          <article class="panel disclaimer"><div class="eyebrow">DATA LIMITATIONS</div><h3>Intelligence is a decision aid.</h3><p>Weight changes do not automatically distinguish fat, water and lean tissue. Maintaining logged strength is encouraging but is not proof of muscle retention.</p></article>
+        </div>
+      </section>
+      <footer class="app-footer">SPARTANX INTELLIGENCE <span>·</span> TRAIN SMARTER <span>·</span> GOAL-SPECIFIC VIEWS <span>·</span> READ-ONLY WORKOUTS</footer>
+    </main>
+  </div>
+</div>
+<nav class="bottom-nav" aria-label="Mobile Intelligence navigation">
+  <button type="button" data-tab="overview" class="active" aria-label="Overview"><span>◈</span><small>OVERVIEW</small></button>
+  <button type="button" data-tab="performance" aria-label="Performance"><span>↗</span><small>PROGRESS</small></button>
+  <button type="button" data-tab="muscles" aria-label="Muscle workload or training consistency"><span>▧</span><small id="gxMobileMuscleLabel">MUSCLES</small></button>
+  <button type="button" data-tab="intelligence" aria-label="Intelligence"><span>✦</span><small>INSIGHTS</small></button>
+</nav>
+<dialog id="gxSourceDialog" class="source-dialog" aria-labelledby="gxDialogTitle">
+  <form method="dialog"><button class="close-dialog" aria-label="Close data source dialog">×</button></form>
+  <div class="eyebrow">DATA SOURCE</div><h2 id="gxDialogTitle">Choose your athlete data</h2>
+  <p class="small-copy">Both goal dashboards read completed SpartanX workouts in this browser. Changing training goals does not delete any data.</p>
+  <div class="connection-panel">
+    <div class="eyebrow">SPARTANX WORKOUT HISTORY</div>
+    <p class="small-copy" id="gxConnectionDetails">Checking saved workouts…</p>
+    <button type="button" class="primary-button full" id="gxConnect">USE MY SPARTANX WORKOUTS</button>
+    <button type="button" class="secondary-button full" id="gxRefresh">REFRESH TRAINING DATA</button>
+  </div>
+  <div class="modal-separator"><span>OPTIONAL DEMONSTRATION</span></div>
+  <button type="button" class="secondary-button full" id="gxDemo">LOAD DEMO ATHLETE</button>
+  <div class="modal-separator"><span>OPTIONAL LOCAL TEST</span></div>
+  <label for="gxImportInput">READ-ONLY SPARTANX JSON PREVIEW</label>
+  <input type="file" id="gxImportInput" accept=".json,application/json">
+  <p class="small-copy">Imported records are analysed in memory, not uploaded or written to your SpartanX data.</p>
+  <p class="small-copy" role="status" id="gxImportStatus"></p>
+</dialog>
 </body>
 </html>

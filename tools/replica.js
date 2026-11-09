@@ -174,6 +174,7 @@ sxAscNative.innerHTML='<div class="sx-asc-dialog"><div class="sx-asc-scroll">'+
 document.body.appendChild(sxAscNative);
 const sxAscStyle=document.createElement('style');
 sxAscStyle.textContent="\n#sxAscWorkoutPopup[hidden]{display:none!important}\n#sxAscWorkoutPopup{position:fixed;inset:0;z-index:290001;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.60);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);overscroll-behavior:contain}\n#sxAscWorkoutPopup *{box-sizing:border-box}\n#sxAscWorkoutPopup .sx-asc-dialog{width:min(100%,440px);max-height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid color-mix(in srgb,var(--lime) 38%,var(--line));border-radius:20px;background:linear-gradient(145deg,var(--panel2),var(--panel) 60%,var(--bg));color:var(--txt);box-shadow:0 20px 65px #000a}\n#sxAscWorkoutPopup .sx-asc-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:21px 21px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}\n#sxAscWorkoutPopup .sx-asc-caption{color:var(--lime);font-size:10px;letter-spacing:1.3px;font-weight:900}\n#sxAscWorkoutPopup h2{font-size:21px;line-height:1.28;margin:10px 0 13px}\n#sxAscWorkoutPopup .sx-asc-intro,#sxAscWorkoutPopup .sx-asc-help{font-size:12px;line-height:1.65;color:var(--muted);margin:0 0 13px}\n#sxAscWorkoutPopup label{display:block;font-size:12px;color:var(--muted);margin:12px 0 7px}\n#sxAscWorkoutPopup select{width:100%;min-height:43px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--txt);padding:10px;font-size:14px}\n#sxAscWorkoutPopup .sx-asc-preview{margin:12px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:12px;line-height:1.75;overflow-wrap:anywhere}\n#sxAscWorkoutPopup .sx-asc-preview strong{display:block;font-size:13px;margin-bottom:8px}\n#sxAscWorkoutPopup .asc-spartan-import-label{display:block;color:var(--lime);letter-spacing:1px;font-weight:850;font-size:10px;margin:12px 0 5px}\n#sxAscWorkoutPopup .sx-asc-preview .tiny{font-size:11px;color:var(--muted)}\n#sxAscWorkoutPopup .sx-asc-help{margin:13px 0 0}\n#sxAscWorkoutPopup .sx-asc-msg{font-size:11px;color:var(--lime);line-height:1.4;margin-top:8px}\n#sxAscWorkoutPopup .sx-asc-actions{display:grid;grid-template-columns:1fr 1.5fr;flex:0 0 auto;gap:8px;padding:13px 21px 19px;border-top:1px solid var(--line)}\n#sxAscWorkoutPopup .sx-asc-actions button{min-height:49px;min-width:0;border-radius:10px;padding:9px 7px;font-size:11px;font-weight:900;cursor:pointer}\n#sxAscCancel{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}\n#sxAscLoad{background:var(--lime);border:1px solid var(--lime);color:var(--bg)}\n#sxAscLoad:disabled{opacity:.5;cursor:not-allowed}\n@media(max-width:380px){#sxAscWorkoutPopup .sx-asc-scroll{padding:16px 15px 11px}#sxAscWorkoutPopup .sx-asc-actions{padding:11px 15px 14px}#sxAscWorkoutPopup h2{font-size:19px}}";
+sxAscStyle.textContent+='\n/* iPhone: the fixed bottom navigation uses max z-index and must not cover this modal. */\nbody.sx-asc-native-modal-open #trackerNav,body.sx-asc-native-modal-open .minimized-session{display:none!important;pointer-events:none!important}\n#sxAscWorkoutPopup{z-index:2147483647!important}\n#sxAscWorkoutPopup .sx-asc-dialog{max-height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}\n';
 document.head.appendChild(sxAscStyle);
 const sxAscLift=sxAscNative.querySelector('#sxAscLift');
 const sxAscPreview=sxAscNative.querySelector('#sxAscPreview');
@@ -198,6 +199,7 @@ function openSXAscWorkout(lift){
  sxAscMessage.textContent='';
  sxAscLoad.disabled=true;sxAscLoad.textContent='LOAD INTO SPARTANX';
  sxAscLift.disabled=true;
+ document.body.classList.add('sx-asc-native-modal-open');
  sxAscNative.hidden=false;
  sxAscNative.querySelector('#sxAscCancel').focus({preventScroll:true});
  if(ascensionEmbedReadyForShortcut)requestSXAscPreview(sxAscRequestedLift);
@@ -208,6 +210,7 @@ function openSXAscWorkout(lift){
 function closeSXAscWorkout(success=false){
  if(sxAscNative.hidden)return;
  sxAscNative.hidden=true;
+ document.body.classList.remove('sx-asc-native-modal-open');
  if(sxAscOldOverflow){
   document.body.style.overflow=sxAscOldOverflow.body;
   document.documentElement.style.overflow=sxAscOldOverflow.html;
@@ -283,7 +286,7 @@ function deliverAscensionShortcut(){
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionQuickNavigate',mode:destination.mode,lift:destination.lift,quickImport:destination.quickImport===true,importOnly:destination.importOnly===true},location.origin)}catch(e){}
 }
 window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
- const option=mode==='continue'?'continue':mode==='setup'?'setup':'home';
+ const option=mode==='continue'?'continue':mode==='setup'?'setup':mode==='manage'?'manage':'home';
  const current=document.querySelector('.screen.active')?.id;
  const fromActiveSession=current==='activeWorkout';
  const fromNewWorkout=context==='new-workout'&&current==='workout';

@@ -148,3 +148,62 @@ body[data-active-theme="cosmic-nebula"] #profileSettingsOverlay button:not(.dang
  background:linear-gradient(155deg,#303653,#17203b)!important;
  border-color:#8187b8!important;color:#f4f6ff!important
 }
+
+/* Spartan Pantheon: settings bridge for main modal and standalone Tools Settings. */
+body[data-sx-settings-theme="spartan-pantheon"]{
+ --sx-settings-bg:#090e0e;
+ --sx-settings-panel:#1b211e;
+ --sx-settings-panel2:#302b24;
+ --sx-settings-line:#a68351;
+ --sx-settings-text:#f1e6d3;
+ --sx-settings-muted:#bfaf93;
+ --sx-settings-accent:#e1b875;
+ --bg:#090e0e;--panel:#1b211e;--panel2:#302b24;
+ --line:#a68351;--txt:#f1e6d3;--muted:#bfaf93;--lime:#e1b875;
+ color-scheme:dark;
+}
+body[data-sx-settings-theme="spartan-pantheon"] :is(header,#settingsNav){
+ background:linear-gradient(115deg,#0d1514,#382b22 52%,#111918)!important;
+ border-color:#bc9056!important;
+ box-shadow:inset 0 1px 0 #f4ce8e23,0 0 14px #0008!important;
+}
+body[data-sx-settings-theme="spartan-pantheon"] :is(.card,.settings-modal,.detail-panel,.plate-setting,.profile-icon,.setting-row){
+ background:
+  url("./pantheon-meander.svg") top left / 80px 11px repeat-x,
+  linear-gradient(155deg,#332b24,#1b2220 62%,#121919)!important;
+ border-color:#aa8657!important;
+ box-shadow:inset 0 0 0 1px #e7bf8123,0 4px 13px #0006!important;
+ color:#f1e7d6!important;
+}
+body[data-sx-settings-theme="spartan-pantheon"] :is(button:not(.danger),.spartan-back-button,#settingsBack){
+ background:linear-gradient(150deg,#39362c,#1d2521)!important;
+ border:1px solid #ba925d!important;
+ color:#f6e4bf!important;
+ box-shadow:inset 0 0 0 1px #211912,inset 0 1px 0 #fae3a321!important;
+}
+body[data-sx-settings-theme="spartan-pantheon"] :is(input,select,textarea){
+ background:#141c1b!important;color:#f0e7d7!important;border-color:#ad895b!important;
+}
+body[data-sx-settings-theme="spartan-pantheon"] .switch input:checked+span{
+ background:#843b32!important;
+ box-shadow:inset 0 0 0 1px #dbad68!important;
+}
+body[data-sx-settings-theme="spartan-pantheon"] :is(.eyebrow,.brand span){color:#edc483!important}
+body[data-active-theme="spartan-pantheon"] #profileSettingsOverlay{
+ background:rgba(5,7,7,.88)!important;
+ -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+body[data-active-theme="spartan-pantheon"] #profileSettingsOverlay .detail-panel{
+ background:
+  url("./pantheon-meander.svg") top left / 80px 12px repeat-x,
+  linear-gradient(155deg,#392e23,#202721 50%,#0d1616)!important;
+ border:2px solid #caa16a!important;
+ box-shadow:inset 0 0 0 3px #1c211d,0 0 23px #000b!important;
+}
+body[data-active-theme="spartan-pantheon"] #profileSettingsOverlay button:not(.danger){
+ background:linear-gradient(145deg,#3e382e,#1c2521)!important;
+ border:1px solid #c79b61!important;color:#f3e5c9!important;
+}
+body[data-active-theme="spartan-pantheon"] #profileSettingsOverlay :is(.eyebrow,h2,h3){
+ color:#edca8d!important;
+}

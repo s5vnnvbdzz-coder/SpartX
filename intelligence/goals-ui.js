@@ -124,6 +124,10 @@
       'Log repeat strength exercises to monitor performance while changing bodyweight.';
     $('gxWeightInsight').textContent=weight.insight;
     $('gxFrequency').value=state.settings.weeklySessions||3;
+    $('gxTarget').disabled=state.demo;
+    $('gxSetForm').querySelector('button').disabled=state.demo;
+    $('gxFrequency').disabled=state.demo;
+    $('gxFrequencyForm').querySelector('button').disabled=state.demo;
     $('gxWeightInput').disabled=state.demo;
     $('gxWeightDate').disabled=state.demo;
     $('gxAddWeight').disabled=state.demo;

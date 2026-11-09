@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 210">
+ <defs>
+  <linearGradient id="bronze" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f4d391"/><stop offset=".3" stop-color="#b98b4f"/><stop offset=".67" stop-color="#79532e"/><stop offset="1" stop-color="#d9af68"/></linearGradient>
+  <linearGradient id="crest" x1="0" x2="1" y1="0" y2="0"><stop stop-color="#3c171a"/><stop offset=".53" stop-color="#a5443a"/><stop offset="1" stop-color="#5b201f"/></linearGradient>
+ </defs>
+ <!-- Corinthian plume, comb, and nose guard rendered as engraved metal -->
+ <path d="M38 55 C19 30 29 13 56 7 C83 1 120 11 148 36 C158 46 164 61 159 74 C141 50 115 35 88 36 C66 35 48 43 38 55Z" fill="url(#crest)" stroke="#bd8155" stroke-width="3"/>
+ <path d="M40 64 C38 36 67 18 99 23 C129 25 146 51 147 83 L142 128 L122 169 L111 158 L119 120 L106 101 L105 159 L96 182 L84 174 L83 101 L65 122 L72 158 L59 166 L39 128Z" fill="url(#bronze)" stroke="#4c321f" stroke-width="4" stroke-linejoin="round"/>
+ <path d="M45 84 C64 72 75 77 85 91 L84 106 C68 98 61 105 46 109Z" fill="#1b1b19" stroke="#f0c77f" stroke-width="3"/>
+ <path d="M143 84 C126 73 115 77 105 91 L106 106 C122 98 130 105 142 109Z" fill="#1b1b19" stroke="#f0c77f" stroke-width="3"/>
+ <path d="M91 74 L98 74 L100 162 L95 186 L88 165Z" fill="#e7c17d" stroke="#694527" stroke-width="3"/>
+ <path d="M47 62 Q93 42 139 62 M45 124 L65 155 M142 124 L121 155" fill="none" stroke="#ffe0a0" stroke-opacity=".7" stroke-width="3"/>
+ <path d="M76 40 Q101 31 121 44" fill="none" stroke="#f2d18f" stroke-width="4" stroke-linecap="round"/>
+ <circle cx="54" cy="73" r="3" fill="#35241a"/><circle cx="134" cy="73" r="3" fill="#35241a"/>
+</svg>

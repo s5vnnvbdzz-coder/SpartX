@@ -967,6 +967,41 @@ window.addEventListener('message',e=>{
   closeCycleEditor();
   return;
  }
+
+ // SpartanX's Workout page owns the visible Continue popup.
+ // AscensionX remains the sole source of prescribed sets and accessories.
+ if(e.data?.type==='spartx:ascensionHostPreviewRequest'&&ascensionEmbeddedBySpartanX){
+  const lifts=state.cycle.created?selectedLifts():[];
+  const preferred=typeof e.data.lift==='string'&&lifts.includes(e.data.lift)?e.data.lift:lifts[0];
+  const picker=$('ascSpartanImportLift'),panel=$('ascSpartanImportPreview');
+  if(!preferred||!picker||!panel){
+   window.parent.postMessage({type:'spartx:ascensionHostPreview',ready:false,message:'No active AscensionX cycle was found on this device.'},location.origin);
+   return;
+  }
+  picker.innerHTML=lifts.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
+  picker.value=preferred;
+  renderAscSpartanImportPreview();
+  window.parent.postMessage({
+   type:'spartx:ascensionHostPreview',ready:true,
+   lifts:lifts.map(lift=>({lift,week:currentWeekFor(lift)})),
+   selectedLift:preferred,
+   previewHtml:panel.innerHTML
+  },location.origin);
+  return;
+ }
+ if(e.data?.type==='spartx:ascensionHostLoad'&&ascensionEmbeddedBySpartanX){
+  const lift=e.data.lift;
+  if(typeof lift==='string'&&state.cycle.created&&selectedLifts().includes(lift)){
+   const picker=$('ascSpartanImportLift');
+   picker.value=lift;
+   requestAscensionSpartanImport();
+  }
+  return;
+ }
+ if(e.data?.type==='spartx:ascensionHostCancel'&&ascensionEmbeddedBySpartanX){
+  closeAscSpartanImport();
+  return;
+ }
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
   document.body.classList.toggle('sx-spartan-import-only',e.data.mode==='continue'&&e.data.importOnly===true);

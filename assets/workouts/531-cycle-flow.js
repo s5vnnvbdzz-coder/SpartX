@@ -98,9 +98,11 @@ const overlay=document.createElement('div');
 overlay.id='sx531CyclePreview';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','5/3/1 programme preview');
 overlay.innerHTML='<div class="sx531-dialog"><header><div><div class="sx531-caption">5/3/1 × SPARTANX</div><h2>Log this workout in SpartanX?</h2></div><span class="sx531-caption" id="sx531CycleStatus"></span></header><div class="sx531-content" id="sx531CycleContent"></div><footer class="sx531-footer"><button type="button" id="sx531Cancel">CANCEL</button><button type="button" id="sx531Load">LOAD INTO SPARTANX</button></footer></div>';
 document.body.appendChild(overlay);
-const card=document.createElement('section');card.id='sx531WorkoutCard';card.className='card';card.hidden=true;
+const card=document.createElement('section');card.id='sx531WorkoutCard';card.className='card sx-programme-card sx-531-quick-card';card.hidden=true;
 const workout=$('workout'),start=workout?.querySelector('.start-card');
-if(start)start.before(card);
+const slot=$('sx531ProgrammeSlot');
+if(slot)slot.prepend(card);
+else if(start)start.before(card);
 let cycleId=null,selectedLift=null,returnMenu=false,oldOverflow=null,bypass=false;
 function chosenCycle(){return activeCycles().find(c=>c.id===cycleId)||activeCycles()[0]}
 function renderPreview(){
@@ -230,18 +232,41 @@ $('start531Shortcut')?.addEventListener('click',e=>{
 },true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden){e.preventDefault();closePreview(true)}});
 function renderCard(){
- const all=activeCycles();if(!card||!all.length){if(card)card.hidden=true;return}
- const c=all[0],l=lifts(c);
- const total=l.length*c.weeks;
+ const all=activeCycles(),empty=$('sx531Empty');
+ if(!card||!all.length){
+  if(card)card.hidden=true;
+  if(empty)empty.hidden=false;
+  return;
+ }
+ if(empty)empty.hidden=true;
+ const c=all[0],l=lifts(c),total=Math.max(1,l.length*c.weeks);
  const done=l.reduce((sum,lift)=>sum+completed(c,lift).size,0);
+ const percent=Math.min(100,Math.max(0,Math.round(done/total*100)));
  const next=selectDefault(c);
  card.hidden=false;
- card.innerHTML='<div class="eyebrow">YOUR ACTIVE PROGRAMME</div><h2>5/3/1 CYCLE</h2><div class="tiny muted">'+safe(c.name)+' · Next: '+safe(next?.lift||'')+' (Week '+(next?.week||'—')+')</div>'+
-  '<div class="sx531-quick-row">'+l.map(lift=>'<span>'+LABEL[lift]+'<strong>'+(nextWeek(c,lift)===null?'✓':'W'+nextWeek(c,lift))+'</strong></span>').join('')+'</div>'+
-  '<div class="tiny muted">CYCLE PROGRESS · '+done+'/'+total+' LIFT SESSIONS</div><div class="sx531-progress"><i style="width:'+Math.min(100,100*done/total)+'%"></i></div>'+
-  '<div class="sx531-actions"><button type="button" id="sx531QuickContinue">⚡ CONTINUE 5/3/1</button><button type="button" id="sx531QuickView">VIEW CYCLE</button></div>';
+ card.innerHTML=
+  '<div class="sx-programme-head"><div><div class="sx-programme-kicker">5/3/1 · POWERLIFTING</div><h2 class="sx-programme-title">'+safe(c.name||'5/3/1 Strength Cycle')+'</h2></div>'+
+  '<div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sx531QuickMenu" aria-label="5/3/1 programme options" aria-expanded="false" aria-controls="sx531QuickOptions">•••</button>'+
+  '<div class="sx-programme-options" id="sx531QuickOptions" hidden><button type="button" id="sx531QuickView">VIEW CYCLE</button><button type="button" id="sx531QuickManage">MANAGE SAVED CYCLES</button></div></div></div>'+
+  '<p class="sx-programme-meta">5/3/1 · Powerlifting · Week '+(next?.week||'—')+' of '+c.weeks+(all.length>1?' · '+(all.length-1)+' more active':'')+'</p>'+
+  '<div class="sx-programme-progressline"><span>CYCLE PROGRESS</span><strong>'+percent+'%</strong></div>'+
+  '<div class="sx-programme-progress" role="progressbar" aria-label="5/3/1 cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><span style="width:'+percent+'%"></span></div>'+
+  '<div class="sx-programme-footer"><div class="sx-programme-next">NEXT: <b>'+safe(next?.lift||'Select lift')+' · Week '+(next?.week||'—')+'</b></div>'+
+  '<button type="button" class="sx-programme-continue" id="sx531QuickContinue">CONTINUE ›</button></div>';
 }
-card.addEventListener('click',e=>{if(e.target.closest('#sx531QuickContinue,#sx531QuickView'))openPreview(false)});
+card.addEventListener('click',e=>{
+ if(e.target.closest('#sx531QuickContinue')){openPreview(false);return}
+ const menuButton=e.target.closest('#sx531QuickMenu');
+ if(menuButton){
+  const pop=$('sx531QuickOptions');pop.hidden=!pop.hidden;
+  menuButton.setAttribute('aria-expanded',String(!pop.hidden));return;
+ }
+ if(e.target.closest('#sx531QuickView')){openPreview(false);return}
+ if(e.target.closest('#sx531QuickManage')){
+  const details=$('homeCycleCard');
+  if(details){details.open=true;details.scrollIntoView({behavior:'smooth',block:'start'})}
+ }
+});
 window.addEventListener('spartx:cycleUpdated',renderCard);
 window.addEventListener('storage',e=>{if(!e.key||e.key===KEY)renderCard()});
 window.addEventListener('pageshow',renderCard);

@@ -4120,8 +4120,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/531-cycle-flow.js?v=271"></script>
 <script id="sx-pwa-update-controller">
 (()=>{
- const BUILD=282;
+ // Read the visible app build instead of maintaining a second, stale constant.
+ // This prevents repeated refresh offers when Settings and the SW are already current.
  const status=document.getElementById('sxUpdateStatus');
+ const BUILD=Number((status?.textContent||'').match(/\bBuild\s+(\d+)\b/)?.[1])||284;
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;
  let checking=false;

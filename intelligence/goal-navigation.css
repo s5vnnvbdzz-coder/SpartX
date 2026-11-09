@@ -1,0 +1,8 @@
+/* Goal selector shared by Powerlifting, Bodybuilding and Weight Loss Intelligence. */
+.sx-goal-picker{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 18px;margin:14px 0 19px;border-radius:15px;border:1px solid rgba(244,205,55,.24);background:linear-gradient(108deg,rgba(244,205,55,.08),#15171a 48%,#101216)}
+.sx-goal-picker .sx-goal-label{font-size:10px;letter-spacing:1.8px;font-weight:900;color:var(--gold);margin-bottom:5px}
+.sx-goal-picker p{font-size:12px;line-height:1.55;color:var(--muted);margin:0;max-width:540px}
+.sx-goal-picker .sx-goal-select-label{flex:0 0 205px;max-width:100%;display:grid;gap:5px;font-size:10px;font-weight:850;letter-spacing:1px;color:var(--muted)}
+.sx-goal-picker select{display:block;width:100%;color:var(--txt);background:#24272c;border:1px solid rgba(244,205,55,.42);border-radius:9px;padding:11px 12px;font-size:15px;font-weight:750;line-height:1.3;min-height:44px}
+.sx-goal-picker select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:650px){.sx-goal-picker{flex-direction:column;align-items:stretch;padding:14px 13px;gap:12px;margin:12px 0 17px}.sx-goal-picker .sx-goal-select-label{flex:0 0 auto;width:100%}.sx-goal-picker p{font-size:11px}}

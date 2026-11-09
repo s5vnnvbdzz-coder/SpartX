@@ -4,7 +4,8 @@
   const M=window.SXGoalModels, E=window.SXEngine;
   const $=id=>document.getElementById(id);
   if(!M||!E){document.body.insertAdjacentText('afterbegin','Unable to load Intelligence models.');return}
-  const state={mode:'bodybuilding',demo:false,muscle:'Chest',exercise:'',settings:M.loadSettings(),weights:M.loadWeights(),raw:[]};
+  const initialGoal=window.SXGoalNavigation?.currentGoal;
+  const state={mode:initialGoal==='weight-loss'?'weight-loss':'bodybuilding',demo:false,muscle:'Chest',exercise:'',settings:M.loadSettings(),weights:M.loadWeights(),raw:[]};
   const fmt=(n,d=0)=>Number.isFinite(n)?Number(n).toLocaleString('en-GB',{maximumFractionDigits:d}):'—';
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -78,10 +79,6 @@
   function render(){
     $('gxBodybuilding').hidden=state.mode!=='bodybuilding';
     $('gxWeightLoss').hidden=state.mode!=='weight-loss';
-    $('gxBodyButton').classList.toggle('active',state.mode==='bodybuilding');
-    $('gxWeightButton').classList.toggle('active',state.mode==='weight-loss');
-    $('gxBodyButton').setAttribute('aria-pressed',state.mode==='bodybuilding');
-    $('gxWeightButton').setAttribute('aria-pressed',state.mode==='weight-loss');
     $('gxDemo').textContent=state.demo?'USE MY WORKOUTS':'TRY DEMO DATA';
     const count=state.raw.length;
     $('gxSourceLabel').textContent=state.demo?'● DEMONSTRATION DATA':count?'● CONNECTED TO SPARTANX':'● NO SAVED WORKOUTS';
@@ -145,8 +142,11 @@
       }
     }
   }
-  $('gxBodyButton').addEventListener('click',()=>{state.mode='bodybuilding';render()});
-  $('gxWeightButton').addEventListener('click',()=>{state.mode='weight-loss';render()});
+  window.addEventListener('sx:intelligence-goal-change',event=>{
+    const goal=event.detail?.goal;
+    if(goal!=='bodybuilding'&&goal!=='weight-loss')return;
+    state.mode=goal;render();
+  });
   $('gxDemo').addEventListener('click',()=>{state.demo=!state.demo;refresh()});
   $('gxMuscle').addEventListener('change',e=>{state.muscle=e.target.value;render()});
   $('gxExercise').addEventListener('change',e=>{state.exercise=e.target.value;render()});

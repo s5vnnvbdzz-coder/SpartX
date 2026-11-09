@@ -315,3 +315,91 @@ body[data-spartx-parent-theme="cosmic-nebula"] :is(button.danger,#confirmDeleteC
  background:linear-gradient(140deg,#593045,#2d1b34)!important;
  color:#ffd6e1!important;border-color:#b47796!important
 }
+
+/* Spartan Pantheon — inherited only inside SpartanX.
+   Standalone AscensionX remains on its own appearance. */
+body[data-spartx-parent-theme="spartan-pantheon"]{
+ --sx-parent-bg:#0a1010;
+ --sx-parent-panel:#1b211e;
+ --sx-parent-panel2:#302b24;
+ --sx-parent-line:#a78251;
+ --sx-parent-text:#f2e5cf;
+ --sx-parent-muted:#bbad95;
+ --sx-parent-accent:#deb477;
+ --bg:#0a1010;--panel:#1b211e;--panel2:#302b24;--panel3:#3b3329;
+ --line:#a78251;--text:#f2e5cf;--muted:#bbad95;
+ --red:#bd8a51;--red2:#f1cd8a;--redDeep:#71342d;
+ color-scheme:dark;
+ background:
+  radial-gradient(ellipse at 50% 0%,rgba(148,93,43,.18),transparent 55%),
+  linear-gradient(160deg,#080f0e,#2b2920 55%,#0d1513)!important;
+ background-attachment:fixed!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(header,nav[aria-label="Main navigation"],.settings-modal .modal-head){
+ background:
+  linear-gradient(130deg,#111817,#392c22 53%,#121917)!important;
+ border-color:#b9915b!important;
+ color:#f3e5c8!important;
+ box-shadow:inset 0 1px 0 #f0ce9425,0 0 12px #0007!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(
+ .card,.hero,.stat,.week-card,.week-tile,.workout-panel,.settings-modal,
+ .cycle-confirm-dialog,.cycle-editor-dialog,.asc-spartan-import-dialog,
+ .set-popup,.number-pad-panel,.cycle-details .card,.metrics-card,
+ .workout-history-card
+){
+ background:
+  url("./pantheon-meander.svg") top left / 80px 11px repeat-x,
+  linear-gradient(150deg,#332b22,#202621 54%,#111917)!important;
+ border:1px solid #b18b58!important;
+ border-radius:10px!important;
+ color:#f1e6d2!important;
+ box-shadow:inset 0 0 0 1px #f1d49a1a,0 5px 15px #0006!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(
+ .cycle-confirm-backdrop,.settings-backdrop,#cycleEditorBackdrop,
+ #ascSpartanImportBackdrop,.set-popup-backdrop
+){
+ background:#060909e3!important;
+ -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(.cycle-editor-header,.cycle-editor-actions,.modal-head){
+ background:linear-gradient(150deg,#35291f,#1b2621)!important;
+ border-color:#b28c5b!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(
+ .eyebrow,.brand span,.progress>i,.asc-spartan-import-label,
+ .cycle-lift-row .current strong,.rpe-popup-value,.number-pad-display
+){color:#e9bc7b!important}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(
+ button:not(.danger):not(.ghost),.secondary,.seg button,
+ .cycle-editor-actions button,.asc-spartan-import-actions button,
+ .settings-modal button:not(.danger)
+){
+ background:linear-gradient(150deg,#423a2d,#1f2821)!important;
+ border:1px solid #b9915e!important;
+ color:#f0e2c7!important;
+ box-shadow:inset 0 1px 0 #f6d99d24!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(
+ .seg button.active,.unit-choice button.active,.weektile.current,
+ nav[aria-label="Main navigation"] button.active,#ascSpartanImportConfirm
+){
+ background:linear-gradient(140deg,#863b33,#382722)!important;
+ border-color:#e5b878!important;
+ color:#ffebc4!important;
+ box-shadow:0 0 11px #be7d4560!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(input,select,textarea,.set-control .set-value,.number-pad-keys button){
+ background:#141c19!important;
+ border:1px solid #97774e!important;
+ color:#f2e8d6!important;
+}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(input[type="checkbox"],input[type="radio"],input[type="range"]){accent-color:#dfb36a!important}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(
+ .settable td,.settable th,.listitem,.asc-cycle-strength-editor,
+ .asc-spartan-import-preview,.cycle-lift-row,.cycle-editor-body
+){border-color:#8d714f!important;color:#f1e3cf!important}
+body[data-spartx-parent-theme="spartan-pantheon"] :is(.progress>i,.stat .progress-fill,.weekgrid .weektile.done){
+ background:linear-gradient(90deg,#602722,#b0783e,#edc77c)!important;
+}

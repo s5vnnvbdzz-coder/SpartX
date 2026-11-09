@@ -403,3 +403,28 @@ body[data-spartx-parent-theme="spartan-pantheon"] :is(
 body[data-spartx-parent-theme="spartan-pantheon"] :is(.progress>i,.stat .progress-fill,.weekgrid .weektile.done){
  background:linear-gradient(90deg,#602722,#b0783e,#edc77c)!important;
 }
+
+/* Build 288: the Workout card's Continue opens AscensionX's real import
+   dialog, while SpartanX (not the AscensionX dashboard) remains underneath.
+   The parent overlay supplies the dark backdrop and blur. */
+html:has(body.sx-spartan-import-only),
+body.sx-ascension-embedded.sx-spartan-import-only[data-spartx-parent-theme]{
+ background:transparent!important;background-image:none!important;
+ background-color:transparent!important;
+}
+body.sx-ascension-embedded.sx-spartan-import-only{
+ min-height:0!important;height:100dvh!important;padding:0!important;
+ overflow:hidden!important;
+}
+body.sx-ascension-embedded.sx-spartan-import-only > header,
+body.sx-ascension-embedded.sx-spartan-import-only > main,
+body.sx-ascension-embedded.sx-spartan-import-only > nav[aria-label="Main navigation"]{
+ display:none!important
+}
+body.sx-ascension-embedded.sx-spartan-import-only[data-spartx-parent-theme] #ascSpartanImportBackdrop{
+ position:fixed!important;inset:0!important;top:0!important;bottom:0!important;
+ height:100dvh!important;width:100%!important;
+ background:transparent!important;background-image:none!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))!important;
+}

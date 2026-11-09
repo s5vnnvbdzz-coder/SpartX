@@ -379,9 +379,9 @@ tr:last-child td{border:0}
   display:grid;
   place-items:center;
   padding:8px 7px;
-  border:1px solid #aab2b7;
-  border-radius:12px;
-  background:linear-gradient(145deg,#f4f5f5,#d7dddf);
+  border:0;
+  border-radius:0;
+  background:transparent;
   overflow:hidden;
 }
 .workload-hero .sx-intel-anatomy-map .sx-anatomy-figure{
@@ -404,14 +404,15 @@ tr:last-child td{border:0}
   max-width:100%;
 }
 .workload-hero .sx-intel-anatomy-map .sx-anatomy-region{
-  stroke:#606970;
+  stroke:#555c66;
   stroke-width:9;
   stroke-linejoin:round;
   stroke-linecap:round;
 }
-.workload-hero .sx-intel-anatomy-map .sx-muscle-neutral{fill:#b5bdc1}
-.workload-hero .sx-intel-anatomy-map .sx-muscle-primary{fill:var(--gold);stroke:#856e24}
-.workload-hero .sx-intel-anatomy-map .sx-muscle-secondary{fill:#dac987;stroke:#899398}
+.workload-hero .sx-intel-anatomy-map .sx-anatomy-contour{fill:#25292f;stroke:#565d65;stroke-width:5}
+.workload-hero .sx-intel-anatomy-map .sx-muscle-neutral{fill:#454b54}
+.workload-hero .sx-intel-anatomy-map .sx-muscle-primary{fill:var(--gold);stroke:#b7942f}
+.workload-hero .sx-intel-anatomy-map .sx-muscle-secondary{fill:#8f7b47;stroke:#736743}
 .workload-hero .sx-intel-anatomy-caption{
   display:block;
   color:#a9adb2;

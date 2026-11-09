@@ -18,7 +18,7 @@ card.innerHTML=`
  <div class="sx-programme-head">
   <div><div class="sx-programme-kicker">ASCENSIONX · POWERLIFTING</div><h2 class="sx-programme-title" id="sxAscensionTitle">AscensionX</h2></div>
   <div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sxAscensionOptions" aria-label="AscensionX programme options" aria-expanded="false" aria-controls="sxAscensionOptionsMenu">•••</button>
-   <div class="sx-programme-options" id="sxAscensionOptionsMenu" hidden><button type="button" id="sxAscensionView">VIEW CYCLE</button></div>
+   <div class="sx-programme-options" id="sxAscensionOptionsMenu" hidden><button type="button" id="sxAscensionView">VIEW CYCLE</button><button type="button" id="sxAscensionManage">MANAGE CYCLE</button></div>
   </div>
  </div>
  <p class="sx-programme-meta" id="sxAscensionSummary">AscensionX · Powerlifting · Week 1 of 6</p>
@@ -78,7 +78,8 @@ function launch(mode,context='auto'){
  const state=readCycle();
  if(typeof window.spartanxOpenEmbeddedAscensionX==='function'){
   // The linked cycle is read fresh from AscensionX state, not copied into a new planner.
-  return window.spartanxOpenEmbeddedAscensionX(mode==='continue'&&state?'continue':'home',mode==='continue'&&state?state.upNext.lift:null,context)===true;
+  const destination=mode==='continue'&&state?'continue':mode==='manage'&&state?'manage':'home';
+  return window.spartanxOpenEmbeddedAscensionX(destination,destination==='continue'?state.upNext.lift:null,context)===true;
  }
  // The connection normally exists; gracefully retain access via Training Tools.
  if(typeof switchScreen==='function')switchScreen('tools');
@@ -96,7 +97,12 @@ byId('sxAscensionOptions').addEventListener('click',()=>{
 byId('sxAscensionView').addEventListener('click',()=>{
  byId('sxAscensionOptionsMenu').hidden=true;
  byId('sxAscensionOptions').setAttribute('aria-expanded','false');
- launch('home');
+ launch('home','workout');
+});
+byId('sxAscensionManage').addEventListener('click',()=>{
+ byId('sxAscensionOptionsMenu').hidden=true;
+ byId('sxAscensionOptions').setAttribute('aria-expanded','false');
+ launch('manage','workout');
 });
 window.addEventListener('spartx:ascensionCycleUpdated',refresh);
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY||e.key===null)refresh()});

@@ -8,12 +8,13 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
-  <link rel="stylesheet" href="./styles.css?v=7">
+  <link rel="stylesheet" href="./styles.css?v=8">
   <link rel="stylesheet" href="./goal-navigation.css?v=1">
+  <script src="../assets/anatomy/body-map.js?v=1" defer></script>
   <script src="./engine.js?v=3" defer></script>
   <script src="./bridge.js?v=3" defer></script>
   <script src="./live.js?v=2" defer></script>
-  <script src="./app.js?v=7" defer></script>
+  <script src="./app.js?v=8" defer></script>
   <script src="./goal-navigation.js?v=2" defer></script>
 </head>
 <body data-theme="black-yellow">
@@ -139,7 +140,7 @@
 
       <section class="page" id="musclesPage" data-page="muscles" hidden>
         <div class="section-top"><div><h3>Muscle workload</h3><p>How your recent training is distributed</p></div><span class="micro-tag">LAST 7 DAYS</span></div>
-        <div class="workload-hero"><div class="body-visual" aria-hidden="true"><div class="figure-head"></div><div class="figure-torso"></div><div class="figure-arm left"></div><div class="figure-arm right"></div><div class="figure-leg left"></div><div class="figure-leg right"></div><div class="figure-accent">X</div></div><div class="workload-hero-text"><div class="eyebrow">WORKLOAD AT A GLANCE</div><h3>Know what you've trained.</h3><p>Working-set counts show training exposure across major muscle groups. They do not measure exact muscle fatigue, readiness or recovery.</p><div class="workload-legend"><span><i class="legend-color low"></i> 0–3 sets</span><span><i class="legend-color med"></i> 4–9 sets</span><span><i class="legend-color high"></i> 10+ sets</span></div></div></div>
+        <div class="workload-hero"><div class="sx-intel-anatomy-panel"><div id="sxIntelligenceBodyMap" class="sx-intel-anatomy-map" role="img" aria-label="Front and back anatomical muscle map highlighting muscles represented by recent working sets"></div><span class="sx-intel-anatomy-caption">Highlighted muscles trained in the last 7 days</span></div><div class="workload-hero-text"><div class="eyebrow">WORKLOAD AT A GLANCE</div><h3>Know what you've trained.</h3><p>Working-set counts show training exposure across major muscle groups. They do not measure exact muscle fatigue, readiness or recovery.</p><div class="workload-legend"><span><i class="legend-color low"></i> 0–3 sets</span><span><i class="legend-color med"></i> 4–9 sets</span><span><i class="legend-color high"></i> 10+ sets</span></div></div></div>
         <div class="muscle-grid" id="muscleGrid"></div>
         <article class="panel disclaimer"><div class="eyebrow">UNDERSTANDING THIS VIEW</div><h3>What this does — and doesn't — mean</h3><p>Counts are assigned to the primary muscle group of each recognised exercise. Compound movements also recruit other muscles, so this is a simplified workload view. Recovery depends on sleep, effort, nutrition and individual variation; SpartanX does not diagnose injury or determine whether a muscle is fully recovered.</p></article>
       </section>

@@ -151,6 +151,88 @@ document.head.appendChild(ascensionRootStyle);
 const ascensionEmbedFrame=ascensionPortal.getElementById('ascensionXEmbedFrame');
 const ascensionOpenButton=$('openAscensionX');
 const ascensionCloseButton=ascensionPortal.getElementById('closeAscensionX');
+
+/* AscensionX's powerlifting engine stays in the original iframe. The visible
+   Continue preview lives in SpartanX itself, directly over Workout. */
+const sxAscNative=document.createElement('div');
+sxAscNative.id='sxAscWorkoutPopup';
+sxAscNative.hidden=true;
+sxAscNative.setAttribute('role','dialog');
+sxAscNative.setAttribute('aria-modal','true');
+sxAscNative.setAttribute('aria-labelledby','sxAscWorkoutTitle');
+sxAscNative.innerHTML='<div class="sx-asc-dialog"><div class="sx-asc-scroll">'+
+ '<div class="sx-asc-caption">ASCENSIONX × SPARTANX</div>'+
+ '<h2 id="sxAscWorkoutTitle">Log this workout in SpartanX?</h2>'+
+ '<p class="sx-asc-intro">Choose the lift to load as an active SpartanX workout. Warm-up and working sets are prescribed by AscensionX.</p>'+
+ '<label for="sxAscLift">Exercise</label>'+
+ '<select id="sxAscLift" disabled><option>Loading training cycle…</option></select>'+
+ '<div id="sxAscPreview" class="sx-asc-preview" aria-live="polite">Loading your next session…</div>'+
+ '<p class="sx-asc-help">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets</strong> to advance this lift. Partial sessions do not advance.</p>'+
+ '<div id="sxAscMessage" class="sx-asc-msg" role="status" aria-live="polite"></div>'+
+ '</div><div class="sx-asc-actions"><button type="button" id="sxAscCancel">CANCEL</button>'+
+ '<button type="button" id="sxAscLoad" disabled>LOAD INTO SPARTANX</button></div></div>';
+document.body.appendChild(sxAscNative);
+const sxAscStyle=document.createElement('style');
+sxAscStyle.textContent="\n#sxAscWorkoutPopup[hidden]{display:none!important}\n#sxAscWorkoutPopup{position:fixed;inset:0;z-index:290001;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.60);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);overscroll-behavior:contain}\n#sxAscWorkoutPopup *{box-sizing:border-box}\n#sxAscWorkoutPopup .sx-asc-dialog{width:min(100%,440px);max-height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid color-mix(in srgb,var(--lime) 38%,var(--line));border-radius:20px;background:linear-gradient(145deg,var(--panel2),var(--panel) 60%,var(--bg));color:var(--txt);box-shadow:0 20px 65px #000a}\n#sxAscWorkoutPopup .sx-asc-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:21px 21px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}\n#sxAscWorkoutPopup .sx-asc-caption{color:var(--lime);font-size:10px;letter-spacing:1.3px;font-weight:900}\n#sxAscWorkoutPopup h2{font-size:21px;line-height:1.28;margin:10px 0 13px}\n#sxAscWorkoutPopup .sx-asc-intro,#sxAscWorkoutPopup .sx-asc-help{font-size:12px;line-height:1.65;color:var(--muted);margin:0 0 13px}\n#sxAscWorkoutPopup label{display:block;font-size:12px;color:var(--muted);margin:12px 0 7px}\n#sxAscWorkoutPopup select{width:100%;min-height:43px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--txt);padding:10px;font-size:14px}\n#sxAscWorkoutPopup .sx-asc-preview{margin:12px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:12px;line-height:1.75;overflow-wrap:anywhere}\n#sxAscWorkoutPopup .sx-asc-preview strong{display:block;font-size:13px;margin-bottom:8px}\n#sxAscWorkoutPopup .asc-spartan-import-label{display:block;color:var(--lime);letter-spacing:1px;font-weight:850;font-size:10px;margin:12px 0 5px}\n#sxAscWorkoutPopup .sx-asc-preview .tiny{font-size:11px;color:var(--muted)}\n#sxAscWorkoutPopup .sx-asc-help{margin:13px 0 0}\n#sxAscWorkoutPopup .sx-asc-msg{font-size:11px;color:var(--lime);line-height:1.4;margin-top:8px}\n#sxAscWorkoutPopup .sx-asc-actions{display:grid;grid-template-columns:1fr 1.5fr;flex:0 0 auto;gap:8px;padding:13px 21px 19px;border-top:1px solid var(--line)}\n#sxAscWorkoutPopup .sx-asc-actions button{min-height:49px;min-width:0;border-radius:10px;padding:9px 7px;font-size:11px;font-weight:900;cursor:pointer}\n#sxAscCancel{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}\n#sxAscLoad{background:var(--lime);border:1px solid var(--lime);color:var(--bg)}\n#sxAscLoad:disabled{opacity:.5;cursor:not-allowed}\n@media(max-width:380px){#sxAscWorkoutPopup .sx-asc-scroll{padding:16px 15px 11px}#sxAscWorkoutPopup .sx-asc-actions{padding:11px 15px 14px}#sxAscWorkoutPopup h2{font-size:19px}}";
+document.head.appendChild(sxAscStyle);
+const sxAscLift=sxAscNative.querySelector('#sxAscLift');
+const sxAscPreview=sxAscNative.querySelector('#sxAscPreview');
+const sxAscMessage=sxAscNative.querySelector('#sxAscMessage');
+const sxAscLoad=sxAscNative.querySelector('#sxAscLoad');
+let sxAscOldOverflow=null,sxAscOldScroll=0,sxAscCaller=null,sxAscRequestedLift=null;
+function requestSXAscPreview(lift){
+ sxAscLoad.disabled=true;sxAscMessage.textContent='';
+ if(!ascensionEmbedReadyForShortcut)return;
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionHostPreviewRequest',lift:lift||null},location.origin)}
+ catch(_){sxAscPreview.textContent='Unable to reach AscensionX. Try reopening the programme.'}
+}
+function openSXAscWorkout(lift){
+ if(ascensionOverlay.classList.contains('open'))return false;
+ if(!sxAscNative.hidden)return true;
+ sxAscCaller=document.activeElement;
+ sxAscOldScroll=window.scrollY||document.documentElement.scrollTop||0;
+ sxAscOldOverflow={body:document.body.style.overflow,html:document.documentElement.style.overflow};
+ sxAscRequestedLift=typeof lift==='string'?lift:null;
+ document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
+ sxAscPreview.textContent='Loading your next session…';
+ sxAscMessage.textContent='';
+ sxAscLoad.disabled=true;sxAscLoad.textContent='LOAD INTO SPARTANX';
+ sxAscLift.disabled=true;
+ sxAscNative.hidden=false;
+ sxAscNative.querySelector('#sxAscCancel').focus({preventScroll:true});
+ if(ascensionEmbedReadyForShortcut)requestSXAscPreview(sxAscRequestedLift);
+ else if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=289';
+ return true;
+}
+function closeSXAscWorkout(success=false){
+ if(sxAscNative.hidden)return;
+ sxAscNative.hidden=true;
+ if(sxAscOldOverflow){
+  document.body.style.overflow=sxAscOldOverflow.body;
+  document.documentElement.style.overflow=sxAscOldOverflow.html;
+ }
+ sxAscOldOverflow=null;
+ const caller=sxAscCaller;sxAscCaller=null;sxAscRequestedLift=null;
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionHostCancel'},location.origin)}catch(_){}
+ if(success)window.scrollTo(0,0);
+ else{window.scrollTo(0,sxAscOldScroll);if(caller?.isConnected)caller.focus({preventScroll:true})}
+ window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
+}
+sxAscNative.querySelector('#sxAscCancel').addEventListener('click',()=>closeSXAscWorkout());
+sxAscNative.addEventListener('click',e=>{if(e.target===sxAscNative)closeSXAscWorkout()});
+sxAscLift.addEventListener('change',()=>{
+ sxAscRequestedLift=sxAscLift.value;sxAscPreview.textContent='Updating prescribed sets…';
+ requestSXAscPreview(sxAscRequestedLift);
+});
+sxAscLoad.addEventListener('click',()=>{
+ if(sxAscLoad.disabled||!sxAscLift.value)return;
+ sxAscLoad.disabled=true;sxAscLoad.textContent='LOADING WORKOUT…';sxAscMessage.textContent='';
+ try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionHostLoad',lift:sxAscLift.value},location.origin)}
+ catch(_){sxAscLoad.disabled=false;sxAscLoad.textContent='LOAD INTO SPARTANX';sxAscMessage.textContent='Unable to reach AscensionX.'}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sxAscNative.hidden){e.preventDefault();closeSXAscWorkout()}});
+
 // The AscensionX overlay now tracks the layout viewport with fixed insets.
 // No visualViewport height/scroll listeners: iOS reports a shorter visible
 // viewport when browser chrome or the home indicator is present.
@@ -208,6 +290,7 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  const fromNewWorkout=context==='new-workout'&&current==='workout';
  const fromProgrammeSetup=context==='workout'&&current==='workout';
  const importOnly=option==='continue'&&current==='workout'&&context==='auto';
+ if(importOnly)return openSXAscWorkout(lift);
  const quick=fromActiveSession||fromNewWorkout||importOnly;
  ascensionOverlay.classList.toggle('sx-ascension-quick',quick);
  ascensionOverlay.classList.toggle('sx-ascension-import-only',importOnly);
@@ -238,7 +321,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=288';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=289';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});
@@ -289,9 +372,35 @@ ascensionEmbedFrame.addEventListener('load',()=>{
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionEmbedReady'},location.origin)}catch(e){}
  syncEmbeddedAscensionTheme();
  deliverAscensionShortcut();
+ if(!sxAscNative.hidden)requestSXAscPreview(sxAscRequestedLift);
 });
 window.addEventListener('message',e=>{
- if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || !ascensionOverlay.classList.contains('open'))return;
+ if(e.origin!==location.origin || e.source!==ascensionEmbedFrame.contentWindow || (!ascensionOverlay.classList.contains('open')&&sxAscNative.hidden))return;
+
+ if(e.data?.type==='spartx:ascensionHostPreview'&&!sxAscNative.hidden){
+  const data=e.data;
+  const allowed=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+  if(data.ready!==true||!Array.isArray(data.lifts)){
+   sxAscPreview.textContent=String(data.message||'No active AscensionX programme was found.');
+   sxAscLift.disabled=true;sxAscLoad.disabled=true;
+   return;
+  }
+  sxAscLift.replaceChildren();
+  for(const item of data.lifts){
+   if(!allowed.includes(item?.lift))continue;
+   const option=document.createElement('option');
+   option.value=item.lift;option.textContent=item.lift+' · Week '+(Number(item.week)||1);
+   sxAscLift.appendChild(option);
+  }
+  if(!sxAscLift.options.length){sxAscPreview.textContent='No programme lifts available.';return}
+  sxAscLift.value=allowed.includes(data.selectedLift)?data.selectedLift:sxAscLift.options[0].value;
+  sxAscRequestedLift=sxAscLift.value;
+  // Trust only the original same-origin AscensionX iframe: no separate
+  // powerlifting calculations or externally supplied HTML.
+  sxAscPreview.innerHTML=String(data.previewHtml||'No prescribed sets found.');
+  sxAscLift.disabled=false;sxAscLoad.disabled=false;sxAscLoad.textContent='LOAD INTO SPARTANX';
+  return;
+ }
  if(e.data?.type==='spartx:ascensionRequestClose'){
   exitAscensionToCaller();return;
  }
@@ -321,8 +430,11 @@ window.addEventListener('message',e=>{
   }catch(err){message='SpartanX could not import this workout. No sets were saved.';}
  }
  try{ascensionEmbedFrame.contentWindow?.postMessage({type:'spartx:ascensionImportResult',requestId,success,message},location.origin)}catch(e){}
- if(success){
-  // Return to SpartanX's active workout, not the old Tools scroll position.
+ if(!sxAscNative.hidden){
+  if(success){closeSXAscWorkout(true);requestAnimationFrame(()=>document.getElementById('activeWorkoutName')?.focus({preventScroll:true}))}
+  else{sxAscLoad.disabled=false;sxAscLoad.textContent='LOAD INTO SPARTANX';sxAscMessage.textContent=message}
+ }else if(success){
+  // Preserve the original embedded import workflow for other entry points.
   ascensionReturnScroll=0;
   closeEmbeddedAscensionX();
   requestAnimationFrame(()=>{

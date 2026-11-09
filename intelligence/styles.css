@@ -403,16 +403,32 @@ tr:last-child td{border:0}
   width:auto;
   max-width:100%;
 }
+/* Keep SpartanX / AscensionX anatomy colour rules; only the surrounding
+   panel is transparent. The dashboard's theme accent is the fallback. */
+.workload-hero .sx-intel-anatomy-map{
+  --sx-anatomy-accent:var(--lime,var(--gold));
+}
 .workload-hero .sx-intel-anatomy-map .sx-anatomy-region{
-  stroke:#555c66;
+  stroke:#606970;
   stroke-width:9;
   stroke-linejoin:round;
   stroke-linecap:round;
+  transition:fill .22s;
 }
-.workload-hero .sx-intel-anatomy-map .sx-anatomy-contour{fill:#25292f;stroke:#565d65;stroke-width:5}
-.workload-hero .sx-intel-anatomy-map .sx-muscle-neutral{fill:#454b54}
-.workload-hero .sx-intel-anatomy-map .sx-muscle-primary{fill:var(--gold);stroke:#b7942f}
-.workload-hero .sx-intel-anatomy-map .sx-muscle-secondary{fill:#8f7b47;stroke:#736743}
+.workload-hero .sx-intel-anatomy-map .sx-anatomy-contour{
+  fill:#22272d;
+  stroke:#606970;
+  stroke-width:5;
+}
+.workload-hero .sx-intel-anatomy-map .sx-muscle-neutral{fill:#b5bdc1}
+.workload-hero .sx-intel-anatomy-map .sx-muscle-primary{
+  fill:var(--sx-anatomy-accent);
+  stroke:color-mix(in srgb,var(--sx-anatomy-accent) 68%,#303337);
+}
+.workload-hero .sx-intel-anatomy-map .sx-muscle-secondary{
+  fill:color-mix(in srgb,var(--sx-anatomy-accent) 43%,#b5bdc1);
+  stroke:#899398;
+}
 .workload-hero .sx-intel-anatomy-caption{
   display:block;
   color:#a9adb2;

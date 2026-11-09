@@ -47,10 +47,28 @@
   function weeklySeries(weeks=12,now=Date.now()){
     const end=startWeek(now);return Array.from({length:weeks},(_,i)=>end-(weeks-1-i)*WEEK);
   }
+  function historyWeeks(items,rangeDays=90,now=Date.now()){
+    if(rangeDays>0)return rangeDays<=30?5:Math.ceil(rangeDays/7)+1;
+    let earliest=now;
+    for(const item of items||[]){
+      const value=dateValue(item.date||item.completedAt||item.timestamp);
+      if(Number.isFinite(value)&&value<=now&&value<earliest)earliest=value;
+    }
+    return Math.max(5,Math.ceil((startWeek(now)-startWeek(earliest))/WEEK)+1);
+  }
+  function historyDays(items,rangeDays=90,now=Date.now()){
+    if(rangeDays>0)return rangeDays;
+    let earliest=now;
+    for(const item of items||[]){
+      const value=dateValue(item.date||item.completedAt||item.timestamp);
+      if(Number.isFinite(value)&&value<=now&&value<earliest)earliest=value;
+    }
+    return Math.max(30,Math.ceil((now-earliest)/DAY)+1);
+  }
   function bodybuilding(raw,opts){
     opts=opts||{};const muscle=MUSCLES.includes(opts.muscle)?opts.muscle:'Chest';
     const target=Number.isFinite(num(opts.setTarget))&&num(opts.setTarget)>0?Math.min(50,num(opts.setTarget)):12;
-    const dates=weeklySeries(12,opts.now||Date.now()),samples=resistanceSessions(raw);
+    const dates=weeklySeries(historyWeeks(raw,opts.rangeDays??90,opts.now||Date.now()),opts.now||Date.now()),samples=resistanceSessions(raw);
     const totals=new Map(), exercises=new Map();let unmapped=0;
     for(const session of samples){
       const week=startWeek(dateValue(session.date));
@@ -102,19 +120,22 @@
     }
     return [...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));
   }
-  function bodyweightTrend(entries,now=Date.now()){
+  function bodyweightTrend(entries,now=Date.now(),days=90){
     const valid=validWeightEntries(entries),today=new Date(now);today.setHours(0,0,0,0);
-    const out=[];
-    for(let offset=83;offset>=0;offset--){
+    const out=[],dayCount=Math.max(1,Math.floor(days));
+    const readings=valid.map(p=>({t:dateValue(p.date+'T12:00:00'),w:p.weight}));
+    let start=0,end=0,sum=0;
+    for(let offset=dayCount-1;offset>=0;offset--){
       const t=today.getTime()-offset*DAY;
-      const nearby=valid.filter(p=>{const d=dateValue(p.date+'T12:00:00');return d>=t-6*DAY&&d<t+DAY});
-      const avg=nearby.length?round(nearby.reduce((a,b)=>a+b.weight,0)/nearby.length,2):null;
+      while(end<readings.length&&readings[end].t<t+DAY){sum+=readings[end].w;end++}
+      while(start<end&&readings[start].t<t-6*DAY){sum-=readings[start].w;start++}
+      const count=end-start,avg=count?round(sum/count,2):null;
       out.push({date:dateKey(t),time:t,label:new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'}),value:avg});
     }
     return out;
   }
-  function cardioWeeks(raw,now=Date.now()){
-    const weeks=weeklySeries(12,now),mins=new Map();
+  function cardioWeeks(raw,now=Date.now(),count=13){
+    const weeks=weeklySeries(count,now),mins=new Map();
     for(const s of raw){
       const t=dateValue(s.date||s.completedAt||s.timestamp);if(!Number.isFinite(t))continue;
       const wk=startWeek(t);if(!weeks.includes(wk))continue;
@@ -139,11 +160,13 @@
   }
   function weightLoss(raw,weightEntries,opts){
     opts=opts||{};const now=opts.now||Date.now();
-    const bw=bodyweightTrend(weightEntries,now),cardio=cardioWeeks(raw,now),weights=validWeightEntries(weightEntries);
+    const weeksCount=historyWeeks([...raw,...weightEntries],opts.rangeDays??90,now);
+    const dayCount=historyDays([...raw,...weightEntries],opts.rangeDays??90,now);
+    const bw=bodyweightTrend(weightEntries,now,dayCount),cardio=cardioWeeks(raw,now,weeksCount),weights=validWeightEntries(weightEntries);
     const valid=bw.filter(x=>x.value!==null);const first=valid[0]?.value,last=valid[valid.length-1]?.value;
     const change=first!=null&&last!=null&&weights.length>=2?round(last-first,2):null;
     const sessions=frequency(raw,now),goal=Number.isFinite(num(opts.weeklySessions))?Math.max(1,Math.min(14,num(opts.weeklySessions))):3;
-    const weeks=weeklySeries(4,now),weeklyDays=weeks.map(t=>{
+    const weeks=weeklySeries(weeksCount,now),weeklyDays=weeks.map(t=>{
       const unique=new Set(raw.filter(s=>startWeek(dateValue(s.date||s.completedAt||s.timestamp))===t)
         .map(s=>dateKey(dateValue(s.date||s.completedAt||s.timestamp))));
       return {time:t,label:weekLabel(t),value:unique.size,target:goal};
@@ -159,5 +182,5 @@
   function saveWeights(rows,storage){(storage||global.localStorage).setItem(WEIGHT_KEY,JSON.stringify(validWeightEntries(rows)))}
   function loadSettings(storage){try{const x=JSON.parse((storage||global.localStorage).getItem(GOAL_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(_){return {}}}
   function saveSettings(x,storage){(storage||global.localStorage).setItem(GOAL_KEY,JSON.stringify(x))}
-  global.SXGoalModels=Object.freeze({MUSCLES,primaryMuscle,working,readRaw,resistanceSessions,bodybuilding,weightLoss,bodyweightTrend,cardioWeeks,validWeightEntries,loadWeights,saveWeights,loadSettings,saveSettings,weekLabel});
+  global.SXGoalModels=Object.freeze({MUSCLES,primaryMuscle,working,readRaw,resistanceSessions,bodybuilding,weightLoss,bodyweightTrend,cardioWeeks,validWeightEntries,loadWeights,saveWeights,loadSettings,saveSettings,weekLabel,historyWeeks,historyDays});
 })(window);

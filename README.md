@@ -30,3 +30,11 @@ Any new theme is incomplete until the selected appearance works on **all** Spart
 - Update asset cache query versions for affected CSS and JavaScript so installed PWA clients can receive changes.
 
 Theme tokens: `--bg`, `--panel`, `--panel2`, `--line`, `--txt`, `--muted`, `--lime`. Avoid fixed colours in common components unless deliberately theme-independent.
+
+
+## SpartanX Intelligence goal modes
+The Intelligence dashboard under `/intelligence/` now offers a shared **Training Goal** dropdown with Powerlifting, Bodybuilding, and Weight Loss. The goal-specific dashboards at `/intelligence/goals.html` share the same top header, sidebar/mobile navigation, Overview, Performance, Workload/Consistency, and Insights sections, along with 30-day, 90-day, and all-time trends.
+
+Changing goals only writes the selection to `sx_intelligence_selected_goal_v1`. It **does not modify or delete** `spartx_db`, training history, active workout drafts, 5/3/1 cycles, or AscensionX programming. Bodybuilding targets and weight-management settings remain under `sx_intelligence_goal_settings_v1`; optional weight readings remain under `sx_intelligence_weight_logs_v1`; selected filters and view state are stored separately.
+
+These are browser-local settings and records. Switching from a web browser to an installed iPhone app can present different local storage; users need to use the same origin/browser context or export/import backups. Intelligence supports read-only JSON previews, and the goal-specific demo mode never writes to SpartanX workout records.

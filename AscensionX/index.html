@@ -138,8 +138,14 @@ nav button.active{color:var(--red2)}nav b{font-size:19px;font-weight:600}
 }
 
 .cycle-details[hidden]{display:none!important}.cycle-details{margin-top:12px}.cycle-details>.card{margin-top:12px}.cycle-details{padding-top:14px}
-/* View Cycle from SpartanX opens the dashboard with the redundant
-   Exercise-Specific Cycle hero hidden. Other entry points are unchanged. */
+/* Programme setup uses the normal AscensionX dashboard.
+   The old progress panel is retained only as hidden data/controls. */
+#ascCycleProgressCard{display:none!important}
+.asc-build-cycle-entry{border-color:color-mix(in srgb,var(--red2) 36%,var(--line))}
+.asc-build-cycle-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
+.asc-build-cycle-actions button{flex:1 1 135px;min-height:44px}
+.asc-build-cycle-actions button[hidden]{display:none!important}
+/* View Cycle from SpartanX hides only the redundant active-cycle hero. */
 body.sx-ascension-view-cycle #homeHero{display:none!important}
 .asc-cycle-progress-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .asc-cycle-progress-actions button{flex:1 1 120px;min-width:0}
@@ -444,7 +450,18 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
   <div class="tiny">Build a six-week strength cycle, record your work and let performance guide the next step.</div>
   <button style="margin-top:15px" onclick="showScreen('profile')">Set up your lifts</button>
  </div>
- <div class="card">
+
+ <div class="card asc-build-cycle-entry" id="ascBuildCycleEntry">
+  <div class="row between" style="align-items:flex-start;gap:10px">
+   <div><div class="eyebrow">YOUR PROGRAMME</div><h2 style="margin:5px 0 6px">Build your cycle</h2><p class="tiny" style="margin:0;line-height:1.6">Choose your compound lifts and set up the AscensionX six-week progression methodology.</p></div>
+   <span class="pill red">6 WEEKS</span>
+  </div>
+  <div class="asc-build-cycle-actions">
+   <button type="button" id="ascBuildCycleOpen" onclick="showScreen('cycle')">BUILD YOUR CYCLE</button>
+   <button type="button" id="ascBuildCycleView" class="secondary" aria-expanded="false" aria-controls="cycleDetails" onclick="toggleCycleDetails()" hidden>VIEW FULL CYCLE</button>
+  </div>
+ </div>
+ <div id="ascCycleProgressCard" hidden>
   <div class="row between"><div><h2 style="margin:0">Cycle progress</h2><div class="tiny" id="cycleProgressText">Create a cycle to begin.</div></div><span class="pill red" id="cycleProgressPct">0%</span></div>
   <div class="progress" style="margin-top:12px"><i id="cycleProgressBar" style="width:0%"></i></div>
   <div class="weekgrid" id="homeWeeks" style="margin-top:14px"></div>
@@ -453,13 +470,14 @@ body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0
    <button type="button" class="secondary small" id="ascEditProgrammeCycle" onclick="openCycleEditor()">Edit programme</button>
   </div>
    <button type="button" class="secondary small asc-recovery-trigger" id="ascRecoveryOpen" onclick="openAscWorkoutRecovery()" hidden>RECOVER PAST SPARTANX WORKOUTS</button>
+
+ </div>
  <div id="cycleDetails" class="cycle-details" hidden>
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
  <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
  <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
  <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
 </div>
- </div>
  <div class="card"><h2>Method principles</h2><div class="listitem"><span>01 · Progressive intensity</span><span class="tiny">↑ load</span></div><div class="listitem"><span>02 · Descending reps</span><span class="tiny">↓ reps</span></div><div class="listitem"><span>03 · Managed volume</span><span class="tiny">↓ sets</span></div><div class="listitem"><span>04 · Performance-led progression</span><span class="tiny">Earn it</span></div></div>
 </section>
 
@@ -745,6 +763,8 @@ function confirmDeleteCycle(){
   panel.hidden=true;
   expand.textContent='View full cycle';
   expand.setAttribute('aria-expanded','false');
+  const view=$('ascBuildCycleView');
+  if(view){view.textContent='VIEW FULL CYCLE';view.setAttribute('aria-expanded','false')}
  }
  $('liftSelect').value=LIFTS[0];
  $('workWeek').value=1;
@@ -810,7 +830,19 @@ function applyCycleSelection(chosen,existing,romanianDeadlift=cycleRomanianDeadl
  renderWorkout();renderCycle();renderDashboard();renderProfile();renderProgress();
  toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
-function toggleCycleDetails(){const panel=$('cycleDetails'),button=$('cycleExpandButton');if(!panel||!button)return;const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-expanded',String(opening));button.textContent=opening?'Hide full cycle':'View full cycle';if(opening)renderCycle()}
+function toggleCycleDetails(){
+ const panel=$('cycleDetails'),button=$('cycleExpandButton'),view=$('ascBuildCycleView');
+ if(!panel||!button)return;
+ const opening=panel.hidden;
+ panel.hidden=!opening;
+ button.setAttribute('aria-expanded',String(opening));
+ button.textContent=opening?'Hide full cycle':'View full cycle';
+ if(view){
+  view.setAttribute('aria-expanded',String(opening));
+  view.textContent=opening?'HIDE FULL CYCLE':'VIEW FULL CYCLE';
+ }
+ if(opening)renderCycle();
+}
 function resetAscensionScrollTop(){
  // Use instant scrolling to override html's smooth scroll behaviour on iOS.
  const root=document.scrollingElement||document.documentElement;
@@ -949,10 +981,27 @@ window.addEventListener('message',e=>{
   }else{
    // VIEW CYCLE opens the AscensionX dashboard, never the programme editor.
    // On the Workout-page View Cycle entry hide only the oversized hero card.
-   document.body.classList.toggle('sx-ascension-view-cycle',e.data.quickImport!==true);
+   document.body.classList.toggle('sx-ascension-view-cycle',e.data.mode==='home'&&e.data.quickImport!==true);
    closeCycleEditor();
    showScreen('home');
    renderDashboard();
+   // View Cycle still reveals the detailed roadmap without displaying the
+   // removed Cycle Progress card; Set Up keeps the build action visible.
+   const panel=$('cycleDetails'),expand=$('cycleExpandButton'),view=$('ascBuildCycleView');
+   if(panel&&expand&&view&&e.data.mode==='home'&&state.cycle.created){
+    panel.hidden=false;
+    expand.textContent='Hide full cycle';
+    expand.setAttribute('aria-expanded','true');
+    view.textContent='HIDE FULL CYCLE';
+    view.setAttribute('aria-expanded','true');
+    renderCycle();
+   }else if(panel&&expand&&view&&e.data.mode==='setup'){
+    panel.hidden=true;
+    expand.textContent='View full cycle';
+    expand.setAttribute('aria-expanded','false');
+    view.textContent='VIEW FULL CYCLE';
+    view.setAttribute('aria-expanded','false');
+   }
   }
   resetEmbeddedAscensionOpening();
   return;
@@ -1205,7 +1254,14 @@ function renderDashboard(){
  $('cycleProgressPct').textContent=pct+'%';$('cycleProgressBar').style.width=pct+'%';
  $('homeWeeks').innerHTML=state.cycle.created?active.map(lift=>{const week=currentWeekFor(lift);const completed=cycleLogs.some(x=>x.lift===lift&&x.week===6&&x.setsComplete===true);return '<div class="cycle-lift-row"><div class="cycle-lift-name">'+lift+'</div><div class="weekgrid">'+PLAN.map(p=>{const done=p.week<week||(completed&&p.week===6);return '<div class="weektile '+(p.week===week?'current ':'')+(done?'done':'')+'" aria-label="'+lift+' week '+p.week+(p.week===week?' active':'')+'"><strong>W'+p.week+'</strong></div>'}).join('')+'</div></div>'}).join(''):'<p class="tiny">Create a cycle to see each lift\'s six-week progression.</p>';
  $('ascRecoveryOpen').hidden=!(ascensionEmbeddedBySpartanX&&state.cycle.created);
- $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="continueAscensionTraining()">Continue training</button><button class="secondary" onclick="showScreen('cycle')">Edit programme</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div><button style="margin-top:15px" onclick="showScreen('cycle')">Build your cycle</button>`;
+ const buildView=$('ascBuildCycleView');
+ if(buildView)buildView.hidden=!state.cycle.created;
+ if(!state.cycle.created&&$('cycleDetails')&&!$('cycleDetails').hidden){
+  $('cycleDetails').hidden=true;
+  $('cycleExpandButton')?.setAttribute('aria-expanded','false');
+  if(buildView){buildView.textContent='VIEW FULL CYCLE';buildView.setAttribute('aria-expanded','false')}
+ }
+ $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="continueAscensionTraining()">Continue training</button><button class="secondary" onclick="showScreen('cycle')">Edit programme</button></div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div>`;
 }
 function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
 let restTimerDeadline=0,restTimerInterval=null;

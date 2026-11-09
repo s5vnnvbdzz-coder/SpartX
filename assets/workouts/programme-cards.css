@@ -1,0 +1,95 @@
+/* SpartanX Workout programme cards — shared visual treatment for every engine.
+   Reuses theme tokens, so seasonal and premium themes remain supported. */
+#workout .sx-programme-hub{margin:17px 0 14px}
+#workout .sx-programme-hub-title{margin:0 2px 11px}
+#workout .sx-programme-hub-title h2{font-size:19px;line-height:1.25;margin:4px 0 3px;letter-spacing:.2px}
+#workout .sx-programme-hub-title p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+#workout .sx-programme-stack{display:grid;gap:10px;min-width:0}
+#workout .sx-programme-stack>div{min-width:0}
+#workout .sx-programme-card{
+ position:relative;isolation:isolate;overflow:visible;margin:0!important;
+ border:1px solid color-mix(in srgb,var(--lime) 31%,var(--line))!important;
+ border-radius:15px!important;padding:13px 14px!important;
+ background:linear-gradient(115deg,color-mix(in srgb,var(--lime) 7%,var(--panel)),var(--panel) 55%,color-mix(in srgb,var(--panel2) 55%,var(--panel)))!important;
+ box-shadow:inset 0 1px 0 color-mix(in srgb,var(--lime) 8%,transparent),0 5px 15px #0002!important;
+}
+#workout .sx-programme-card[hidden]{display:none!important}
+#workout .sx-programme-card:before{
+ content:'';position:absolute;top:-1px;left:16%;right:16%;height:1px;
+ background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--lime) 62%,transparent),transparent);
+ pointer-events:none
+}
+#workout .sx-programme-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+#workout .sx-programme-kicker{font-size:9px;font-weight:900;letter-spacing:1.1px;color:var(--lime);line-height:1.4}
+#workout .sx-programme-title{font-size:16px;line-height:1.25;margin:5px 0 0;overflow-wrap:anywhere;font-weight:850}
+#workout .sx-programme-menu-wrap{position:relative;flex:0 0 auto}
+#workout button.sx-programme-menu-button{
+ min-width:32px;min-height:32px;padding:0 5px!important;border:1px solid var(--line)!important;
+ border-radius:8px!important;background:color-mix(in srgb,var(--panel2) 62%,transparent)!important;
+ color:var(--txt)!important;font-size:18px!important;font-weight:850!important;letter-spacing:2px!important
+}
+#workout .sx-programme-options{
+ position:absolute;z-index:35;right:0;top:37px;min-width:142px;
+ border:1px solid var(--line);border-radius:10px;padding:5px;
+ background:var(--panel2);box-shadow:0 9px 22px #0008
+}
+#workout .sx-programme-options[hidden]{display:none!important}
+#workout .sx-programme-options button{
+ display:block;width:100%;min-height:36px;padding:9px 10px!important;
+ background:transparent!important;color:var(--txt)!important;
+ border:0!important;border-radius:6px;text-align:left;font-size:11px!important;font-weight:750
+}
+#workout .sx-programme-options button:focus-visible{outline:2px solid var(--lime)}
+#workout .sx-programme-meta{font-size:11px;color:var(--muted);line-height:1.5;margin:7px 0 0}
+#workout .sx-programme-progressline{
+ display:flex;justify-content:space-between;align-items:center;gap:8px;
+ font-size:10px;color:var(--muted);font-weight:750;margin:11px 0 6px
+}
+#workout .sx-programme-progressline strong{color:var(--txt);font-variant-numeric:tabular-nums}
+#workout .sx-programme-progress{height:5px;border-radius:99px;overflow:hidden;background:color-mix(in srgb,var(--line) 62%,var(--panel2));margin:0 0 11px}
+#workout .sx-programme-progress>span,#workout .sx-programme-progress>i{
+ display:block;width:0;height:100%;border-radius:99px;
+ background:linear-gradient(90deg,color-mix(in srgb,var(--lime) 50%,#151515),var(--lime));
+ box-shadow:0 0 7px color-mix(in srgb,var(--lime) 43%,transparent);transition:width .22s ease
+}
+#workout .sx-programme-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0}
+#workout .sx-programme-next{font-size:10px;color:var(--muted);line-height:1.5;flex:1;min-width:0;overflow-wrap:anywhere}
+#workout .sx-programme-next b{color:var(--txt)}
+#workout .sx-programme-card button.sx-programme-continue{
+ flex:0 0 auto;min-height:37px;min-width:109px;max-width:45%;
+ padding:9px 11px!important;
+ background:color-mix(in srgb,var(--lime) 13%,var(--panel2))!important;
+ border:1px solid color-mix(in srgb,var(--lime) 55%,var(--line))!important;
+ color:var(--txt)!important;border-radius:9px!important;font-size:10px!important;font-weight:900!important;
+ letter-spacing:.35px!important;white-space:nowrap
+}
+#workout .sx-programme-card button.sx-programme-continue:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+#workout .sx-programme-tag{
+ display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:850;
+ letter-spacing:.6px;color:var(--lime);border:1px solid color-mix(in srgb,var(--lime) 39%,var(--line));
+ border-radius:30px;padding:6px 8px;background:color-mix(in srgb,var(--lime) 7%,transparent)
+}
+#workout .sx-programme-upcoming{opacity:.84}
+#workout .sx-programme-upcoming .sx-programme-kicker{color:var(--muted)}
+#workout .sx-programme-upcoming .sx-programme-next{margin-top:11px}
+#workout .sx-programme-upcoming .sx-programme-continue:disabled{opacity:.60;cursor:not-allowed}
+#workout .sx-programme-empty .sx-programme-next{margin-top:11px}
+#workout .sx-programme-legacy{margin-top:13px!important;padding:12px 13px}
+#workout .sx-programme-legacy>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#workout .sx-programme-legacy>summary::-webkit-details-marker{display:none}
+#workout .sx-programme-legacy>summary:after{content:'⌄';color:var(--lime);font-size:18px}
+#workout .sx-programme-legacy[open]>summary:after{content:'⌃'}
+#workout .sx-programme-legacy>summary strong{font-size:12px}
+#workout .sx-programme-legacy>summary .tiny{margin-left:auto;font-size:10px}
+#workout .sx-programme-legacy #homeCycleList{padding-top:9px}
+#workout .sx-programme-legacy .home-cycle-item{padding:10px 0}
+#workout .sx-programme-legacy .home-cycle-item:first-child{border-top:1px solid var(--line)}
+#workout .sx-programme-start{margin-bottom:14px!important;padding:14px!important;box-shadow:0 7px 20px #0002}
+#workout .sx-programme-routines{margin-top:14px!important}
+@media(max-width:370px){
+ #workout .sx-programme-card{padding:11px 10px!important}
+ #workout .sx-programme-title{font-size:15px}
+ #workout .sx-programme-next{font-size:9px}
+ #workout .sx-programme-card button.sx-programme-continue{min-width:92px;padding:8px!important;font-size:9px!important}
+}
+@media(prefers-reduced-motion:reduce){#workout .sx-programme-progress>span,#workout .sx-programme-progress>i{transition:none}}

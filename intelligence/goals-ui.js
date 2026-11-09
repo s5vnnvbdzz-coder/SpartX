@@ -5,7 +5,54 @@
   const $=id=>document.getElementById(id);
   if(!M||!E){document.body.insertAdjacentText('afterbegin','Unable to load Intelligence models.');return}
   const initialGoal=window.SXGoalNavigation?.currentGoal;
-  const state={mode:initialGoal==='weight-loss'?'weight-loss':'bodybuilding',demo:false,muscle:'Chest',exercise:'',settings:M.loadSettings(),weights:M.loadWeights(),raw:[]};
+  const UI_KEY='sx_intelligence_goal_view_v1';
+  const RANGE_KEY='sx_intelligence_range_v1';
+  function readUI(){try{const x=JSON.parse(localStorage.getItem(UI_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(_){return {}}}
+  const ui=readUI();
+  let range=90;
+  try{const chosen=Number(localStorage.getItem(RANGE_KEY));if([0,30,90].includes(chosen))range=chosen}catch(_){}
+  const state={mode:initialGoal==='weight-loss'?'weight-loss':'bodybuilding',source:'spartanx',demo:false,imported:[],tab:'overview',range,muscle:ui.muscle||'Chest',exercise:ui.exercise||'',settings:M.loadSettings(),weights:M.loadWeights(),raw:[]};
+  state.tab=['overview','performance','muscles','intelligence'].includes(ui.tabs?.[state.mode])?ui.tabs[state.mode]:'overview';
+  function persistUI(){
+    try{
+      const tabs=readUI().tabs||{};
+      tabs[state.mode]=state.tab;
+      localStorage.setItem(UI_KEY,JSON.stringify({tabs,muscle:state.muscle,exercise:state.exercise}));
+      localStorage.setItem(RANGE_KEY,String(state.range));
+    }catch(_){}
+  }
+  const headings={
+    bodybuilding:{
+      overview:['YOUR TRAINING, DECODED','Athlete Dashboard','Track working sets, hypertrophy training and progression.'],
+      performance:['HYPERTROPHY PERFORMANCE','Exercise Progression','Watch your reps and load change across comparable sessions.'],
+      muscles:['TRAINING EXPOSURE','Muscle Workload','Review working sets by muscle and manage personal targets.'],
+      intelligence:['SMART TRAINING DECISIONS','SpartanX Intelligence','Understand the patterns behind your training history.']
+    },
+    'weight-loss':{
+      overview:['YOUR TRAINING, DECODED','Athlete Dashboard','Follow meaningful weight and fitness trends over time.'],
+      performance:['CARDIO & STRENGTH','Performance Analytics','Review your cardio minutes and exercise performance.'],
+      muscles:['TRAINING CONSISTENCY','Training Habits','Track completed training days against your own goals.'],
+      intelligence:['SMART TRAINING DECISIONS','SpartanX Intelligence','Review bodyweight and fitness patterns with context.']
+    }
+  };
+  function setTab(next,scroll=false){
+    if(!['overview','performance','muscles','intelligence'].includes(next))return;
+    state.tab=next;
+    document.querySelectorAll('.gx-nav-page').forEach(n=>{n.hidden=n.dataset.tabPage!==next});
+    document.querySelectorAll('.sidebar-nav [data-tab], .bottom-nav [data-tab]').forEach(n=>{
+      const active=n.dataset.tab===next;
+      n.classList.toggle('active',active);
+      if(active)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current');
+    });
+    const [kicker,title,subtitle]=headings[state.mode][next];
+    $('sectionKicker').textContent=kicker;
+    $('pageTitle').textContent=title;
+    $('pageSubtitle').textContent=subtitle;
+    document.querySelectorAll('.gx-muscle-label').forEach(n=>{n.textContent=state.mode==='bodybuilding'?'Muscle workload':'Training consistency'});
+    $('gxMobileMuscleLabel').textContent=state.mode==='bodybuilding'?'MUSCLES':'HABITS';
+    persistUI();
+    if(scroll && typeof window.scrollTo==='function')window.scrollTo(0,0);
+  }
   const fmt=(n,d=0)=>Number.isFinite(n)?Number(n).toLocaleString('en-GB',{maximumFractionDigits:d}):'—';
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -69,7 +116,11 @@
     return {raw,weights};
   }
   const demo=demoData();
-  function refresh(){state.raw=state.demo?demo.raw:M.readRaw();render();}
+  function refresh(){
+    state.raw=state.source==='demo'?demo.raw:state.source==='import'?state.imported:M.readRaw();
+    state.demo=state.source==='demo';
+    render();
+  }
   function renderOptions(select,items,current){
     const previous=current||'';
     select.replaceChildren();
@@ -79,16 +130,20 @@
   function render(){
     $('gxBodybuilding').hidden=state.mode!=='bodybuilding';
     $('gxWeightLoss').hidden=state.mode!=='weight-loss';
-    $('gxDemo').textContent=state.demo?'USE MY WORKOUTS':'TRY DEMO DATA';
+    $('gxDemo').textContent=state.demo?'RESTORE MY WORKOUTS':'LOAD DEMO ATHLETE';
     const count=state.raw.length;
-    $('gxSourceLabel').textContent=state.demo?'● DEMONSTRATION DATA':count?'● CONNECTED TO SPARTANX':'● NO SAVED WORKOUTS';
-    $('gxSourceDescription').textContent=state.demo?'Fictional example records; your own workout data is untouched.':
-      count?count+' saved sessions found on this device. Intelligence reads them without modifying records.':
-      'No completed workouts are visible in this browser. Log sessions in SpartanX or use demonstration mode.';
+    $('gxSourceLabel').textContent=state.demo?'● DEMO DATA':state.source==='import'?'● LOCAL IMPORT':count?'● CONNECTED':'● NO WORKOUTS';
+    $('gxSourceDescription').textContent=state.demo?'Demonstration mode — fictional data. Your saved workouts and weight logs remain unchanged.':
+      state.source==='import'?'Analysing '+count+' imported sessions in memory. No SpartanX records were modified.':
+      count?count+' saved workouts from this browser. Switching goals keeps your full history.':
+      'No saved workouts found in this browser. Use the gear icon to try the demo or import a backup.';
+    $('gxConnectionDetails').textContent=state.source==='import'?'Local JSON preview active — not written to SpartanX.':
+      count+' workout session(s) available in the current data source.';
+    $('rangeSelect').value=String(state.range);
     const targetMap=state.settings.setTargets||{},target=Number(targetMap[state.muscle]||12);
     renderOptions($('gxMuscle'),M.MUSCLES,state.muscle);
     $('gxTarget').value=target;
-    const result=M.bodybuilding(state.raw,{muscle:state.muscle,exercise:state.exercise,setTarget:target});
+    const result=M.bodybuilding(state.raw,{muscle:state.muscle,exercise:state.exercise,setTarget:target,rangeDays:state.range});
     state.exercise=result.exercise;
     renderOptions($('gxExercise'),result.names,result.exercise);
     if(!result.names.length){const op=document.createElement('option');op.textContent='No exercises yet';$('gxExercise').append(op)}
@@ -97,39 +152,52 @@
     const reps=result.exerciseProgress.filter(p=>p.value!=null);
     const delta=reps.length>=2?reps.at(-1).value-reps[0].value:null;
     $('gxRepDelta').textContent=delta==null?'—':(delta>0?'+':'')+fmt(delta)+' reps';
-    chart($('gxVolumeChart'),result.weeks,{zero:true,goal:target,title:state.muscle+' working sets'});
+    if(!count){$('gxOverviewVolumeChart').innerHTML='<div class="gx-empty">Complete workouts to see training trends.</div>';}
+    else chart($('gxOverviewVolumeChart'),result.weeks,{zero:true,goal:target,title:state.muscle+' working sets'});
+    if(!count){$('gxVolumeChart').innerHTML='<div class="gx-empty">Complete workouts to see working-set trends.</div>';}
+    else chart($('gxVolumeChart'),result.weeks,{zero:true,goal:target,title:state.muscle+' working sets'});
     chart($('gxProgressChart'),result.exerciseProgress,{zero:true,title:result.exercise+' repetitions'});
     $('gxProgressDescription').textContent=result.referenceLoad!=null?
       'Best completed repetitions at '+result.referenceLoad+' kg for '+result.exercise+'. Weeks without a matched load are left blank.':
       'Not enough comparable sets yet. Log an exercise at the same weight over several weeks.';
     $('gxBodyInsight').textContent=result.insight;
+    $('gxBodyOverviewInsight').textContent=result.insight;
+    const breakdown=$('gxMuscleBreakdown');breakdown.replaceChildren();
+    for(const item of result.muscleTotals){
+      const row=document.createElement('div');row.className='gx-muscle-row';
+      const name=document.createElement('span');name.textContent=item.name;
+      const value=document.createElement('strong');value.textContent=fmt(item.sets)+' sets';
+      row.append(name,value);breakdown.append(row);
+    }
     $('gxBodyCoverage').textContent=result.unmapped?
       result.unmapped+' working sets excluded from muscle totals because the exercises need reliable muscle mappings.':
       'Muscle totals represent primary-muscle working sets; secondary muscle contribution is not double-counted.';
-    const weights=state.demo?demo.weights:state.weights;
-    const weight=M.weightLoss(state.raw,weights,{weeklySessions:Number(state.settings.weeklySessions||3)});
+    const weights=state.demo?demo.weights:state.source==='import'?[]:state.weights;
+    const weight=M.weightLoss(state.raw,weights,{weeklySessions:Number(state.settings.weeklySessions||3),rangeDays:state.range});
     $('gxWeightChange').textContent=weight.change==null?'—':(weight.change>0?'+':'')+fmt(weight.change,2)+' kg';
     $('gxDays').textContent=fmt(weight.sessionDays28);
     $('gxCardioMinutes').textContent=fmt(weight.cardio.at(-1).value,1)+' min';
     chart($('gxWeightChart'),weight.bodyweight,{decimals:1,title:'Seven-day average bodyweight'});
     chart($('gxCardioChart'),weight.cardio,{zero:true,title:'Cardio minutes'});
     chart($('gxConsistencyChart'),weight.weeklyDays,{zero:true,goal:weight.weeklySessionTarget,title:'Completed training days per week'});
-    const retain=M.bodybuilding(state.raw,{muscle:'Chest',exercise:'Bench Press'});
+    const retain=M.bodybuilding(state.raw,{muscle:'Chest',exercise:'Bench Press',rangeDays:state.range});
     chart($('gxRetentionChart'),retain.exerciseProgress,{zero:true,title:'Comparable exercise repetitions'});
     $('gxRetentionDescription').textContent=retain.referenceLoad!=null?
       'Best repetitions at '+retain.referenceLoad+' kg for '+retain.exercise+'. Similar performance during weight loss is encouraging, but cannot prove muscle retention.':
       'Log repeat strength exercises to monitor performance while changing bodyweight.';
     $('gxWeightInsight').textContent=weight.insight;
+    $('gxWeightOverviewInsight').textContent=weight.insight;
     $('gxFrequency').value=state.settings.weeklySessions||3;
-    $('gxTarget').disabled=state.demo;
-    $('gxSetForm').querySelector('button').disabled=state.demo;
-    $('gxFrequency').disabled=state.demo;
-    $('gxFrequencyForm').querySelector('button').disabled=state.demo;
-    $('gxWeightInput').disabled=state.demo;
-    $('gxWeightDate').disabled=state.demo;
-    $('gxAddWeight').disabled=state.demo;
+    const readOnlyPreview=state.source!=='spartanx';
+    $('gxTarget').disabled=readOnlyPreview;
+    $('gxSetForm').querySelector('button').disabled=readOnlyPreview;
+    $('gxFrequency').disabled=readOnlyPreview;
+    $('gxFrequencyForm').querySelector('button').disabled=readOnlyPreview;
+    $('gxWeightInput').disabled=readOnlyPreview;
+    $('gxWeightDate').disabled=readOnlyPreview;
+    $('gxAddWeight').disabled=readOnlyPreview;
     $('gxWeightLog').replaceChildren();
-    if(state.demo){$('gxWeightLog').textContent='Weight logging is disabled while showing demonstration data.'}
+    if(state.source!=='spartanx'){$('gxWeightLog').textContent='Weight logging is disabled in demo and imported data previews.'}
     else if(!weights.length){$('gxWeightLog').textContent='No bodyweight readings saved yet.'}
     else{
       const list=weights.slice(-5).reverse();
@@ -141,28 +209,54 @@
         row.append(txt,btn);$('gxWeightLog').append(row);
       }
     }
+    setTab(state.tab);
   }
   window.addEventListener('sx:intelligence-goal-change',event=>{
     const goal=event.detail?.goal;
     if(goal!=='bodybuilding'&&goal!=='weight-loss')return;
-    state.mode=goal;render();
+    state.mode=goal;
+    const pref=readUI();
+    state.tab=['overview','performance','muscles','intelligence'].includes(pref.tabs?.[goal])?pref.tabs[goal]:'overview';
+    render();
   });
-  $('gxDemo').addEventListener('click',()=>{state.demo=!state.demo;refresh()});
-  $('gxMuscle').addEventListener('change',e=>{state.muscle=e.target.value;render()});
-  $('gxExercise').addEventListener('change',e=>{state.exercise=e.target.value;render()});
+  document.querySelectorAll('.sidebar-nav [data-tab],.bottom-nav [data-tab], [data-go]').forEach(btn=>{
+    btn.addEventListener('click',()=>setTab(btn.dataset.tab||btn.dataset.go,true));
+  });
+  $('rangeSelect').addEventListener('change',e=>{
+    state.range=[0,30,90].includes(Number(e.target.value))?Number(e.target.value):90;persistUI();render();
+  });
+  const sourceDialog=$('gxSourceDialog');
+  $('gxOpenSource').addEventListener('click',()=>sourceDialog.showModal());
+  $('gxConnect').addEventListener('click',()=>{state.source='spartanx';refresh();sourceDialog.close()});
+  $('gxRefresh').addEventListener('click',()=>{state.source='spartanx';refresh();sourceDialog.close()});
+  $('gxDemo').addEventListener('click',()=>{state.source=state.demo?'spartanx':'demo';refresh();sourceDialog.close()});
+  $('gxImportInput').addEventListener('change',async e=>{
+    const file=e.target.files?.[0],status=$('gxImportStatus');if(!file)return;
+    if(file.size>10*1024*1024){status.textContent='File exceeds the 10 MB preview limit.';return}
+    try{
+      const parsed=JSON.parse(await file.text());
+      const raw=Array.isArray(parsed?.sessions)?parsed.sessions:Array.isArray(parsed?.db?.sessions)?parsed.db.sessions:null;
+      if(!raw||raw.length>5000)throw Error('Import a SpartanX JSON export with up to 5,000 sessions.');
+      state.imported=raw;state.source='import';refresh();status.textContent='Imported '+raw.length+' sessions for read-only analysis.';
+      sourceDialog.close();
+    }catch(error){status.textContent=error.message||'Could not read the JSON file.'}
+    finally{e.target.value=''}
+  });
+  $('gxMuscle').addEventListener('change',e=>{state.muscle=e.target.value;persistUI();render()});
+  $('gxExercise').addEventListener('change',e=>{state.exercise=e.target.value;persistUI();render()});
   $('gxSetForm').addEventListener('submit',e=>{
-    e.preventDefault();if(state.demo)return;
+    e.preventDefault();if(state.source!=='spartanx')return;
     const v=Number($('gxTarget').value);if(!Number.isInteger(v)||v<1||v>50)return;
     state.settings.setTargets=state.settings.setTargets||{};
     state.settings.setTargets[state.muscle]=v;M.saveSettings(state.settings);render();
   });
   $('gxFrequencyForm').addEventListener('submit',e=>{
-    e.preventDefault();if(state.demo)return;
+    e.preventDefault();if(state.source!=='spartanx')return;
     const v=Number($('gxFrequency').value);if(!Number.isInteger(v)||v<1||v>14)return;
     state.settings.weeklySessions=v;M.saveSettings(state.settings);render();
   });
   $('gxWeightForm').addEventListener('submit',e=>{
-    e.preventDefault();if(state.demo)return;
+    e.preventDefault();if(state.source!=='spartanx')return;
     const date=$('gxWeightDate').value,weight=Number($('gxWeightInput').value);
     if(!date||date>today()||!Number.isFinite(weight)||weight<20||weight>500){alert('Enter a valid date not in the future and a weight between 20 and 500 kg.');return}
     state.weights=M.validWeightEntries([...state.weights,{date,weight}]);M.saveWeights(state.weights);
@@ -170,8 +264,8 @@
   });
   $('gxWeightDate').value=today();$('gxWeightDate').max=today();
   window.addEventListener('storage',e=>{if(e.key==='spartx_db'||e.key==='sx_intelligence_weight_logs_v1'||e.key==='sx_intelligence_goal_settings_v1'){
-    state.settings=M.loadSettings();state.weights=M.loadWeights();if(!state.demo)refresh();
+    state.settings=M.loadSettings();state.weights=M.loadWeights();if(state.source==='spartanx')refresh();
   }});
-  window.addEventListener('pageshow',()=>{if(!state.demo){state.settings=M.loadSettings();state.weights=M.loadWeights();refresh()}});
+  window.addEventListener('pageshow',()=>{if(state.source==='spartanx'){state.settings=M.loadSettings();state.weights=M.loadWeights();refresh()}});
   refresh();
 })();

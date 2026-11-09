@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+ <defs>
+  <radialGradient id="rim" cx=".32" cy=".22" r=".8"><stop stop-color="#f4d79a"/><stop offset=".45" stop-color="#be9250"/><stop offset="1" stop-color="#61432a"/></radialGradient>
+  <radialGradient id="face" cx=".35" cy=".20" r="1"><stop stop-color="#8a3930"/><stop offset=".6" stop-color="#532925"/><stop offset="1" stop-color="#271b1b"/></radialGradient>
+ </defs>
+ <circle cx="90" cy="90" r="82" fill="#1b1916" stroke="#7b5b36" stroke-width="3"/>
+ <circle cx="90" cy="90" r="76" fill="url(#rim)" stroke="#ebc784" stroke-width="3"/>
+ <circle cx="90" cy="90" r="66" fill="url(#face)" stroke="#6c492d" stroke-width="3"/>
+ <circle cx="90" cy="90" r="59" fill="none" stroke="#ddb77b" stroke-opacity=".65" stroke-width="1.5" stroke-dasharray="2 9"/>
+ <path d="M62 124 L89 57 L100 57 L127 124 L113 124 L94 77 L76 124 Z" fill="#e3be78" stroke="#58371f" stroke-width="2.5" stroke-linejoin="round"/>
+ <path d="M70 110 H119" fill="none" stroke="#f8dc9c" stroke-width="6"/>
+ <path d="M89 13 V22 M89 158 V167 M13 90 H22 M158 90 H167" stroke="#fff0bc" stroke-opacity=".65" stroke-width="2"/>
+</svg>

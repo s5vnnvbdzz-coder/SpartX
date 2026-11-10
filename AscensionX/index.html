@@ -350,6 +350,59 @@ body[data-theme="monster"]{--bg:#070a07;--panel:#101710;--panel2:#1b261a;--red:#
 body[data-theme="obsidian"]{--bg:#050505;--panel:#111;--panel2:#1d1d1d;--red:#b0b0b0;--red2:#f4f4f4;--redDeep:#555}
 </style>
 <link rel="stylesheet" href="../assets/themes/spartanx-ascension-embed.css?v=288">
+
+<style id="sx-asc-manage-from-workout-style">
+/* Scoped to the Manage Cycle entry from SpartanX Workout.
+   Standalone AscensionX cycle creation and editing remain unchanged. */
+html:has(body.sx-asc-workout-manage){background:transparent!important;background-image:none!important;overflow:hidden!important}
+body.sx-asc-workout-manage{
+ background:transparent!important;background-image:none!important;
+ min-height:0!important;height:100dvh!important;overflow:hidden!important;
+ margin:0!important;padding:0!important
+}
+body.sx-asc-workout-manage > header,
+body.sx-asc-workout-manage > main,
+body.sx-asc-workout-manage > nav[aria-label="Main navigation"]{display:none!important}
+body.sx-asc-workout-manage #cycleEditorBackdrop.open{
+ position:fixed!important;inset:0!important;background:transparent!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-dialog{
+ width:min(100%,530px)!important;max-width:530px!important;
+ height:auto!important;max-height:100%!important;min-height:0!important;
+ overflow:hidden!important;border-radius:17px!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleBuilderCard > .row:first-child,
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleBuilderCard > p.tiny,
+body.sx-asc-workout-manage #cycleBuilderStatus{display:none!important}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body{
+ padding:6px 15px 13px!important;min-height:0!important;max-height:calc(100dvh - 180px)!important;
+ overflow-y:auto!important;-webkit-overflow-scrolling:touch
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleBuilderCard{
+ margin:0!important;padding:0!important;background:transparent!important;border:0!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleStrengthEditor{
+ margin-top:9px!important;padding:14px!important;border:1px solid var(--line)!important;
+ border-radius:12px!important;background:var(--panel2)!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleExerciseOptions{
+ margin-top:12px!important;border:1px solid var(--line)!important;
+ border-radius:12px!important;padding:4px 12px!important;background:var(--panel2)!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleAccessorySettings{margin:12px 0!important}
+body.sx-asc-workout-manage #cycleEditorBackdrop #deleteCycleButton:not([hidden]){
+ display:block!important;width:100%!important;min-height:53px!important;
+ margin:17px 0 5px!important;border:1px solid #e13a49!important;border-radius:11px!important;
+ background:linear-gradient(140deg,#bb2437,#831827)!important;
+ color:#fff!important;font-size:12px!important;letter-spacing:.8px!important;font-weight:900!important;
+ box-shadow:0 5px 15px #a11b2e4d!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-actions{
+ background:var(--panel)!important;padding:11px 15px 13px!important
+}
+</style>
 </head>
 <body>
 <header>
@@ -601,7 +654,9 @@ function openCycleEditor(){
 function closeCycleEditor(){
  const overlay=$('cycleEditorBackdrop');
  if(!overlay||!overlay.classList.contains('open'))return;
+ const returnToSpartanX=document.body.classList.contains('sx-asc-workout-manage');
  overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
+ if(returnToSpartanX)document.body.classList.remove('sx-asc-workout-manage');
  if(cycleEditorLock){
   document.body.style.overflow=cycleEditorLock.body;
   document.documentElement.style.overflow=cycleEditorLock.html;
@@ -609,6 +664,9 @@ function closeCycleEditor(){
  cycleEditorLock=null;
  const caller=cycleEditorCaller;cycleEditorCaller=null;
  if(caller?.isConnected)caller.focus({preventScroll:true});
+ if(returnToSpartanX){
+  try{window.parent.postMessage({type:'spartx:ascensionManageExit'},location.origin)}catch(_){}
+ }
 }
 document.addEventListener('keydown',event=>{
  if(event.key!=='Escape'||!$('cycleEditorBackdrop')?.classList.contains('open'))return;
@@ -962,7 +1020,7 @@ window.addEventListener('message',e=>{
  }
 
  if(e.data?.type==='spartx:ascensionQuickExit'&&ascensionEmbeddedBySpartanX){
-  document.body.classList.remove('sx-spartan-quick-import','sx-spartan-import-only','sx-ascension-view-cycle');
+  document.body.classList.remove('sx-spartan-quick-import','sx-spartan-import-only','sx-ascension-view-cycle','sx-asc-workout-manage');
   closeAscSpartanImport();
   closeCycleEditor();
   return;
@@ -1005,6 +1063,7 @@ window.addEventListener('message',e=>{
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
   document.body.classList.toggle('sx-spartan-import-only',e.data.mode==='continue'&&e.data.importOnly===true);
+  document.body.classList.toggle('sx-asc-workout-manage',e.data.mode==='manage'&&state.cycle.created);
   document.body.classList.remove('sx-ascension-view-cycle');
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
@@ -1024,8 +1083,9 @@ window.addEventListener('message',e=>{
    showScreen('home');
    renderDashboard();
    if(e.data.mode==='manage'&&state.cycle.created){
-    // Existing editor: allow changes to the current programme, not creation of a second cycle.
+    // One focused editor. The Workout page remains behind it.
     openCycleEditor();
+    try{window.parent.postMessage({type:'spartx:ascensionManageReady'},location.origin)}catch(_){}
    }
    // View Cycle still reveals the detailed roadmap without displaying the
    // removed Cycle Progress card; Set Up keeps the build action visible.

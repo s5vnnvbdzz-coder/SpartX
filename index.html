@@ -1761,6 +1761,7 @@ body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0
  border:1px solid var(--lime)!important;color:var(--txt)!important}
 #sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleScroll{padding-bottom:6px!important}
 </style>
+<link rel="stylesheet" href="./assets/workouts/cycle-pages.css?v=296">
 </head>
 <body class="sx-main-header-layout">
 <header><div id="sxBrandHeader"><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div>
@@ -4120,7 +4121,9 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
    const editModal=nativeHost.shadowRoot?.getElementById('editModal');
    if(editModal&&!editModal.hidden)nativeHost.shadowRoot?.getElementById('closeEdit')?.click();
   }
-  cycleOverlay.classList.remove('sx-531-manage-popup');
+  cycleOverlay.classList.remove('sx-531-manage-popup','sx-531-manage-page');
+  cycleOverlay.setAttribute('role','dialog');cycleOverlay.setAttribute('aria-modal','true');
+  document.body.classList.remove('sx-cycle-page-active');
   if(manageFooter)manageFooter.hidden=true;
   cycleOverlay.hidden=true;
   $('sxQuick531CycleTitle').textContent='Build Your Cycle';
@@ -4168,7 +4171,14 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   if(fromWorkoutManager)nativeHost.classList.add('sx-531-manage-inline');
   cycleMount.appendChild(nativeHost);
   cycleLock=lock();
-  cycleOverlay.classList.toggle('sx-531-manage-popup',fromWorkoutManager);
+  cycleOverlay.classList.toggle('sx-531-manage-popup',false);
+  cycleOverlay.classList.toggle('sx-531-manage-page',fromWorkoutManager);
+  if(fromWorkoutManager){
+   document.body.classList.add('sx-cycle-page-active');
+   cycleOverlay.setAttribute('role','main');cycleOverlay.removeAttribute('aria-modal');
+  }else{
+   cycleOverlay.setAttribute('role','dialog');cycleOverlay.setAttribute('aria-modal','true');
+  }
   if(manageFooter)manageFooter.hidden=!fromWorkoutManager;
   $('sxQuick531CycleTitle').textContent=fromWorkoutManager?'Edit saved 5/3/1 cycle':'Build Your Cycle';
   $('sxQuick531CycleClose').textContent=fromWorkoutManager?'✕ CLOSE':'✕ Cancel';

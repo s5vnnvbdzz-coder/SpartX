@@ -549,6 +549,73 @@ body.sx-asc-workout-view #sxCycleViewDialog #sxCycleViewSave{
  border:1px solid var(--red2)!important;color:var(--text)!important
 }
 </style>
+
+<style id="sx-asc-dedicated-cycle-pages">
+/* Dedicated AscensionX View/Manage screens inside SpartanX. No modal backdrop. */
+html:has(body.sx-asc-workout-view),
+html:has(body.sx-asc-workout-manage),
+body.sx-asc-workout-view,
+body.sx-asc-workout-manage{
+ width:100%!important;height:100dvh!important;min-height:0!important;margin:0!important;
+ padding:0!important;overflow:hidden!important;background:var(--bg)!important;
+ background-image:none!important;color:var(--text)!important
+}
+body.sx-asc-workout-view #sxCycleViewBackdrop.open,
+body.sx-asc-workout-manage #cycleEditorBackdrop.open{
+ position:fixed!important;inset:0!important;display:flex!important;flex-direction:column!important;
+ align-items:stretch!important;justify-content:stretch!important;
+ width:100%!important;height:100dvh!important;max-height:none!important;
+ margin:0!important;padding:0!important;border:0!important;
+ background:var(--bg)!important;background-image:none!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ box-shadow:none!important;overflow:hidden!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog,
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-dialog{
+ flex:1 1 auto!important;display:flex!important;flex-direction:column!important;
+ width:100%!important;height:100%!important;max-width:none!important;max-height:100%!important;min-height:0!important;
+ border:0!important;border-radius:0!important;margin:0!important;padding:0!important;
+ background:var(--bg)!important;box-shadow:none!important;overflow:hidden!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-head,
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-header{
+ flex:0 0 auto!important;width:100%!important;min-height:60px!important;
+ margin:0!important;padding:calc(13px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 15px max(16px,env(safe-area-inset-left,0px))!important;
+ border-bottom:1px solid var(--line)!important;background:var(--panel)!important;
+ border-radius:0!important;box-shadow:none!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll,
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body{
+ flex:1 1 auto!important;width:100%!important;min-height:0!important;max-height:none!important;
+ margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+ padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))!important;
+ background:var(--bg)!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain
+}
+body.sx-asc-workout-view #sxCycleViewDialog #sxCycleViewContent,
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleBuilderCard{
+ max-width:820px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleBuilderCard{
+ background:transparent!important;border:0!important;box-shadow:none!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot,
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-actions{
+ flex:0 0 auto!important;width:100%!important;margin:0!important;
+ padding:13px max(16px,env(safe-area-inset-right,0px)) calc(15px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))!important;
+ border-top:1px solid var(--line)!important;background:var(--panel)!important;
+ box-shadow:none!important;overflow:visible!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-actions > *,
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
+ min-width:0!important
+}
+@media(min-width:850px){
+ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll,
+ body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body{
+ padding-top:24px!important;padding-bottom:32px!important
+ }
+}
+</style>
 </head>
 <body>
 <header>
@@ -819,6 +886,7 @@ function openSXWorkoutCycleView(){
  holder.appendChild(details);
  details.hidden=false;
  document.body.classList.add('sx-asc-workout-view');
+ backdrop.setAttribute('role','main');backdrop.removeAttribute('aria-modal');
  backdrop.classList.add('open');
  backdrop.setAttribute('aria-hidden','false');
  $('sxCycleViewScroll').scrollTop=0;
@@ -838,6 +906,7 @@ function closeSXWorkoutCycleView(save=false){
   details.hidden=true;
  }
  sxCycleViewHomeParent=null;sxCycleViewHomeSibling=null;
+ backdrop.setAttribute('role','presentation');backdrop.removeAttribute('aria-modal');
  document.body.classList.remove('sx-asc-workout-view');
  const caller=sxCycleViewCaller;sxCycleViewCaller=null;
  if(caller?.isConnected)caller.focus({preventScroll:true});
@@ -855,6 +924,9 @@ function openCycleEditor(){
  cycleEditorLock={body:document.body.style.overflow,html:document.documentElement.style.overflow};
  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
  overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+ if(document.body.classList.contains('sx-asc-workout-manage')){
+  overlay.setAttribute('role','main');overlay.removeAttribute('aria-modal');
+ }
  $('cycleEditorScroll').scrollTop=0;
  $('cycleEditorClose').focus({preventScroll:true});
 }
@@ -863,6 +935,7 @@ function closeCycleEditor(){
  if(!overlay||!overlay.classList.contains('open'))return;
  const returnToSpartanX=document.body.classList.contains('sx-asc-workout-manage');
  overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
+ overlay.setAttribute('role','presentation');overlay.removeAttribute('aria-modal');
  if(returnToSpartanX)document.body.classList.remove('sx-asc-workout-manage');
  if(cycleEditorLock){
   document.body.style.overflow=cycleEditorLock.body;

@@ -61,6 +61,15 @@ ascensionToolCard.innerHTML=
  '<button id="openAscensionX" type="button" class="ascension-launch">OPEN ASCENSIONX <span aria-hidden="true">↗</span></button>'+
  '<p class="hint" style="margin:11px 0 0">Opens within SpartanX. The standalone AscensionX app remains available separately.</p>';
 shadow.querySelector('main').appendChild(ascensionToolCard);
+// Move the original Intelligence card, including its working link, into Tools.
+const sxIntelligenceCard=document.getElementById('sxIntelligenceEntry');
+if(sxIntelligenceCard){
+ shadow.querySelector('main').appendChild(sxIntelligenceCard);
+ sxIntelligenceCard.classList.add('sx-tools-intelligence-card');
+}
+const sxToolInfoStyles=document.createElement('style');
+sxToolInfoStyles.textContent='.sx-tools-intelligence-card{color:var(--txt)}.sx-tools-intelligence-card h2{font-size:17px}.sx-tools-intelligence-card a.sx-intelligence-entry-link{color:var(--lime)!important;text-decoration:none}.page-title-row .page-actions{display:none!important}';
+shadow.appendChild(sxToolInfoStyles);
 
 // Mount the full-screen AscensionX overlay outside the hidden Tools screen.
 // This lets Workout-page quick access open it reliably without changing Tools layout.
@@ -87,7 +96,7 @@ ascensionPortal.appendChild(ascensionOverlay);
 
 const ascensionStyle=document.createElement('style');
 ascensionStyle.textContent=[
- '#ascensionXToolCard .ascension-launch{display:flex!important;align-items:center;justify-content:center;gap:9px;width:100%;min-height:47px;font-size:12px;letter-spacing:.7px;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff09}',
+ '#ascensionXToolCard .ascension-launch,#cyclePlannerCard #openCyclePlanner{display:flex!important;align-items:center;justify-content:center;gap:9px;width:100%;min-height:47px;font-size:12px;letter-spacing:.7px;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff09}',
  '#ascensionXToolCard .ascension-launch span{color:var(--lime);font-size:19px;line-height:1}',
  '#ascensionXOverlay{display:none;position:fixed;inset:0;width:100%;height:100dvh;z-index:2147483647;flex-direction:column;background:var(--bg,#090b0f);color:var(--txt,#f5f5f7);overflow:hidden;overscroll-behavior:contain}',
  '#ascensionXOverlay.open{display:flex}',
@@ -562,6 +571,22 @@ window.addEventListener('spartx:ascensionLinkedSessionSaved',()=>{
   main.addEventListener('lostpointercapture',()=>{if(activeCard)finishDrag();},true);
   setMode(false);
  })();
+ // Fixed SpartanX header controls now proxy the established Tools reorder flow.
+ const globalReorder=document.getElementById('sxHeaderReorderTools');
+ if(globalReorder){
+  const nativeReorder=$('reorderMenuButton');
+  const toolsMain=shadow.querySelector('main');
+  globalReorder.addEventListener('click',()=>{
+   if(!toolsMain?.classList.contains('reorder-mode'))nativeReorder?.click();
+  });
+  const sync=()=>{
+   const active=!!toolsMain?.classList.contains('reorder-mode');
+   globalReorder.setAttribute('aria-pressed',String(active));
+   globalReorder.disabled=active;
+  };
+  new MutationObserver(sync).observe(toolsMain,{attributes:true,attributeFilter:['class']});
+  sync();
+ }
 
 $('ormResult').textContent='—';$('plateTotal').textContent='—';$('plates').replaceChildren();$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';$('applyLift').value='Back Squat';if(!$('bar').value)$('bar').value='20';
 

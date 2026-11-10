@@ -38,3 +38,33 @@ The Intelligence dashboard under `/intelligence/` now offers a shared **Training
 Changing goals only writes the selection to `sx_intelligence_selected_goal_v1`. It **does not modify or delete** `spartx_db`, training history, active workout drafts, 5/3/1 cycles, or AscensionX programming. Bodybuilding targets and weight-management settings remain under `sx_intelligence_goal_settings_v1`; optional weight readings remain under `sx_intelligence_weight_logs_v1`; selected filters and view state are stored separately.
 
 These are browser-local settings and records. Switching from a web browser to an installed iPhone app can present different local storage; users need to use the same origin/browser context or export/import backups. Intelligence supports read-only JSON previews, and the goal-specific demo mode never writes to SpartanX workout records.
+
+
+## Strength & Bodybuilding programme integration (Stages 1–2)
+
+The Workout page's **Strength & Bodybuilding** card opens a theme-aware programme builder:
+create, view, edit and delete 3–6-day plans of 4, 6, 8 or 12 weeks. Saved plans
+live in `sx_bodybuilding_programmes_v1` and do not edit AscensionX, 5/3/1,
+or completed workout history.
+
+**Continue Training** selects the next outstanding training day in the active
+plan (or an explicitly chosen day), asks for confirmation, and loads exercises,
+starting weights, minimum reps, working-set counts and rest time into SpartanX's
+existing workout logger. The sets start unchecked. Existing active workouts
+are never overwritten: the athlete must finish or discard the current session
+before starting another.
+
+After **Finish & Save**, SpartanX records a `bodybuildingLink` on the new
+workout and on the linked exercises. Programme progress is derived from those
+saved workouts, not from a separate mutable counter. A day is marked complete
+when all prescribed working sets were logged; partial saves remain outstanding.
+The next training week opens only when all days in the current week are complete.
+Unrelated workouts and duplicates cannot advance programme progress.
+
+The normal SpartanX workout draft-recovery mechanism retains imported
+programme metadata. Subsequent stages will implement adaptive load
+recommendations and planned-versus-completed analyses in Intelligence.
+
+**Storage notice:** programme definitions currently use their own browser-local
+key and are not part of the legacy `spartx_db` export/import file. Exporting
+only the legacy workout database is not a complete programme backup.

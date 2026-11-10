@@ -68,3 +68,36 @@ recommendations and planned-versus-completed analyses in Intelligence.
 **Storage notice:** programme definitions currently use their own browser-local
 key and are not part of the legacy `spartx_db` export/import file. Exporting
 only the legacy workout database is not a complete programme backup.
+
+
+## AscensionX Strength & Size Companion (opt-in)
+
+The **Strength & Bodybuilding** builder now offers a six-week **AscensionX
+Strength & Size Companion** when a valid AscensionX cycle is available in the
+same browser. It discovers **only the lifts the athlete chose** in that cycle,
+with individually toggleable Squat, Bench Press, Deadlift and Overhead Press
+companions. Enabling it requires explicit user action; the default is **OFF**.
+
+The companion adds optional exercises only to subsequent imported AscensionX
+sessions, after the existing paused-bench and Romanian-deadlift accessory
+modules. Those two existing prescriptions are **not recreated**. New optional
+pairings are: Squat → Leg Press and Seated Leg Curl; Bench → Chest-Supported
+Row and Triceps Pushdown; Deadlift → Lat Pulldown and Pallof Press; Overhead
+Press → Lateral Raise and Rear Delt Fly. New sets are unchecked, moderate
+RIR (approximately 3), and have no `ascensionLink` or AscensionX cycle
+completion requirement.
+
+Volume tapers with the selected lift's week (weeks 1–3 normal, week 4
+reduced, week 5 only one set of the first accessory, week 6 none). The
+athlete can choose **Low** volume or disable any linked lift individually.
+The implementation deduplicates exercise names within an active session and
+never injects work into a historical workout, a non-AscensionX workout or
+an old cycle. User preferences are scoped by cycle ID under
+`sx_ascension_companion_v1`. They do not alter `ascensionx_strength_v1`,
+`spartx_db` until a normal SpartanX session is explicitly completed, or
+5/3/1 programming.
+
+This is a starting prescription and does not guarantee recovery or strength
+progression. Planned-versus-actual workload analysis and editable exercise
+substitutions are future improvements. The standalone Strength & Size
+programme builder remains separate from this cycle-linked companion.

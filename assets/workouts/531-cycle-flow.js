@@ -103,7 +103,7 @@ document.body.appendChild(overlay);
    AscensionX and 5/3/1 View Cycle share presentation and sections. */
 const viewOverlay=document.createElement('div');
 viewOverlay.id='sx531ViewCycle';viewOverlay.hidden=true;
-viewOverlay.setAttribute('role','dialog');viewOverlay.setAttribute('aria-modal','true');
+viewOverlay.setAttribute('role','main');viewOverlay.removeAttribute('aria-modal');
 viewOverlay.setAttribute('aria-labelledby','sx531ViewTitle');
 viewOverlay.innerHTML='<section class="sx531-view-dialog">'+
  '<header class="sx531-view-head"><div><div class="sx531-view-eyebrow">5/3/1 · POWERLIFTING</div><h2 id="sx531ViewTitle">View Cycle</h2></div>'+
@@ -171,7 +171,10 @@ function open531CycleView(c){
  viewOldOverflow={body:document.body.style.overflow,html:document.documentElement.style.overflow,scroll:window.scrollY||0};
  viewCaller=document.activeElement;
  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
- render531ViewCycle();viewOverlay.hidden=false;
+ render531ViewCycle();
+ document.body.classList.add('sx-cycle-page-active');
+ viewOverlay.classList.add('sx-cycle-page');
+ viewOverlay.hidden=false;
  $('sx531ViewScroll').scrollTop=0;
  $('sx531ViewClose').focus({preventScroll:true});
  return true;
@@ -179,6 +182,8 @@ function open531CycleView(c){
 function close531CycleView(){
  if(viewOverlay.hidden)return;
  viewOverlay.hidden=true;
+ viewOverlay.classList.remove('sx-cycle-page');
+ document.body.classList.remove('sx-cycle-page-active');
  if(viewOldOverflow){
   document.body.style.overflow=viewOldOverflow.body;
   document.documentElement.style.overflow=viewOldOverflow.html;

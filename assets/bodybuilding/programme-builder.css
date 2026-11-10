@@ -149,3 +149,59 @@ body:has(#sxBodybuildingBuilder.screen.active) #minimizedSession{display:none!im
  #workout #sxBodybuildingProgrammeCard .sx-programme-next{max-width:60%}
  #sxBodybuildingBuilder .sx-bb-programme-status strong{font-size:11px}
 }
+
+
+/* AscensionX strength-and-size companion stays within existing SpartanX themes. */
+#sxBodybuildingBuilder .sx-bb-companion-card{
+ border-color:color-mix(in srgb,var(--lime) 36%,var(--line));
+ background:linear-gradient(130deg,color-mix(in srgb,var(--lime) 6%,var(--panel)),var(--panel));
+}
+#sxBodybuildingBuilder .sx-bb-companion-card h2{font-size:18px;margin:7px 0}
+#sxBodybuildingBuilder .sx-bb-companion-config{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,220px);gap:12px;
+ align-items:center;margin:16px 0 13px;
+}
+#sxBodybuildingBuilder .sx-bb-companion-toggle,
+#sxBodybuildingBuilder .sx-bb-companion-lift-header{
+ display:flex;align-items:center;gap:11px;min-width:0;
+ padding:12px;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel2);font-size:11px;
+}
+#sxBodybuildingBuilder .sx-bb-companion-toggle input,
+#sxBodybuildingBuilder .sx-bb-companion-lift-header input{
+ width:19px;height:19px;min-height:0;padding:0;margin:0;
+ flex:0 0 auto;accent-color:var(--lime);
+}
+#sxBodybuildingBuilder .sx-bb-companion-toggle span,
+#sxBodybuildingBuilder .sx-bb-companion-lift-header span{min-width:0;flex:1}
+#sxBodybuildingBuilder .sx-bb-companion-toggle strong,
+#sxBodybuildingBuilder .sx-bb-companion-lift-header strong{
+ display:block;color:var(--txt);font-size:11px;line-height:1.5;
+}
+#sxBodybuildingBuilder .sx-bb-companion-toggle small,
+#sxBodybuildingBuilder .sx-bb-companion-lift-header small{
+ display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:3px;font-weight:500;
+}
+#sxBodybuildingBuilder .sx-bb-companion-lifts{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+}
+#sxBodybuildingBuilder .sx-bb-companion-lift{
+ border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--panel);
+}
+#sxBodybuildingBuilder .sx-bb-companion-lift-header{padding:8px 9px;margin-bottom:8px}
+#sxBodybuildingBuilder .sx-bb-companion-ex{
+ display:flex;justify-content:space-between;gap:8px;padding:10px 5px;
+ border-bottom:1px solid var(--line);font-size:11px;
+}
+#sxBodybuildingBuilder .sx-bb-companion-ex strong{font-weight:700}
+#sxBodybuildingBuilder .sx-bb-companion-ex span{color:var(--muted);white-space:nowrap}
+#sxBodybuildingBuilder .sx-bb-companion-existing{
+ margin:8px 0;padding:8px;border-radius:8px;
+ border:1px dashed color-mix(in srgb,var(--lime) 33%,var(--line));
+ font-size:10px;line-height:1.5;color:var(--muted);
+}
+#sxBodybuildingBuilder .sx-bb-companion-note{margin-top:16px}
+@media(max-width:650px){
+ #sxBodybuildingBuilder .sx-bb-companion-config,
+ #sxBodybuildingBuilder .sx-bb-companion-lifts{grid-template-columns:1fr}
+}

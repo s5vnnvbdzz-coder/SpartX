@@ -1740,6 +1740,26 @@ body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0
  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
  box-shadow:none!important
 }
+
+/* 5/3/1 Manage Cycle footer — matching AscensionX edit controls. */
+#sx531ManageFooter[hidden]{display:none!important}
+#sxQuick531CycleOverlay.sx-531-manage-popup #sx531ManageFooter{
+ display:block!important;flex:0 0 auto!important;padding:12px 15px calc(13px + env(safe-area-inset-bottom,0px))!important;
+ border-top:1px solid var(--line);background:var(--panel);box-shadow:none!important
+}
+#sx531ManageFooter button{min-height:48px!important;width:100%;display:grid;place-items:center;
+ text-align:center;border-radius:11px!important;padding:10px 12px!important;
+ font-size:11px!important;font-weight:900!important;letter-spacing:.25px!important;
+ cursor:pointer;line-height:1.3!important}
+#sx531ManageDelete{
+ background:linear-gradient(135deg,#b7293b,#841927)!important;border:1px solid #dc4254!important;
+ color:#fff!important;margin-bottom:10px!important
+}
+#sx531ManageFooter .sx531-manage-footer-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#sx531ManageCancel{background:var(--panel2)!important;border:1px solid var(--line)!important;color:var(--txt)!important}
+#sx531ManageSave{background:color-mix(in srgb,var(--lime) 20%,var(--panel2))!important;
+ border:1px solid var(--lime)!important;color:var(--txt)!important}
+#sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleScroll{padding-bottom:6px!important}
 </style>
 </head>
 <body class="sx-main-header-layout">
@@ -2028,6 +2048,13 @@ body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0
   <div id="sxQuick531CycleDialog">
     <div id="sxQuick531CycleHeader"><h2 id="sxQuick531CycleTitle">Build Your Cycle</h2><button type="button" id="sxQuick531CycleClose" aria-label="Cancel cycle creation and return to calculator">✕ Cancel</button></div>
     <div id="sxQuick531CycleScroll" tabindex="0" aria-label="Scrollable 5/3/1 cycle builder"><div id="sxQuick531CycleMount"></div></div>
+    <div id="sx531ManageFooter" hidden>
+      <button type="button" id="sx531ManageDelete">DELETE PROGRAMME</button>
+      <div class="sx531-manage-footer-row">
+        <button type="button" id="sx531ManageCancel">CANCEL</button>
+        <button type="button" id="sx531ManageSave">SAVE CHANGES</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="deleteProgramOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="deleteProgramTitle"><div class="detail-panel" style="width:min(100%,440px)"><div class="eyebrow">SPARTANX · CONFIRM ACTION</div><h2 id="deleteProgramTitle" style="margin:10px 0">Delete programme?</h2><p id="deleteProgramMessage" class="muted">This cannot be undone.</p><div class="row" style="margin-top:22px"><button type="button" class="secondary" id="cancelDeleteProgram" style="flex:1">CANCEL</button><button type="button" id="confirmDeleteProgram" style="flex:1">DELETE</button></div></div></div><div id="completedWorkoutOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="completedWorkoutTitle"><div class="detail-panel" style="width:min(100%,680px)"><div class="row between"><div><div class="eyebrow">COMPLETED WORKOUT</div><h2 id="completedWorkoutTitle" style="margin:5px 0">Workout</h2></div><button type="button" class="secondary small" id="closeCompletedWorkout" aria-label="Close workout details">✕</button></div><div id="completedWorkoutDetails"></div></div></div><div id="numberPadSheet" class="set-type-sheet" aria-hidden="true"><div class="set-type-sheet-backdrop" onclick="closeNumberPad()"></div><div class="set-type-sheet-panel number-pad-panel" role="dialog" aria-modal="true" aria-label="Numeric keypad"><div class="set-type-sheet-handle"></div><div class="number-pad-heading" id="numberPadHeading">WEIGHT</div><div id="numberPadValue" class="number-pad-value" role="status" aria-live="off">0</div><div class="number-pad-layout"><div class="number-pad-keys"><button type="button" data-pad-key="1">1</button><button type="button" data-pad-key="2">2</button><button type="button" data-pad-key="3">3</button><button type="button" data-pad-key="4">4</button><button type="button" data-pad-key="5">5</button><button type="button" data-pad-key="6">6</button><button type="button" data-pad-key="7">7</button><button type="button" data-pad-key="8">8</button><button type="button" data-pad-key="9">9</button><button type="button" data-pad-key=".">.</button><button type="button" data-pad-key="0">0</button><button type="button" data-pad-key="back">⌫</button></div><div class="number-pad-actions"><button type="button" id="numberPadDone" aria-label="Close calculator">▦</button><button type="button" data-pad-action="plus">+</button><button type="button" data-pad-action="minus">−</button></div></div></div></div><div id="rpeSheet" class="set-type-sheet" aria-hidden="true"><div class="set-type-sheet-backdrop" onclick="closeRpeSheet()"></div><div class="set-type-sheet-panel" role="dialog" aria-modal="true" aria-label="Select RPE"><div class="set-type-sheet-handle"></div><div class="rpe-sheet-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 17a9 9 0 1 1 15.6 0"/><path d="M12 14.5 16.5 8"/><circle cx="12" cy="14.5" r="1.5"/></svg></div><div class="rpe-sheet-value" id="rpeSheetValue">8</div><div class="rpe-sheet-description" id="rpeSheetDescription" aria-live="polite">2 more reps in the tank</div><div class="rpe-sheet-scale"><input id="rpeSheetSlider" type="range" min="6" max="10" step="0.5" value="8" aria-label="RPE from 6 to 10 in half increments"><div class="rpe-sheet-ticks"><span>6</span><span>6.5</span><span>7</span><span>7.5</span><span>8</span><span>8.5</span><span>9</span><span>9.5</span><span>10</span></div></div><div class="rpe-sheet-actions"><button type="button" class="rpe-sheet-apply" id="applyRpeSheet">APPLY</button><button type="button" class="set-type-sheet-cancel" onclick="closeRpeSheet()">CANCEL</button></div></div></div><div id="setTypeSheet" class="set-type-sheet" aria-hidden="true"><div class="set-type-sheet-backdrop" onclick="closeSetTypeSheet()"></div><div class="set-type-sheet-panel" role="dialog" aria-modal="true" aria-label="Choose set type"><div class="set-type-sheet-handle"></div><div class="set-type-sheet-title">SELECT SET TYPE</div><div class="set-type-sheet-options"><button type="button" data-set-type="">Working Set</button><button type="button" data-set-type="W">W · Warm-up</button><button type="button" data-set-type="B">B · Backdown Set</button><button type="button" data-set-type="F">F · Failure Set</button><button type="button" data-set-type="X">× · Remove Set</button></div><button type="button" class="set-type-sheet-cancel" onclick="closeSetTypeSheet()">CANCEL</button></div></div><div id="floatingRestTimer" class="floating-rest-bar hidden" role="timer" aria-label="Active rest countdown" aria-live="off"><div class="floating-rest-info"><span id="floatingRestExercise">REST TIMER</span><strong id="floatingRestTime">03:00</strong></div><div class="floating-rest-actions"><button type="button" id="restMinus15" class="rest-running-control" aria-label="Reduce rest by fifteen seconds">−15s</button><button type="button" id="restPlus15" class="rest-running-control" aria-label="Add fifteen seconds">+15s</button><button type="button" id="restClose" class="rest-running-control" aria-label="Skip rest timer">✕</button></div></div><div id="minimizedSession" class="minimized-session hidden" role="button" tabindex="0" aria-label="Return to active workout"><div class="min-session-indicator"></div><div class="min-session-copy"><strong id="minSessionName">ACTIVE WORKOUT</strong><span id="minSessionClock">00:00:00 · Tap to return</span></div><button type="button" class="secondary small" id="resumeSession">RESUME</button></div><nav id="trackerNav" aria-label="Main navigation"><button type="button" data-screen="tools"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3.5 17.5a2.1 2.1 0 0 0 3 3l4.8-4.8a5 5 0 0 0 6.4-6.4l-3.3 3.3-3.6-3.6z"/></svg></b><span>TOOLS</span></button><button type="button" class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b><span>HOME</span></button><button type="button" data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b><span>WORKOUT</span></button><button type="button" data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></b><span>PROFILE</span></button></nav>
@@ -4017,6 +4044,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  const button=$('startWorkout'),menu=$('sessionOptionsMenu'),menuClose=$('sxCloseSessionOptions'),overlay=$('sxQuick531Overlay');
  const host=$('toolsReplica'),tools=$('tools'),mount=$('sxQuick531Mount'),close=$('sxClose531Quick');
  const cycleOverlay=$('sxQuick531CycleOverlay'),cycleMount=$('sxQuick531CycleMount'),cycleClose=$('sxQuick531CycleClose');
+ const manageFooter=$('sx531ManageFooter'),manageDelete=$('sx531ManageDelete'),
+  manageCancel=$('sx531ManageCancel'),manageSave=$('sx531ManageSave');
  const nativeHost=$('native531Host'),nativeHome=$('native531');
  const confirmOverlay=$('sxConfirm531StartOverlay'),confirmText=$('sxConfirm531StartDescription');
  const confirmCancel=$('sxCancel531Start'),confirmAccept=$('sxAccept531Start');
@@ -4092,6 +4121,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
    if(editModal&&!editModal.hidden)nativeHost.shadowRoot?.getElementById('closeEdit')?.click();
   }
   cycleOverlay.classList.remove('sx-531-manage-popup');
+  if(manageFooter)manageFooter.hidden=true;
   cycleOverlay.hidden=true;
   $('sxQuick531CycleTitle').textContent='Build Your Cycle';
   $('sxQuick531CycleClose').textContent='✕ Cancel';
@@ -4133,18 +4163,52 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   }
   if(cycleLock||calcLock)return;
   cycleEditorReturn={id,returnToMenu:e.detail?.returnToMenu===true,skipPreview:e.detail?.skipPreview===true};
-  const fromWorkoutManager=e.detail?.skipPreview===true&&onWorkout();
+  const fromWorkoutManager=e.detail?.skipPreview===true&&onWorkoutSetup();
   nativeHost.classList.add('sx-531-cycle-quick-mode');
   if(fromWorkoutManager)nativeHost.classList.add('sx-531-manage-inline');
   cycleMount.appendChild(nativeHost);
   cycleLock=lock();
   cycleOverlay.classList.toggle('sx-531-manage-popup',fromWorkoutManager);
+  if(manageFooter)manageFooter.hidden=!fromWorkoutManager;
   $('sxQuick531CycleTitle').textContent=fromWorkoutManager?'Edit saved 5/3/1 cycle':'Build Your Cycle';
   $('sxQuick531CycleClose').textContent=fromWorkoutManager?'✕ CLOSE':'✕ Cancel';
   cycleOverlay.hidden=false;
   $('sxQuick531CycleScroll').scrollTop=0;
   launchEdit();
   cycleClose.focus({preventScroll:true});
+ });
+ // Shadow-DOM edit controls use the existing 5/3/1 multi-lift save handler.
+ // The visible footer merely calls it; no prescription logic is duplicated.
+ manageSave?.addEventListener('click',()=>{
+  if(!cycleLock||!nativeHost.classList.contains('sx-531-manage-inline'))return;
+  nativeHost.shadowRoot?.getElementById('generate')?.click();
+ });
+ const discardManage=()=>{if(cycleLock)closeCycle(false);};
+ manageCancel?.addEventListener('click',discardManage);
+ // Catch legacy internal Discard/X actions before their shadow handlers: all
+ // exits should restore the Workout tab rather than the 5/3/1 calculator.
+ nativeHost.shadowRoot?.addEventListener('click',event=>{
+  if(!nativeHost.classList.contains('sx-531-manage-inline'))return;
+  const clicked=event.target?.closest?.('button');
+  if(clicked?.id!=='cancelEdit'&&clicked?.id!=='closeEdit')return;
+  event.preventDefault();event.stopImmediatePropagation();
+  discardManage();
+ },true);
+ manageDelete?.addEventListener('click',()=>{
+  if(!cycleLock||!nativeHost.classList.contains('sx-531-manage-inline'))return;
+  const id=cycleEditorReturn?.id;if(!id)return;
+  if(!window.confirm('Permanently delete this 5/3/1 programme? This cannot be undone.'))return;
+  const key='spartanx_531_saved_cycles_v1';
+  try{
+   const cycles=JSON.parse(localStorage.getItem(key)||'[]');
+   if(!Array.isArray(cycles))throw Error('Invalid saved cycles');
+   const next=cycles.filter(c=>String(c.id)!==String(id));
+   if(next.length===cycles.length){alert('This saved cycle could not be found.');return;}
+   localStorage.setItem(key,JSON.stringify(next));
+   window.dispatchEvent(new StorageEvent('storage',{key}));
+   window.dispatchEvent(new Event('spartx:cycleUpdated'));
+   closeCycle(false);
+  }catch(e){alert('Could not delete programme. Your saved data has not been changed.');}
  });
  window.addEventListener('spartx:quickCycleSaved',()=>closeCycle(false));
  window.addEventListener('spartx:quickCycleCancel',()=>closeCycle(true));

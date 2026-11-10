@@ -227,6 +227,9 @@
         row.append(txt,btn);$('gxWeightLog').append(row);
       }
     }
+    // Reuse the same read-only full-workout/accessory breakdown shown in
+    // Powerlifting Intelligence, without changing Bodybuilding model totals.
+    window.SXSessionBreakdown?.render({mode:state.source,range:state.range,sessions:state.raw});
     setTab(state.tab);
   }
   window.addEventListener('sx:intelligence-goal-change',event=>{

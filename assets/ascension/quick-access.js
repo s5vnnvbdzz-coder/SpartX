@@ -78,7 +78,7 @@ function launch(mode,context='auto'){
  const state=readCycle();
  if(typeof window.spartanxOpenEmbeddedAscensionX==='function'){
   // The linked cycle is read fresh from AscensionX state, not copied into a new planner.
-  const destination=mode==='continue'&&state?'continue':mode==='manage'&&state?'manage':'home';
+  const destination=mode==='continue'&&state?'continue':mode==='manage'&&state?'manage':mode==='view'&&state?'view':'home';
   return window.spartanxOpenEmbeddedAscensionX(destination,destination==='continue'?state.upNext.lift:null,context)===true;
  }
  // The connection normally exists; gracefully retain access via Training Tools.
@@ -97,7 +97,7 @@ byId('sxAscensionOptions').addEventListener('click',()=>{
 byId('sxAscensionView').addEventListener('click',()=>{
  byId('sxAscensionOptionsMenu').hidden=true;
  byId('sxAscensionOptions').setAttribute('aria-expanded','false');
- launch('home','workout');
+ launch('view','workout');
 });
 byId('sxAscensionManage').addEventListener('click',()=>{
  byId('sxAscensionOptionsMenu').hidden=true;

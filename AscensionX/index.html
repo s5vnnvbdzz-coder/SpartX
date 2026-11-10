@@ -518,6 +518,37 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails 
  padding:9px 7px
 }
 </style>
+<style id="sx-view-cycle-parity-295">
+/* Match 5/3/1 View Cycle control sizing while retaining AscensionX accents. */
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-head .iconbtn{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ padding:0!important;line-height:0!important;text-align:center!important;
+ width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;
+ border:1px solid var(--line)!important;border-radius:12px!important;box-sizing:border-box!important;
+ background:var(--panel2)!important;color:var(--text)!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-head .iconbtn svg{
+ display:block!important;flex:none!important;margin:auto!important;transform:none!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ gap:10px!important;padding:12px 15px calc(13px + env(safe-area-inset-bottom,0px))!important;
+ background:var(--panel)!important;border-top:1px solid var(--line)!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot button{
+ display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;
+ box-sizing:border-box!important;min-height:49px!important;width:100%!important;margin:0!important;
+ border-radius:12px!important;padding:10px 12px!important;font-size:11px!important;
+ font-weight:900!important;letter-spacing:.2px!important;line-height:1.25!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot button.secondary{
+ background:var(--panel2)!important;border:1px solid var(--line)!important;color:var(--text)!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog #sxCycleViewSave{
+ background:color-mix(in srgb,var(--red2) 18%,var(--panel2))!important;
+ border:1px solid var(--red2)!important;color:var(--text)!important
+}
+</style>
 </head>
 <body>
 <header>
@@ -568,7 +599,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails 
 </div>
 <div id="sxCycleViewBackdrop" role="presentation" aria-hidden="true">
  <section id="sxCycleViewDialog" role="dialog" aria-modal="true" aria-labelledby="sxCycleViewTitle">
-  <div class="sx-cycle-view-head"><div><div class="eyebrow">ASCENSIONX · POWERLIFTING</div><h2 id="sxCycleViewTitle">View Cycle</h2></div><button type="button" class="iconbtn" onclick="closeSXWorkoutCycleView(false)" aria-label="Close cycle view">×</button></div>
+  <div class="sx-cycle-view-head"><div><div class="eyebrow">ASCENSIONX · POWERLIFTING</div><h2 id="sxCycleViewTitle">View Cycle</h2></div><button type="button" class="iconbtn" onclick="closeSXWorkoutCycleView(false)" aria-label="Close cycle view"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></div>
   <div class="sx-cycle-view-scroll" id="sxCycleViewScroll"><div id="sxCycleViewContent"></div></div>
   <div class="sx-cycle-view-foot"><button type="button" class="secondary" onclick="closeSXWorkoutCycleView(false)">CANCEL</button><button type="button" id="sxCycleViewSave" onclick="closeSXWorkoutCycleView(true)">SAVE</button></div>
  </section>

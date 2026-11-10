@@ -3127,7 +3127,7 @@ window.SpartanXStartBodybuildingSession=function(payload){
  if(!programme||!sourceDay||link.week>programme.weeks)return false;
  // Reject stale or altered UI payloads. Always import the latest saved plan.
  const confirmed=confirm('Start '+sourceDay.name+' · Week '+link.week+' of '+programme.weeks+
-   '?\\n\\n'+sourceDay.exercises.length+' exercises will be loaded into a new workout. Nothing is marked complete until you log sets and Finish & Save.');
+   '?\n\n'+sourceDay.exercises.length+' exercises will be loaded into a new workout. Nothing is marked complete until you log sets and Finish & Save.');
  if(!confirmed)return false;
  const plannedTotalSets=sourceDay.exercises.reduce((n,ex)=>n+Number(ex.sets||0),0);
  const sessionLink={programmeId:programme.id,programmeName:programme.name,

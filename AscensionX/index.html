@@ -470,6 +470,54 @@ body.sx-asc-workout-view .sx-cycle-view-scroll::-webkit-scrollbar-thumb{
  background:var(--line);border-radius:8px
 }
 </style>
+<style id="sx-asc-cycle-view-shared-format">
+/* Shared cycle-view presentation: the same information hierarchy in
+   AscensionX and 5/3/1, with each engine's own actual programming. */
+body.sx-asc-workout-view #sxCycleViewDialog{background:var(--panel)!important}
+body.sx-asc-workout-view .sx-cycle-view-overview{
+ padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);
+ margin:11px 0
+}
+body.sx-asc-workout-view .sx-cycle-view-topline{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px;
+ font-size:12px
+}
+body.sx-asc-workout-view .sx-cycle-view-topline strong{font-size:14px}
+body.sx-asc-workout-view .sx-cycle-view-tag{
+ padding:4px 8px;border-radius:10px;background:color-mix(in srgb,var(--red2) 12%,var(--panel2));
+ border:1px solid var(--line);color:var(--text);font-size:10px;font-weight:850;white-space:nowrap
+}
+body.sx-asc-workout-view .sx-cycle-view-muted{
+ font-size:11px;line-height:1.65;color:var(--muted);margin:6px 0
+}
+body.sx-asc-workout-view .sx-cycle-view-progress{
+ height:6px;border-radius:99px;overflow:hidden;background:var(--line);margin:10px 0
+}
+body.sx-asc-workout-view .sx-cycle-view-progress i{
+ display:block;height:100%;border-radius:99px;
+ background:linear-gradient(90deg,color-mix(in srgb,var(--red2) 45%,var(--panel2)),var(--red2))
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails>.card{
+ padding:13px!important;margin:11px 0!important;background:var(--panel2)!important;
+ border:1px solid var(--line)!important;border-radius:12px!important;box-shadow:none!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails>.card h2{
+ font-size:15px!important;margin:0 0 12px!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails>.eyebrow{
+ display:none!important
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails select{
+ width:100%;min-height:42px;border-radius:10px
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails table{
+ font-size:11px
+}
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails th,
+body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails td{
+ padding:9px 7px
+}
+</style>
 </head>
 <body>
 <header>
@@ -723,6 +771,20 @@ function openSXWorkoutCycleView(){
  sxCycleViewHomeParent=details.parentNode;
  sxCycleViewHomeSibling=details.nextSibling;
  sxCycleViewCaller=document.activeElement;
+ const active=selectedLifts(),weeks=active.map(currentWeekFor),logs=activeCycleLogs();
+ const finished=active.filter(lift=>logs.some(x=>x.lift===lift&&x.week===6&&x.setsComplete===true));
+ const fraction=active.length?active.reduce((count,lift,i)=>count+(finished.includes(lift)?6:weeks[i]-1),0)/(active.length*6):0;
+ const percent=Math.round(Math.min(100,Math.max(0,fraction*100)));
+ const title=String(state.cycle.title||state.cycle.name||'AscensionX Strength Progression');
+ const summary=document.createElement('section');
+ summary.className='sx-cycle-view-overview';
+ summary.innerHTML='<div class="sx-cycle-view-topline"><strong></strong><span class="sx-cycle-view-tag">6 WEEKS</span></div>'+
+  '<p class="sx-cycle-view-muted">AscensionX powerlifting · '+active.length+' selected '+(active.length===1?'lift':'lifts')+'</p>'+
+  '<div class="sx-cycle-view-topline"><span>Cycle progress</span><strong>'+percent+'%</strong></div>'+
+  '<div class="sx-cycle-view-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><i style="width:'+percent+'%"></i></div>'+
+  '<p class="sx-cycle-view-muted">'+active.map(lift=>lift+' · Week '+currentWeekFor(lift)).join(' · ')+'</p>';
+ summary.querySelector('strong').textContent=title;
+ holder.replaceChildren(summary);
  holder.appendChild(details);
  details.hidden=false;
  document.body.classList.add('sx-asc-workout-view');

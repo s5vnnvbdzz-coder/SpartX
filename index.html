@@ -1732,6 +1732,14 @@ body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0
  padding:10px 13px 16px!important;background:var(--panel)!important;-webkit-overflow-scrolling:touch}
 #sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleTitle{font-size:17px!important}
 
+
+/* Build 294: no page-dimming backdrop for 5/3/1 Manage Cycle.
+   The editor itself retains a solid, legible themed surface. */
+#sxQuick531CycleOverlay.sx-531-manage-popup{
+ background:transparent!important;background-image:none!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ box-shadow:none!important
+}
 </style>
 </head>
 <body class="sx-main-header-layout">

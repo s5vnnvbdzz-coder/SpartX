@@ -31,6 +31,20 @@ quickStyle.textContent=`
  :host(.sx-531-cycle-quick-mode) #programmeCard.visible{display:block!important}
 `;
 shadow.append(quickStyle);
+const manageModalStyle=document.createElement('style');
+manageModalStyle.textContent=`
+:host(.sx-531-manage-inline) main{display:none!important}
+:host(.sx-531-manage-inline) #editModal:not([hidden]){position:static!important;inset:auto!important;
+ display:block!important;background:transparent!important;min-height:0!important;
+ height:auto!important;margin:0!important;padding:0!important;z-index:auto!important}
+:host(.sx-531-manage-inline) #editModal[hidden]{display:none!important}
+:host(.sx-531-manage-inline) #editModal .edit-dialog{width:100%!important;max-width:none!important;
+ max-height:none!important;overflow:visible!important;background:transparent!important;
+ box-shadow:none!important;border:0!important;padding:4px!important}
+:host(.sx-531-manage-inline) #editModal .edit-dialog-head{display:none!important}
+:host(.sx-531-manage-inline) #editModal #cancelEdit{min-height:44px!important}
+`;
+shadow.appendChild(manageModalStyle);
 
 // Cosmic Nebula must theme this native planner inside its shadow root.
 const cosmicPlannerStyle=document.createElement('style');
@@ -198,7 +212,7 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 $('lengthChoices').addEventListener('click',e=>{const b=e.target.closest('button[data-weeks]');if(!b)return;weeks=+b.dataset.weeks;setLength();saveDraft();});
 function syncBbbOptions(){$('bbbOptions').hidden=!$('bbb').checked;}
 function openEditForm(){ $('editModalBody').appendChild($('setupCard')); $('setupCard').hidden=false; $('generate').textContent='SAVE CHANGES'; $('editModal').hidden=false; sync531CreationControls(); host.style.overflow='hidden'; $('tm').focus(); }
-function closeEditForm(){ $('setupPlaceholder').after($('setupCard')); $('setupCard').hidden=false; $('editModal').hidden=true; host.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; sync531CreationControls(); }
+function closeEditForm(){ const returnToWorkout=host.classList.contains('sx-531-manage-inline'); $('setupPlaceholder').after($('setupCard')); $('setupCard').hidden=false; $('editModal').hidden=true; host.style.overflow=''; editingId=null; $('generate').textContent='GENERATE CYCLE'; sync531CreationControls(); if(returnToWorkout)window.dispatchEvent(new Event('spartx:quickCycleCancel')); }
 $('bbb').addEventListener('change',()=>{syncBbbOptions();saveDraft();});
 ['tm','increase','bbbPct'].forEach(id=>$(id).addEventListener('input',saveDraft));
 $('lift').addEventListener('change',selectPlannerLift);

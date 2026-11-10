@@ -105,3 +105,47 @@ body:has(#sxBodybuildingBuilder.screen.active) #minimizedSession{display:none!im
  #sxBodybuildingBuilder .sx-bb-actions button{max-width:none}
 }
 @media(prefers-reduced-motion:reduce){#sxBodybuildingBuilder *{scroll-behavior:auto!important}}
+
+
+/* Stage 2: programme launch and completion */
+#workout #sxBodybuildingProgrammeCard .sx-bb-card-view{
+ display:block;width:100%;border:0!important;background:transparent!important;
+ color:var(--lime)!important;text-align:center;font-size:10px;font-weight:850;
+ letter-spacing:.6px;min-height:34px;margin-top:5px;padding:7px!important;
+}
+#workout #sxBodybuildingProgrammeCard #sxBBContinue:disabled{opacity:.44;cursor:not-allowed}
+#sxBodybuildingBuilder .sx-bb-full{
+ display:flex;width:100%;justify-content:center;align-items:center;
+ margin-top:12px;min-height:44px;
+}
+#sxBodybuildingBuilder .sx-bb-programme-status{
+ padding:15px 0;margin-top:5px;border-top:1px solid var(--line);
+}
+#sxBodybuildingBuilder .sx-bb-programme-status>div:first-child{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+#sxBodybuildingBuilder .sx-bb-programme-status>div:first-child>span{
+ color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.6px;
+}
+#sxBodybuildingBuilder .sx-bb-programme-status strong{
+ font-size:12px;font-variant-numeric:tabular-nums;
+}
+#sxBodybuildingBuilder .sx-bb-status-track{
+ background:var(--panel2);border-radius:20px;height:6px;margin-top:10px;overflow:hidden;
+}
+#sxBodybuildingBuilder .sx-bb-status-track i{
+ display:block;height:100%;border-radius:20px;
+ background:linear-gradient(90deg,color-mix(in srgb,var(--lime) 50%,var(--panel)),var(--lime));
+ box-shadow:0 0 8px color-mix(in srgb,var(--lime) 38%,transparent);
+ transition:width .25s ease;
+}
+#sxBodybuildingBuilder .sx-bb-day-state{
+ font-size:10px;color:var(--muted);font-weight:850;letter-spacing:.35px;white-space:nowrap;
+}
+#sxBodybuildingBuilder .sx-bb-day-state.is-done{color:var(--lime)}
+#sxBodybuildingBuilder .sx-bb-day-start{font-size:10px;margin-top:13px}
+#sxBodybuildingBuilder .sx-bb-primary:disabled{opacity:.43;cursor:not-allowed}
+@media(max-width:540px){
+ #workout #sxBodybuildingProgrammeCard .sx-programme-next{max-width:60%}
+ #sxBodybuildingBuilder .sx-bb-programme-status strong{font-size:11px}
+}

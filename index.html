@@ -903,7 +903,7 @@ body.completed-workout-open #trackerNav{display:none!important}
 <link rel="stylesheet" href="./assets/stats/statistics.css">
 <link rel="stylesheet" href="./assets/ascension/quick-access.css">
 <link rel="stylesheet" href="./assets/workouts/programme-cards.css?v=285">
-<link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=1">
+<link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=2">
 <style>
 
 /* Profile Workout Calendar: independent iOS scrolling and accessible completed days. */
@@ -3109,6 +3109,49 @@ function recoverAscensionWorkoutTitle(){
  return applyAscensionWorkoutTitle(detail);
 }
 
+// Programme import uses the existing SpartanX workout logger, set controls,
+// draft recovery and Finish & Save path. All linked sets are initially unchecked.
+window.SpartanXStartBodybuildingSession=function(payload){
+ const data=payload&&typeof payload==='object'?payload:{};
+ const link=data.link,day=data.day;
+ if(!link||typeof link.programmeId!=='string'||typeof link.dayId!=='string'||
+    !Number.isInteger(link.week)||link.week<1||link.week>12||
+    !day||day.id!==link.dayId||!Array.isArray(day.exercises)||!day.exercises.length)return false;
+ if(sessionActive||editingSessionId!==null){
+  alert('A workout is already active. Finish or discard that workout before loading a bodybuilding training day.');
+  return false;
+ }
+ const model=window.SXBodybuildingModel;
+ const store=model?.read?.(),programme=store?.programmes?.find(p=>p.id===link.programmeId);
+ const sourceDay=programme?.sessions.find(d=>d.id===link.dayId);
+ if(!programme||!sourceDay||link.week>programme.weeks)return false;
+ // Reject stale or altered UI payloads. Always import the latest saved plan.
+ const confirmed=confirm('Start '+sourceDay.name+' · Week '+link.week+' of '+programme.weeks+
+   '?\\n\\n'+sourceDay.exercises.length+' exercises will be loaded into a new workout. Nothing is marked complete until you log sets and Finish & Save.');
+ if(!confirmed)return false;
+ const plannedTotalSets=sourceDay.exercises.reduce((n,ex)=>n+Number(ex.sets||0),0);
+ const sessionLink={programmeId:programme.id,programmeName:programme.name,
+  dayId:sourceDay.id,dayName:sourceDay.name,week:link.week,
+  plannedTotalSets,plannedExerciseCount:sourceDay.exercises.length};
+ work=sourceDay.exercises.map(ex=>({
+  name:ex.name,rest:Number(ex.restSeconds)||120,
+  notes:'Bodybuilding · '+ex.repsMin+'–'+ex.repsMax+' reps · '+ex.rir+' RIR',
+  bodybuildingLink:{...sessionLink,exerciseId:ex.id,plannedSets:ex.sets,
+    repsMin:ex.repsMin,repsMax:ex.repsMax,rir:ex.rir},
+  sets:Array.from({length:ex.sets},()=>({
+   weight:ex.startingKg>0?String(ex.startingKg):'',
+   reps:String(ex.repsMin),rpe:'',type:'Working Set',done:false
+  }))
+ }));
+ libraryMode='workout';activeCycle=null;
+ window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
+ clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;
+ const title=sourceDay.name+' - Week '+link.week;
+ $('activeWorkoutName').textContent=title;$('workoutName').value=title;
+ $('sessionClock').textContent='00:00:00';
+ switchScreen('activeWorkout',{instant:true});renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
+ return true;
+};
 function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
 function renderSavedRoutines(){let a=Array.isArray(db.routines)?db.routines:[];const count=a.length+'/5';if($('routineCount'))$('routineCount').textContent=count;if($('homeRoutineCount'))$('homeRoutineCount').textContent=count;if($('homeRoutineSummary'))$('homeRoutineSummary').textContent='View created routines ('+a.length+')';const html=a.length?a.map((r,i)=>'<div class="listitem row between"><div><strong>'+esc(r.name)+'</strong><div class="tiny muted">'+r.exercises.length+' exercises</div></div><div class="row"><button class="secondary small" data-delete-routine="'+i+'" aria-label="Delete routine">DELETE</button><button class="small" data-start-routine="'+i+'">START</button></div></div>').join(''):'<p class="muted tiny">No routines created yet.</p>';if($('savedRoutineList'))$('savedRoutineList').innerHTML=html;if($('homeRoutineList'))$('homeRoutineList').innerHTML=html;}
 function openRoutineSelect(){renderSavedRoutines();switchScreen('routineSelectScreen');}
@@ -3662,14 +3705,27 @@ function commitFinishSession(){
  if(!exercises.length){alert('No completed sets have been logged.');return;}
  const volume=exercises.flatMap(ex=>ex.sets).reduce((total,set)=>total+set.weight*set.reps,0);
  const duration=Number.isFinite(window.sxReviewDurationSeconds)?window.sxReviewDurationSeconds:currentWorkoutElapsed();
+ const bbSource=work.find(ex=>ex.bodybuildingLink?.programmeId)?.bodybuildingLink||null;
+ const bodybuildingLink=bbSource?{
+  programmeId:bbSource.programmeId,programmeName:bbSource.programmeName,
+  dayId:bbSource.dayId,dayName:bbSource.dayName,week:bbSource.week,
+  plannedTotalSets:bbSource.plannedTotalSets,plannedExerciseCount:bbSource.plannedExerciseCount
+ }:null;
  db.sessions.unshift({
   id:window.sxReviewSessionId||Date.now(),date:window.sxManualWorkoutDate||new Date().toISOString(),
   name:(window.sxReviewWorkoutName||$('activeWorkoutName').textContent).trim()||'Workout',
   duration,volume,exercises,
-  ...(activeCycle?{cycleId:activeCycle.id,cycleWeek:activeCycle.week}:{})
+  ...(activeCycle?{cycleId:activeCycle.id,cycleWeek:activeCycle.week}:{}),
+  ...(bodybuildingLink?{bodybuildingLink}:{})
  });
  if(activeCycle){if(typeof window.spartanx531RecordCompleted==='function')window.spartanx531RecordCompleted(activeCycle,db.sessions[0]);else markCycleWeekCompleted(activeCycle.id,activeCycle.week);activeCycle=null;}
  persist();queueAscensionWorkoutCompletion(db.sessions[0]);
+ if(bodybuildingLink){
+  window.dispatchEvent(new CustomEvent('spartx:bodybuildingSessionSaved',{
+   detail:{sessionId:db.sessions[0].id,programmeId:bodybuildingLink.programmeId,
+    dayId:bodybuildingLink.dayId,week:bodybuildingLink.week}
+  }));
+ }
  resetSession();stats();renderHomeCycles();switchScreen('home');
  const rankAfter=getWorkoutRank();
  pendingRankCelebration=rankAfter.index>rankBefore.index?rankAfter:null;
@@ -4382,6 +4438,6 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-save-review.js?v=262"></script>
 <script src="./assets/profile/profile-social-pages.js?v=262"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=243"></script>
-<script src="./assets/bodybuilding/programme-model.js?v=1"></script>
-<script src="./assets/bodybuilding/programme-builder.js?v=1"></script>
+<script src="./assets/bodybuilding/programme-model.js?v=2"></script>
+<script src="./assets/bodybuilding/programme-builder.js?v=2"></script>
 </body></html>

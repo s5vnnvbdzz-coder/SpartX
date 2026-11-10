@@ -48,6 +48,61 @@
     '<button type="button" class="sx-bb-secondary" data-bb-action="close-picker">CANCEL</button></section></div>'
   ].join('');
   main.appendChild(screen);
+  // Separate six-week AscensionX companion. This does not create or replace
+  // an independent bodybuilding programme and is disabled until opted in.
+  const companionCard=document.createElement('section');
+  companionCard.id='sxBBAscensionCompanion';
+  companionCard.className='card sx-bb-companion-card';
+  companionCard.hidden=true;
+  screen.appendChild(companionCard);
+  function renderCompanion(){
+    const api=window.SXAscensionCompanion;
+    const cycle=api?.cycle?.();
+    if(!cycle){companionCard.hidden=true;return}
+    companionCard.hidden=false;
+    const prefs=api.preference();
+    const currentWeeks=cycle.lifts.map(lift=>{
+      const item=Object.entries(cycle.weeks).find(([key])=>api.canonical(key)===lift);
+      return {lift,week:Math.max(1,Math.min(6,Number(item?.[1]||cycle.currentWeek)||1))};
+    });
+    companionCard.innerHTML='<div class="eyebrow">ASCENSIONX · SIX-WEEK COMPANION</div>'+
+      '<h2>Strength &amp; Size · Linked Accessories</h2>'+
+      '<p class="sx-bb-help">Designed around the compound lifts selected in your active AscensionX cycle. Primary lift loads, training maxes and AscensionX week completion are never changed.</p>'+
+      '<div class="sx-bb-companion-config"><label class="sx-bb-companion-toggle">'+
+      '<input type="checkbox" id="sxBBCompanionEnabled" '+(prefs.enabled?'checked':'')+'>'+
+      '<span><strong>ENABLE LINKED ACCESSORIES</strong><small>Load additional hypertrophy work only when importing an AscensionX compound lift</small></span></label>'+
+      '<label>ACCESSORY VOLUME<select id="sxBBCompanionVolume">'+
+      '<option value="balanced" '+(prefs.volume==='balanced'?'selected':'')+'>Balanced · conservative</option>'+
+      '<option value="low" '+(prefs.volume==='low'?'selected':'')+'>Low · extra recovery</option></select></label></div>'+
+      '<div class="sx-bb-companion-lifts">'+currentWeeks.map(({lift,week})=>{
+        const enabled=!prefs.excluded.includes(lift);
+        const planned=api.plan(lift,week,{volume:prefs.volume});
+        const legacy=lift==='Bench Press'?'Existing AscensionX: Paused Bench Press':
+          lift==='Deadlift'?'Existing AscensionX: Romanian Deadlift':'';
+        return '<div class="sx-bb-companion-lift">'+
+          '<label class="sx-bb-companion-lift-header"><input type="checkbox" data-bb-companion-lift="'+esc(lift)+'" '+(enabled?'checked':'')+'>'+
+          '<span><strong>'+esc(lift)+'</strong><small>Week '+week+' of 6</small></span></label>'+
+          (legacy?'<div class="sx-bb-companion-existing">'+esc(legacy)+' · Existing optional accessory, not duplicated</div>':'')+
+          (planned.length?planned.map(ex=>'<div class="sx-bb-companion-ex"><strong>'+esc(ex.name)+'</strong><span>'+
+            ex.sets+' × '+ex.min+'–'+ex.max+' · '+ex.rir+' RIR</span></div>').join(''):
+            '<p class="sx-bb-help">Recovery week: no new companion exercises.</p>')+
+          '</div>';
+      }).join('')+'</div>'+
+      '<p class="sx-bb-help sx-bb-companion-note">Week 1–3: steady controlled volume · Week 4: reduced volume · Week 5: one low-fatigue accessory per lift · Week 6: no new companion exercises. All companion sets start unchecked and never count toward AscensionX cycle completion. Reopen AscensionX Continue Training to load them.</p>';
+  }
+  companionCard.addEventListener('change',event=>{
+    const api=window.SXAscensionCompanion;if(!api?.cycle?.())return;
+    const target=event.target,prefs=api.preference();
+    if(target.id==='sxBBCompanionEnabled')api.savePreference({enabled:target.checked});
+    else if(target.id==='sxBBCompanionVolume')api.savePreference({volume:target.value});
+    else if(target.dataset.bbCompanionLift){
+      const lift=target.dataset.bbCompanionLift;
+      const excludes=new Set(prefs.excluded);
+      if(target.checked)excludes.delete(lift);else excludes.add(lift);
+      api.savePreference({excluded:[...excludes]});
+    }else return;
+    renderCompanion();
+  });
   const favourites=['Bench Press','Incline Dumbbell Press','Chest-Supported Row','Lat Pulldown','Overhead Press','Lateral Raise',
     'Triceps Pushdown','Dumbbell Curl','Back Squat','Romanian Deadlift','Leg Press','Hack Squat','Leg Extension','Seated Leg Curl','Hip Thrust','Standing Calf Raise'];
   const library=()=>{
@@ -230,7 +285,7 @@
     $('sxBBModePill').textContent=mode==='edit'?'EDIT PROGRAMME':'PROGRAMME OVERVIEW';
     $('sxBBNotice').hidden=true;
     if(mode==='edit')renderEdit();else renderView();
-    cardRender();
+    cardRender();renderCompanion();
   }
   function save(){
     if(!draft)return;
@@ -338,10 +393,13 @@
     store=M.read();selectedId=store.activeId;
     if(screen.classList.contains('active'))render();else cardRender();
   });
+  window.addEventListener('storage',e=>{
+    if(e.key==='ascensionx_strength_v1'||e.key==='sx_ascension_companion_v1')renderCompanion();
+  });
   window.addEventListener('spartx:bodybuildingSessionSaved',()=>{
     store=M.read();selectedId=store.activeId;
     if(screen.classList.contains('active')&&mode!=='edit')render();else cardRender();
   });
-  window.SXBodybuildingProgrammes=Object.freeze({open,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender()},storageKey:M.KEY});
+  window.SXBodybuildingProgrammes=Object.freeze({open,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender();renderCompanion()},storageKey:M.KEY});
   cardRender();
 })();

@@ -426,6 +426,50 @@ body.sx-asc-workout-view #sxCycleViewBackdrop.open{position:fixed!important;inse
 #sxCycleViewDialog .sx-cycle-view-foot button{min-height:45px;border-radius:10px}
 #sxCycleViewDialog #sxCycleViewSave{background:linear-gradient(135deg,var(--red2),var(--redDeep));color:#fff}
 </style>
+
+<style id="sx-asc-single-window-fix">
+/* No nested 14px matte: the editor occupies the host's frameless iframe.
+   Only the editor itself draws a border and background. */
+body.sx-asc-workout-manage #cycleEditorBackdrop.open{
+ padding:0!important;inset:0!important;width:100%!important;height:100dvh!important;
+ background:transparent!important;box-shadow:none!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-dialog{
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ height:100%!important;max-height:100%!important;min-height:0!important;
+ border-radius:16px!important;
+ border:1px solid color-mix(in srgb,var(--red2) 35%,var(--line))!important;
+ background:linear-gradient(150deg,var(--panel2),var(--panel) 58%,var(--bg))!important;
+ box-shadow:none!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-header,
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-actions{
+ flex:0 0 auto!important
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body{
+ flex:1 1 auto!important;min-height:0!important;max-height:none!important;
+ overflow-y:auto!important;overscroll-behavior:contain!important;
+ scrollbar-width:thin;scrollbar-color:var(--line) transparent
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body::-webkit-scrollbar{width:5px}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body::-webkit-scrollbar-thumb{
+ background:var(--line);border-radius:8px
+}
+/* Apply the same frameless treatment to the read-only View Cycle dialog. */
+body.sx-asc-workout-view #sxCycleViewBackdrop.open{padding:0!important;background:transparent!important}
+body.sx-asc-workout-view #sxCycleViewDialog{
+ border:1px solid color-mix(in srgb,var(--red2) 35%,var(--line))!important;
+ border-radius:16px!important;box-shadow:none!important;overflow:hidden!important
+}
+body.sx-asc-workout-view .sx-cycle-view-scroll{
+ scrollbar-width:thin;scrollbar-color:var(--line) transparent
+}
+body.sx-asc-workout-view .sx-cycle-view-scroll::-webkit-scrollbar{width:5px}
+body.sx-asc-workout-view .sx-cycle-view-scroll::-webkit-scrollbar-thumb{
+ background:var(--line);border-radius:8px
+}
+</style>
 </head>
 <body>
 <header>

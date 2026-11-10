@@ -171,7 +171,7 @@
       :hasLive
       ?'<strong>Active SpartanX workout connected.</strong> Live completed sets are available below. You have no saved workout history in this browser yet, so comparisons remain unavailable until Finish &amp; Save.'
       :'<strong>SpartanX history not available here.</strong> '+escapeHtml(result?.reason||'Unable to read this device’s workouts.')+' Open Intelligence using the button on SpartanX Home on the same device, or import a backup. iPhone Safari and Home Screen apps can use separate storage.';
-    $('dataBanner').innerHTML='<span class="banner-symbol">ⓘ</span><span>'+line+' <a class="sx-back-link" href="../">Back to SpartanX</a></span>';
+    $('dataBanner').innerHTML='<span class="banner-symbol">ⓘ</span><span>'+line+' <a class="sx-back-link" href="../?sxReturn=intelligence">Back to SpartanX</a></span>';
     const detail=$('connectionDetails');
     if(detail)detail.textContent=connected
       ?'Connected to '+result.sessions.length+' valid completed workouts (read-only)'+(hasLive?' and an active draft.':'.')
@@ -187,6 +187,7 @@
     const sessions=E.normalizeSessions(src);
     if(sessions.length===0)throw new Error('No valid completed workouts were found.');
     state.profile={name:'Imported Athlete',label:'Local JSON Preview',sessions,isDemo:false};
+    state.importedRaw=src;
     state.source='import';
     state.goals=Object.assign({},defaultGoal);
     $('modePill').textContent='● LOCAL IMPORT';
@@ -348,6 +349,10 @@
     if(!state.profile)return;
     state.analysis=E.analyse(state.profile.sessions,state.range);
     renderOverview();renderPerformance();renderMuscles();renderIntelligence();renderLivePanel();
+    // A complete workout view must include accessories that four-lift
+    // powerlifting metrics and simplified muscle mapping do not surface.
+    window.SXSessionBreakdown?.render({mode:state.source,range:state.range,
+      sessions:state.source==='import'?state.importedRaw:state.profile.sessions});
   }
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.go)));

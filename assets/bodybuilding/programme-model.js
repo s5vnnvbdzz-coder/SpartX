@@ -151,6 +151,64 @@
     const sets=sessions.reduce((total,d)=>total+d.exercises.reduce((n,e)=>n+e.sets,0),0);
     return {sessions:sessions.length,exercises,sets,weeklySets:sets,plannedSessions:sessions.length*Number(program?.weeks||8)};
   }
+  /* Training progress is derived from the saved SpartanX workout history,
+     not from an independently edited counter. Deleting or editing an old
+     workout will therefore update progress on the next render. */
+  function linkedSession(session){
+    const direct=session?.bodybuildingLink;
+    if(direct && typeof direct.programmeId==='string')return direct;
+    const found=(Array.isArray(session?.exercises)?session.exercises:[])
+      .find(ex=>ex?.bodybuildingLink?.programmeId);
+    return found?.bodybuildingLink||null;
+  }
+  function completion(session){
+    const link=linkedSession(session);
+    if(!link||!Array.isArray(session?.exercises))return {linked:false,complete:false,done:0,planned:0};
+    const applicable=session.exercises.filter(ex=>ex.bodybuildingLink?.programmeId===link.programmeId &&
+      ex.bodybuildingLink?.dayId===link.dayId &&
+      Number(ex.bodybuildingLink?.week)===Number(link.week));
+    const sets=applicable.map(ex=>({
+      id:String(ex.bodybuildingLink?.exerciseId||''),
+      planned:Math.max(0,Math.round(Number(ex.bodybuildingLink?.plannedSets)||0)),
+      completed:(Array.isArray(ex.sets)?ex.sets:[]).filter(set=>set.done!==false&&
+        String(set.type||'Working Set')!=='Warm-up'&&Number(set.reps)>0).length
+    }));
+    const done=sets.reduce((a,v)=>a+v.completed,0);
+    const planned=Math.max(0,Number(link.plannedTotalSets)||sets.reduce((a,v)=>a+v.planned,0));
+    const expected=Math.max(0,Number(link.plannedExerciseCount)||sets.length);
+    const complete=planned>0&&sets.length>=expected&&
+      sets.every(v=>v.planned>0&&v.completed>=v.planned)&&done>=planned;
+    return {linked:true,complete,done,planned,expected};
+  }
+  function progress(program,sessions){
+    const p=normalize(program);
+    if(!p)return {week:1,dayId:null,finished:false,days:[],completeCount:0,loggedCount:0,plannedCount:0};
+    const history=(Array.isArray(sessions)?sessions:[]).filter(session=>{
+      const link=linkedSession(session);
+      return link?.programmeId===p.id;
+    });
+    const completed=new Map(),logged=new Map();
+    for(const session of history){
+      const link=linkedSession(session),week=Math.round(Number(link.week)||0);
+      if(week<1||week>p.weeks||!p.sessions.some(day=>day.id===link.dayId))continue;
+      const key=week+'|'+link.dayId,coverage=completion(session);
+      logged.set(key,(logged.get(key)||0)+1);
+      if(coverage.complete)completed.set(key,true);
+    }
+    const slots=[];
+    for(let week=1;week<=p.weeks;week++){
+      for(const day of p.sessions){
+        const key=week+'|'+day.id;
+        slots.push({week,dayId:day.id,dayName:day.name,complete:completed.has(key),logged:(logged.get(key)||0)>0});
+      }
+    }
+    const next=slots.find(s=>!s.complete),week=next?.week||p.weeks;
+    const days=slots.filter(slot=>slot.week===week);
+    return {week,dayId:next?.dayId||null,finished:!next,days,
+      completeCount:slots.filter(slot=>slot.complete).length,
+      loggedCount:slots.filter(slot=>slot.logged).length,
+      plannedCount:slots.length};
+  }
   global.SXBodybuildingModel=Object.freeze({KEY,DAYS,WEEKS,KINDS,PRIORITIES,EXPERIENCES,
-    fresh,buildDays,exercise,normalize,read,write,save,remove,activate,summary});
+    fresh,buildDays,exercise,normalize,read,write,save,remove,activate,summary,linkedSession,completion,progress});
 })(window);

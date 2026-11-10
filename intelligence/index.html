@@ -8,13 +8,14 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
-  <link rel="stylesheet" href="./styles.css?v=10">
+  <link rel="stylesheet" href="./styles.css?v=11">
   <link rel="stylesheet" href="./goal-navigation.css?v=1">
   <script src="../assets/anatomy/body-map.js?v=1" defer></script>
   <script src="./engine.js?v=3" defer></script>
   <script src="./bridge.js?v=3" defer></script>
   <script src="./live.js?v=2" defer></script>
-  <script src="./app.js?v=8" defer></script>
+  <script src="./session-breakdown.js?v=1" defer></script>
+  <script src="./app.js?v=9" defer></script>
   <script src="./goal-navigation.js?v=2" defer></script>
 </head>
 <body data-theme="black-yellow">
@@ -97,6 +98,22 @@
           <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div><span class="hero-tag">S T R O N G E R &nbsp; E V E R Y &nbsp; D A Y</span></div>
         </div>
 
+        <div class="section-top sx-session-section-top">
+          <div><h3>Your latest completed workout</h3><p>All saved exercises and accessory sets, not just the main compound lift</p></div>
+          <span class="micro-tag">FULL SESSION ANALYSIS</span>
+        </div>
+        <div id="sxLatestWorkoutAnalysis" aria-live="polite"></div>
+        <div class="section-top sx-session-section-top">
+          <div><h3>Exercise-by-exercise progression</h3><p>Explore the training volume history of an exercise from your most recent workout</p></div>
+        </div>
+        <article class="panel sx-session-trend-panel">
+          <div class="panel-head"><div><div class="eyebrow">ADDITIONAL EXERCISES · TREND</div><h3>Recorded training volume</h3></div>
+            <select class="compact-select" id="sxSessionTrendSelect" aria-label="Choose a recorded exercise"></select>
+          </div>
+          <div id="sxSessionTrendChart" class="sx-session-trend-chart"></div>
+          <p class="sx-session-muted" id="sxSessionTrendNote"></p>
+        </article>
+
         <div class="section-top"><div><h3 id="snapshotTitle">Bench Press performance snapshot</h3><p id="snapshotSubtitle">All four metrics reflect your selected exercise.</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
         <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
         <div class="two-col">
@@ -149,6 +166,7 @@
         <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Your next session, informed by your last.</h3><p>Simple, explainable recommendations from completed sets and RPE. Nothing is changed in your training plan.</p></div></div>
         <div class="section-top"><div><h3>Progression suggestions</h3><p>Review a lift to see why a recommendation was made</p></div></div>
         <div class="recommendation-grid" id="recommendationGrid"></div>
+        <article class="panel sx-session-insights-panel" id="sxLatestSessionInsight" aria-label="Latest completed session and accessory insight"></article>
         <div class="section-top"><div><h3>Training insights</h3><p>Signals worth noticing, not automatic training decisions</p></div></div>
         <div class="insight-grid" id="allInsights"></div>
         <article class="panel disclaimer"><div class="eyebrow">IMPORTANT LIMITATIONS</div><h3>Intelligence is a decision aid, not a coach or clinician.</h3><p>Recommendations currently use recent top sets, repetitions, estimated strength trends and logged RPE. They cannot assess bar speed, technique, sleep quality, pain, injury risk or actual muscle recovery. Use judgement and adapt training to how you feel. This module does not write to SpartanX or change any workout.</p></article>

@@ -403,6 +403,29 @@ body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-actions{
  background:var(--panel)!important;padding:11px 15px 13px!important
 }
 </style>
+
+<style id="sx-asc-view-cycle-window">
+/* View Cycle from Workout is a compact, parent-framed modal. */
+html:has(body.sx-asc-workout-view),
+body.sx-asc-workout-view{background:transparent!important;background-image:none!important;background-color:transparent!important}
+body.sx-asc-workout-view{height:100dvh!important;min-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important}
+body.sx-asc-workout-view > header,
+body.sx-asc-workout-view > main,
+body.sx-asc-workout-view > nav{display:none!important}
+#sxCycleViewBackdrop{display:none}
+body.sx-asc-workout-view #sxCycleViewBackdrop.open{position:fixed!important;inset:0!important;z-index:150!important;display:flex!important;align-items:center!important;justify-content:center!important;background:transparent!important;padding:0!important}
+#sxCycleViewDialog{width:100%;height:100%;max-height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;border-radius:15px;background:var(--panel);color:var(--text)}
+#sxCycleViewDialog .sx-cycle-view-head{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;gap:10px;border-bottom:1px solid var(--line);padding:15px}
+#sxCycleViewDialog .sx-cycle-view-head h2{font-size:18px;margin:4px 0 0}
+#sxCycleViewDialog .sx-cycle-view-scroll{padding:10px 14px;min-height:0;flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails{margin-top:0!important;padding-top:0!important}
+#sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails>.eyebrow{margin-top:5px}
+#sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails>h2{display:none}
+#sxCycleViewDialog .sx-cycle-view-scroll .card{padding:13px!important;margin:11px 0!important}
+#sxCycleViewDialog .sx-cycle-view-foot{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:0 0 auto;padding:12px 15px calc(13px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line)}
+#sxCycleViewDialog .sx-cycle-view-foot button{min-height:45px;border-radius:10px}
+#sxCycleViewDialog #sxCycleViewSave{background:linear-gradient(135deg,var(--red2),var(--redDeep));color:#fff}
+</style>
 </head>
 <body>
 <header>
@@ -449,6 +472,13 @@ body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-actions{
   <div class="card"><h2>Appearance</h2><p class="tiny" id="sxStandaloneThemeHint">Choose an AscensionX theme.</p><div class="theme-choices" id="themeChoices"></div><p class="tiny" id="sxLinkedThemeNote" hidden>Appearance follows your selected SpartanX theme while embedded. Standalone AscensionX themes remain independent.</p></div>
   <div class="card"><h2>Weight units</h2><p class="tiny">Choose how weights are displayed and entered throughout the app. Your saved training data stays accurate when switching units.</p><div class="unit-choice"><button id="unitKg" class="secondary" onclick="setUnit('kg')">Kilograms (kg)</button><button id="unitLbs" class="secondary" onclick="setUnit('lbs')">Pounds (lbs)</button></div></div>
   <div class="data-card"><h2>Data & privacy</h2><p class="tiny">Your profile, measurements and training log are stored locally in this browser on this device. They are not uploaded to an AscensionX account or synced to a server. Export a backup before clearing browser data or changing devices.</p><div class="row wrap"><button class="secondary" id="exportBtn" onclick="exportData()">Export backup</button><label class="secondary" style="padding:12px;border-radius:12px;margin:0;cursor:pointer">Import backup<input type="file" id="importFile" accept="application/json" class="hidden"></label></div><button class="danger full" style="margin-top:12px" onclick="resetData()">Delete all AscensionX data</button><div class="tiny" style="margin-top:12px">ASCENSIONX · V1.3 · WORKOUT HISTORY RECOVERY · LOCAL STORAGE</div></div>
+ </section>
+</div>
+<div id="sxCycleViewBackdrop" role="presentation" aria-hidden="true">
+ <section id="sxCycleViewDialog" role="dialog" aria-modal="true" aria-labelledby="sxCycleViewTitle">
+  <div class="sx-cycle-view-head"><div><div class="eyebrow">ASCENSIONX · POWERLIFTING</div><h2 id="sxCycleViewTitle">View Cycle</h2></div><button type="button" class="iconbtn" onclick="closeSXWorkoutCycleView(false)" aria-label="Close cycle view">×</button></div>
+  <div class="sx-cycle-view-scroll" id="sxCycleViewScroll"><div id="sxCycleViewContent"></div></div>
+  <div class="sx-cycle-view-foot"><button type="button" class="secondary" onclick="closeSXWorkoutCycleView(false)">CANCEL</button><button type="button" id="sxCycleViewSave" onclick="closeSXWorkoutCycleView(true)">SAVE</button></div>
  </section>
 </div>
 <div id="cycleEditorBackdrop" class="cycle-editor-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeCycleEditor()">
@@ -636,6 +666,46 @@ function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.th
 function ascRankState(){const total=state.logs.length,prestige=state.prestige||{level:0,xpOffset:0};const xp=Math.max(0,total-(prestige.xpOffset||0));const level=Math.min(5,Math.floor(xp/3));return {total,xp,level,prestige:prestige.level||0}}
 function renderAscRank(){const r=ascRankState();$('ascRankName').textContent=ascRankLabel(r.level);document.body.dataset.sxRankTier=String(r.level===5?8:r.level+1);$('ascRankXp').textContent=r.xp+' XP';$('ascRankBar').style.width=(r.level===5?100:r.xp%3/3*100)+'%';$('ascRankNext').textContent=r.level===5?'Olympian achieved — prestige available':(3-r.xp%3)+' XP to '+ascRankLabel(r.level+1);$('ascPrestigeLevel').textContent=r.prestige;$('ascRankSessions').textContent=r.total+' saved workouts';$('ascRankEmblem').src='../ranks/'+['mortal.svg','spartan.svg','hero.svg','demigod.svg','titan.svg','olympian.svg'][r.level];$('ascRankEmblem').alt=ASC_RANKS[r.level]+' rank emblem';$('navRankEmblem').src=$('ascRankEmblem').src;$('ascPrestigeButton').disabled=r.level<5;$('ascPrestigeButton').textContent=r.level===5?'Prestige · Ascend to level '+(r.prestige+1):'Reach Olympian to prestige'}
 function prestigeAscRank(){const r=ascRankState();if(r.level!==5)return;if(!confirm('Prestige to level '+(r.prestige+1)+'? Your rank resets to Mortal, but your workouts and training history are preserved.'))return;state.prestige={level:r.prestige+1,xpOffset:r.total};persist();toast('Prestige '+(r.prestige+1)+' unlocked!')}
+
+
+let sxCycleViewHomeParent=null,sxCycleViewHomeSibling=null,sxCycleViewCaller=null;
+function openSXWorkoutCycleView(){
+ const backdrop=$('sxCycleViewBackdrop'),details=$('cycleDetails'),holder=$('sxCycleViewContent');
+ if(!backdrop||!details||!holder||!state.cycle.created)return;
+ if(backdrop.classList.contains('open'))return;
+ closeCycleEditor();
+ showScreen('home',false);
+ renderCycle();renderDashboard();
+ sxCycleViewHomeParent=details.parentNode;
+ sxCycleViewHomeSibling=details.nextSibling;
+ sxCycleViewCaller=document.activeElement;
+ holder.appendChild(details);
+ details.hidden=false;
+ document.body.classList.add('sx-asc-workout-view');
+ backdrop.classList.add('open');
+ backdrop.setAttribute('aria-hidden','false');
+ $('sxCycleViewScroll').scrollTop=0;
+ backdrop.querySelector('button[aria-label="Close cycle view"]')?.focus({preventScroll:true});
+ try{window.parent.postMessage({type:'spartx:ascensionViewReady'},location.origin)}catch(_){}
+}
+function closeSXWorkoutCycleView(save=false){
+ const backdrop=$('sxCycleViewBackdrop'),details=$('cycleDetails');
+ if(!backdrop?.classList.contains('open'))return;
+ if(save)persist(false);
+ backdrop.classList.remove('open');
+ backdrop.setAttribute('aria-hidden','true');
+ if(details&&sxCycleViewHomeParent){
+  if(sxCycleViewHomeSibling?.parentNode===sxCycleViewHomeParent)
+   sxCycleViewHomeParent.insertBefore(details,sxCycleViewHomeSibling);
+  else sxCycleViewHomeParent.appendChild(details);
+  details.hidden=true;
+ }
+ sxCycleViewHomeParent=null;sxCycleViewHomeSibling=null;
+ document.body.classList.remove('sx-asc-workout-view');
+ const caller=sxCycleViewCaller;sxCycleViewCaller=null;
+ if(caller?.isConnected)caller.focus({preventScroll:true});
+ try{window.parent.postMessage({type:'spartx:ascensionViewExit'},location.origin)}catch(_){}
+}
 
 let cycleEditorLock=null,cycleEditorCaller=null;
 function openCycleEditor(){
@@ -1020,7 +1090,8 @@ window.addEventListener('message',e=>{
  }
 
  if(e.data?.type==='spartx:ascensionQuickExit'&&ascensionEmbeddedBySpartanX){
-  document.body.classList.remove('sx-spartan-quick-import','sx-spartan-import-only','sx-ascension-view-cycle','sx-asc-workout-manage');
+  closeSXWorkoutCycleView(false);
+ document.body.classList.remove('sx-spartan-quick-import','sx-spartan-import-only','sx-ascension-view-cycle','sx-asc-workout-manage','sx-asc-workout-view');
   closeAscSpartanImport();
   closeCycleEditor();
   return;
@@ -1063,6 +1134,7 @@ window.addEventListener('message',e=>{
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
   document.body.classList.toggle('sx-spartan-import-only',e.data.mode==='continue'&&e.data.importOnly===true);
+  closeSXWorkoutCycleView(false);
   document.body.classList.remove('sx-asc-workout-manage','sx-ascension-view-cycle');
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
@@ -1081,6 +1153,9 @@ window.addEventListener('message',e=>{
    closeCycleEditor();
    showScreen('home');
    renderDashboard();
+   if(e.data.mode==='view'&&state.cycle.created){
+    openSXWorkoutCycleView();
+   }
    if(e.data.mode==='manage'&&state.cycle.created){
     // Set the special mode after closing any previous editor, so reentry
     // never dispatches an unintended ManageExit message.

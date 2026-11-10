@@ -98,6 +98,108 @@ const overlay=document.createElement('div');
 overlay.id='sx531CyclePreview';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','5/3/1 programme preview');
 overlay.innerHTML='<div class="sx531-dialog"><header><div><div class="sx531-caption">5/3/1 × SPARTANX</div><h2>Log this workout in SpartanX?</h2></div><span class="sx531-caption" id="sx531CycleStatus"></span></header><div class="sx531-content" id="sx531CycleContent"></div><footer class="sx531-footer"><button type="button" id="sx531Cancel">CANCEL</button><button type="button" id="sx531Load">LOAD INTO SPARTANX</button></footer></div>';
 document.body.appendChild(overlay);
+
+/* Read-only programme overview, separate from Continue Training.
+   AscensionX and 5/3/1 View Cycle share presentation and sections. */
+const viewOverlay=document.createElement('div');
+viewOverlay.id='sx531ViewCycle';viewOverlay.hidden=true;
+viewOverlay.setAttribute('role','dialog');viewOverlay.setAttribute('aria-modal','true');
+viewOverlay.setAttribute('aria-labelledby','sx531ViewTitle');
+viewOverlay.innerHTML='<section class="sx531-view-dialog">'+
+ '<header class="sx531-view-head"><div><div class="sx531-view-eyebrow">5/3/1 · POWERLIFTING</div><h2 id="sx531ViewTitle">View Cycle</h2></div>'+
+ '<button type="button" id="sx531ViewClose" aria-label="Close cycle view">×</button></header>'+
+ '<div class="sx531-view-scroll" id="sx531ViewScroll"><div id="sx531ViewBody"></div></div>'+
+ '<footer class="sx531-view-actions"><button type="button" id="sx531ViewCancel">CANCEL</button>'+
+ '<button type="button" id="sx531ViewSave">SAVE</button></footer></section>';
+document.body.appendChild(viewOverlay);
+const viewStyle=document.createElement('style');
+viewStyle.id='sx531ViewCycleStyles';
+viewStyle.textContent="\nbody:has(#sx531ViewCycle:not([hidden])) #trackerNav,\nbody:has(#sx531ViewCycle:not([hidden])) .minimized-session{display:none!important}\n#sx531ViewCycle[hidden]{display:none!important}\n#sx531ViewCycle{position:fixed;inset:0;z-index:290002;display:flex;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overscroll-behavior:contain;box-sizing:border-box}\n#sx531ViewCycle *{box-sizing:border-box}\n#sx531ViewCycle .sx531-view-dialog{width:min(100%,700px);height:min(88dvh,760px);max-height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid color-mix(in srgb,var(--lime) 40%,var(--line));border-radius:16px;background:var(--panel);color:var(--txt);box-shadow:0 14px 42px #0007}\n#sx531ViewCycle .sx531-view-head{display:flex!important;flex:none!important;align-items:center;justify-content:space-between;gap:12px;position:static!important;margin:0!important;padding:15px!important;background:var(--panel)!important;border-bottom:1px solid var(--line)!important;box-shadow:none!important}\n#sx531ViewCycle .sx531-view-eyebrow{font-size:10px;letter-spacing:1.2px;font-weight:900;color:var(--lime)}\n#sx531ViewCycle h2{font-size:18px;margin:4px 0 0;color:var(--txt)}\n#sx531ViewCycle #sx531ViewClose{width:39px;height:39px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:11px;color:var(--txt);font-size:23px;cursor:pointer}\n#sx531ViewCycle .sx531-view-scroll{min-height:0;flex:1 1 auto;overflow-y:auto;padding:10px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}\n#sx531ViewCycle .sx531-view-actions{display:grid;grid-template-columns:1fr 1fr;flex:0 0 auto;gap:10px;margin:0;padding:12px 15px calc(13px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line)}\n#sx531ViewCycle .sx531-view-actions button{min-height:45px;min-width:0;padding:10px 8px;border-radius:10px;font-weight:850;font-size:11px;cursor:pointer}\n#sx531ViewCancel{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}\n#sx531ViewSave{background:color-mix(in srgb,var(--lime) 17%,var(--panel2));border:1px solid var(--lime);color:var(--txt)}\n#sx531ViewCycle .sx531-view-section{padding:13px;margin:11px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}\n#sx531ViewCycle .sx531-view-section h3{font-size:15px;margin:0 0 12px}\n#sx531ViewCycle .sx531-view-info{font-size:11px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}\n#sx531ViewCycle .sx531-view-statrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;font-size:11px}\n#sx531ViewCycle .sx531-view-statrow strong{color:var(--txt)}\n#sx531ViewCycle .sx531-view-progress{height:6px;border-radius:99px;overflow:hidden;background:var(--line);margin:11px 0}\n#sx531ViewCycle .sx531-view-progress i{display:block;height:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--lime) 45%,var(--panel2)),var(--lime));border-radius:99px}\n#sx531ViewCycle table{border-collapse:collapse;min-width:100%;width:100%;font-size:11px}\n#sx531ViewCycle th,#sx531ViewCycle td{padding:9px 7px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}\n#sx531ViewCycle th{color:var(--lime);font-size:10px;letter-spacing:.5px}\n#sx531ViewCycle .sx531-view-tablebox{width:100%;overflow-x:auto;max-width:100%}\n#sx531ViewCycle .sx531-view-select{display:block;width:100%;max-width:100%;margin:6px 0 12px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--txt);font-size:13px}\n#sx531ViewCycle .sx531-view-pill{display:inline-block;border-radius:10px;padding:3px 7px;background:color-mix(in srgb,var(--lime) 10%,var(--panel2));border:1px solid var(--line);color:var(--txt);font-size:10px;white-space:nowrap}\n#sx531ViewCycle .sx531-view-rule{border-bottom:1px solid var(--line);padding:9px 0;font-size:11px;line-height:1.6;color:var(--muted)}\n#sx531ViewCycle .sx531-view-rule:last-child{border-bottom:0}\n#sx531ViewCycle .sx531-view-rule strong{color:var(--txt)}\n@media(max-width:380px){#sx531ViewCycle .sx531-view-scroll{padding:7px 10px}#sx531ViewCycle .sx531-view-section{padding:11px}#sx531ViewCycle .sx531-view-head{padding:12px!important}#sx531ViewCycle .sx531-view-actions{padding:10px}}\n";
+document.head.appendChild(viewStyle);
+let viewCycleId=null,viewLift=null,viewOldOverflow=null,viewCaller=null;
+function render531ViewCycle(){
+ const c=read().find(x=>x.id===viewCycleId);if(!c)return;
+ const allLifts=lifts(c);if(!allLifts.includes(viewLift))viewLift=allLifts[0];
+ const count=allLifts.reduce((n,lift)=>n+completed(c,lift).size,0);
+ const total=Math.max(1,allLifts.length*c.weeks);
+ const pct=Math.round(Math.min(100,count/total*100));
+ const next=selectDefault(c);
+ const options=allLifts.map(lift=>'<option value="'+safe(lift)+'" '+(lift===viewLift?'selected':'')+'>'+safe(lift)+'</option>').join('');
+ const byWeek=Array.from({length:c.weeks},(_,i)=>{
+  const w=weekData(c,viewLift,i+1);if(!w)return '';
+  const done=completed(c,viewLift).has(i+1);
+  const work=(w.sets||[]).map(x=>minimumReps(x)+(String(x.rep||'').includes('+')?'+':'')+' @ '+(Number(x.pct)*100).toLocaleString(undefined,{maximumFractionDigits:1})+'%').join(' · ');
+  return '<tr><td><strong>W'+(i+1)+'</strong> '+(done?'<span class="sx531-view-pill">✓</span>':'')+'</td>'+
+   '<td>'+safe(w.name||'5/3/1')+'</td><td>'+safe(work||'—')+'</td>'+
+   '<td>'+(w.bbb?'BBB '+safe(w.bbb.sets)+' × '+safe(w.bbb.reps):'—')+'</td></tr>';
+ }).join('');
+ const weights=Array.from({length:c.weeks},(_,i)=>{
+  const w=weekData(c,viewLift,i+1);if(!w)return '';
+  const warm=(w.warmups||[]).map(x=>Number(x.weight).toLocaleString()+' × '+minimumReps(x)).join(' · ')||'—';
+  const working=(w.sets||[]).map(x=>Number(x.weight).toLocaleString()+' × '+minimumReps(x)+(String(x.rep||'').includes('+')?'+':'')).join(' · ');
+  return '<tr><td><strong>W'+(i+1)+'</strong></td><td>'+Number(w.tm).toLocaleString()+' kg</td>'+
+   '<td>'+safe(warm)+'</td><td>'+safe(working||'—')+'</td></tr>';
+ }).join('');
+ const nextLabel=next?'Next: '+safe(next.lift)+' · Week '+next.week:'All programmed weeks completed';
+ $('sx531ViewBody').innerHTML=
+  '<section class="sx531-view-section"><div class="sx531-view-statrow"><strong>'+safe(c.name||'5/3/1 Strength Cycle')+
+  '</strong><span class="sx531-view-pill">'+safe(c.weeks)+' WEEKS</span></div>'+
+  '<p class="sx531-view-info">Traditional 5/3/1 · '+allLifts.length+' programmed '+(allLifts.length===1?'lift':'lifts')+'</p>'+
+  '<div class="sx531-view-statrow"><span>Cycle progress</span><strong>'+pct+'%</strong></div>'+
+  '<div class="sx531-view-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>'+
+  '<p class="sx531-view-info">'+nextLabel+'</p></section>'+
+  '<section class="sx531-view-section"><h3>Weekly prescriptions</h3>'+
+  '<p class="sx531-view-info">Programme structure for the selected lift. AMRAP sets retain their + designation.</p>'+
+  '<label class="sx531-view-info" for="sx531ViewLift">Select lift</label>'+
+  '<select id="sx531ViewLift" class="sx531-view-select">'+options+'</select>'+
+  '<div class="sx531-view-tablebox"><table><thead><tr><th>Week</th><th>Focus</th><th>Working sets</th><th>Accessory</th></tr></thead><tbody>'+
+  byWeek+'</tbody></table></div></section>'+
+  '<section class="sx531-view-section"><h3>Lift-specific loading</h3>'+
+  '<div class="sx531-view-tablebox"><table><thead><tr><th>Week</th><th>TM</th><th>Warm-up (kg × reps)</th><th>Working (kg × reps)</th></tr></thead><tbody>'+
+  weights+'</tbody></table></div></section>'+
+  '<section class="sx531-view-section"><h3>Progression rules</h3>'+
+  '<div class="sx531-view-rule"><strong>Progress</strong> — Prescribed working sets completed; the lift advances to its next saved week.</div>'+
+  '<div class="sx531-view-rule"><strong>Hold</strong> — An incomplete session does not mark the week complete.</div>'+
+  '<div class="sx531-view-rule"><strong>Review</strong> — Reassess training maxes before your next cycle.</div>'+
+  '</section>';
+}
+function open531CycleView(c){
+ if(!c||!lifts(c).length)return false;
+ if(!viewOverlay.hidden)return true;
+ viewCycleId=c.id;viewLift=selectDefault(c)?.lift||lifts(c)[0];
+ viewOldOverflow={body:document.body.style.overflow,html:document.documentElement.style.overflow,scroll:window.scrollY||0};
+ viewCaller=document.activeElement;
+ document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
+ render531ViewCycle();viewOverlay.hidden=false;
+ $('sx531ViewScroll').scrollTop=0;
+ $('sx531ViewClose').focus({preventScroll:true});
+ return true;
+}
+function close531CycleView(){
+ if(viewOverlay.hidden)return;
+ viewOverlay.hidden=true;
+ if(viewOldOverflow){
+  document.body.style.overflow=viewOldOverflow.body;
+  document.documentElement.style.overflow=viewOldOverflow.html;
+  window.scrollTo(0,viewOldOverflow.scroll);
+ }
+ viewOldOverflow=null;viewCycleId=null;viewLift=null;
+ const caller=viewCaller;viewCaller=null;if(caller?.isConnected)caller.focus({preventScroll:true});
+}
+$('sx531ViewClose').addEventListener('click',close531CycleView);
+$('sx531ViewCancel').addEventListener('click',close531CycleView);
+$('sx531ViewSave').addEventListener('click',close531CycleView);
+viewOverlay.addEventListener('click',e=>{if(e.target===viewOverlay)close531CycleView()});
+$('sx531ViewBody').addEventListener('change',e=>{
+ if(e.target?.id==='sx531ViewLift'){
+  const scroller=$('sx531ViewScroll'),at=scroller.scrollTop;
+  viewLift=e.target.value;render531ViewCycle();scroller.scrollTop=at;
+ }
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!viewOverlay.hidden){e.preventDefault();close531CycleView()}
+});
+
 const card=document.createElement('section');card.id='sx531WorkoutCard';card.className='card sx-programme-card sx-531-quick-card';card.hidden=true;
 const workout=$('workout'),start=workout?.querySelector('.start-card');
 const slot=$('sx531ProgrammeSlot');
@@ -287,7 +389,7 @@ card.addEventListener('click',e=>{
   const pop=$('sx531QuickOptions');if(pop)pop.hidden=true;
   $('sx531QuickMenu')?.setAttribute('aria-expanded','false');
   const c=activeCycles()[0]||read()[0];
-  if(c){if(selectDefault(c))openPreview(false,c.id);else openCompletedPreview(c)}
+  if(c)open531CycleView(c);
   return;
  }
  if(e.target.closest('#sx531QuickManage')){

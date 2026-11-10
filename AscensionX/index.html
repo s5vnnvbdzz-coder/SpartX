@@ -1063,8 +1063,7 @@ window.addEventListener('message',e=>{
  if(e.data?.type==='spartx:ascensionQuickNavigate'&&ascensionEmbeddedBySpartanX){
   document.body.classList.toggle('sx-spartan-quick-import',e.data.quickImport===true);
   document.body.classList.toggle('sx-spartan-import-only',e.data.mode==='continue'&&e.data.importOnly===true);
-  document.body.classList.toggle('sx-asc-workout-manage',e.data.mode==='manage'&&state.cycle.created);
-  document.body.classList.remove('sx-ascension-view-cycle');
+  document.body.classList.remove('sx-asc-workout-manage','sx-ascension-view-cycle');
   const requestedLift=typeof e.data.lift==='string'&&selectedLifts().includes(e.data.lift)?e.data.lift:null;
   if(e.data.mode==='continue'&&state.cycle.created&&selectedLifts().length){
    if(requestedLift){
@@ -1083,6 +1082,9 @@ window.addEventListener('message',e=>{
    showScreen('home');
    renderDashboard();
    if(e.data.mode==='manage'&&state.cycle.created){
+    // Set the special mode after closing any previous editor, so reentry
+    // never dispatches an unintended ManageExit message.
+    document.body.classList.add('sx-asc-workout-manage');
     // One focused editor. The Workout page remains behind it.
     openCycleEditor();
     try{window.parent.postMessage({type:'spartx:ascensionManageReady'},location.origin)}catch(_){}

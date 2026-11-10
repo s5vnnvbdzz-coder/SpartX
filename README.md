@@ -123,3 +123,30 @@ The timer is hidden on Intelligence pages and is not edited or restarted.
 The Intelligence page is still a separate web document: countdown duration
 stays accurate, but rest-completion audio is not guaranteed while the
 Intelligence page is in the foreground.
+
+
+## Intelligence: complete saved-workout and accessory analysis
+
+Powerlifting **Overview** and Bodybuilding **Overview** now show the latest
+completed workout with **all recorded exercises**, not just the four
+powerlifts. Expand an exercise to inspect valid completed sets, load, reps,
+RPE and cautiously qualified comparisons to an earlier session at the same
+external load. A selectable exercise line graph plots *completed non-warm-up
+resistance volume* across saved sessions.
+
+The read-only `intelligence/session-breakdown.js` reads original
+`spartx_db.sessions` records, retaining link metadata for AscensionX main
+lifts, the existing paused-bench/RDL accessories, Strength & Size companion
+sets, and athlete-added exercises. Exercises without a mapped muscle group
+remain visible. Warm-ups and cardio are displayed separately and never
+included in resistance volume. History comparisons need at least two
+comparable sessions; the app does not claim that a single accessory session
+caused deadlift gains or fatigue.
+
+Both Intelligence focuses also load a read-only mirror of SpartanX's
+existing primary-muscle exercise catalogue (`muscle-library.js`) so
+recognised accessory work contributes to muscle exposure. The traditional
+deadlift retains the special multi-muscle treatment in Strength and
+Bodybuilding Intelligence. Workout saving and AscensionX progress are
+unchanged. The full-workout panels use the saved browser history (not an
+unavailable remotely synced copy of a user's phone data).

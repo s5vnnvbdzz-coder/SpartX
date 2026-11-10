@@ -1713,6 +1713,24 @@ body > header #sxHeaderWorkoutActions>a,body > header #sxHeaderWorkoutActions>bu
 body > header #sxHeaderWorkoutActions svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
 body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0 11px color-mix(in srgb,var(--lime) 30%,transparent)}
 @media(max-width:370px){body > header #sxHeaderWorkoutActions>a,body > header #sxHeaderWorkoutActions>button{width:36px!important;height:36px!important;min-width:36px!important}}
+
+/* Existing 5/3/1 editing is a centred modal over Workout, not full screen. */
+#sxQuick531CycleOverlay.sx-531-manage-popup{display:flex!important;align-items:center!important;justify-content:center!important;
+ padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))!important;
+ background:rgba(0,0,0,.62)!important;-webkit-backdrop-filter:blur(5px)!important;backdrop-filter:blur(5px)!important}
+#sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleDialog{
+ display:flex!important;flex:0 1 auto!important;flex-direction:column!important;
+ width:min(100%,620px)!important;max-width:620px!important;min-width:0!important;
+ height:min(85dvh,750px)!important;max-height:100%!important;min-height:0!important;
+ margin:auto!important;border:1px solid color-mix(in srgb,var(--lime) 40%,var(--line))!important;
+ border-radius:17px!important;background:var(--panel)!important;box-shadow:0 20px 65px #000a!important}
+#sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleHeader{
+ flex:0 0 auto!important;padding:13px!important;min-height:53px!important}
+#sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleScroll{
+ flex:1 1 auto!important;min-height:0!important;max-height:100%!important;overflow-y:auto!important;
+ padding:10px 13px 16px!important;background:var(--panel)!important;-webkit-overflow-scrolling:touch}
+#sxQuick531CycleOverlay.sx-531-manage-popup #sxQuick531CycleTitle{font-size:17px!important}
+
 </style>
 </head>
 <body class="sx-main-header-layout">
@@ -4058,7 +4076,15 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  function closeCycle(returnToCalculator=false){
   if(!cycleLock)return;
   const editorReturn=cycleEditorReturn;cycleEditorReturn=null;
+  if(nativeHost.classList.contains('sx-531-manage-inline')){
+   nativeHost.classList.remove('sx-531-manage-inline');
+   const editModal=nativeHost.shadowRoot?.getElementById('editModal');
+   if(editModal&&!editModal.hidden)nativeHost.shadowRoot?.getElementById('closeEdit')?.click();
+  }
+  cycleOverlay.classList.remove('sx-531-manage-popup');
   cycleOverlay.hidden=true;
+  $('sxQuick531CycleTitle').textContent='Build Your Cycle';
+  $('sxQuick531CycleClose').textContent='✕ Cancel';
   nativeHost.classList.remove('sx-531-cycle-quick-mode');
   nativeHome.appendChild(nativeHost);
   unlock(cycleLock);cycleLock=null;
@@ -4097,9 +4123,15 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   }
   if(cycleLock||calcLock)return;
   cycleEditorReturn={id,returnToMenu:e.detail?.returnToMenu===true,skipPreview:e.detail?.skipPreview===true};
+  const fromWorkoutManager=e.detail?.skipPreview===true&&onWorkout();
   nativeHost.classList.add('sx-531-cycle-quick-mode');
+  if(fromWorkoutManager)nativeHost.classList.add('sx-531-manage-inline');
   cycleMount.appendChild(nativeHost);
-  cycleLock=lock();cycleOverlay.hidden=false;
+  cycleLock=lock();
+  cycleOverlay.classList.toggle('sx-531-manage-popup',fromWorkoutManager);
+  $('sxQuick531CycleTitle').textContent=fromWorkoutManager?'Edit saved 5/3/1 cycle':'Build Your Cycle';
+  $('sxQuick531CycleClose').textContent=fromWorkoutManager?'✕ CLOSE':'✕ Cancel';
+  cycleOverlay.hidden=false;
   $('sxQuick531CycleScroll').scrollTop=0;
   launchEdit();
   cycleClose.focus({preventScroll:true});

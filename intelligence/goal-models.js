@@ -17,6 +17,11 @@
   function isCardio(name){return /^(stairmaster|treadmill|rowing machine|bike$|recumbent bike|cross trainer|skierg|ski-erg|elliptical)/i.test(String(name||'').trim())}
   function primaryMuscle(name){
     const s=lower(name);
+    // Keep conventional deadlifts unassigned to a single hypertrophy muscle.
+    // Other exercises reuse SpartanX's explicit primary-muscle library.
+    if(/^(?:(?:conventional|sumo|barbell|trap bar) )?deadlift$/.test(s))return null;
+    const mapped=global.SXMuscleLibrary?.primaryGroup(name);
+    if(mapped&&MUSCLES.includes(mapped))return mapped;
     if(/(?:calf|soleus|gastrocnemius)/.test(s))return 'Calves';
     if(/(?:tricep|pushdown|skullcrusher|close grip bench)/.test(s))return 'Triceps';
     if(/(?:bicep|curl|hammer curl)/.test(s))return 'Biceps';

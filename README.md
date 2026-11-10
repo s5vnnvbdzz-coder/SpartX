@@ -103,3 +103,23 @@ substitutions are future improvements. The standalone Strength & Size
 programme builder remains separate from this cycle-linked companion.
 
 A standalone **Strength & Size** workout is prevented from starting if its training day contains an AscensionX-selected compound lift while a six-week AscensionX cycle is active; the athlete can edit the standalone day to remove overlapping heavy compounds or use the linked companion instead.
+
+
+## Workout rest countdown and Intelligence navigation
+
+The floating rest countdown remains linked to its **absolute wall-clock deadline**
+when navigating from SpartanX to either Intelligence dashboard. The existing
+workout draft `spartx_draft_v1` saves the active rest exercise, deadline and
+phase; starting, adjusting, skipping and ending a rest update that draft.
+On return, only an **unexpired deadline** is restored; expired rests remain
+closed rather than resetting to their original duration. iOS page resume
+recalculates the remaining time from the deadline.
+
+SpartanX remembers the screen the athlete came from in session storage and
+the Intelligence Back link returns to SpartanX with
+`?sxReturn=intelligence`. When an active rest is still running the app
+reopens **Active Workout**, displaying the existing floating rest bar.
+The timer is hidden on Intelligence pages and is not edited or restarted.
+The Intelligence page is still a separate web document: countdown duration
+stays accurate, but rest-completion audio is not guaranteed while the
+Intelligence page is in the foreground.

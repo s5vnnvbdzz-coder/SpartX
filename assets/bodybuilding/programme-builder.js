@@ -67,16 +67,55 @@
   function current(){return store.programmes.find(p=>p.id===selectedId)||store.programmes.find(p=>p.id===store.activeId)||store.programmes[0]||null}
   function copy(x){return JSON.parse(JSON.stringify(x))}
   function showMessage(msg){$('sxBBNotice').textContent=msg;$('sxBBNotice').hidden=false}
+  function trainingHistory(){
+    try{
+      const raw=localStorage.getItem('spartx_db');
+      if(!raw||raw.length>12*1024*1024)return [];
+      const db=JSON.parse(raw);
+      return Array.isArray(db.sessions)?db.sessions:[];
+    }catch(_){return []}
+  }
+  function currentProgress(program){return M.progress(program,trainingHistory())}
+  function continueTraining(dayId){
+    const programme=current();if(!programme)return open();
+    if(mode==='edit'){window.alert('Save or discard your programme changes before starting training.');return}
+    const state=currentProgress(programme);
+    if(state.finished){window.alert('All planned sessions are complete. Edit or create a new programme to continue.');return}
+    const day=programme.sessions.find(item=>item.id===(dayId||state.dayId));
+    if(!day)return;
+    if(!window.SpartanXStartBodybuildingSession){
+      window.alert('Workout import is not available. Reload SpartanX and try again.');return;
+    }
+    // The logger checks for an existing active workout and asks for explicit
+    // confirmation before replacing the current screen with prescribed sets.
+    window.SpartanXStartBodybuildingSession({
+      link:{programmeId:programme.id,dayId:day.id,week:state.week},
+      day
+    });
+  }
   function cardRender(){
     const active=store.programmes.find(p=>p.id===store.activeId)||store.programmes[0];
+    const progress=active?currentProgress(active):null;
+    const completed=progress?progress.completeCount:0;
+    const count=progress?progress.plannedCount:0;
+    const percent=count?Math.round(100*completed/count):0;
+    const next=progress?.days.find(d=>d.dayId===progress.dayId);
     card.classList.remove('sx-programme-upcoming');
     card.setAttribute('aria-label','Strength and Bodybuilding programme builder');
     card.innerHTML='<div class="sx-programme-head"><div><div class="sx-programme-kicker">STRENGTH · HYPERTROPHY</div>'+
-      '<h3 class="sx-programme-title">Strength &amp; Bodybuilding</h3></div><span class="sx-programme-tag">'+(active?'PROGRAMME READY':'READY TO BUILD')+'</span></div>'+
+      '<h3 class="sx-programme-title">Strength &amp; Bodybuilding</h3></div><span class="sx-programme-tag">'+
+      (active?(progress.finished?'PROGRAMME COMPLETE':'PROGRAMME ACTIVE'):'READY TO BUILD')+'</span></div>'+
       '<p class="sx-programme-meta">'+(active?esc(active.name)+' · '+active.days+' days/week · '+active.weeks+' weeks':'Build a fully editable hypertrophy training programme.')+'</p>'+
-      '<div class="sx-programme-footer"><span class="sx-programme-next">'+(active?store.programmes.length+' saved programme(s)':'8-week, 4-day Upper/Lower starting template')+'</span>'+
-      '<button type="button" class="sx-programme-continue" id="sxBBOpen">'+(active?'VIEW PROGRAMME ›':'BUILD PROGRAMME ›')+'</button></div>';
-    $('sxBBOpen').addEventListener('click',open);
+      (active?'<div class="sx-programme-progressline"><span>PROGRAMME PROGRESS</span><strong>'+percent+'%</strong></div>'+
+      '<div class="sx-programme-progress" role="progressbar" aria-label="Bodybuilding programme completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><span style="width:'+percent+'%"></span></div>':'')+
+      '<div class="sx-programme-footer"><span class="sx-programme-next">'+
+      (active?progress.finished?'ALL '+count+' SESSIONS COMPLETE': 'NEXT: Week '+progress.week+' · '+esc(next?.dayName||'Training'):
+        '8-week, 4-day Upper/Lower starting template')+'</span>'+
+      (active?'<button type="button" class="sx-programme-continue" id="sxBBContinue" '+(progress.finished?'disabled':'')+'>CONTINUE ›</button>':
+        '<button type="button" class="sx-programme-continue" id="sxBBOpen">BUILD PROGRAMME ›</button>')+
+      '</div>'+(active?'<button type="button" class="sx-bb-card-view" id="sxBBOpen">VIEW / MANAGE PROGRAMME</button>':'');
+    $('sxBBOpen')?.addEventListener('click',open);
+    $('sxBBContinue')?.addEventListener('click',()=>continueTraining());
   }
   function selectRender(){
     const el=$('sxBBSelect');el.replaceChildren();
@@ -124,21 +163,37 @@
   function renderView(){
     const p=current(),host=$('sxBBView');
     if(!p){host.innerHTML='<div class="card">No saved programme. <button data-bb-action="new">CREATE PROGRAMME</button></div>';return}
+    const progress=currentProgress(p);
+    const finished=progress.finished,completed=progress.completeCount,planned=progress.plannedCount;
+    const donePercent=planned?Math.round(100*completed/planned):0;
     host.innerHTML='<article class="card sx-bb-view-hero"><div class="eyebrow">'+(p.kind==='hybrid'?'STRENGTH & SIZE':'BODYBUILDING')+' · DOUBLE PROGRESSION</div>'+
       '<h2>'+esc(p.name)+'</h2><p class="sx-bb-help">'+p.days+' training days/week · '+p.weeks+' weeks · '+esc(p.priority)+' emphasis · '+esc(p.experience)+'</p>'+
-      '<div class="sx-bb-stats">'+statsHTML(p)+'</div><div class="sx-bb-actions">'+
+      '<div class="sx-bb-stats">'+statsHTML(p)+'</div>'+
+      '<div class="sx-bb-programme-status"><div><span>PROGRAMME PROGRESS</span><strong>'+completed+' / '+planned+' complete</strong></div>'+
+      '<div class="sx-bb-status-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+donePercent+'"><i style="width:'+donePercent+'%"></i></div>'+
+      '<p class="sx-bb-help">'+(finished?'Programme complete. All scheduled training days logged.':
+        'CURRENT WEEK '+progress.week+' OF '+p.weeks+' · Completed sets are checked against the programmed targets.')+'</p></div>'+
+      '<div class="sx-bb-actions">'+
       '<button type="button" class="sx-bb-secondary sx-bb-delete" data-bb-action="delete">DELETE PROGRAMME</button>'+
-      '<button type="button" class="sx-bb-primary" data-bb-action="edit">EDIT PROGRAMME</button></div></article>'+
-      '<div class="sx-bb-sectionhead"><div class="eyebrow">YOUR WEEKLY SPLIT</div><h2>Programme preview</h2>'+
-      '<p>These planned days repeat across the selected weeks. Exercise progression will be connected to completed workouts in the next stage.</p></div>'+
-      '<div class="sx-bb-days">'+p.sessions.map((day,i)=>
-        '<details class="card sx-bb-day" '+(i===0?'open':'')+'><summary><div><span class="sx-bb-day-index">DAY '+(i+1)+'</span>'+
-        '<strong>'+esc(day.name)+'</strong></div><span>'+day.exercises.length+' EXERCISES</span></summary>'+
-        '<div class="sx-bb-day-body">'+day.exercises.map(e=>
-          '<div class="sx-bb-preview-ex"><strong>'+esc(e.name)+'</strong><span>'+e.sets+' × '+e.repsMin+'–'+e.repsMax+
-          ' reps · '+e.rir+' RIR'+(e.startingKg>0?' · '+e.startingKg+' kg':'')+'</span></div>').join('')+'</div></details>').join('')+'</div>'+
-      '<article class="card sx-bb-info"><div class="eyebrow">NEXT DEVELOPMENT STAGE</div>'+
-      '<p>Programme creation, editing and saving are active. Importing prescribed sets to the workout logger and analysing planned versus completed training will be added next. No AscensionX or 5/3/1 cycles are changed.</p></article>';
+      '<button type="button" class="sx-bb-secondary" data-bb-action="edit">EDIT PROGRAMME</button></div>'+
+      '<button type="button" class="sx-bb-primary sx-bb-full" data-bb-action="start" '+(finished?'disabled':'')+'>'+
+      (finished?'PROGRAMME COMPLETE':'CONTINUE TRAINING · WEEK '+progress.week)+'</button></article>'+
+      '<div class="sx-bb-sectionhead"><div class="eyebrow">YOUR TRAINING WEEK</div><h2>Programme sessions</h2>'+
+      '<p>Open a training day to review the exercises. Start a session to load its planned sets into SpartanX.</p></div>'+
+      '<div class="sx-bb-days">'+p.sessions.map((day,i)=>{
+        const status=progress.days.find(item=>item.dayId===day.id);
+        const complete=!!status?.complete,logged=!!status?.logged;
+        return '<details class="card sx-bb-day" '+(i===0?'open':'')+'><summary><div><span class="sx-bb-day-index">DAY '+(i+1)+'</span>'+
+          '<strong>'+esc(day.name)+'</strong></div><span class="sx-bb-day-state '+(complete?'is-done':'')+'">'+
+          (complete?'✓ COMPLETE':logged?'PARTIAL LOG':'PLANNED')+'</span></summary>'+
+          '<div class="sx-bb-day-body">'+day.exercises.map(e=>
+            '<div class="sx-bb-preview-ex"><strong>'+esc(e.name)+'</strong><span>'+e.sets+' × '+e.repsMin+'–'+e.repsMax+
+            ' reps · '+e.rir+' RIR'+(e.startingKg>0?' · '+e.startingKg+' kg':'')+'</span></div>').join('')+
+            (!finished?'<button type="button" class="sx-bb-secondary sx-bb-full sx-bb-day-start" data-bb-action="start" data-day-id="'+esc(day.id)+'">'+
+            (complete?'REPEAT THIS DAY':'START '+esc(day.name).toUpperCase())+' · WEEK '+progress.week+'</button>':'')+'</div></details>';
+      }).join('')+'</div>'+
+      '<article class="card sx-bb-info"><div class="eyebrow">SPARTANX WORKOUT INTEGRATION</div>'+
+      '<p>Continue Training loads planned exercises and unchecked working sets into the normal SpartanX logger. Programme completion is calculated from saved working sets, not merely from starting a workout. Automatic next-load recommendations will follow in the progression phase.</p></article>';
   }
   function input(label,key,value,day,ex,min,max,step){
     return '<label>'+label+'<input type="number" inputmode="decimal" data-bb-ex-field="'+key+'" data-day="'+day+
@@ -225,6 +280,7 @@
     if(action==='edit')return edit();
     if(action==='discard')return discard();
     if(action==='save')return save();
+    if(action==='start')return continueTraining(el.dataset.dayId||undefined);
     if(action==='delete')return removeProgramme();
     if(action==='close-picker')return pickerClose();
     if(action==='add')return pickerOpen(day);
@@ -277,8 +333,14 @@
   $('sxBBPicker').addEventListener('click',e=>{if(e.target===$('sxBBPicker'))pickerClose()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sxBBPicker').hidden){e.preventDefault();pickerClose()}});
   window.addEventListener('storage',e=>{
-    if(e.key!==M.KEY||mode==='edit'&&dirty)return;
-    store=M.read();selectedId=store.activeId;render();
+    if(e.key!=='spartx_db'&&e.key!==M.KEY)return;
+    if(mode==='edit'&&dirty)return;
+    store=M.read();selectedId=store.activeId;
+    if(screen.classList.contains('active'))render();else cardRender();
+  });
+  window.addEventListener('spartx:bodybuildingSessionSaved',()=>{
+    store=M.read();selectedId=store.activeId;
+    if(screen.classList.contains('active')&&mode!=='edit')render();else cardRender();
   });
   window.SXBodybuildingProgrammes=Object.freeze({open,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender()},storageKey:M.KEY});
   cardRender();

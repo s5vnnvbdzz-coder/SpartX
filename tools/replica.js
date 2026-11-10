@@ -216,7 +216,7 @@ function openSXAscWorkout(lift){
  sxAscNative.querySelector('#sxAscCancel').focus({preventScroll:true});
  if(ascensionEmbedReadyForShortcut)requestSXAscPreview(sxAscRequestedLift);
  else if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=292';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=293';
  return true;
 }
 function closeSXAscWorkout(success=false){
@@ -340,7 +340,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=292';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=293';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});

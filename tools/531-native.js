@@ -42,7 +42,7 @@ manageModalStyle.textContent=`
  max-height:none!important;overflow:visible!important;background:transparent!important;
  box-shadow:none!important;border:0!important;padding:4px!important}
 :host(.sx-531-manage-inline) #editModal .edit-dialog-head{display:none!important}
-:host(.sx-531-manage-inline) #editModal #cancelEdit{min-height:44px!important}
+:host(.sx-531-manage-inline) #editModal #cancelEdit,:host(.sx-531-manage-inline) #editModal #generate{display:none!important}
 `;
 shadow.appendChild(manageModalStyle);
 

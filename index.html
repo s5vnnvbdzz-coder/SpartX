@@ -3848,7 +3848,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=284',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=290"></script><script src="./tools/531-native.js?v=287"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/ascension/quick-access.js?v=290"></script>
+</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=291"></script><script src="./tools/531-native.js?v=287"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/ascension/quick-access.js?v=291"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -4165,7 +4165,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  };
 })();
 </script>
-<script src="./assets/workouts/531-cycle-flow.js?v=290"></script>
+<script src="./assets/workouts/531-cycle-flow.js?v=291"></script>
 <script src="./assets/workouts/workout-card-order.js?v=291"></script>
 <script id="sx-programme-setup-actions">
 (()=>{

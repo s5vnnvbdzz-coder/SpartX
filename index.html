@@ -1710,9 +1710,10 @@ body > header #sxHeaderWorkoutActions>a,body > header #sxHeaderWorkoutActions>bu
  padding:0!important;margin:0!important;border:1px solid color-mix(in srgb,var(--lime) 45%,var(--line))!important;
  border-radius:50%!important;background:var(--panel2)!important;color:var(--lime)!important;text-decoration:none!important
 }
+body > header #sxHeaderWorkoutActions .sx-header-ascension{font-size:13px!important;font-weight:950!important;letter-spacing:-.6px!important}
 body > header #sxHeaderWorkoutActions svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
 body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0 11px color-mix(in srgb,var(--lime) 30%,transparent)}
-@media(max-width:370px){body > header #sxHeaderWorkoutActions>a,body > header #sxHeaderWorkoutActions>button{width:36px!important;height:36px!important;min-width:36px!important}}
+@media(max-width:390px){body > header #sxHeaderWorkoutActions{gap:5px!important}body > header #sxHeaderWorkoutActions>a,body > header #sxHeaderWorkoutActions>button{width:34px!important;height:34px!important;min-width:34px!important}body > header #sxBrandHeader .sub{font-size:8px!important;letter-spacing:.5px!important}}
 
 /* Existing 5/3/1 editing is a centred modal over Workout, not full screen. */
 #sxQuick531CycleOverlay.sx-531-manage-popup{display:flex!important;align-items:center!important;justify-content:center!important;
@@ -1741,6 +1742,7 @@ body > header #sxHeaderWorkoutActions>button[aria-pressed="true"]{box-shadow:0 0
 </div>
 <div class="sx-workout-header-actions" id="sxHeaderWorkoutActions">
  <button id="sxWorkoutReorder" type="button" aria-label="Rearrange Workout cards" aria-pressed="false" title="Rearrange Workout cards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+ <button type="button" id="sxHeaderAscensionX" aria-label="Open AscensionX dashboard" title="AscensionX" class="sx-header-ascension">AX</button>
  <a href="./intelligence/" aria-label="Open SpartanX Intelligence Performance Center" title="Performance Center"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4m0-12.8L17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><path d="m10 13 2-4 2 4-2-1z"/></svg></a>
  </div><div class="sx-add-exercise-header" id="sxHeaderExerciseControls" role="group" aria-label="Add Exercise header">
   <button type="button" class="back-button spartan-back-button" id="closeExerciseLibrary">← Back</button>
@@ -4214,6 +4216,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-card-order.js?v=291"></script>
 <script id="sx-programme-setup-actions">
 (()=>{
+ document.getElementById("sxHeaderAscensionX")?.addEventListener("click",()=>{
+  if(typeof window.spartanxOpenEmbeddedAscensionX==="function")
+   window.spartanxOpenEmbeddedAscensionX("home",null,"workout");
+ });
  document.getElementById("sx531EmptySetup")?.addEventListener("click",()=>document.getElementById("start531Shortcut")?.click());
  document.getElementById("sxAscensionEmptySetup")?.addEventListener("click",()=>{
   if(typeof window.spartanxOpenEmbeddedAscensionX==="function")window.spartanxOpenEmbeddedAscensionX("setup",null,"workout");

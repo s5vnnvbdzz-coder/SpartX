@@ -3125,6 +3125,19 @@ window.SpartanXStartBodybuildingSession=function(payload){
  const store=model?.read?.(),programme=store?.programmes?.find(p=>p.id===link.programmeId);
  const sourceDay=programme?.sessions.find(d=>d.id===link.dayId);
  if(!programme||!sourceDay||link.week>programme.weeks)return false;
+ // A standalone Strength & Size programme must not accidentally prescribe
+ // the same compound main lift in parallel with an active six-week cycle.
+ // The cycle-linked companion is the supported way to add size work.
+ const ascension=window.SXAscensionCompanion?.cycle?.();
+ if(ascension&&programme.kind==='hybrid'){
+  const overlap=sourceDay.exercises.map(ex=>window.SXAscensionCompanion.canonical(ex.name))
+    .filter(lift=>lift&&ascension.lifts.includes(lift));
+  if(overlap.length){
+   alert('This separate Strength & Size day includes '+[...new Set(overlap)].join(', ')+
+    ', already selected for your AscensionX cycle. To avoid duplicate heavy-lift prescriptions, use the six-week AscensionX Strength & Size Companion instead, or edit this programme day to remove the overlapping main lift.');
+   return false;
+  }
+ }
  // Reject stale or altered UI payloads. Always import the latest saved plan.
  const confirmed=confirm('Start '+sourceDay.name+' · Week '+link.week+' of '+programme.weeks+
    '?\n\n'+sourceDay.exercises.length+' exercises will be loaded into a new workout. Nothing is marked complete until you log sets and Finish & Save.');

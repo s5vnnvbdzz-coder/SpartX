@@ -142,9 +142,30 @@ function renderPreview(){
   '<p class="sx531-help">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets</strong> to advance this lift to the next week. Partial sessions are saved but do not advance.</p>'+
   expanded+'<div class="sx531-sub-actions"><button type="button" id="sx531EditCycle">EDIT PROGRAMME / LIFTS</button><button type="button" id="sx531OpenCalculator">5/3/1 CALCULATOR</button></div>';
 }
+function openCompletedPreview(c){
+ if(!c)return false;
+ returnMenu=false;cycleId=c.id;selectedLift=null;
+ oldOverflow={body:document.body.style.overflow,html:document.documentElement.style.overflow,scroll:window.scrollY||0};
+ document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
+ $('sx531CycleStatus').textContent='CYCLE COMPLETED';
+ $('sx531Load').disabled=true;
+ $('sx531Load').hidden=true;
+ $('sx531CycleContent').innerHTML='<p class="sx531-intro">This saved programme is complete. Your training prescription and history remain available.</p>'+
+ lifts(c).map(lift=>'<div class="sx531-plan"><strong>'+safe(lift)+'</strong>'+
+ Array.from({length:c.weeks},(_,index)=>{
+  const n=index+1,w=weekData(c,lift,n);
+  if(!w)return '';
+  const main=(w.sets||[]).map(set=>Number(set.weight).toLocaleString()+' kg × '+minimumReps(set)).join(' · ');
+  const label=completed(c,lift).has(n)?'✓ ':'';
+  return '<div class="sx531-plan-group"><strong>'+label+'Week '+n+'</strong><p>'+main+'</p></div>';
+ }).join('')+'</div>').join('');
+ overlay.hidden=false;$('sx531Cancel').focus({preventScroll:true});
+ return true;
+}
 function openPreview(fromMenu=false,requestedId=null){
  const all=activeCycles();if(!all.length)return false;
  returnMenu=fromMenu;const c=all.find(x=>x.id===requestedId)||all[0];cycleId=c.id;selectedLift=selectDefault(c)?.lift||null;
+ $('sx531Load').hidden=false;
  oldOverflow={body:document.body.style.overflow,html:document.documentElement.style.overflow,scroll:window.scrollY||0};
  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
  renderPreview();overlay.hidden=false;$('sx531Cancel').focus({preventScroll:true});
@@ -153,6 +174,7 @@ function openPreview(fromMenu=false,requestedId=null){
 function closePreview(reopen=false){
  if(overlay.hidden)return;
  overlay.hidden=true;
+ $('sx531Load').hidden=false;
  if(oldOverflow){document.body.style.overflow=oldOverflow.body;document.documentElement.style.overflow=oldOverflow.html;window.scrollTo(0,oldOverflow.scroll)}
  oldOverflow=null;
  const menu=returnMenu;returnMenu=false;
@@ -232,14 +254,14 @@ $('start531Shortcut')?.addEventListener('click',e=>{
 },true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden){e.preventDefault();closePreview(true)}});
 function renderCard(){
- const all=activeCycles(),empty=$('sx531Empty');
- if(!card||!all.length){
+ const all=activeCycles(),saved=read(),empty=$('sx531Empty');
+ if(!card||!saved.length){
   if(card)card.hidden=true;
   if(empty)empty.hidden=false;
   return;
  }
  if(empty)empty.hidden=true;
- const c=all[0],l=lifts(c),total=Math.max(1,l.length*c.weeks);
+ const c=all[0]||saved[0],l=lifts(c),total=Math.max(1,l.length*c.weeks);
  const done=l.reduce((sum,lift)=>sum+completed(c,lift).size,0);
  const percent=Math.min(100,Math.max(0,Math.round(done/total*100)));
  const next=selectDefault(c);
@@ -248,11 +270,11 @@ function renderCard(){
   '<div class="sx-programme-head"><div><div class="sx-programme-kicker">5/3/1 · POWERLIFTING</div><h2 class="sx-programme-title">'+safe(c.name||'5/3/1 Strength Cycle')+'</h2></div>'+
   '<div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sx531QuickMenu" aria-label="5/3/1 programme options" aria-expanded="false" aria-controls="sx531QuickOptions">•••</button>'+
   '<div class="sx-programme-options" id="sx531QuickOptions" hidden><button type="button" id="sx531QuickView">VIEW CYCLE</button><button type="button" id="sx531QuickManage">MANAGE CYCLE</button></div></div></div>'+
-  '<p class="sx-programme-meta">5/3/1 · Powerlifting · Week '+(next?.week||'—')+' of '+c.weeks+(all.length>1?' · '+(all.length-1)+' more active':'')+'</p>'+
+  '<p class="sx-programme-meta">5/3/1 · Powerlifting · '+(next?'Week '+next.week+' of '+c.weeks:'Completed · '+c.weeks+' weeks')+(all.length>1?' · '+(all.length-1)+' more active':'')+'</p>'+
   '<div class="sx-programme-progressline"><span>CYCLE PROGRESS</span><strong>'+percent+'%</strong></div>'+
   '<div class="sx-programme-progress" role="progressbar" aria-label="5/3/1 cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><span style="width:'+percent+'%"></span></div>'+
-  '<div class="sx-programme-footer"><div class="sx-programme-next">NEXT: <b>'+safe(next?.lift||'Select lift')+' · Week '+(next?.week||'—')+'</b></div>'+
-  '<button type="button" class="sx-programme-continue" id="sx531QuickContinue">CONTINUE ›</button></div>';
+  '<div class="sx-programme-footer"><div class="sx-programme-next">'+(next?'NEXT: <b>'+safe(next.lift)+' · Week '+next.week+'</b>':'<b>All programmed weeks completed</b>')+'</div>'+
+  '<button type="button" class="sx-programme-continue" id="sx531QuickContinue" '+(next?'':'disabled aria-disabled="true"')+'>'+(next?'CONTINUE ›':'COMPLETED')+'</button></div>';
 }
 card.addEventListener('click',e=>{
  if(e.target.closest('#sx531QuickContinue')){openPreview(false);return}
@@ -264,13 +286,15 @@ card.addEventListener('click',e=>{
  if(e.target.closest('#sx531QuickView')){
   const pop=$('sx531QuickOptions');if(pop)pop.hidden=true;
   $('sx531QuickMenu')?.setAttribute('aria-expanded','false');
-  openPreview(false);return;
+  const c=activeCycles()[0]||read()[0];
+  if(c){if(selectDefault(c))openPreview(false,c.id);else openCompletedPreview(c)}
+  return;
  }
  if(e.target.closest('#sx531QuickManage')){
   const pop=$('sx531QuickOptions');if(pop)pop.hidden=true;
   $('sx531QuickMenu')?.setAttribute('aria-expanded','false');
-  const active=activeCycles()[0];
-  if(active)window.dispatchEvent(new CustomEvent('spartx:open531CycleEditor',{detail:{id:active.id,returnToMenu:false,skipPreview:true}}));
+  const selected=activeCycles()[0]||read()[0];
+  if(selected)window.dispatchEvent(new CustomEvent('spartx:open531CycleEditor',{detail:{id:selected.id,returnToMenu:false,skipPreview:true}}));
   return;
  }
 });

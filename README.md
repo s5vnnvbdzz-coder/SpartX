@@ -101,3 +101,5 @@ This is a starting prescription and does not guarantee recovery or strength
 progression. Planned-versus-actual workload analysis and editable exercise
 substitutions are future improvements. The standalone Strength & Size
 programme builder remains separate from this cycle-linked companion.
+
+A standalone **Strength & Size** workout is prevented from starting if its training day contains an AscensionX-selected compound lift while a six-week AscensionX cycle is active; the athlete can edit the standalone day to remove overlapping heavy compounds or use the linked companion instead.

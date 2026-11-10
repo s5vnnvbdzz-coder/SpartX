@@ -903,7 +903,7 @@ body.completed-workout-open #trackerNav{display:none!important}
 <link rel="stylesheet" href="./assets/stats/statistics.css">
 <link rel="stylesheet" href="./assets/ascension/quick-access.css">
 <link rel="stylesheet" href="./assets/workouts/programme-cards.css?v=285">
-<link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=2">
+<link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=3">
 <style>
 
 /* Profile Workout Calendar: independent iOS scrolling and accessible completed days. */
@@ -3280,6 +3280,21 @@ function backfillActiveAscensionWeek2RomanianDeadlift(){
  return true;
 }
 
+// Strength & Size is an OPTIONAL companion to an AscensionX import.
+// It never alters the prescribed compound sets and never carries ascensionLink.
+function ensureAscensionStrengthSizeCompanions(d){
+ if(d?.source!=='AscensionX')return 0;
+ const api=window.SXAscensionCompanion;
+ if(!api||typeof api.forImport!=='function')return 0;
+ const extras=api.forImport(d,work.map(ex=>ex.name));
+ if(!extras.length)return 0;
+ const inserted=[];
+ for(const exercise of extras){
+  if(work.some(ex=>String(ex.name||'').trim().toLowerCase()===exercise.name.toLowerCase()))continue;
+  work.push(exercise);inserted.push(exercise.name);
+ }
+ return inserted.length;
+}
 function import531IntoWorkout(d){
  if(!d||!Array.isArray(d.sets)||!d.sets.length||!d.exercise)return false;
  const source=d.source==='AscensionX'?'AscensionX':'SpartanX Tools';
@@ -3305,6 +3320,7 @@ function import531IntoWorkout(d){
   const benchIndex=linkedIndex>=0?linkedIndex:unlinkedIndex;
   if(benchIndex>=0){
    ensureAscensionPausedBench(benchIndex,d);
+   ensureAscensionStrengthSizeCompanions(d);
    switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
    return true;
   }
@@ -3317,6 +3333,7 @@ function import531IntoWorkout(d){
   const deadliftIndex=linkedIndex>=0?linkedIndex:unlinkedIndex;
   if(deadliftIndex>=0){
    ensureAscensionRomanianDeadlift(deadliftIndex,d);
+   ensureAscensionStrengthSizeCompanions(d);
    switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
    return true;
   }
@@ -3328,6 +3345,7 @@ function import531IntoWorkout(d){
  work.unshift(imported);
  if(source==='AscensionX'&&d.exercise==='Bench Press')ensureAscensionPausedBench(0,d);
  if(source==='AscensionX'&&d.exercise==='Deadlift')ensureAscensionRomanianDeadlift(0,d);
+ if(source==='AscensionX')ensureAscensionStrengthSizeCompanions(d);
  beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return true;
 }
 window.spartanxImport531=import531IntoWorkout;
@@ -4438,6 +4456,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-save-review.js?v=262"></script>
 <script src="./assets/profile/profile-social-pages.js?v=262"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=243"></script>
+<script src="./assets/bodybuilding/ascension-companion.js?v=1"></script>
 <script src="./assets/bodybuilding/programme-model.js?v=2"></script>
-<script src="./assets/bodybuilding/programme-builder.js?v=2"></script>
+<script src="./assets/bodybuilding/programme-builder.js?v=3"></script>
 </body></html>

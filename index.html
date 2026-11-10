@@ -2727,6 +2727,18 @@ window.removeCardioInterval=(i,j)=>{
  work[i].sets.splice(j,1);renderWork();saveDraft();
 };
 let activeRestExercise=null,restPreviewExercise=null;
+// A wall-clock deadline survives cross-page navigation; a decremented
+// 'remaining' value does not (especially when iOS suspends the old page).
+function snapshotActiveRest(){
+ if(!sessionActive||editingSessionId!==null||activeRestExercise===null)return null;
+ const timer=exerciseTimers[activeRestExercise],deadline=Number(timer?.deadline);
+ if(!Number.isFinite(deadline)||deadline<=Date.now())return null;
+ return {
+  exercise:activeRestExercise,deadline,
+  remaining:Math.max(0,Math.ceil((deadline-Date.now())/1000)),
+  phase:String(timer.phase||'')
+ };
+}
 const REST_SOUND_KEY='spartx_rest_sound_enabled_v1';
 let restSoundEnabled=true;
 try{restSoundEnabled=localStorage.getItem(REST_SOUND_KEY)!=='false'}catch(e){}
@@ -2845,6 +2857,7 @@ function attachRestCountdown(i,timer){
    if(navigator.vibrate)navigator.vibrate([200,100,200]);
    if(!document.hidden)playRestCompleteSound();
    activeRestExercise=null;
+   saveDraft();
   }
   updateFloatingRestTimer();
  };
@@ -2860,18 +2873,19 @@ window.startRest=(i,completedSetIndex)=>{
  const timer={deadline:Date.now()+duration*1000,remaining:duration,interval:null,phase:plan.phase};
  activeRestExercise=i;exerciseTimers[i]=timer;
  attachRestCountdown(i,timer);
+ saveDraft();
 };
 window.skipRest=i=>{
  const timer=exerciseTimers[i];if(timer?.interval)clearInterval(timer.interval);
  delete exerciseTimers[i];if(activeRestExercise===i)activeRestExercise=null;
- updateFloatingRestTimer();
+ updateFloatingRestTimer();saveDraft();
 };
 function adjustFloatingRestTimer(delta){
  if(activeRestExercise===null)return;
  const timer=exerciseTimers[activeRestExercise];if(!timer)return;
  timer.deadline=Math.max(Date.now()+1000,timer.deadline+delta*1000);
  timer.remaining=Math.max(1,Math.ceil((timer.deadline-Date.now())/1000));
- updateFloatingRestTimer();
+ updateFloatingRestTimer();saveDraft();
 }
 $('restMinus15').addEventListener('click',()=>adjustFloatingRestTimer(-15));
 $('restPlus15').addEventListener('click',()=>adjustFloatingRestTimer(15));
@@ -2881,6 +2895,15 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeRes
  if(timer){timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));if(timer.remaining===0)skipRest(activeRestExercise);}
  updateFloatingRestTimer();
 }});
+window.addEventListener('pageshow',()=>{
+ // BFCache and iOS return navigation can resume with a stale interval tick.
+ if(activeRestExercise===null)return;
+ const timer=exerciseTimers[activeRestExercise];
+ if(!timer)return;
+ timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));
+ if(!timer.remaining){window.skipRest(activeRestExercise);return}
+ updateFloatingRestTimer();
+});
 const exerciseNames=[
 'Back Squat','Front Squat','Pause Squat','Tempo Squat','Box Squat','Safety Bar Squat','Goblet Squat','Hack Squat','Smith Machine Squat','Leg Press','Single-Leg Leg Press','Leg Extension','Single-Leg Leg Extension','Bulgarian Split Squat','Reverse Lunge','Walking Lunge','Step-Up','Single-Leg Romanian Deadlift','Romanian Deadlift','Stiff-Leg Deadlift','Deadlift','Conventional Deadlift','Sumo Deadlift','Trap Bar Deadlift','Deficit Deadlift','Hip Thrust','Single-Leg Hip Thrust','Glute Bridge','Cable Kickback','Lying Leg Curl','Seated Leg Curl','Single-Leg Curl','Standing Calf Raise','Seated Calf Raise',
 'Bench Press','Paused Bench Press','Close-Grip Bench Press','Incline Barbell Bench Press','Decline Bench Press','Dumbbell Chest Press','Flat Dumbbell Press','Incline Dumbbell Chest Press','Incline Dumbbell Press','Decline Dumbbell Press','Single-Arm Dumbbell Chest Press','Machine Chest Press','Single-Arm Machine Chest Press','Push-Up','Weighted Dip','Chest Fly','Dumbbell Fly','Incline Dumbbell Fly','Cable Crossover','Single-Arm Cable Fly',
@@ -2954,11 +2977,39 @@ function loadToolVisibility(){const v=readToolVisibility();$('toggle531WorkingWe
 $('toggle531WorkingWeights').addEventListener('change',updateToolVisibility);
 $('toggle531CyclePlanner').addEventListener('change',updateToolVisibility);
 loadToolVisibility();
-function saveDraft(){if(restoringDraft)return;try{const fields={};document.querySelectorAll('main input[id],main textarea[id],main select[id]').forEach(el=>{if(el.type==='checkbox'||el.type==='radio')fields[el.id]={checked:el.checked,value:el.value};else if(el.type!=='file')fields[el.id]=el.value;});localStorage.setItem(DRAFT_KEY,JSON.stringify({version:1,sessionActive,work,editingSessionId,editingSessionMeta,activeWorkoutName:$('activeWorkoutName').textContent||'',elapsed:currentWorkoutElapsed(),sessionPaused:sessionPausedAt!==null,editReturnSnapshot,screen:document.querySelector('.screen.active')?.id||'home',manualWorkoutDate:window.sxManualWorkoutDate||null,missedWorkoutMode:!!window.sxMissedWorkoutMode,activeCycle,routineDraft,routineName:$('routineName').value,libraryMode,fields,profileEditor:!$('editProfileOverlay').classList.contains('hidden')?{name:$('profileNameInput').value,bio:$('profileBioInput').value,pendingPhoto:$('editProfileOverlay').dataset.pendingPhoto||''}:null}));}catch(e){}}
-function restoreDraft(){let d;try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');}catch(e){return;}if(!d||d.version!==1)return;restoringDraft=true;try{Object.entries(d.fields||{}).forEach(([id,value])=>{const el=$(id);if(!el||el.type==='file')return;if(el.type==='checkbox'||el.type==='radio'){if(value&&typeof value==='object')el.checked=!!value.checked;else el.checked=!!value;}else el.value=value;});activeCycle=d.activeCycle&&d.activeCycle.id?d.activeCycle:null;editingSessionId=d.editingSessionId??null;editingSessionMeta=d.editingSessionMeta||null;window.sxManualWorkoutDate=d.sessionActive&&typeof d.manualWorkoutDate==='string'?d.manualWorkoutDate:null;window.sxMissedWorkoutMode=!!(d.sessionActive&&d.missedWorkoutMode);if(Array.isArray(d.routineDraft))routineDraft=d.routineDraft;if(typeof d.routineName==='string')$('routineName').value=d.routineName;libraryMode=d.libraryMode==='routine'?'routine':'workout';if(d.sessionActive&&Array.isArray(d.work)){work=d.work;sessionActive=true;sessionStarted=Date.now()-(Math.max(0,+d.elapsed||0)*1000);sessionPausedAt=d.sessionPaused?Date.now():null;editReturnSnapshot=d.editReturnSnapshot||null;if(editingSessionId!==null){sessionStarted=null;sessionPausedAt=null;}$('activeWorkoutName').textContent=d.activeWorkoutName||'Workout';$('workoutName').value=d.activeWorkoutName||'';}if(d.profileEditor){$('profileNameInput').value=d.profileEditor.name||'';$('profileBioInput').value=d.profileEditor.bio||'';if(d.profileEditor.pendingPhoto){$('editProfileOverlay').dataset.pendingPhoto=d.profileEditor.pendingPhoto;$('editProfileAvatar').innerHTML='<img src="'+d.profileEditor.pendingPhoto+'" alt="Profile picture preview">';}$('profileBioCount').textContent=$('profileBioInput').value.length+' / 210';/* keep editor drafts, but NEVER auto-open the editor on app startup */}}catch(e){}finally{restoringDraft=false;}}
+function saveDraft(){if(restoringDraft)return;try{const fields={};document.querySelectorAll('main input[id],main textarea[id],main select[id]').forEach(el=>{if(el.type==='checkbox'||el.type==='radio')fields[el.id]={checked:el.checked,value:el.value};else if(el.type!=='file')fields[el.id]=el.value;});localStorage.setItem(DRAFT_KEY,JSON.stringify({version:1,sessionActive,work,editingSessionId,editingSessionMeta,activeWorkoutName:$('activeWorkoutName').textContent||'',elapsed:currentWorkoutElapsed(),sessionPaused:sessionPausedAt!==null,editReturnSnapshot,screen:document.querySelector('.screen.active')?.id||'home',manualWorkoutDate:window.sxManualWorkoutDate||null,missedWorkoutMode:!!window.sxMissedWorkoutMode,activeCycle,rest:snapshotActiveRest(),routineDraft,routineName:$('routineName').value,libraryMode,fields,profileEditor:!$('editProfileOverlay').classList.contains('hidden')?{name:$('profileNameInput').value,bio:$('profileBioInput').value,pendingPhoto:$('editProfileOverlay').dataset.pendingPhoto||''}:null}));}catch(e){}}
+function restoreDraft(){let d;try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');}catch(e){return;}if(!d||d.version!==1)return;restoringDraft=true;try{Object.entries(d.fields||{}).forEach(([id,value])=>{const el=$(id);if(!el||el.type==='file')return;if(el.type==='checkbox'||el.type==='radio'){if(value&&typeof value==='object')el.checked=!!value.checked;else el.checked=!!value;}else el.value=value;});activeCycle=d.activeCycle&&d.activeCycle.id?d.activeCycle:null;editingSessionId=d.editingSessionId??null;editingSessionMeta=d.editingSessionMeta||null;window.sxManualWorkoutDate=d.sessionActive&&typeof d.manualWorkoutDate==='string'?d.manualWorkoutDate:null;window.sxMissedWorkoutMode=!!(d.sessionActive&&d.missedWorkoutMode);if(Array.isArray(d.routineDraft))routineDraft=d.routineDraft;if(typeof d.routineName==='string')$('routineName').value=d.routineName;libraryMode=d.libraryMode==='routine'?'routine':'workout';if(d.sessionActive&&Array.isArray(d.work)){work=d.work;sessionActive=true;sessionStarted=Date.now()-(Math.max(0,+d.elapsed||0)*1000);sessionPausedAt=d.sessionPaused?Date.now():null;editReturnSnapshot=d.editReturnSnapshot||null;if(editingSessionId!==null){sessionStarted=null;sessionPausedAt=null;}$('activeWorkoutName').textContent=d.activeWorkoutName||'Workout';$('workoutName').value=d.activeWorkoutName||'';
+ // Restore the ORIGINAL deadline rather than starting the interval anew.
+ // If the rest finished while Intelligence was open, keep the bar closed.
+ const rest=d.rest,index=Number(rest?.exercise),deadline=Number(rest?.deadline);
+ if(editingSessionId===null && rest && Number.isInteger(index)&&index>=0&&index<work.length&&
+    Number.isFinite(deadline)&&deadline>Date.now()&&deadline-Date.now()<7200000){
+   const timer={deadline,remaining:Math.ceil((deadline-Date.now())/1000),
+     interval:null,phase:String(rest.phase||'')};
+   activeRestExercise=index;exerciseTimers[index]=timer;attachRestCountdown(index,timer);
+ }
+ }if(d.profileEditor){$('profileNameInput').value=d.profileEditor.name||'';$('profileBioInput').value=d.profileEditor.bio||'';if(d.profileEditor.pendingPhoto){$('editProfileOverlay').dataset.pendingPhoto=d.profileEditor.pendingPhoto;$('editProfileAvatar').innerHTML='<img src="'+d.profileEditor.pendingPhoto+'" alt="Profile picture preview">';}$('profileBioCount').textContent=$('profileBioInput').value.length+' / 210';/* keep editor drafts, but NEVER auto-open the editor on app startup */}}catch(e){}finally{restoringDraft=false;}}
 document.addEventListener('input',e=>{if(e.target.matches('main input,main textarea,main select'))saveDraft();});
 document.addEventListener('change',e=>{if(e.target.matches('main input,main textarea,main select'))saveDraft();});
 window.addEventListener('pagehide',saveDraft);setInterval(saveDraft,700);
+// Intelligence is a separate page, so remember the origin screen and persist
+// the rest deadline synchronously before navigating to it.
+const SX_INTELLIGENCE_RETURN_KEY='sx_intelligence_return_context_v1';
+document.addEventListener('click',event=>{
+ if(event.defaultPrevented||event.button>0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ const anchor=event.target.closest?.('a[href^="./intelligence/"]');
+ if(!anchor)return;
+ saveDraft();
+ try{
+  sessionStorage.setItem(SX_INTELLIGENCE_RETURN_KEY,JSON.stringify({
+   screen:document.querySelector('main > .screen.active')?.id||'home',
+   at:Date.now()
+  }));
+ }catch(_){}
+ // The rest has not been cancelled. The deadline is still in the draft;
+ // the bar simply disappears with the SpartanX page while Intelligence opens.
+ $('floatingRestTimer')?.classList.add('hidden');
+},true);
 document.querySelectorAll('main > section.screen').forEach(screen=>{const footer=document.createElement('footer');footer.className='spartanx-page-footer';footer.textContent='SpartanX TOOLS · TRAIN SMARTER';screen.appendChild(footer);});
 
 /* Consistent iPhone navigation: forward opens at top, Back returns to previous scroll position.
@@ -3781,6 +3832,31 @@ $('export').onclick=()=>{let a=document.createElement('a'),u=URL.createObjectURL
 $('import').onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d.sessions))throw 0;db=d;persist();stats();renderSavedRoutines();renderSpartanRanks();renderLatestSessionRank();renderProfile();alert('Backup imported.');}catch{alert('Could not read that backup.');}e.target.value='';};
 $('minimizedSession').onclick=resumeSession;$('resumeSession').onclick=e=>{e.stopPropagation();resumeSession();};$('minimizedSession').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();resumeSession();}};
 restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
+// Returning from Intelligence should restore the workout view, not force Home.
+// If a rest is still in progress, show Active Workout so its floating timer
+// becomes visible again with the correct wall-clock remaining time.
+(function restoreIntelligenceReturn(){
+ let context=null;
+ try{
+  const raw=sessionStorage.getItem(SX_INTELLIGENCE_RETURN_KEY);
+  if(raw){const parsed=JSON.parse(raw);if(parsed?.at&&Date.now()-parsed.at<3600000)context=parsed}
+ }catch(_){}
+ const fromIntelligence=new URLSearchParams(location.search).get('sxReturn')==='intelligence';
+ if(!fromIntelligence&&!context)return;
+ try{sessionStorage.removeItem(SX_INTELLIGENCE_RETURN_KEY)}catch(_){}
+ if(sessionActive&&editingSessionId===null){
+  const original=typeof context?.screen==='string'?context.screen:'activeWorkout';
+  const target=activeRestExercise!==null?'activeWorkout':
+    document.getElementById(original)?.classList.contains('screen')?original:'activeWorkout';
+  switchScreen(target,{instant:true});
+ }else if(context?.screen&&document.getElementById(context.screen)?.classList.contains('screen')){
+  switchScreen(context.screen,{instant:true});
+ }
+ if(fromIntelligence){
+  try{history.replaceState(null,'',location.pathname+location.hash)}catch(_){}
+ }
+ updateFloatingRestTimer();
+})();
 // Attach Week 2 paused bench once to an existing live bench workout after hydration.
 requestAnimationFrame(()=>{backfillActiveAscensionWeek2PausedBench();backfillActiveAscensionWeek2RomanianDeadlift()});
 try{if(JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')?.screen==='routineBuilderScreen')renderRoutineDraft();}catch(e){}stats();renderSavedRoutines();renderHomeCycles();$('rankSex').addEventListener('change',saveRankProfile);$('rankBodyweight').addEventListener('change',saveRankProfile);$('rankSex').value=db.profile?.standard||'male';$('rankSex').dataset.loaded='1';$('rankBodyweight').value=db.profile?.bodyweight||'';$('rankBodyweight').dataset.loaded='1';$('measureBodyweight').value=db.profile?.bodyweight||'';$('measureBodyweight').addEventListener('change',()=>{$('rankBodyweight').value=$('measureBodyweight').value;saveRankProfile();});

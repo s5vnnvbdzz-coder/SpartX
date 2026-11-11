@@ -150,3 +150,47 @@ deadlift retains the special multi-muscle treatment in Strength and
 Bodybuilding Intelligence. Workout saving and AscensionX progress are
 unchanged. The full-workout panels use the saved browser history (not an
 unavailable remotely synced copy of a user's phone data).
+
+
+## Build 297 — adaptive Strength & Hypertrophy + Powerbuilding
+
+The existing **Strength & Bodybuilding** programme builder now uses the
+`assets/bodybuilding/adaptive-engine.js` prescription engine for its 8-week plans.
+The existing 3-, 4- and 5-day templates include core and smaller-muscle coverage;
+saved plans remain fully editable. The builder previews the next day's planned
+working sets, target RIR/RPE, suggested weights and the reason for each load
+decision before the athlete confirms **Continue Training**.
+
+The engine uses **only valid, completed, programme-linked working sets** to
+recommend the next load. It increases loads when all working sets reach the top
+of the rep range with recorded RPE compatible with the planned effort, holds
+when evidence is incomplete or performance has not reached the target, and
+proposes a small reduction after repeated difficult sessions. Exercises with
+no logged load remain user-prescribed. A lighter Week 5 and review Week 8
+adjust imported set counts and RIR; linked completion records store those
+adjusted targets. The original programme template is not overwritten.
+
+**Powerbuilding** now has its own card in the Workout programme stack and
+can also be reached from SpartanX Intelligence. It is **off by default**.
+With a valid AscensionX cycle, the athlete can enable complementary accessory
+prescriptions, choose a suggested 3/4/5-day schedule and start any eligible
+support-only day in the normal logger. The schedule uses the selected main
+lifts, shows their independent week numbers and blocks impossible combinations
+(e.g. four independently imported lifts on only three training days).
+Companion exercises remain optional, start unchecked and do not mark an
+AscensionX lift complete. Support sessions are also unlinked to cycle completion.
+Heavy compound overlap is guarded when starting a separate bodybuilding plan.
+
+Preferences remain in `sx_ascension_companion_v1` by AscensionX cycle ID.
+Existing workout records, AscensionX percentages, training maxes and 5/3/1
+cycles are not migrated or rewritten. Companion sessions and support sessions
+are saved through the normal `spartx_db` **Finish & Save** workflow.
+
+This is a conservative programming aid, **not** a physiological recovery
+guarantee. The suggested schedule does not know sleep, external stress, injury,
+readiness or all future scheduling conflicts. The athlete can change exercise
+selection and timing in the usual SpartanX workflow, and must still review
+recommendations before training.
+
+Regression test: `node assets/bodybuilding/adaptive-engine.test.js`.
+

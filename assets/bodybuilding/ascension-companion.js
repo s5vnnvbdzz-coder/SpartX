@@ -49,16 +49,18 @@
   }
   function preference(storage=global.localStorage){
     const active=cycle(storage);
-    if(!active)return {cycleId:null,enabled:false,volume:'balanced',excluded:[]};
+    if(!active)return {cycleId:null,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]};
     try{
       const raw=storage.getItem(STORAGE);
-      if(!raw||raw.length>25000)return {cycleId:active.id,enabled:false,volume:'balanced',excluded:[]};
+      if(!raw||raw.length>25000)return {cycleId:active.id,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]};
       const entries=JSON.parse(raw);
       const saved=entries?.[active.id]||{};
       return {cycleId:active.id,enabled:saved.enabled===true,
+        powerbuilding:saved.powerbuilding===true,
+        trainingDays:[3,4,5].includes(Number(saved.trainingDays))?Number(saved.trainingDays):4,
         volume:saved.volume==='low'?'low':'balanced',
         excluded:Array.isArray(saved.excluded)?saved.excluded.filter(x=>LIFTS.includes(x)) :[]};
-    }catch(_){return {cycleId:active.id,enabled:false,volume:'balanced',excluded:[]}}
+    }catch(_){return {cycleId:active.id,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]}}
   }
   function savePreference(update,storage=global.localStorage){
     const active=cycle(storage);
@@ -73,7 +75,9 @@
     }catch(_){}
     const prev=preference(storage);
     all[active.id]={
-      enabled:update.enabled===undefined?prev.enabled:update.enabled===true,
+      enabled:update.powerbuilding===true?true:(update.enabled===undefined?prev.enabled:update.enabled===true),
+      powerbuilding:update.enabled===false?false:(update.powerbuilding===undefined?prev.powerbuilding:update.powerbuilding===true),
+      trainingDays:[3,4,5].includes(Number(update.trainingDays))?Number(update.trainingDays):prev.trainingDays,
       volume:update.volume==='low'?'low':update.volume==='balanced'?'balanced':prev.volume,
       excluded:Array.isArray(update.excluded)?update.excluded.filter(x=>active.lifts.includes(x)):prev.excluded
     };
@@ -95,7 +99,13 @@
     const main=canonical(lift),w=Number(week);
     if(!main||!Number.isInteger(w)||w<1||w>6)return [];
     const volume=opts.volume==='low'?'low':'balanced';
-    return PROFILES[main].map((item,index)=>{
+    const extra=opts.powerbuilding?{
+      'Back Squat':[{name:'Standing Calf Raise',sets:2,min:10,max:15,rir:3,rest:75}],
+      'Bench Press':[{name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75}],
+      'Deadlift':[{name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}],
+      'Overhead Press':[{name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75}]
+    }[main]:[];
+    return PROFILES[main].concat(extra||[]).map((item,index)=>{
       // During peak week, one low-fatigue accessory per lift.
       const sets=w===5&&index>0?0:setCount(item.sets,w,volume);
       return {...item,sets,sourceLift:main,week:w};
@@ -111,7 +121,7 @@
     // Existing paused bench and RDL are owned by their original AscensionX
     // accessory modules. Neither is generated or modified here.
     const exists=new Set(existingNames.map(normName));
-    return plan(main,week,{volume:p.volume})
+    return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding})
       .filter(item=>!exists.has(normName(item.name)))
       .map(item=>({
         name:item.name,rest:item.rest,
@@ -125,7 +135,61 @@
         }))
       }));
   }
+  /* Powerbuilding is scheduling guidance, not a second AscensionX cycle.
+     Each primary lift remains owned by its own existing AscensionX import. */
+  const WEEKDAYS={3:['MON','WED','SAT'],4:['MON','TUE','THU','SAT'],5:['MON','TUE','THU','SAT','SUN']};
+  function supportExercises(position,week,lifts=[],lastDay=false){
+    if(week>=5)return [];
+    // Keep the day immediately before the next week light on lower-body
+    // and spinal loading. Heavy compound work belongs to AscensionX.
+    const low=[
+      {name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Seated Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}
+    ];
+    const balanced=[
+      {name:'Machine Chest Press',sets:2,min:10,max:15,rir:3,rest:90},
+      {name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75},
+      {name:'Standing Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}
+    ];
+    let items=lastDay?low:balanced;
+    // Supply a missing lower-body movement only when no AscensionX squat is
+    // prescribed, rather than layering redundant heavy work onto squat day.
+    if(!lifts.includes('Back Squat')){
+      const lower={name:'Leg Press',sets:2,min:10,max:15,rir:3,rest:120};
+      items=lastDay?[lower,...items.slice(0,3)]:[lower,...items.slice(1)];
+    }
+    if(!lifts.includes('Back Squat')&&!lifts.includes('Deadlift')){
+      const curl={name:'Seated Leg Curl',sets:2,min:10,max:15,rir:3,rest:90};
+      items=[...items.slice(0,items.length-1),curl];
+    }
+    return items.map(item=>({...item,sets:week===4?1:item.sets}));
+  }
+  function schedule(days,storage=global.localStorage){
+    const active=cycle(storage),preferenceData=preference(storage);
+    if(!active)return {valid:false,message:'Create an AscensionX cycle before enabling Powerbuilding.',slots:[]};
+    const count=[3,4,5].includes(Number(days))?Number(days):preferenceData.trainingDays;
+    const lifts=(count===3?['Back Squat','Deadlift','Bench Press','Overhead Press']:LIFTS).filter(l=>active.lifts.includes(l));
+    if(count<lifts.length)return {valid:false,message:
+      'Your AscensionX cycle has '+lifts.length+' primary lifts, but you selected '+count+
+      ' training days. Choose at least '+lifts.length+' days so separately imported main lifts are not combined unsafely.',slots:[]};
+    const liftWeek=lift=>{
+      const match=Object.entries(active.weeks||{}).find(([key])=>canonical(key)===lift);
+      return Math.max(1,Math.min(6,Number(match?.[1]||active.currentWeek)||1));
+    };
+    const week=Math.max(1,...lifts.map(liftWeek));
+    const slots=WEEKDAYS[count].map((day,index)=>{
+      const lift=lifts[index];
+      return lift?{day,kind:'ascension',title:lift+' · AscensionX · Week '+liftWeek(lift),lift,
+        week:liftWeek(lift),exercises:plan(lift,liftWeek(lift),{volume:preferenceData.volume,powerbuilding:true})}:
+        {day,kind:'support',title:index===count-1?'Arms, Calves & Core':'Controlled Hypertrophy',
+        lift:null,exercises:supportExercises(index-lifts.length,week,lifts,index===count-1)};
+    });
+    return {valid:true,message:'A suggested weekly layout: move sessions when needed and reassess effort, soreness and performance.',week,slots};
+  }
   global.SXAscensionCompanion=Object.freeze({
-    STORAGE,CYCLE_STORAGE,LIFTS,PROFILES,canonical,cycle,preference,savePreference,plan,forImport
+    STORAGE,CYCLE_STORAGE,LIFTS,PROFILES,canonical,cycle,preference,savePreference,plan,forImport,schedule,supportExercises
   });
 })(window);

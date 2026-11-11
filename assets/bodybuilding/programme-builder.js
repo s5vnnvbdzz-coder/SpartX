@@ -2,7 +2,7 @@
    Planning stays in its own localStorage key; no workout/AscensionX mutation. */
 (function(){
   'use strict';
-  const M=window.SXBodybuildingModel,card=document.getElementById('sxBodybuildingProgrammeCard');
+  const M=window.SXBodybuildingModel,E=window.SXProgrammeIntelligence,card=document.getElementById('sxBodybuildingProgrammeCard');
   const main=document.querySelector('body > main');
   if(!M||!card||!main)return;
   const $=id=>document.getElementById(id);
@@ -35,8 +35,8 @@
     '<button type="button" class="sx-bb-secondary" data-bb-action="rebuild">↻ REBUILD TEMPLATE</button></article>',
     '<article class="card"><div class="eyebrow">PROGRESSION METHODOLOGY</div><h2>Double progression</h2>',
     '<p>Increase reps within a planned range. When all working sets reach the upper target with appropriate effort and technique, consider the next available load.</p>',
-    '<p class="sx-bb-help">Stage 1 saves targets and programme structure. Automatic workout loading and progression analysis are not active yet.</p>',
-    '<div id="sxBBDraftStats" class="sx-bb-stats"></div></article></div>',
+    '<p class="sx-bb-help">Eight-week plans adapt working sets and RIR by phase. Completed reps, load and RPE inform the next workout; adjustments are recommendations, not silent changes to saved programmes.</p>',
+    '<div id="sxBBDraftStats" class="sx-bb-stats"></div><p id="sxBBMuscleCoverage" class="sx-bb-help"></p></article></div>',
     '<div class="sx-bb-sectionhead"><div class="eyebrow">YOUR WEEKLY SPLIT</div><h2>Edit training days</h2><p>All exercises, working sets, rep ranges, RIR, rest and starting loads can be changed.</p></div>',
     '<div id="sxBBEditorDays" class="sx-bb-days"></div>',
     '<div class="sx-bb-actions"><button type="button" class="sx-bb-secondary" data-bb-action="discard">DISCARD</button>',
@@ -55,19 +55,58 @@
   companionCard.className='card sx-bb-companion-card';
   companionCard.hidden=true;
   screen.appendChild(companionCard);
+  const powerCard=document.createElement('section');
+  powerCard.id='sxPowerbuildingProgrammeCard';
+  powerCard.className='card sx-programme-card sx-pb-card';
+  powerCard.setAttribute('aria-label','AscensionX Powerbuilding programme');
+  card.insertAdjacentElement('afterend',powerCard);
+  powerCard.addEventListener('click',event=>{
+    if(!event.target.closest('[data-pb-open]'))return;
+    open();
+    const el=document.getElementById('sxBBAscensionCompanion');
+    if(el&&!el.hidden)el.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  function renderPowerCard(){
+    const api=window.SXAscensionCompanion,cycle=api?.cycle?.(),pref=api?.preference?.();
+    powerCard.innerHTML='<div class="sx-programme-head"><div><div class="sx-programme-kicker">ASCENSIONX · INTELLIGENT POWERBUILDING</div>'+
+     '<h3 class="sx-programme-title">Powerbuilding</h3></div><span class="sx-programme-tag">'+
+     (pref?.powerbuilding?'ENABLED':'OPTIONAL')+'</span></div>'+
+     '<p class="sx-programme-meta">'+(cycle?
+      esc(cycle.lifts.join(' · '))+' · '+(pref?.trainingDays||4)+' training days/week':
+      'Build an AscensionX cycle to unlock coordinated strength and muscle-building sessions.')+'</p>'+
+     '<div class="sx-programme-footer"><span class="sx-programme-next">'+
+     (pref?.powerbuilding?'COORDINATED TRAINING ACTIVE':'RECOVERY-AWARE SUPPORTING WORK')+'</span>'+
+     '<button type="button" class="sx-programme-continue" data-pb-open>VIEW / CONFIGURE ›</button></div>';
+  }
   function renderCompanion(){
     const api=window.SXAscensionCompanion;
     const cycle=api?.cycle?.();
-    if(!cycle){companionCard.hidden=true;return}
+    if(!cycle){companionCard.hidden=true;renderPowerCard();return}
     companionCard.hidden=false;
     const prefs=api.preference();
+    const schedule=api.schedule(prefs.trainingDays);
+    renderPowerCard();
     const currentWeeks=cycle.lifts.map(lift=>{
       const item=Object.entries(cycle.weeks).find(([key])=>api.canonical(key)===lift);
       return {lift,week:Math.max(1,Math.min(6,Number(item?.[1]||cycle.currentWeek)||1))};
     });
-    companionCard.innerHTML='<div class="eyebrow">ASCENSIONX · SIX-WEEK COMPANION</div>'+
-      '<h2>Strength &amp; Size · Linked Accessories</h2>'+
+    companionCard.innerHTML='<div class="eyebrow">ASCENSIONX · COORDINATED TRAINING</div>'+
+      '<h2>Powerbuilding &amp; Linked Accessories</h2>'+
       '<p class="sx-bb-help">Designed around the compound lifts selected in your active AscensionX cycle. Primary lift loads, training maxes and AscensionX week completion are never changed.</p>'+
+      '<div class="sx-pb-config"><label class="sx-bb-companion-toggle">'+
+      '<input type="checkbox" id="sxBBPowerEnabled" '+(prefs.powerbuilding?'checked':'')+'>'+
+      '<span><strong>ENABLE POWERBUILDING</strong><small>Coordinate the AscensionX main lifts with comprehensive accessory work</small></span></label>'+
+      '<label>TRAINING DAYS PER WEEK<select id="sxBBPowerDays">'+
+      [3,4,5].map(n=>'<option value="'+n+'" '+(prefs.trainingDays===n?'selected':'')+'>'+n+' days</option>').join('')+'</select></label></div>'+
+      '<div class="sx-pb-schedule"><div class="eyebrow">SUGGESTED WEEKLY TRAINING SPLIT</div>'+
+      (schedule.valid?schedule.slots.map((slot,i)=>'<div class="sx-pb-slot"><div><strong>'+esc(slot.day)+' · '+esc(slot.title)+'</strong>'+
+        '<small>'+esc(slot.kind==='ascension'?'Start the main lift in AscensionX. Companion sets load automatically when enabled.':
+         slot.exercises.length?slot.exercises.map(e=>e.name).join(' · '):'Reduced workload during the peak / recovery period.')+'</small></div>'+
+        (prefs.powerbuilding&&slot.kind==='support'&&slot.exercises.length?
+          '<button type="button" class="sx-bb-secondary" data-pb-support="'+i+'">START</button>':'')+
+        '</div>').join(''):
+        '<p class="sx-bb-help sx-pb-warning">'+esc(schedule.message)+'</p>')+
+      '<p class="sx-bb-help">This is a scheduling suggestion, not a guarantee of complete recovery. Change days when session performance or fatigue indicates a conflict.</p></div>'+
       '<div class="sx-bb-companion-config"><label class="sx-bb-companion-toggle">'+
       '<input type="checkbox" id="sxBBCompanionEnabled" '+(prefs.enabled?'checked':'')+'>'+
       '<span><strong>ENABLE LINKED ACCESSORIES</strong><small>Load additional hypertrophy work only when importing an AscensionX compound lift</small></span></label>'+
@@ -76,7 +115,7 @@
       '<option value="low" '+(prefs.volume==='low'?'selected':'')+'>Low · extra recovery</option></select></label></div>'+
       '<div class="sx-bb-companion-lifts">'+currentWeeks.map(({lift,week})=>{
         const enabled=!prefs.excluded.includes(lift);
-        const planned=api.plan(lift,week,{volume:prefs.volume});
+        const planned=api.plan(lift,week,{volume:prefs.volume,powerbuilding:prefs.powerbuilding});
         const legacy=lift==='Bench Press'?'Existing AscensionX: Paused Bench Press':
           lift==='Deadlift'?'Existing AscensionX: Romanian Deadlift':'';
         return '<div class="sx-bb-companion-lift">'+
@@ -93,7 +132,17 @@
   companionCard.addEventListener('change',event=>{
     const api=window.SXAscensionCompanion;if(!api?.cycle?.())return;
     const target=event.target,prefs=api.preference();
-    if(target.id==='sxBBCompanionEnabled')api.savePreference({enabled:target.checked});
+    if(target.id==='sxBBPowerEnabled'){
+      const proposed=api.schedule(prefs.trainingDays);
+      if(target.checked&&!proposed.valid){target.checked=false;window.alert(proposed.message);return;}
+      api.savePreference({powerbuilding:target.checked,enabled:target.checked?true:prefs.enabled});
+    }
+    else if(target.id==='sxBBPowerDays'){
+      const proposed=api.schedule(Number(target.value));
+      api.savePreference({trainingDays:Number(target.value)});
+      if(!proposed.valid&&prefs.powerbuilding)api.savePreference({powerbuilding:false});
+    }
+    else if(target.id==='sxBBCompanionEnabled')api.savePreference({enabled:target.checked});
     else if(target.id==='sxBBCompanionVolume')api.savePreference({volume:target.value});
     else if(target.dataset.bbCompanionLift){
       const lift=target.dataset.bbCompanionLift;
@@ -102,6 +151,19 @@
       api.savePreference({excluded:[...excludes]});
     }else return;
     renderCompanion();
+  });
+  companionCard.addEventListener('click',event=>{
+    const btn=event.target.closest('[data-pb-support]');
+    if(!btn)return;
+    const api=window.SXAscensionCompanion,pref=api?.preference?.(),plan=api?.schedule?.(pref.trainingDays);
+    const slot=plan?.slots?.[Number(btn.dataset.pbSupport)];
+    if(!pref?.enabled||!pref?.powerbuilding||!plan.valid||slot?.kind!=='support'||!slot.exercises.length)return;
+    if(typeof window.SpartanXStartPowerbuildingSupportSession!=='function'){
+      window.alert('Powerbuilding workout import is unavailable. Reload SpartanX.');return;
+    }
+    window.SpartanXStartPowerbuildingSupportSession({
+      cycleId:pref.cycleId,week:plan.week,day:slot.day,name:slot.title,exercises:slot.exercises
+    });
   });
   const favourites=['Bench Press','Incline Dumbbell Press','Chest-Supported Row','Lat Pulldown','Overhead Press','Lateral Raise',
     'Triceps Pushdown','Dumbbell Curl','Back Squat','Romanian Deadlift','Leg Press','Hack Squat','Leg Extension','Seated Leg Curl','Hip Thrust','Standing Calf Raise'];
@@ -131,6 +193,9 @@
     }catch(_){return []}
   }
   function currentProgress(program){return M.progress(program,trainingHistory())}
+  function plannedDay(p,day,week){
+    return E?.planDay?.(day,week,trainingHistory(),{programmeId:p.id,dayId:day.id})||day;
+  }
   function continueTraining(dayId){
     const programme=current();if(!programme)return open();
     if(mode==='edit'){window.alert('Save or discard your programme changes before starting training.');return}
@@ -241,14 +306,17 @@
         return '<details class="card sx-bb-day" '+(i===0?'open':'')+'><summary><div><span class="sx-bb-day-index">DAY '+(i+1)+'</span>'+
           '<strong>'+esc(day.name)+'</strong></div><span class="sx-bb-day-state '+(complete?'is-done':'')+'">'+
           (complete?'✓ COMPLETE':logged?'PARTIAL LOG':'PLANNED')+'</span></summary>'+
-          '<div class="sx-bb-day-body">'+day.exercises.map(e=>
+          '<div class="sx-bb-day-body">'+plannedDay(p,day,progress.week).exercises.map(e=>
             '<div class="sx-bb-preview-ex"><strong>'+esc(e.name)+'</strong><span>'+e.sets+' × '+e.repsMin+'–'+e.repsMax+
-            ' reps · '+e.rir+' RIR'+(e.startingKg>0?' · '+e.startingKg+' kg':'')+'</span></div>').join('')+
+            ' reps · '+e.rir+' RIR · RPE '+(e.targetRpe||10-e.rir)+
+            (e.startingKg>0?' · '+e.startingKg+' kg':'')+'</span>'+
+            (e.recommendation?'<small>'+esc(e.recommendation.reason)+'</small>':'')+
+            '</div>').join('')+
             (!finished?'<button type="button" class="sx-bb-secondary sx-bb-full sx-bb-day-start" data-bb-action="start" data-day-id="'+esc(day.id)+'">'+
             (complete?'REPEAT THIS DAY':'START '+esc(day.name).toUpperCase())+' · WEEK '+progress.week+'</button>':'')+'</div></details>';
       }).join('')+'</div>'+
       '<article class="card sx-bb-info"><div class="eyebrow">SPARTANX WORKOUT INTEGRATION</div>'+
-      '<p>Continue Training loads planned exercises and unchecked working sets into the normal SpartanX logger. Programme completion is calculated from saved working sets, not merely from starting a workout. Automatic next-load recommendations will follow in the progression phase.</p></article>';
+      '<p>Continue Training loads planned exercises and unchecked working sets into the normal SpartanX logger. Programme completion is calculated from saved working sets, not merely from starting a workout. Future loads are calculated from your previous completed sets, rep targets and recorded RPE. Week 5 automatically reduces training volume; planned sets remain adjustable.</p></article>';
   }
   function input(label,key,value,day,ex,min,max,step){
     return '<label>'+label+'<input type="number" inputmode="decimal" data-bb-ex-field="'+key+'" data-day="'+day+
@@ -260,6 +328,11 @@
     $('sxBBExperience').value=p.experience;$('sxBBDays').value=String(p.days);
     $('sxBBWeeks').value=String(p.weeks);$('sxBBPriority').value=p.priority;
     $('sxBBDraftStats').innerHTML=statsHTML(p);
+    const muscle=E?.coverage?.(p);
+    $('sxBBMuscleCoverage').textContent=muscle?
+      (muscle.missing.length?'MUSCLE COVERAGE TO REVIEW: '+muscle.missing.join(', ')+'. Add appropriate exercises before saving.':
+       'MUSCLE COVERAGE: Chest, back, shoulders, quads, hamstrings, glutes, calves, biceps, triceps and core represented.'):
+      '';
     $('sxBBEditorDays').innerHTML=p.sessions.map((day,i)=>
       '<article class="card sx-bb-day sx-bb-edit-day"><div class="sx-bb-day-heading">'+
         '<span class="sx-bb-day-index">DAY '+(i+1)+'</span><input maxlength="65" data-bb-day-name="'+i+'" aria-label="Day '+(i+1)+' name" value="'+esc(day.name)+'">'+
@@ -402,4 +475,14 @@
   });
   window.SXBodybuildingProgrammes=Object.freeze({open,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender();renderCompanion()},storageKey:M.KEY});
   cardRender();
+  renderCompanion();
+  // Intelligence may deep-link directly into the existing builder.
+  const launch=new URLSearchParams(window.location.search).get('sxOpen');
+  if(launch==='bodybuilding'||launch==='powerbuilding'){
+    requestAnimationFrame(()=>{
+      open();
+      if(launch==='powerbuilding'&&!companionCard.hidden)
+        companionCard.scrollIntoView({behavior:'auto',block:'start'});
+    });
+  }
 })();

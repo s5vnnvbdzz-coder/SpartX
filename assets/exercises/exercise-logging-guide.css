@@ -8,7 +8,7 @@ body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[da
 body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link]:focus,
 body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link]:focus-visible{
  -webkit-appearance:none!important;appearance:none!important;
- display:block!important;flex:1 1 auto!important;
+ display:block!important;flex:0 1 auto!important;
  min-width:0!important;min-height:0!important;width:auto!important;height:auto!important;
  padding:0!important;margin:0!important;
  border:0!important;border-width:0!important;border-color:transparent!important;
@@ -23,6 +23,9 @@ body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[da
 body #activeWorkout #exerciseList .exercise-title-row > [data-live-exercise-link]::before,
 body #activeWorkout #exerciseList .exercise-title-row > [data-live-exercise-link]::after{
  content:none!important;display:none!important;border:0!important;box-shadow:none!important;
+}
+body #activeWorkout #exerciseList .exercise-title-row > .sx-exercise-menu-trigger{
+ margin-left:auto!important;
 }
 body #activeWorkout #exerciseList .exercise-title-row > [data-live-exercise-link]:focus-visible{
  text-decoration:underline!important;text-decoration-thickness:2px!important;

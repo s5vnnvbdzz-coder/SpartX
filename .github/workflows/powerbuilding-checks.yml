@@ -1,0 +1,34 @@
+name: SpartanX Powerbuilding and Bodybuilding checks
+
+on:
+  push:
+    paths:
+      - 'assets/bodybuilding/**'
+      - 'index.html'
+      - '.github/workflows/powerbuilding-checks.yml'
+  pull_request:
+    paths:
+      - 'assets/bodybuilding/**'
+      - 'index.html'
+      - '.github/workflows/powerbuilding-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Powerbuilding and Bodybuilding syntax
+        run: |
+          node --check assets/bodybuilding/programme-model.js
+          node --check assets/bodybuilding/adaptive-engine.js
+          node --check assets/bodybuilding/ascension-companion.js
+          node --check assets/bodybuilding/programme-builder.js
+      - name: Run training programme regression tests
+        run: node assets/bodybuilding/adaptive-engine.test.js

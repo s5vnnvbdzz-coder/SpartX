@@ -10,6 +10,7 @@ const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 const html=read('index.html');
 const engine=read('engine.js');
 const bridge=read('bridge.js');
+const live=read('live.js');
 const app=read('app.js');
 assert.match(html,/<input type="text" id="goalInput"[^>]*inputmode="decimal"/,'Goal field must support select-on-focus on iOS');
 assert.doesNotMatch(html,/<input type="number" id="goalInput"/,'No invalid native number step constraints');
@@ -30,9 +31,10 @@ function element(id){
   });
 }
 doc={activeElement:null,getElementById:element,querySelectorAll:()=>[],querySelector:()=>({scrollIntoView(){}}),addEventListener(){}};
-const win={localStorage:storage,addEventListener(){}};
+const win={localStorage:storage,location:{search:''},addEventListener(){}};
 new Function('window',engine)(win);
 new Function('window',bridge)(win);
+new Function('window',live)(win);
 new Function('window','document','localStorage','setTimeout','clearTimeout',app)(win,doc,storage,()=>0,()=>{});
 
 const field=element('goalInput'),form=element('goalForm');

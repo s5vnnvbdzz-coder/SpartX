@@ -903,7 +903,7 @@ body.completed-workout-open #trackerNav{display:none!important}
 <link rel="stylesheet" href="./assets/stats/statistics.css">
 <link rel="stylesheet" href="./assets/ascension/quick-access.css">
 <link rel="stylesheet" href="./assets/workouts/programme-cards.css?v=285">
-<link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=3">
+<link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=4">
 <style>
 
 /* Profile Workout Calendar: independent iOS scrolling and accessible completed days. */
@@ -3180,7 +3180,7 @@ window.SpartanXStartBodybuildingSession=function(payload){
  // the same compound main lift in parallel with an active six-week cycle.
  // The cycle-linked companion is the supported way to add size work.
  const ascension=window.SXAscensionCompanion?.cycle?.();
- if(ascension&&programme.kind==='hybrid'){
+ if(ascension){
   const overlap=sourceDay.exercises.map(ex=>window.SXAscensionCompanion.canonical(ex.name))
     .filter(lift=>lift&&ascension.lifts.includes(lift));
   if(overlap.length){
@@ -3189,19 +3189,23 @@ window.SpartanXStartBodybuildingSession=function(payload){
    return false;
   }
  }
+ // Generate the current week's targets from the latest completed linked sessions.
+ // Saved programme templates and AscensionX main lifts are never mutated.
+ const adapted=window.SXProgrammeIntelligence?.planDay?.(sourceDay,link.week,db.sessions,
+  {programmeId:programme.id,dayId:sourceDay.id})||sourceDay;
  // Reject stale or altered UI payloads. Always import the latest saved plan.
  const confirmed=confirm('Start '+sourceDay.name+' · Week '+link.week+' of '+programme.weeks+
    '?\n\n'+sourceDay.exercises.length+' exercises will be loaded into a new workout. Nothing is marked complete until you log sets and Finish & Save.');
  if(!confirmed)return false;
- const plannedTotalSets=sourceDay.exercises.reduce((n,ex)=>n+Number(ex.sets||0),0);
+ const plannedTotalSets=adapted.exercises.reduce((n,ex)=>n+Number(ex.sets||0),0);
  const sessionLink={programmeId:programme.id,programmeName:programme.name,
   dayId:sourceDay.id,dayName:sourceDay.name,week:link.week,
-  plannedTotalSets,plannedExerciseCount:sourceDay.exercises.length};
- work=sourceDay.exercises.map(ex=>({
+  plannedTotalSets,plannedExerciseCount:adapted.exercises.length};
+ work=adapted.exercises.map(ex=>({
   name:ex.name,rest:Number(ex.restSeconds)||120,
-  notes:'Bodybuilding · '+ex.repsMin+'–'+ex.repsMax+' reps · '+ex.rir+' RIR',
+  notes:'Bodybuilding · '+ex.repsMin+'–'+ex.repsMax+' reps · '+ex.rir+' RIR · Target RPE '+(ex.targetRpe||10-ex.rir)+ (ex.recommendation?' · '+ex.recommendation.reason:''),
   bodybuildingLink:{...sessionLink,exerciseId:ex.id,plannedSets:ex.sets,
-    repsMin:ex.repsMin,repsMax:ex.repsMax,rir:ex.rir},
+    repsMin:ex.repsMin,repsMax:ex.repsMax,rir:ex.rir,targetRpe:ex.targetRpe||10-ex.rir},
   sets:Array.from({length:ex.sets},()=>({
    weight:ex.startingKg>0?String(ex.startingKg):'',
    reps:String(ex.repsMin),rpe:'',type:'Working Set',done:false
@@ -3211,6 +3215,38 @@ window.SpartanXStartBodybuildingSession=function(payload){
  window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
  clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;
  const title=sourceDay.name+' - Week '+link.week;
+ $('activeWorkoutName').textContent=title;$('workoutName').value=title;
+ $('sessionClock').textContent='00:00:00';
+ switchScreen('activeWorkout',{instant:true});renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
+ return true;
+};
+
+window.SpartanXStartPowerbuildingSupportSession=function(payload){
+ const api=window.SXAscensionCompanion,cycle=api?.cycle?.(),pref=api?.preference?.();
+ if(!cycle||!pref?.enabled||!pref.powerbuilding||pref.cycleId!==cycle.id)return false;
+ const schedule=api.schedule(pref.trainingDays);
+ if(!schedule.valid||Number(payload?.week)!==schedule.week||payload?.cycleId!==cycle.id)return false;
+ const slot=schedule.slots.find(x=>x.day===payload.day&&x.kind==='support'&&x.title===payload.name);
+ if(!slot||!slot.exercises.length||sessionActive||editingSessionId!==null){
+  alert(sessionActive?'Finish or discard your current workout before starting another.':
+   'No support workout is available for this Powerbuilding day.');return false;
+ }
+ if(!confirm('Start '+slot.title+' · '+slot.day+' · AscensionX Week '+schedule.week+
+  '?\n\n'+slot.exercises.length+' supporting exercises will be loaded. Sets begin unchecked and will not advance your AscensionX cycle.'))return false;
+ work=slot.exercises.map(ex=>({
+  name:ex.name,rest:ex.rest||90,
+  notes:'Powerbuilding support · Week '+schedule.week+' · '+ex.min+'–'+ex.max+
+   ' reps · '+ex.rir+' RIR · Target RPE '+(10-ex.rir),
+  sxPowerbuildingSupport:{cycleId:cycle.id,week:schedule.week,day:slot.day,
+   repsMin:ex.min,repsMax:ex.max,rir:ex.rir},
+  sets:Array.from({length:ex.sets},()=>({
+   weight:'',reps:String(ex.min),rpe:'',type:'Working Set',done:false
+  }))
+ }));
+ libraryMode='workout';activeCycle=null;
+ window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
+ clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;
+ const title='Powerbuilding - '+slot.title+' - Week '+schedule.week;
  $('activeWorkoutName').textContent=title;$('workoutName').value=title;
  $('sessionClock').textContent='00:00:00';
  switchScreen('activeWorkout',{instant:true});renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
@@ -4545,7 +4581,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-save-review.js?v=262"></script>
 <script src="./assets/profile/profile-social-pages.js?v=262"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=243"></script>
-<script src="./assets/bodybuilding/ascension-companion.js?v=1"></script>
-<script src="./assets/bodybuilding/programme-model.js?v=2"></script>
-<script src="./assets/bodybuilding/programme-builder.js?v=3"></script>
+<script src="./assets/bodybuilding/ascension-companion.js?v=2"></script>
+<script src="./assets/bodybuilding/programme-model.js?v=3"></script>
+<script src="./assets/bodybuilding/adaptive-engine.js?v=1"></script>
+<script src="./assets/bodybuilding/programme-builder.js?v=4"></script>
 </body></html>

@@ -149,8 +149,12 @@
       [3,4,5].map(n=>'<option value="'+n+'" '+(prefs.trainingDays===n?'selected':'')+'>'+n+' days</option>').join('')+'</select></label></div>'+
       '<div class="sx-pb-schedule"><div class="eyebrow">SUGGESTED WEEKLY TRAINING SPLIT</div>'+
       (schedule.valid?schedule.slots.map((slot,i)=>'<div class="sx-pb-slot"><div><strong>'+esc(slot.day)+' · '+esc(slot.title)+'</strong>'+
-        '<small>'+esc(slot.kind==='ascension'?'Start the main lift in AscensionX. Companion sets load automatically when enabled.':
-         slot.exercises.length?slot.exercises.map(e=>e.name).join(' · '):'Reduced workload during the peak / recovery period.')+'</small></div>'+
+        '<small>'+esc(slot.kind==='ascension'?
+         'MAIN: '+slot.lift+' (AscensionX warm-ups and working sets) · '+
+         (slot.exercises.length?'AFTER: '+slot.exercises.map(e=>e.sets+'× '+e.name).join(' · '):
+          'No added accessory sets during peak/recovery'):
+         slot.exercises.length?slot.exercises.map(e=>e.sets+'× '+e.name).join(' · '):
+          'Reduced workload during peak/recovery')+'</small></div>'+
         (prefs.powerbuilding&&slot.kind==='support'&&slot.exercises.length?
           '<button type="button" class="sx-bb-secondary" data-pb-support="'+i+'">START</button>':'')+
         '</div>').join(''):
@@ -164,7 +168,7 @@
       '<option value="low" '+(prefs.volume==='low'?'selected':'')+'>Low · extra recovery</option></select></label></div>'+
       '<div class="sx-bb-companion-lifts">'+currentWeeks.map(({lift,week})=>{
         const enabled=!prefs.excluded.includes(lift);
-        const planned=api.plan(lift,week,{volume:prefs.volume,powerbuilding:prefs.powerbuilding});
+        const planned=api.plan(lift,week,{volume:prefs.volume,powerbuilding:prefs.powerbuilding,lifts:cycle.lifts});
         const legacy=lift==='Bench Press'?'Existing AscensionX: Paused Bench Press':
           lift==='Deadlift'?'Existing AscensionX: Romanian Deadlift':'';
         return '<div class="sx-bb-companion-lift">'+

@@ -1,0 +1,171 @@
+/* SpartanX exercise action sheet, long-press reorder and superset pairing.
+ * Uses the active SpartanX theme and respects the iPhone safe area.
+ */
+#sxExerciseActionsOverlay[hidden]{display:none!important}
+#sxExerciseActionsOverlay{
+ position:fixed;inset:0;z-index:2147483600;
+ background:rgba(0,0,0,.66);display:flex;align-items:flex-end;justify-content:center;
+ -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+}
+#sxExerciseActionsOverlay .sx-exercise-actions-sheet{
+ width:min(100%,640px);
+ padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));
+ border:1px solid var(--line);border-bottom:0;
+ border-radius:25px 25px 0 0;background:var(--panel);
+ box-shadow:0 -14px 56px #0008;max-height:85dvh;overflow-y:auto;
+}
+#sxExerciseActionsOverlay .sx-exercise-actions-grip{
+ width:48px;height:5px;border-radius:9px;background:var(--muted);
+ opacity:.65;margin:0 auto 18px;
+}
+#sxExerciseActionsTitle{font-size:17px;color:var(--txt);margin:0 6px 3px}
+#sxExerciseActionsName{font-size:11px;color:var(--muted);margin:0 6px 17px}
+#sxExerciseActionsOverlay .sx-exercise-actions-list{
+ border:1px solid var(--line);border-radius:14px;overflow:hidden;
+}
+#sxExerciseActionsOverlay .sx-exercise-actions-list button{
+ display:flex;align-items:center;gap:16px;text-align:left;width:100%;
+ padding:17px 17px;min-height:60px;background:var(--panel2)!important;
+ color:var(--txt)!important;border:0!important;border-bottom:1px solid var(--line)!important;
+ border-radius:0!important;font-size:15px;font-weight:650;cursor:pointer;
+}
+#sxExerciseActionsOverlay .sx-exercise-actions-list button:last-child{border-bottom:0!important}
+#sxExerciseActionsOverlay .sx-exercise-actions-list button>span{
+ width:28px;flex:0 0 28px;text-align:center;font-size:25px;line-height:1;
+ color:var(--lime);
+}
+#sxExerciseActionsOverlay .sx-exercise-actions-list .sx-exercise-actions-remove,
+#sxExerciseActionsOverlay .sx-exercise-actions-list .sx-exercise-actions-remove>span{
+ color:#ff6b62!important;
+}
+#sxExerciseActionsOverlay .sx-exercise-actions-dismiss{
+ display:block;width:100%;margin-top:12px;padding:14px;
+ border:1px solid var(--line)!important;border-radius:11px;
+ color:var(--txt)!important;background:var(--panel2)!important;
+ font-weight:800;
+}
+#activeWorkout .exercise-title-row .sx-exercise-menu-trigger{
+ display:grid;place-items:center;flex:0 0 auto;width:41px;height:40px;
+ padding:0!important;border:1px solid transparent!important;
+ border-radius:9px;background:transparent!important;
+ color:var(--muted)!important;cursor:pointer;font-size:25px;
+}
+#activeWorkout .exercise-title-row .sx-exercise-menu-trigger:focus-visible{
+ border-color:var(--lime)!important;outline:1px solid var(--lime);
+}
+#activeWorkout .sx-superset-banner{
+ display:flex;justify-content:space-between;gap:8px;align-items:center;
+ padding:9px 12px;margin:0 0 11px;border:1px solid color-mix(in srgb,var(--lime) 35%,var(--line));
+ border-radius:9px;background:color-mix(in srgb,var(--lime) 5%,var(--panel2));
+ font-size:10px;color:var(--muted);
+}
+#activeWorkout .sx-superset-banner strong{color:var(--lime);letter-spacing:.65px;font-size:10px;white-space:nowrap}
+#activeWorkout .sx-superset-banner span{min-width:0;overflow-wrap:anywhere;text-align:right}
+#activeWorkout .sx-superset-ready{
+ box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--lime) 60%,transparent),0 0 15px color-mix(in srgb,var(--lime) 15%,transparent)!important;
+}
+#activeWorkout .sx-superset-ready-label{
+ display:block;width:max-content;max-width:100%;
+ margin-bottom:9px;padding:5px 9px;border-radius:7px;
+ background:color-mix(in srgb,var(--lime) 16%,var(--panel2));
+ color:var(--lime);font-size:10px;font-weight:900;letter-spacing:.6px;
+}
+:is(#sxActiveExerciseReorder,#sxActiveExerciseSuperset).sx-exercise-manage{
+ width:min(100%,760px);min-height:100dvh;margin:0 auto;
+ padding:18px 13px calc(90px + env(safe-area-inset-bottom,0px));
+}
+body:has(#sxActiveExerciseReorder.screen.active) #trackerNav,
+body:has(#sxActiveExerciseSuperset.screen.active) #trackerNav,
+body:has(#sxActiveExerciseReorder.screen.active) #minimizedSession,
+body:has(#sxActiveExerciseSuperset.screen.active) #minimizedSession{display:none!important}
+.sx-exercise-manage .sx-exercise-manage-header{
+ padding:8px 4px 14px;border-bottom:1px solid var(--line);
+}
+.sx-exercise-manage .sx-exercise-manage-header .eyebrow{
+ font-size:10px;letter-spacing:1.1px;color:var(--lime);font-weight:900;
+}
+.sx-exercise-manage .sx-exercise-manage-header h1{
+ color:var(--txt);font-size:23px;margin:8px 0;
+}
+.sx-exercise-manage .sx-exercise-manage-header p{
+ color:var(--muted);font-size:12px;line-height:1.6;margin:0;
+}
+.sx-exercise-manage .sx-exercise-manage-list{
+ display:grid;gap:10px;margin:18px 0;max-height:calc(100dvh - 330px);
+ min-height:100px;overflow:auto;-webkit-overflow-scrolling:touch;
+ overscroll-behavior:contain;padding:2px 3px 10px;
+}
+.sx-exercise-manage .sx-exercise-manage-row,
+.sx-exercise-manage .sx-exercise-select-row{
+ display:flex;align-items:center;gap:12px;min-width:0;
+ border:1px solid var(--line);border-radius:12px;
+ background:var(--panel)!important;color:var(--txt)!important;
+ padding:11px 12px;text-align:left;min-height:66px;
+}
+.sx-exercise-manage .sx-exercise-row-index{
+ display:grid;place-items:center;width:28px;min-width:28px;
+ color:var(--lime);font-size:11px;font-weight:900;
+}
+.sx-exercise-manage .sx-exercise-row-name{min-width:0;flex:1}
+.sx-exercise-manage .sx-exercise-row-name strong{
+ display:block;color:var(--txt);font-size:13px;line-height:1.4;overflow-wrap:anywhere;
+}
+.sx-exercise-manage .sx-exercise-row-name small{
+ display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-top:4px;
+}
+.sx-exercise-manage .sx-exercise-drag-handle{
+ width:45px;height:46px;flex:0 0 45px;display:grid;place-items:center;
+ border:1px solid var(--line)!important;border-radius:10px;background:var(--panel2)!important;
+ color:var(--lime)!important;font-size:21px;cursor:grab;touch-action:none;user-select:none;
+ -webkit-user-select:none;
+}
+.sx-exercise-manage .sx-exercise-held{
+ border-color:var(--lime)!important;box-shadow:0 0 16px color-mix(in srgb,var(--lime) 20%,transparent);
+}
+.sx-exercise-manage .sx-exercise-over{
+ border-color:var(--lime)!important;
+ background:color-mix(in srgb,var(--lime) 10%,var(--panel))!important;
+}
+.sx-exercise-manage .sx-exercise-select-row{width:100%;cursor:pointer}
+.sx-exercise-manage .sx-exercise-select-row:disabled{opacity:.75;cursor:not-allowed}
+.sx-exercise-manage .sx-exercise-check{
+ display:grid;place-items:center;width:27px;height:27px;flex:0 0 27px;
+ border:1px solid var(--line);border-radius:8px;color:var(--panel2);
+ font-weight:900;
+}
+.sx-exercise-manage .sx-exercise-select-row.is-selected{
+ border-color:color-mix(in srgb,var(--lime) 65%,var(--line));
+ background:color-mix(in srgb,var(--lime) 8%,var(--panel))!important;
+}
+.sx-exercise-manage .sx-exercise-select-row.is-selected .sx-exercise-check{
+ color:var(--bg);background:var(--lime);border-color:var(--lime);
+}
+.sx-exercise-manage .sx-exercise-manage-footer{
+ position:sticky;bottom:0;z-index:10;
+ display:grid;grid-template-columns:1fr 1fr;gap:10px;
+ border-top:1px solid var(--line);padding:13px 2px calc(11px + env(safe-area-inset-bottom,0px));
+ background:color-mix(in srgb,var(--bg) 95%,transparent);
+}
+.sx-exercise-manage .sx-exercise-manage-footer button,
+.sx-exercise-manage .sx-exercise-unpair{
+ min-height:47px;padding:10px 7px;border-radius:10px;
+ font-size:11px;font-weight:900;letter-spacing:.5px;
+ background:var(--panel2)!important;color:var(--txt)!important;
+ border:1px solid var(--line)!important;cursor:pointer;
+}
+.sx-exercise-manage .sx-exercise-manage-footer [data-sx-save]{
+ border-color:var(--lime)!important;
+ background:color-mix(in srgb,var(--lime) 18%,var(--panel2))!important;
+}
+.sx-exercise-manage .sx-exercise-manage-footer [data-sx-save]:disabled{
+ opacity:.43;cursor:not-allowed;
+}
+.sx-exercise-manage .sx-exercise-unpair{
+ display:block;width:100%;border-color:#b35650!important;color:#ff8981!important;
+}
+.sx-exercise-manage .sx-exercise-unpair[hidden]{display:none!important}
+@media(max-width:440px){
+ .sx-exercise-manage .sx-exercise-manage-list{max-height:calc(100dvh - 305px)}
+ #sxExerciseActionsOverlay .sx-exercise-actions-list button{min-height:56px;padding:14px}
+}
+@media(prefers-reduced-motion:reduce){.sx-exercise-manage *{scroll-behavior:auto!important}}

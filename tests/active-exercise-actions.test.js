@@ -52,7 +52,7 @@ test('remove superset detaches both without deleting exercises',()=>{
 });
 test('safe reorder changes display order but not workout entries',()=>{
  const reordered=A.reorder(p,[3,1,0,2]);
- assert.deepEqual(reordered.map(x=>x.name),['Triceps Pushdown','Lat Pulldown','Incline Dumbbell Press','Cable Curl']);
+ assert.deepEqual(Array.from(reordered,x=>x.name),['Triceps Pushdown','Lat Pulldown','Incline Dumbbell Press','Cable Curl']);
  assert.equal(reordered[2],p[0]);
  assert.equal(reordered[1],p[1]);
  assert.equal(A.badge(reordered,1).partnerIndex,2);
@@ -90,7 +90,7 @@ test('warm-up completion does not trigger superset alternation',()=>{
 });
 test('menu and management screens are active-session actions and always cancellable',()=>{
  for(const token of [
-  'id=\'sxExerciseActionsOverlay\'','Reorder Exercises','Replace Exercise',
+  "overlay.id='sxExerciseActionsOverlay'",'Reorder Exercises','Replace Exercise',
   'Add to Superset','Remove Exercise','sxActiveExerciseReorder','sxActiveExerciseSuperset',
   'data-sx-cancel','data-sx-save','pointerdown','pointermove','pointerup',
   'Hold and drag','SAVE SUPERSET','REMOVE EXISTING SUPERSET'

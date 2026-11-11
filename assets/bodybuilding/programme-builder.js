@@ -475,4 +475,14 @@
   });
   window.SXBodybuildingProgrammes=Object.freeze({open,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender();renderCompanion()},storageKey:M.KEY});
   cardRender();
+  renderCompanion();
+  // Intelligence may deep-link directly into the existing builder.
+  const launch=new URLSearchParams(window.location.search).get('sxOpen');
+  if(launch==='bodybuilding'||launch==='powerbuilding'){
+    requestAnimationFrame(()=>{
+      open();
+      if(launch==='powerbuilding'&&!companionCard.hidden)
+        companionCard.scrollIntoView({behavior:'auto',block:'start'});
+    });
+  }
 })();

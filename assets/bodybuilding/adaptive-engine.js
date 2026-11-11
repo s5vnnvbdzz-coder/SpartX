@@ -79,7 +79,7 @@
     kg=roundKg(previous.weight*.975);status='reduce';
     reason='Two difficult sessions: suggest a small load reduction and reassess recovery.';
    }else if(previous.allHigh&&meanRpe!==null&&meanRpe<=target+.5&&w!==5&&w!==8){
-    const step=/dumbbell|cable|lateral|curl|fly|raise|pushdown|extension/i.test(String(ex.name))?1:2.5;
+    const step=/cable|lateral|curl|fly|raise|pushdown|extension/i.test(String(ex.name))?1:2.5;
     kg=roundKg(previous.weight+step);status='increase';
     reason='All working sets reached the upper rep target at the prescribed effort.';
    }else{

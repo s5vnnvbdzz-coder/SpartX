@@ -33,16 +33,16 @@
   const L_A=[
     tuple('Back Squat',3,6,10,2,180),tuple('Romanian Deadlift',3,8,12,2,150),
     tuple('Leg Press',3,10,15,2,150),tuple('Seated Leg Curl',3,10,15),
-    tuple('Standing Calf Raise',3,10,15)
+    tuple('Standing Calf Raise',3,10,15),tuple('Pallof Press',2,10,15,3,75)
   ];
   const L_B=[
     tuple('Hack Squat',3,8,12,2,150),tuple('Hip Thrust',3,8,12),
     tuple('Bulgarian Split Squat',3,8,12),tuple('Lying Leg Curl',3,10,15),
-    tuple('Seated Calf Raise',3,10,15)
+    tuple('Seated Calf Raise',3,10,15),tuple('Pallof Press',2,10,15,3,75)
   ];
   const FULL_A=[tuple('Back Squat',3,6,10),tuple('Bench Press',3,6,10),tuple('Chest-Supported Row',3,8,12),tuple('Seated Leg Curl',2,10,15),tuple('Lateral Raise',2,12,20),tuple('Cable Curl',2,10,15)];
-  const FULL_B=[tuple('Romanian Deadlift',3,8,12),tuple('Incline Dumbbell Press',3,8,12),tuple('Lat Pulldown',3,8,12),tuple('Leg Extension',2,10,15),tuple('Overhead Triceps Extension',2,10,15),tuple('Standing Calf Raise',2,10,15)];
-  const FULL_C=[tuple('Leg Press',3,10,15),tuple('Overhead Press',3,6,10),tuple('Seated Cable Row',3,8,12),tuple('Hip Thrust',2,8,12),tuple('Chest Fly',2,12,15),tuple('Dumbbell Curl',2,10,15)];
+  const FULL_B=[tuple('Romanian Deadlift',3,8,12),tuple('Incline Dumbbell Press',3,8,12),tuple('Lat Pulldown',3,8,12),tuple('Leg Extension',2,10,15),tuple('Overhead Triceps Extension',2,10,15),tuple('Standing Calf Raise',2,10,15),tuple('Pallof Press',2,10,15,3,75)];
+  const FULL_C=[tuple('Leg Press',3,10,15),tuple('Overhead Press',3,6,10),tuple('Seated Cable Row',3,8,12),tuple('Hip Thrust',2,8,12),tuple('Chest Fly',2,12,15),tuple('Dumbbell Curl',2,10,15),tuple('Rear Delt Fly',2,12,20,3,75)];
   const PUSH=[tuple('Bench Press',3,6,10),tuple('Incline Dumbbell Press',3,8,12),tuple('Overhead Press',3,8,12),tuple('Lateral Raise',3,12,20),tuple('Triceps Pushdown',3,10,15)];
   const PULL=[tuple('Chest-Supported Row',3,8,12),tuple('Lat Pulldown',3,8,12),tuple('Seated Cable Row',2,10,15),tuple('Rear Delt Fly',3,12,20),tuple('Dumbbell Curl',3,10,15)];
   const LEGS=[tuple('Back Squat',3,6,10),tuple('Romanian Deadlift',3,8,12),tuple('Leg Press',3,10,15),tuple('Lying Leg Curl',3,10,15),tuple('Standing Calf Raise',3,10,15)];

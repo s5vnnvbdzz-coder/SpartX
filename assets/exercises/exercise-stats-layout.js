@@ -145,6 +145,33 @@ function drawHistory(){
   return '<article class="sx-exercise-history-row"><div><strong>'+escape(p.isLive?'Today · Live':longDate(p.date))+'</strong><span>'+escape(p.name||exerciseName)+'</span></div><div><strong>'+escape(cardio()?display(totals.duration,'duration'):weight(totals.heaviest))+'</strong><span>'+escape(cardio()?display(totals[cardioMeasure()==='distanceKm'?'distance':cardioMeasure()],cardioMeasure()==='distanceKm'?'distance':cardioMeasure())+' · '+number(p.sets?.length||0)+' intervals':number(p.sets?.length||0)+' sets · '+weight(p.volume))+'</span></div></article>';
  }).join(''):'<p>No workouts logged for this exercise yet.</p>');
 }
+// A brief weight convention directly underneath the Summary subtitle.
+function drawWeightLoggingSummary(){
+ const el=$('sxExerciseLoggingSummaryNote');
+ if(!el)return;
+ const info=window.SpartanXExerciseLoggingGuide?.get(exerciseName,preferences.weight);
+ const unit=preferences.weight==='lb'?'lb':'kg';
+ let note='';
+ switch(info?.kind){
+  case 'two-dumbbells':
+   note='How to log: 10 '+unit+' per dumbbell = 20 '+unit+' total. Log the combined weight.';
+   break;
+  case 'independent-sides':
+   note='How to log: 40 '+unit+' per side = 80 '+unit+' total. Log the combined weight.';
+   break;
+  case 'one-dumbbell':
+   note='How to log: One 10 '+unit+' dumbbell = 10 '+unit+' logged. Do not double a single-arm load.';
+   break;
+  case 'single-side':
+   note='How to log: 40 '+unit+' on the working side = 40 '+unit+' logged.';
+   break;
+  case 'variable-dumbbell':
+   note='How to log: One 10 '+unit+' dumbbell = 10 '+unit+'; two 10 '+unit+' dumbbells = 20 '+unit+' total.';
+   break;
+ }
+ el.hidden=!note;
+ el.textContent=note;
+}
 function drawHowTo(muscles){
  const el=$('sxExerciseHowTo');
  el.replaceChildren();
@@ -184,7 +211,7 @@ function render(name,list,isLive,muscles){
  $('sxExerciseChartRange').value='3m';
  $('exerciseHistorySubtitle').textContent=points.filter(x=>!x.isLive).length+' logged workouts'+(points.some(x=>x.isLive)?(cardio()?' · Live cardio intervals included':' · Live sets included'):'');
  $('exerciseHistoryMuscles').innerHTML=cardio()?'<strong>CARDIO SESSION</strong><span>Time, '+(cardioMeasure()==='floors'?'floors climbed':cardioMeasure()==='steps'?'steps climbed':'distance')+' and calories recorded separately from strength stats</span>':'<strong>MUSCLES WORKED</strong><span>'+escape(muscleNames(muscles.primary)||'Not classified')+' · '+escape(muscleNames(muscles.secondary)||'None')+'</span>';
- drawMetric();records();drawHowTo(muscles);showTab('summary');
+ drawWeightLoggingSummary();drawMetric();records();drawHowTo(muscles);showTab('summary');
 }
 $('exerciseMetricTabs').addEventListener('click',e=>{
  const b=e.target.closest('[data-exercise-metric]');if(!b)return;

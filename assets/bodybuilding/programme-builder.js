@@ -84,14 +84,14 @@
   });
   function openPowerbuilding(){
     renderCompanion();
-    if(typeof window.switchScreen==='function')window.switchScreen('sxPowerbuildingScreen',{instant:true});
-    else powerScreen.classList.add('active');
+    if(typeof window.spartanxNavigateScreen==='function')window.spartanxNavigateScreen('sxPowerbuildingScreen',{instant:true});
+    else {document.querySelectorAll('.screen.active').forEach(el=>el.classList.remove('active'));powerScreen.classList.add('active');}
     window.scrollTo(0,0);
   }
   function backPowerbuilding(){
-    if(typeof window.returnToScreen==='function')window.returnToScreen('workout');
-    else if(typeof window.switchScreen==='function')window.switchScreen('workout',{back:true,instant:true});
-    else powerScreen.classList.remove('active');
+    if(typeof window.spartanxReturnToScreen==='function')window.spartanxReturnToScreen('workout');
+    else if(typeof window.spartanxNavigateScreen==='function')window.spartanxNavigateScreen('workout',{back:true,instant:true});
+    else {powerScreen.classList.remove('active');document.getElementById('workout')?.classList.add('active');}
   }
   function renderPowerHero(cycle,prefs){
     const host=$('sxPBHero');if(!host)return;
@@ -121,7 +121,7 @@
      (pref?.powerbuilding?'ENABLED':'OPTIONAL')+'</span></div>'+
      '<p class="sx-programme-meta">'+(cycle?
       esc(cycle.lifts.join(' · '))+' · '+(pref?.trainingDays||4)+' training days/week':
-      'Build an AscensionX cycle to unlock coordinated strength and muscle-building sessions.')+'</p>'+
+      'Connect a six-week AscensionX strength cycle for tailored sessions built around its selected main lifts.')+'</p>'+
      '<div class="sx-programme-footer"><span class="sx-programme-next">'+
      (pref?.powerbuilding?'COORDINATED TRAINING ACTIVE':'RECOVERY-AWARE SUPPORTING WORK')+'</span>'+
      '<button type="button" class="sx-programme-continue" data-pb-open>VIEW / CONFIGURE ›</button></div>';
@@ -155,7 +155,7 @@
           '<button type="button" class="sx-bb-secondary" data-pb-support="'+i+'">START</button>':'')+
         '</div>').join(''):
         '<p class="sx-bb-help sx-pb-warning">'+esc(schedule.message)+'</p>')+
-      '<p class="sx-bb-help">This is a scheduling suggestion, not a guarantee of complete recovery. Change days when session performance or fatigue indicates a conflict.</p></div>'+
+      '<p class="sx-bb-help">Warm-up and ramp-up sets for the main lift are provided by AscensionX, not counted as accessory working sets here. This is scheduling guidance, not a recovery guarantee; adjust around fatigue and performance.</p></div>'+
       '<div class="sx-bb-companion-config"><label class="sx-bb-companion-toggle">'+
       '<input type="checkbox" id="sxBBCompanionEnabled" '+(prefs.enabled?'checked':'')+'>'+
       '<span><strong>ENABLE LINKED ACCESSORIES</strong><small>Load additional hypertrophy work only when importing an AscensionX compound lift</small></span></label>'+
@@ -271,10 +271,10 @@
     const next=progress?.days.find(d=>d.dayId===progress.dayId);
     card.classList.remove('sx-programme-upcoming');
     card.setAttribute('aria-label','Strength and Bodybuilding programme builder');
-    card.innerHTML='<div class="sx-programme-head"><div><div class="sx-programme-kicker">STRENGTH · HYPERTROPHY</div>'+
+    card.innerHTML='<div class="sx-programme-head"><div><div class="sx-programme-kicker">INDEPENDENT · 8-WEEK TRAINING</div>'+
       '<h3 class="sx-programme-title">Strength &amp; Bodybuilding</h3></div><span class="sx-programme-tag">'+
       (active?(progress.finished?'PROGRAMME COMPLETE':'PROGRAMME ACTIVE'):'READY TO BUILD')+'</span></div>'+
-      '<p class="sx-programme-meta">'+(active?esc(active.name)+' · '+active.days+' days/week · '+active.weeks+' weeks':'Build a fully editable hypertrophy training programme.')+'</p>'+
+      '<p class="sx-programme-meta">'+(active?esc(active.name)+' · '+active.days+' days/week · '+active.weeks+' weeks':'Build a fully editable standalone strength and hypertrophy programme.')+'</p>'+
       (active?'<div class="sx-programme-progressline"><span>PROGRAMME PROGRESS</span><strong>'+percent+'%</strong></div>'+
       '<div class="sx-programme-progress" role="progressbar" aria-label="Bodybuilding programme completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><span style="width:'+percent+'%"></span></div>':'')+
       '<div class="sx-programme-footer"><span class="sx-programme-next">'+
@@ -299,16 +299,16 @@
     store=M.read();selectedId=store.activeId;
     mode=store.programmes.length?'view':'edit';draft=mode==='edit'?M.fresh({name:'8-Week Upper / Lower Bodybuilding'}):null;dirty=false;
     render();
-    if(typeof window.switchScreen==='function')window.switchScreen('sxBodybuildingBuilder',{instant:true});
-    else screen.classList.add('active');
+    if(typeof window.spartanxNavigateScreen==='function')window.spartanxNavigateScreen('sxBodybuildingBuilder',{instant:true});
+    else {document.querySelectorAll('.screen.active').forEach(el=>el.classList.remove('active'));screen.classList.add('active');}
     window.scrollTo(0,0);
   }
   function back(){
     if(mode==='edit'&&dirty&&!window.confirm('Discard unsaved programme changes?'))return;
     pickerClose();draft=null;dirty=false;
-    if(typeof window.returnToScreen==='function')window.returnToScreen('workout');
-    else if(typeof window.switchScreen==='function')window.switchScreen('workout',{back:true,instant:true});
-    else screen.classList.remove('active');
+    if(typeof window.spartanxReturnToScreen==='function')window.spartanxReturnToScreen('workout');
+    else if(typeof window.spartanxNavigateScreen==='function')window.spartanxNavigateScreen('workout',{back:true,instant:true});
+    else {screen.classList.remove('active');document.getElementById('workout')?.classList.add('active');}
   }
   function newProgramme(){
     if(mode==='edit'&&dirty&&!window.confirm('Discard unsaved programme changes?'))return;

@@ -95,8 +95,10 @@ test('Powerbuilding opt-in enables only cycle-scoped accessories',()=>{
  assert.equal(p.trainingDays,5);
  const items=A.forImport({source:'AscensionX',cycleId:p.cycleId,exercise:'Back Squat',week:2},
   ['Leg Press'],win.localStorage);
- assert(items.some(x=>x.name==='Standing Calf Raise'));
+ assert(items.some(x=>x.name==='Lying Leg Curl'));
+ assert(items.some(x=>x.name==='Leg Extension'));
  assert(!items.some(x=>x.name==='Leg Press'));
+ assert(!items.some(x=>/Back Squat|Romanian Deadlift/i.test(x.name)));
  assert(items.every(x=>!x.ascensionLink&&x.sets.every(s=>s.done===false)));
 });
 test('never adds companion volume in the sixth week',()=>{
@@ -108,5 +110,52 @@ test('saved programme remains independent of the companion',()=>{
  assert.equal(store.programmes.length,1);
  assert.equal(store.programmes[0].weeks,8);
  assert.equal(A.cycle(win.localStorage).lifts.length,4);
+});
+test('coach-style lower sessions use 11 and 10-11 working sets',()=>{
+ for(const [days,expected] of [[4,[11,11]],[5,[11,10]]]){
+  const programme=M.fresh({days,weeks:8});
+  const actual=programme.sessions.filter(day=>/^(Lower|Legs)/.test(day.name))
+    .map(day=>day.exercises.reduce((count,ex)=>count+ex.sets,0));
+  assert.deepEqual(actual,expected);
+ }
+});
+test('rebalancing existing programmes is opt-in and retains upper-day edits',()=>{
+ const programme=M.fresh({days:4,weeks:8});
+ const upper=programme.sessions[0],lower=programme.sessions[1];
+ upper.exercises[0].startingKg=125;
+ lower.exercises[0].startingKg=160;
+ const updated=M.rebalanceLegDays(programme);
+ assert.equal(updated.sessions[0],upper);
+ assert.equal(updated.sessions[1].id,lower.id);
+ assert.equal(updated.sessions[1].exercises[0].startingKg,160);
+ assert.equal(programme.sessions[0].exercises[0].startingKg,125);
+});
+test('coach-style squat stays away from redundant heavy lower compounds',()=>{
+ const items=A.plan('Back Squat',2,{powerbuilding:true,lifts:A.cycle(win.localStorage).lifts});
+ assert.deepEqual(items.map(ex=>ex.name),['Lying Leg Curl','Leg Extension','Walking Lunge']);
+ assert.equal(items.reduce((total,ex)=>total+ex.sets,0),6);
+});
+test('bench press avoids duplicate shoulder strength day when OHP selected',()=>{
+ const mainLifts=A.cycle(win.localStorage).lifts;
+ assert.equal(A.plan('Bench Press',2,{powerbuilding:true,lifts:mainLifts})
+   .some(ex=>ex.name==='Shoulder Press'),false);
+ assert.equal(A.plan('Bench Press',2,{powerbuilding:true,lifts:['Bench Press']})
+   .some(ex=>ex.name==='Shoulder Press'),true);
+});
+test('fourth day becomes Upper B when no AscensionX overhead press is selected',()=>{
+ win.localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{
+  created:'2026-11-11T12:00:00.000Z',
+  exercises:['Back Squat','Bench Press','Deadlift'],
+  currentWeek:3,weeks:{'Back Squat':3,'Bench Press':3,'Deadlift':3}
+ }}));
+ const proposed=A.schedule(4,win.localStorage);
+ assert.equal(proposed.valid,true);
+ assert.equal(proposed.slots[3].title,'Upper B · Hypertrophy');
+ assert.equal(proposed.slots[3].exercises.length,6);
+ assert.equal(proposed.slots[3].exercises.reduce((sum,ex)=>sum+ex.sets,0),12);
+});
+test('accessory working sets taper ahead of AscensionX peak',()=>{
+ assert.equal(A.plan('Back Squat',5,{powerbuilding:true}).reduce((total,ex)=>total+ex.sets,0),1);
+ assert.deepEqual(A.plan('Back Squat',6,{powerbuilding:true}),[]);
 });
 console.log('Passed '+checks+' training integration tests.');

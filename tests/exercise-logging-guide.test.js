@@ -80,14 +80,18 @@ test('exercise title is text-only in CSS across active workout themes',()=>{
  assert(css.includes('flex:0 1 auto!important'));
  assert(css.includes('.sx-exercise-menu-trigger'));
 });
-test('exercise-title click shows guide, with View Statistics still available',()=>{
- assert(html.includes('window.showExerciseLoggingGuide(link.dataset.liveExerciseLink)'));
- assert(html.includes('window.showExerciseLoggingGuide=name=>'));
- assert(source.includes("global.showExercisePR(ex)"));
- assert(source.includes("BACK TO WORKOUT"));
- assert(source.includes('VIEW STATISTICS'));
- assert(source.includes("e.key==='Escape'"));
+test('exercise-title click opens statistics directly and Summary has inline note',()=>{
+ assert(html.includes('window.showExercisePR(link.dataset.liveExerciseLink)'));
+ assert(!html.includes('window.showExerciseLoggingGuide(link.dataset.liveExerciseLink)'));
+ assert(html.includes('id="sxExerciseLoggingSummaryNote"'));
  assert(html.includes('exercise-logging-guide.css?v=303'));
  assert(html.includes('exercise-logging-guide.js?v=303'));
+ const stats=fs.readFileSync('assets/exercises/exercise-stats-layout.js','utf8');
+ const style=fs.readFileSync('assets/exercises/exercise-stats-layout.css','utf8');
+ assert(stats.includes('function drawWeightLoggingSummary()'));
+ assert(stats.includes("'How to log: 10 '+unit+' per dumbbell = 20 '+unit+' total."));
+ assert(stats.includes("'How to log: 40 '+unit+' per side = 80 '+unit+' total."));
+ assert(stats.includes('drawWeightLoggingSummary();drawMetric()'));
+ assert(style.includes('#sxExerciseLoggingSummaryNote:not([hidden])'));
 });
 console.log('Passed '+n+' exercise logging guidance tests.');

@@ -92,7 +92,7 @@ const render=(ex,i,unit,escape,previousSets=[],allExercises=[])=>{
  return '<article class="exercise-card sx-cardio-card"><div class="exercise-title-row">'+
   '<div class="exercise-avatar" aria-hidden="true">🏃</div>'+
   '<span role="button" tabindex="0" class="exercise-title sx-exercise-stats-link" data-live-exercise-link="'+escape(ex.name)+
-  '" aria-label="How to log '+escape(ex.name)+' and view statistics">'+escape(ex.name)+'</span>'+
+  '" aria-label="View statistics for '+escape(ex.name)+'">'+escape(ex.name)+'</span>'+
   '<button type="button" class="exercise-menu secondary small sx-exercise-menu-trigger" onclick="openExerciseActions('+i+')" aria-label="Options for '+escape(ex.name)+'" aria-haspopup="dialog">⋮</button></div>'+
   (window.SXActiveExerciseActions?.badge?.(allExercises,i)?
    '<div class="sx-superset-banner"><strong>'+escape(window.SXActiveExerciseActions.badge(allExercises,i).label)+'</strong>'+

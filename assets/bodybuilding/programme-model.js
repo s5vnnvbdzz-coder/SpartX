@@ -30,22 +30,28 @@
     tuple('Cable Lateral Raise',3,12,20,2,75),tuple('Cable Curl',2,10,15),
     tuple('Overhead Triceps Extension',2,10,15)
   ];
+  // Balanced lower-body prescription: 11 sets/day instead of 17.
+  // One heavy primary lift, one posterior-chain exercise, then controlled assistance.
   const L_A=[
-    tuple('Back Squat',3,6,10,2,180),tuple('Romanian Deadlift',3,8,12,2,150),
-    tuple('Leg Press',3,10,15,2,150),tuple('Seated Leg Curl',3,10,15),
-    tuple('Standing Calf Raise',3,10,15),tuple('Pallof Press',2,10,15,3,75)
+    tuple('Back Squat',3,6,10,2,180),tuple('Romanian Deadlift',2,8,12,3,150),
+    tuple('Seated Leg Curl',2,10,15,3,90),
+    tuple('Standing Calf Raise',2,10,15,2,75),tuple('Pallof Press',2,10,15,3,75)
   ];
   const L_B=[
-    tuple('Hack Squat',3,8,12,2,150),tuple('Hip Thrust',3,8,12),
-    tuple('Bulgarian Split Squat',3,8,12),tuple('Lying Leg Curl',3,10,15),
-    tuple('Seated Calf Raise',3,10,15),tuple('Pallof Press',2,10,15,3,75)
+    tuple('Hack Squat',3,8,12,2,150),tuple('Bulgarian Split Squat',2,8,12,3,120),
+    tuple('Lying Leg Curl',2,10,15,3,90),
+    tuple('Seated Calf Raise',2,10,15,2,75),tuple('Pallof Press',2,10,15,3,75)
   ];
   const FULL_A=[tuple('Back Squat',3,6,10),tuple('Bench Press',3,6,10),tuple('Chest-Supported Row',3,8,12),tuple('Seated Leg Curl',2,10,15),tuple('Lateral Raise',2,12,20),tuple('Cable Curl',2,10,15)];
   const FULL_B=[tuple('Romanian Deadlift',3,8,12),tuple('Incline Dumbbell Press',3,8,12),tuple('Lat Pulldown',3,8,12),tuple('Leg Extension',2,10,15),tuple('Overhead Triceps Extension',2,10,15),tuple('Standing Calf Raise',2,10,15),tuple('Pallof Press',2,10,15,3,75)];
   const FULL_C=[tuple('Leg Press',3,10,15),tuple('Overhead Press',3,6,10),tuple('Seated Cable Row',3,8,12),tuple('Hip Thrust',2,8,12),tuple('Chest Fly',2,12,15),tuple('Dumbbell Curl',2,10,15),tuple('Rear Delt Fly',2,12,20,3,75)];
   const PUSH=[tuple('Bench Press',3,6,10),tuple('Incline Dumbbell Press',3,8,12),tuple('Overhead Press',3,8,12),tuple('Lateral Raise',3,12,20),tuple('Triceps Pushdown',3,10,15)];
   const PULL=[tuple('Chest-Supported Row',3,8,12),tuple('Lat Pulldown',3,8,12),tuple('Seated Cable Row',2,10,15),tuple('Rear Delt Fly',3,12,20),tuple('Dumbbell Curl',3,10,15)];
-  const LEGS=[tuple('Back Squat',3,6,10),tuple('Romanian Deadlift',3,8,12),tuple('Leg Press',3,10,15),tuple('Lying Leg Curl',3,10,15),tuple('Standing Calf Raise',3,10,15)];
+  // Second 5-day leg session prioritises lower-fatigue machines rather than
+  // repeating both heavy squats and RDLs in the same training week.
+  const LEGS=[tuple('Leg Press',2,10,15,3,150),tuple('Hip Thrust',2,8,12,3,120),
+    tuple('Leg Extension',2,12,15,2,90),tuple('Lying Leg Curl',2,10,15,3,90),
+    tuple('Standing Calf Raise',2,10,15,2,75)];
   const TEMPLATES={
     3:[['Full Body A',FULL_A],['Full Body B',FULL_B],['Full Body C',FULL_C]],
     4:[['Upper A',U_A],['Lower A',L_A],['Upper B',U_B],['Lower B',L_B]],
@@ -67,6 +73,24 @@
       }
       return {id:uid(),name:label,exercises:list};
     });
+  }
+  /* Explicitly opt-in to balancing the lower sessions on an existing
+     programme. Keep upper days, workout history, and exercise identity for
+     retained movements untouched. Not persisted until the user presses Save. */
+  function rebalanceLegDays(program){
+    if(!program||!Array.isArray(program.sessions))return null;
+    const replacement=buildDays(program.days,program.priority);
+    const sessions=program.sessions.map((day,i)=>{
+      if(!/^(lower|legs)(?: [ab])?$/i.test(String(day?.name||'')))return day;
+      const template=replacement[i];
+      if(!template||!/^(lower|legs)(?: [ab])?$/i.test(template.name))return day;
+      const exercises=template.exercises.map(item=>{
+        const prior=(day.exercises||[]).find(ex=>String(ex.name).toLowerCase()===item.name.toLowerCase());
+        return prior?{...item,id:prior.id,startingKg:prior.startingKg,restSeconds:prior.restSeconds}:item;
+      });
+      return {...day,exercises};
+    });
+    return {...program,sessions};
   }
   function fresh(options={}){
     const kind=KINDS.includes(options.kind)?options.kind:defaults.kind;
@@ -210,5 +234,5 @@
       plannedCount:slots.length};
   }
   global.SXBodybuildingModel=Object.freeze({KEY,DAYS,WEEKS,KINDS,PRIORITIES,EXPERIENCES,
-    fresh,buildDays,exercise,normalize,read,write,save,remove,activate,summary,linkedSession,completion,progress});
+    fresh,buildDays,rebalanceLegDays,exercise,normalize,read,write,save,remove,activate,summary,linkedSession,completion,progress});
 })(window);

@@ -2289,7 +2289,8 @@ function captureLiveWorkoutForEdit(){
   activeCycle:activeCycle?JSON.parse(JSON.stringify(activeCycle)):null,
   restPreviewExercise,
   rest:running?.interval&&running.remaining>0?
-   {exercise:activeRestExercise,remaining:Math.max(1,Math.ceil((running.deadline-Date.now())/1000)),phase:running.phase||''}:null
+   {exercise:activeRestExercise,remaining:Math.max(1,Math.ceil((running.deadline-Date.now())/1000)),
+    phase:running.phase||'',nextSupersetIndex:running.nextSupersetIndex??null}:null
  };
 }
 function beginHistoricalWorkoutEdit(session){
@@ -2328,7 +2329,8 @@ function restoreWorkoutAfterHistoryEdit(){
   restPreviewExercise=saved.restPreviewExercise??null;
   if(saved.rest&&work[saved.rest.exercise]){
    const i=saved.rest.exercise,remaining=Math.max(1,Math.ceil(Number(saved.rest.remaining)||1));
-   const timer={deadline:Date.now()+remaining*1000,remaining,interval:null,phase:saved.rest.phase||''};
+   const timer={deadline:Date.now()+remaining*1000,remaining,interval:null,
+    phase:saved.rest.phase||'',nextSupersetIndex:saved.rest.nextSupersetIndex??null};
    activeRestExercise=i;exerciseTimers[i]=timer;
    attachRestCountdown(i,timer);
   }
@@ -2683,7 +2685,7 @@ function remapActiveExerciseTimer(order){
  if(timer){
   const nextIndex=Number.isInteger(timer.nextSupersetIndex)?
     order.indexOf(timer.nextSupersetIndex):-1;
-  if(nextIndex<0)delete timer.nextSupersetIndex;
+  if(nextIndex<0){delete timer.nextSupersetIndex;if(timer.phase==='SUPERSET')timer.phase='';}
   else timer.nextSupersetIndex=nextIndex;
   const newIndex=order.indexOf(oldActive);
   if(newIndex>=0&&timer.deadline>Date.now()){
@@ -2703,6 +2705,7 @@ function reconcileSupersetRest(){
     ![activeRestExercise,badge.partnerIndex].includes(timer.nextSupersetIndex)){
   delete timer.nextSupersetIndex;
   delete timer.supersetGroupId;
+  if(timer.phase==='SUPERSET')timer.phase='';
  }
  updateFloatingRestTimer();
 }
@@ -2840,7 +2843,8 @@ function snapshotActiveRest(){
  return {
   exercise:activeRestExercise,deadline,
   remaining:Math.max(0,Math.ceil((deadline-Date.now())/1000)),
-  phase:String(timer.phase||'')
+  phase:String(timer.phase||''),
+  nextSupersetIndex:Number.isInteger(timer.nextSupersetIndex)?timer.nextSupersetIndex:null
  };
 }
 const REST_SOUND_KEY='spartx_rest_sound_enabled_v1';
@@ -2910,7 +2914,9 @@ function updateFloatingRestTimer(){
  bar.classList.toggle('hidden',!visible);
  if(!visible)return;
  $('floatingRestTime').textContent=fmtTime(timer.remaining);
- $('floatingRestExercise').textContent='REST · '+(work[activeRestExercise]?.name||'WORKOUT')+(timer.phase?' · '+timer.phase:'');
+ $('floatingRestExercise').textContent=Number.isInteger(timer.nextSupersetIndex)&&work[timer.nextSupersetIndex]?
+  'SUPERSET · NEXT: '+work[timer.nextSupersetIndex].name:
+  'REST · '+(work[activeRestExercise]?.name||'WORKOUT')+(timer.phase?' · '+timer.phase:'');
 }
 window.completeSet=(i,j,done)=>{
  restPreviewExercise=i;
@@ -2925,7 +2931,9 @@ window.completeSet=(i,j,done)=>{
   alert('Enter a valid '+window.SpartanXCardio.metricName(work[i].name,preferences.distance).toLowerCase()+' value and time before completing this cardio set.');
   return;
  }
- if(done&&editingSessionId===null&&!window.SpartanXCardio?.isCardio(work[i].name))startRest(i,j);updateLiveStats();saveDraft();
+ if(done&&editingSessionId===null&&(!window.SpartanXCardio?.isCardio(work[i].name)||
+  window.SXActiveExerciseActions?.badge(work,i)))startRest(i,j);
+ updateLiveStats();saveDraft();
 };
 function isNumberedWorkoutSet(set){
  // W/B/F are special even when a stored or imported set uses their short codes.
@@ -2960,6 +2968,7 @@ function attachRestCountdown(i,timer){
    clearInterval(timer.interval);timer.interval=null;
    if(navigator.vibrate)navigator.vibrate([200,100,200]);
    if(!document.hidden)playRestCompleteSound();
+   if(Number.isInteger(timer.nextSupersetIndex))sxActiveActionsUI?.flashNext(timer.nextSupersetIndex);
    activeRestExercise=null;
    saveDraft();
   }
@@ -2971,10 +2980,16 @@ window.startRest=(i,completedSetIndex)=>{
  if(!work[i]||!sessionActive||editingSessionId!==null)return;
  restPreviewExercise=i;prepareRestSound();
  for(const t of Object.values(exerciseTimers))if(t?.interval)clearInterval(t.interval);
- exerciseTimers={};
- const plan=ascensionRestPlan(i,completedSetIndex);
- const duration=plan.seconds;
- const timer={deadline:Date.now()+duration*1000,remaining:duration,interval:null,phase:plan.phase};
+ exerciseTimers={};activeRestExercise=null;
+ const superset=window.SXActiveExerciseActions?.badge(work,i);
+ const next=superset?window.SXActiveExerciseActions.next(work,i,completedSetIndex):null;
+ // No extra countdown once both members' planned working sets are complete.
+ if(superset&&!next&&work[i]?.sets?.[completedSetIndex]?.type!=='Warm-up'){
+  updateFloatingRestTimer();saveDraft();return;
+ }
+ const plan=ascensionRestPlan(i,completedSetIndex),duration=plan.seconds;
+ const timer={deadline:Date.now()+duration*1000,remaining:duration,interval:null,
+  phase:next?'SUPERSET':plan.phase,nextSupersetIndex:next?.index??null};
  activeRestExercise=i;exerciseTimers[i]=timer;
  attachRestCountdown(i,timer);
  saveDraft();
@@ -3089,7 +3104,9 @@ function restoreDraft(){let d;try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||
  if(editingSessionId===null && rest && Number.isInteger(index)&&index>=0&&index<work.length&&
     Number.isFinite(deadline)&&deadline>Date.now()&&deadline-Date.now()<7200000){
    const timer={deadline,remaining:Math.ceil((deadline-Date.now())/1000),
-     interval:null,phase:String(rest.phase||'')};
+     interval:null,phase:String(rest.phase||''),
+     nextSupersetIndex:Number.isInteger(rest.nextSupersetIndex)&&rest.nextSupersetIndex>=0&&
+       rest.nextSupersetIndex<work.length?rest.nextSupersetIndex:null};
    activeRestExercise=index;exerciseTimers[index]=timer;attachRestCountdown(index,timer);
  }
  }if(d.profileEditor){$('profileNameInput').value=d.profileEditor.name||'';$('profileBioInput').value=d.profileEditor.bio||'';if(d.profileEditor.pendingPhoto){$('editProfileOverlay').dataset.pendingPhoto=d.profileEditor.pendingPhoto;$('editProfileAvatar').innerHTML='<img src="'+d.profileEditor.pendingPhoto+'" alt="Profile picture preview">';}$('profileBioCount').textContent=$('profileBioInput').value.length+' / 210';/* keep editor drafts, but NEVER auto-open the editor on app startup */}}catch(e){}finally{restoringDraft=false;}}
@@ -3822,7 +3839,10 @@ window.pickExercise=name=>{
   if(change.source531&&activeCycle)notices.push('This removes the 5/3/1 cycle link so a substitute cannot complete the original lift.');
   if(change.unlinksBodybuilding)notices.push('A cardio replacement will not count towards the original bodybuilding exercise.');
   if(notices.length&&!confirm('Replace '+old.name+' with '+name+'?\\n\\n'+notices.join('\\n')+'\\n\\nOther exercises and the workout timer are unaffected.'))return;
+  // Replacing one member dissolves its pair; never leave an orphan badge.
+  work=window.SXActiveExerciseActions?.removePair(work,index)||work;
   work[index]=change.exercise;
+  reconcileSupersetRest();
   if(change.source531&&activeCycle)activeCycle=null;
   pendingReplacementIndex=null;
   returnToScreen('activeWorkout');

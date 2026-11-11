@@ -38,6 +38,13 @@ body:has(#exerciseHistoryScreen.screen.active) #trackerNav{display:none!importan
 #exerciseHistoryScreen .sx-exercise-info-banner{
  margin:0 0 21px;padding:0;font-size:11px;line-height:1.5;color:var(--muted);
 }
+/* Simple, unboxed logging hint under the Summary workout count. */
+#exerciseHistoryScreen #sxExerciseLoggingSummaryNote:not([hidden]){
+ display:block;margin:-10px 0 20px;padding:0;
+ background:none;border:0;box-shadow:none;
+ color:var(--muted);font-size:11px;line-height:1.55;
+}
+#exerciseHistoryScreen #sxExerciseLoggingSummaryNote[hidden]{display:none!important}
 #exerciseHistoryScreen .sx-exercise-chart-intro{
  display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;
 }

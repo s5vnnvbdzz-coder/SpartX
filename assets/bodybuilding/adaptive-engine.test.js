@@ -29,7 +29,7 @@ test('3/4/5-day templates cover all major muscles',()=>{
   const p=M.fresh({days,weeks:8});
   assert.equal(p.sessions.length,days);
   assert.equal(p.weeks,8);
-  assert.deepEqual(E.coverage(p).missing,[]);
+  assert.equal(E.coverage(p).missing.length,0);
  }
 });
 test('progresses weights only when full target with RPE',()=>{
@@ -102,7 +102,7 @@ test('Powerbuilding opt-in enables only cycle-scoped accessories',()=>{
  assert(items.every(x=>!x.ascensionLink&&x.sets.every(s=>s.done===false)));
 });
 test('never adds companion volume in the sixth week',()=>{
- assert.deepEqual(A.plan('Deadlift',6,{powerbuilding:true}),[]);
+ assert.equal(A.plan('Deadlift',6,{powerbuilding:true}).length,0);
 });
 test('saved programme remains independent of the companion',()=>{
  const p=M.fresh({days:4,weeks:8});
@@ -116,7 +116,7 @@ test('coach-style lower sessions use 11 and 10-11 working sets',()=>{
   const programme=M.fresh({days,weeks:8});
   const actual=programme.sessions.filter(day=>/^(Lower|Legs)/.test(day.name))
     .map(day=>day.exercises.reduce((count,ex)=>count+ex.sets,0));
-  assert.deepEqual(actual,expected);
+  assert.deepEqual(Array.from(actual),expected);
  }
 });
 test('rebalancing existing programmes is opt-in and retains upper-day edits',()=>{
@@ -132,7 +132,7 @@ test('rebalancing existing programmes is opt-in and retains upper-day edits',()=
 });
 test('coach-style squat stays away from redundant heavy lower compounds',()=>{
  const items=A.plan('Back Squat',2,{powerbuilding:true,lifts:A.cycle(win.localStorage).lifts});
- assert.deepEqual(items.map(ex=>ex.name),['Lying Leg Curl','Leg Extension','Walking Lunge']);
+ assert.deepEqual(Array.from(items,ex=>ex.name),['Lying Leg Curl','Leg Extension','Walking Lunge']);
  assert.equal(items.reduce((total,ex)=>total+ex.sets,0),6);
 });
 test('bench press avoids duplicate shoulder strength day when OHP selected',()=>{
@@ -156,6 +156,6 @@ test('fourth day becomes Upper B when no AscensionX overhead press is selected',
 });
 test('accessory working sets taper ahead of AscensionX peak',()=>{
  assert.equal(A.plan('Back Squat',5,{powerbuilding:true}).reduce((total,ex)=>total+ex.sets,0),1);
- assert.deepEqual(A.plan('Back Squat',6,{powerbuilding:true}),[]);
+ assert.equal(A.plan('Back Squat',6,{powerbuilding:true}).length,0);
 });
 console.log('Passed '+checks+' training integration tests.');

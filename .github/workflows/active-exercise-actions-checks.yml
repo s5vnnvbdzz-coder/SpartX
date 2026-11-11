@@ -1,0 +1,54 @@
+name: SpartanX Active Exercise Actions and Supersets
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'assets/cardio/cardio.js'
+      - 'assets/workouts/active-exercise-actions.js'
+      - 'assets/workouts/active-exercise-actions.css'
+      - 'tests/active-exercise-actions.test.js'
+      - 'tests/active-exercise-actions.mobile.py'
+      - 'tests/iso-lateral-row-library.test.js'
+      - '.github/workflows/active-exercise-actions-checks.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'assets/cardio/cardio.js'
+      - 'assets/workouts/active-exercise-actions.js'
+      - 'assets/workouts/active-exercise-actions.css'
+      - 'tests/active-exercise-actions.test.js'
+      - 'tests/active-exercise-actions.mobile.py'
+      - 'tests/iso-lateral-row-library.test.js'
+      - '.github/workflows/active-exercise-actions-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  training-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check assets/workouts/active-exercise-actions.js
+          node --check assets/cardio/cardio.js
+          node --check tests/active-exercise-actions.test.js
+          node --check tests/iso-lateral-row-library.test.js
+      - name: Exercise management and new machine movement tests
+        run: |
+          node tests/active-exercise-actions.test.js
+          node tests/iso-lateral-row-library.test.js
+      - name: iPhone-sized Chrome UI smoke test
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+          google-chrome --version
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/spartanx-mobile-test-server.log 2>&1 &
+          python3 tests/active-exercise-actions.mobile.py

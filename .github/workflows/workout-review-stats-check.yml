@@ -59,7 +59,12 @@ jobs:
             assert appearance['background'] in ('rgba(0, 0, 0, 0)','transparent'),appearance
             assert 20<appearance['width']<appearance['parentWidth']/2,appearance
             click('#exerciseList [data-live-exercise-link]')
-            assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')"),'Exercise name must open statistics'
+            # Build 303 shows the How to Log sheet first; the Statistics action
+            # retains the original exercise history and live metrics flow.
+            if run("return !!document.querySelector('#sxExerciseLogGuide:not([hidden])')"):
+              assert run("return document.querySelector('#sxLogGuideExample').textContent.length>0")
+              click('#sxLogGuideStats')
+            assert run("return document.querySelector('#exerciseHistoryScreen').classList.contains('active')"),'Exercise statistics must remain accessible'
             assert run("return document.querySelector('#exerciseHistoryTitle').textContent")=='Squat'
             assert run("return document.querySelector('#sxExercisePersonalRecords').textContent.includes('Heaviest Weight')")
             assert run("return document.querySelector('#exerciseHistorySubtitle').textContent.includes('Live sets')")

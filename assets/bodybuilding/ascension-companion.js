@@ -160,11 +160,15 @@
     if(count<lifts.length)return {valid:false,message:
       'Your AscensionX cycle has '+lifts.length+' primary lifts, but you selected '+count+
       ' training days. Choose at least '+lifts.length+' days so separately imported main lifts are not combined unsafely.',slots:[]};
-    const week=Math.max(1,Math.min(6,Number(active.currentWeek)||1));
+    const liftWeek=lift=>{
+      const match=Object.entries(active.weeks||{}).find(([key])=>canonical(key)===lift);
+      return Math.max(1,Math.min(6,Number(match?.[1]||active.currentWeek)||1));
+    };
+    const week=Math.max(1,...lifts.map(liftWeek));
     const slots=WEEKDAYS[count].map((day,index)=>{
       const lift=lifts[index];
-      return lift?{day,kind:'ascension',title:lift+' · AscensionX',lift,
-        exercises:plan(lift,week,{volume:preferenceData.volume,powerbuilding:true})}:
+      return lift?{day,kind:'ascension',title:lift+' · AscensionX · Week '+liftWeek(lift),lift,
+        week:liftWeek(lift),exercises:plan(lift,liftWeek(lift),{volume:preferenceData.volume,powerbuilding:true})}:
         {day,kind:'support',title:index===count-1?'Arms, Calves & Core':'Controlled Hypertrophy',
         lift:null,exercises:supportExercises(index-lifts.length,week)};
     });

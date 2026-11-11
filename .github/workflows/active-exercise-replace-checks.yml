@@ -1,0 +1,39 @@
+name: SpartanX active exercise replacement
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'assets/cardio/cardio.js'
+      - 'assets/workouts/exercise-replacement.js'
+      - 'assets/bodybuilding/adaptive-engine.js'
+      - 'tests/active-exercise-replacement.test.js'
+      - '.github/workflows/active-exercise-replace-checks.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/cardio/cardio.js'
+      - 'assets/workouts/exercise-replacement.js'
+      - 'assets/bodybuilding/adaptive-engine.js'
+      - 'tests/active-exercise-replacement.test.js'
+      - '.github/workflows/active-exercise-replace-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replacement-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check replacement scripts
+        run: |
+          node --check assets/workouts/exercise-replacement.js
+          node --check assets/cardio/cardio.js
+          node --check assets/bodybuilding/adaptive-engine.js
+      - name: Test safe exercise replacement
+        run: node tests/active-exercise-replacement.test.js

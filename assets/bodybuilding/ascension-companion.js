@@ -131,7 +131,7 @@
     const exercises=base.map(item=>({...item}));
     if(opts.powerbuilding&&main==='Bench Press'&&!selected.includes('Overhead Press')){
       const index=exercises.findIndex(item=>item.name==='Rear Delt Fly');
-      if(index>=0)exercises[index]={name:'Shoulder Press',sets:2,min:8,max:12,rir:3,rest:120};
+      if(index>=0)exercises[index]={name:'Seated Dumbbell Shoulder Press',sets:2,min:8,max:12,rir:3,rest:120};
     }
     return exercises.map((item,index)=>{
       // During peak week, one low-fatigue accessory per lift.

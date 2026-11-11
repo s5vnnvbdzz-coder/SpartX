@@ -32,7 +32,9 @@
     '<label>PROGRAMME LENGTH<select id="sxBBWeeks" data-bb-field="weeks"><option value="4">4 weeks</option><option value="6">6 weeks</option><option value="8">8 weeks</option><option value="12">12 weeks</option></select></label></div>',
     '<label>TRAINING PRIORITY<select id="sxBBPriority" data-bb-field="priority"><option value="balanced">Balanced development</option><option value="upper">Upper-body emphasis</option><option value="lower">Lower-body emphasis</option></select></label>',
     '<p class="sx-bb-help">Changing training days rebuilds the exercise split. Changing priority does not overwrite your edited exercises until you choose Rebuild Template.</p>',
-    '<button type="button" class="sx-bb-secondary" data-bb-action="rebuild">↻ REBUILD TEMPLATE</button></article>',
+    '<button type="button" class="sx-bb-secondary" data-bb-action="rebuild">↻ REBUILD ALL TRAINING DAYS</button>'+
+    '<button type="button" id="sxBBBalanceLegs" class="sx-bb-secondary sx-bb-balance-legs" data-bb-action="balance-legs">BALANCE LEG DAYS ONLY</button>'+
+    '<p class="sx-bb-help">The balanced lower-volume template uses 11 working sets per lower day (10 on the second leg day of a 5-day plan). Existing saved programmes are never changed automatically.</p></article>',
     '<article class="card"><div class="eyebrow">PROGRESSION METHODOLOGY</div><h2>Double progression</h2>',
     '<p>Increase reps within a planned range. When all working sets reach the upper target with appropriate effort and technique, consider the next available load.</p>',
     '<p class="sx-bb-help">Eight-week plans adapt working sets and RIR by phase. Completed reps, load and RPE inform the next workout; adjustments are recommendations, not silent changes to saved programmes.</p>',
@@ -54,18 +56,64 @@
   companionCard.id='sxBBAscensionCompanion';
   companionCard.className='card sx-bb-companion-card';
   companionCard.hidden=true;
-  screen.appendChild(companionCard);
+  // The two training systems have independent, fully navigable screens.
+  // Bodybuilding manages 8-week standalone plans; Powerbuilding manages the
+  // live six-week AscensionX cycle and does not create a second standalone plan.
+  const powerScreen=document.createElement('section');
+  powerScreen.id='sxPowerbuildingScreen';
+  powerScreen.className='screen sx-bb-screen sx-pb-screen';
+  powerScreen.setAttribute('aria-label','AscensionX Powerbuilding dashboard');
+  powerScreen.innerHTML='<header class="sx-bb-header sx-pb-header">'+
+    '<button type="button" class="sx-bb-back" data-pb-back>← WORKOUT</button>'+
+    '<div><div class="eyebrow">ASCENSIONX · CONNECTED STRENGTH TRAINING</div>'+
+    '<h1>Powerbuilding</h1></div><span class="sx-bb-pill">6-WEEK CYCLE</span></header>'+
+    '<p class="sx-bb-subtitle">Build muscle around your existing AscensionX main lifts. This dashboard never changes the weights or progression of your strength cycle.</p>'+
+    '<div id="sxPBHero"></div>';
+  main.appendChild(powerScreen);
+  powerScreen.appendChild(companionCard);
+  powerScreen.addEventListener('click',event=>{
+    if(event.target.closest('[data-pb-back]'))backPowerbuilding();
+  });
   const powerCard=document.createElement('section');
   powerCard.id='sxPowerbuildingProgrammeCard';
   powerCard.className='card sx-programme-card sx-pb-card';
   powerCard.setAttribute('aria-label','AscensionX Powerbuilding programme');
   card.insertAdjacentElement('afterend',powerCard);
   powerCard.addEventListener('click',event=>{
-    if(!event.target.closest('[data-pb-open]'))return;
-    open();
-    const el=document.getElementById('sxBBAscensionCompanion');
-    if(el&&!el.hidden)el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(event.target.closest('[data-pb-open]'))openPowerbuilding();
   });
+  function openPowerbuilding(){
+    renderCompanion();
+    if(typeof window.switchScreen==='function')window.switchScreen('sxPowerbuildingScreen',{instant:true});
+    else powerScreen.classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function backPowerbuilding(){
+    if(typeof window.returnToScreen==='function')window.returnToScreen('workout');
+    else if(typeof window.switchScreen==='function')window.switchScreen('workout',{back:true,instant:true});
+    else powerScreen.classList.remove('active');
+  }
+  function renderPowerHero(cycle,prefs){
+    const host=$('sxPBHero');if(!host)return;
+    if(!cycle){
+      host.innerHTML='<article class="card sx-pb-hero sx-pb-no-cycle">'+
+        '<div class="eyebrow">STEP 1 · ASCENSIONX</div><h2>No active AscensionX cycle</h2>'+
+        '<p>Create or activate your chosen squat, bench, deadlift and/or overhead press cycle from the Workout page. Then return here to link supporting hypertrophy work.</p>'+
+        '<button type="button" class="sx-bb-secondary" data-pb-back>RETURN TO WORKOUT</button></article>';
+      return;
+    }
+    const api=window.SXAscensionCompanion;
+    host.innerHTML='<article class="card sx-pb-hero"><div class="eyebrow">ASCENSIONX · ACTIVE STRENGTH CYCLE</div>'+
+      '<h2>Build strength. Add size. Manage fatigue.</h2>'+
+      '<p>Your main lifts stay in AscensionX; Powerbuilding schedules optional accessories and support-only sessions around them.</p>'+
+      '<div class="sx-pb-hero-lifts">'+cycle.lifts.map(lift=>{
+        const w=Object.entries(cycle.weeks).find(([name])=>api.canonical(name)===lift);
+        const week=Math.max(1,Math.min(6,Number(w?.[1]||cycle.currentWeek)||1));
+        return '<span><strong>'+esc(lift)+'</strong><small>Week '+week+' / 6</small></span>';
+      }).join('')+'</div>'+
+      '<div class="sx-pb-status">'+(prefs.powerbuilding?'POWERBUILDING ENABLED':'POWERBUILDING OFF · OPTIONAL')+
+      ' · '+prefs.trainingDays+' TRAINING DAYS</div></article>';
+  }
   function renderPowerCard(){
     const api=window.SXAscensionCompanion,cycle=api?.cycle?.(),pref=api?.preference?.();
     powerCard.innerHTML='<div class="sx-programme-head"><div><div class="sx-programme-kicker">ASCENSIONX · INTELLIGENT POWERBUILDING</div>'+
@@ -81,17 +129,18 @@
   function renderCompanion(){
     const api=window.SXAscensionCompanion;
     const cycle=api?.cycle?.();
-    if(!cycle){companionCard.hidden=true;renderPowerCard();return}
+    if(!cycle){companionCard.hidden=true;renderPowerCard();renderPowerHero(null,null);return}
     companionCard.hidden=false;
     const prefs=api.preference();
+    renderPowerHero(cycle,prefs);
     const schedule=api.schedule(prefs.trainingDays);
     renderPowerCard();
     const currentWeeks=cycle.lifts.map(lift=>{
       const item=Object.entries(cycle.weeks).find(([key])=>api.canonical(key)===lift);
       return {lift,week:Math.max(1,Math.min(6,Number(item?.[1]||cycle.currentWeek)||1))};
     });
-    companionCard.innerHTML='<div class="eyebrow">ASCENSIONX · COORDINATED TRAINING</div>'+
-      '<h2>Powerbuilding &amp; Linked Accessories</h2>'+
+    companionCard.innerHTML='<div class="eyebrow">POWERBUILDING · TRAINING CONTROL</div>'+
+      '<h2>Programme configuration</h2>'+
       '<p class="sx-bb-help">Designed around the compound lifts selected in your active AscensionX cycle. Primary lift loads, training maxes and AscensionX week completion are never changed.</p>'+
       '<div class="sx-pb-config"><label class="sx-bb-companion-toggle">'+
       '<input type="checkbox" id="sxBBPowerEnabled" '+(prefs.powerbuilding?'checked':'')+'>'+
@@ -328,6 +377,7 @@
     $('sxBBExperience').value=p.experience;$('sxBBDays').value=String(p.days);
     $('sxBBWeeks').value=String(p.weeks);$('sxBBPriority').value=p.priority;
     $('sxBBDraftStats').innerHTML=statsHTML(p);
+    $('sxBBBalanceLegs').hidden=![4,5,6].includes(Number(p.days));
     const muscle=E?.coverage?.(p);
     $('sxBBMuscleCoverage').textContent=muscle?
       (muscle.missing.length?'MUSCLE COVERAGE TO REVIEW: '+muscle.missing.join(', ')+'. Add appropriate exercises before saving.':
@@ -336,7 +386,8 @@
     $('sxBBEditorDays').innerHTML=p.sessions.map((day,i)=>
       '<article class="card sx-bb-day sx-bb-edit-day"><div class="sx-bb-day-heading">'+
         '<span class="sx-bb-day-index">DAY '+(i+1)+'</span><input maxlength="65" data-bb-day-name="'+i+'" aria-label="Day '+(i+1)+' name" value="'+esc(day.name)+'">'+
-        '<span class="sx-bb-day-count">'+day.exercises.length+' EXERCISES</span></div>'+
+        '<span class="sx-bb-day-count">'+day.exercises.length+' EXERCISES · '+
+          day.exercises.reduce((total,ex)=>total+Number(ex.sets||0),0)+' SETS</span></div>'+
         '<div class="sx-bb-day-body">'+day.exercises.map((ex,j)=>
           '<div class="sx-bb-exercise"><div class="sx-bb-ex-top"><div><strong>'+esc(ex.name)+'</strong><small>PRIMARY: '+esc(muscles(ex.name))+'</small></div>'+
           '<div class="sx-bb-ex-actions">'+
@@ -414,8 +465,13 @@
     if(action==='add')return pickerOpen(day);
     if(action==='pick')return pickerChoose(el.dataset.exerciseName);
     if(action==='rebuild'){
-      if(!draft||!window.confirm('Replace your unsaved exercise edits with a new template?'))return;
+      if(!draft||!window.confirm('Replace ALL training days with the current balanced templates? Any unsaved exercise edits will be lost.'))return;
       draft.sessions=M.buildDays(draft.days,draft.priority);dirty=true;renderEdit();return;
+    }
+    if(action==='balance-legs'){
+      if(!draft||![4,5,6].includes(Number(draft.days)))return;
+      if(!window.confirm('Replace only Lower / Legs training days with the lighter, balanced defaults? Upper days and completed workouts remain untouched. Review the exercises, then Save Programme to apply.'))return;
+      draft=M.rebalanceLegDays(draft);dirty=true;renderEdit();return;
     }
     const list=draft?.sessions?.[day]?.exercises;
     if(!list||!Number.isInteger(idx)||idx<0||idx>=list.length)return;
@@ -473,16 +529,15 @@
     store=M.read();selectedId=store.activeId;
     if(screen.classList.contains('active')&&mode!=='edit')render();else cardRender();
   });
-  window.SXBodybuildingProgrammes=Object.freeze({open,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender();renderCompanion()},storageKey:M.KEY});
+  window.SXBodybuildingProgrammes=Object.freeze({open,openPowerbuilding,refresh:()=>{store=M.read();selectedId=store.activeId;cardRender();renderCompanion()},storageKey:M.KEY});
   cardRender();
   renderCompanion();
-  // Intelligence may deep-link directly into the existing builder.
+  // Intelligence links open the relevant distinct programme dashboard.
   const launch=new URLSearchParams(window.location.search).get('sxOpen');
   if(launch==='bodybuilding'||launch==='powerbuilding'){
     requestAnimationFrame(()=>{
-      open();
-      if(launch==='powerbuilding'&&!companionCard.hidden)
-        companionCard.scrollIntoView({behavior:'auto',block:'start'});
+      if(launch==='powerbuilding')openPowerbuilding();
+      else open();
     });
   }
 })();

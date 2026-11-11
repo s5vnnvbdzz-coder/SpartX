@@ -9,7 +9,8 @@
   const n=String(name||'').trim(),low=n.toLowerCase(),u=label(unit);
   const single=/(?:single[ -]?arm|one[ -]?arm|one[ -]?hand|single[ -]?hand|unilateral)/i.test(n);
   const iso=/(?:iso[ -]?lateral|iso[ -]?loaded)/i.test(n);
-  const dumbbell=/(?:dumbbell|\bdb\b|arnold press)/i.test(n);
+  const dumbbell=/(?:dumbbell|\bdb\b|arnold press)/i.test(n)||
+   /^(?:hammer curl|cross-body hammer curl|lateral raise|concentration curl)$/i.test(n);
   const plates=/(?:plate[ -]?loaded)/i.test(n);
   const cardio=/(?:stairmaster|treadmill|rowing machine|bike|cross trainer|ski.?erg)/i.test(n);
   if(iso&&!single){
@@ -24,11 +25,17 @@
     example:'60 '+u+' on the working arm = 60 '+u+' logged.',
     note:'Record each side consistently, including when you perform matching repetitions with both arms.'};
   }
-  if(dumbbell&&single){
+  if(dumbbell&&(single||/^concentration curl$/i.test(n))){
    return {kind:'one-dumbbell',title:'Log the actual dumbbell in use',
     description:'When an exercise uses one dumbbell at a time, enter that dumbbell’s weight for the set. Do not double a single-arm load.',
     example:'One 20 '+u+' dumbbell = 20 '+u+' logged.',
     note:'If you use two dumbbells at the same time instead, log their combined weight.'};
+  }
+  if(/^dumbbell row$/i.test(n)){
+   return {kind:'variable-dumbbell',title:'Log the dumbbells actually used',
+    description:'For a one-arm dumbbell row, log the single dumbbell you row with. If you row with a dumbbell in each hand, log both dumbbells combined.',
+    example:'One 40 '+u+' dumbbell = 40 '+u+' logged. Two 20 '+u+' dumbbells = 40 '+u+' logged.',
+    note:'Only add two weights when you are using two dumbbells. Use the same method each session.'};
   }
   if(dumbbell){
    return {kind:'two-dumbbells',title:'Log both dumbbells combined',
@@ -42,7 +49,7 @@
     example:'Record floors, steps or distance and the time completed, as applicable.',
     note:'Cardio uses its own interval fields rather than combined dumbbell or plate weight.'};
   }
-  if(/barbell|deadlift|squat|bench press|overhead press|ohp/i.test(low)){
+  if(/barbell|deadlift|^(?:back|front|pause|tempo|box|safety bar|smith machine) squat$|^bench press$|^overhead press$|^ohp$/i.test(low)){
    return {kind:'barbell',title:'Record the total barbell weight',
     description:'Use the complete load lifted, including the bar and all weight plates, not just the plates on one side.',
     example:'20 '+u+' bar + 20 '+u+' of plates on each end = 60 '+u+' logged.',

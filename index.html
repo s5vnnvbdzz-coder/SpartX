@@ -3011,7 +3011,13 @@ $('restPlus15').addEventListener('click',()=>adjustFloatingRestTimer(15));
 $('restClose').addEventListener('click',()=>{if(activeRestExercise!==null)skipRest(activeRestExercise)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeRestExercise!==null){
  const timer=exerciseTimers[activeRestExercise];
- if(timer){timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));if(timer.remaining===0)skipRest(activeRestExercise);}
+ if(timer){
+  timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));
+  if(timer.remaining===0){
+   if(Number.isInteger(timer.nextSupersetIndex))sxActiveActionsUI?.flashNext(timer.nextSupersetIndex);
+   skipRest(activeRestExercise);
+  }
+ }
  updateFloatingRestTimer();
 }});
 window.addEventListener('pageshow',()=>{
@@ -3020,7 +3026,10 @@ window.addEventListener('pageshow',()=>{
  const timer=exerciseTimers[activeRestExercise];
  if(!timer)return;
  timer.remaining=Math.max(0,Math.ceil((timer.deadline-Date.now())/1000));
- if(!timer.remaining){window.skipRest(activeRestExercise);return}
+ if(!timer.remaining){
+  if(Number.isInteger(timer.nextSupersetIndex))sxActiveActionsUI?.flashNext(timer.nextSupersetIndex);
+  window.skipRest(activeRestExercise);return;
+ }
  updateFloatingRestTimer();
 });
 const exerciseNames=[

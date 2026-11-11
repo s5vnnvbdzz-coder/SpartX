@@ -92,14 +92,16 @@ test('substituted movement performance never advances a different planned moveme
  assert.equal(prescribed.startingKg,40);
  assert.equal(prescribed.recommendation.status,'baseline');
 });
-test('both workout exercise cards show Replace instead of X, using existing library',()=>{
- assert(html.includes("onclick=\"replaceExercise('+i+')\""));
- assert(cardioSource.includes("onclick=\"replaceExercise('+i+')\""));
+test('both workout cards expose Replace through the options menu and existing exercise library',()=>{
+ assert(html.includes("onclick=\"openExerciseActions('+i+')\""));
+ assert(cardioSource.includes("onclick=\"openExerciseActions('+i+')\""));
  assert(!cardioSource.includes("onclick=\"removeEx('+i+')\""));
+ assert(html.includes('onReplace:i=>window.replaceExercise(i)'));
+ assert(html.includes('window.replaceExercise=i=>'));
  assert(html.includes('pendingReplacementIndex'));
  assert(html.includes("returnFromExerciseLibrary()"));
  assert(html.includes('window.SpartanXExerciseReplacement?.prepare'));
  assert(html.includes('window.spartanxNavigateScreen'));
- assert(html.includes('sx-replace-exercise'));
+ assert(html.includes('sx-exercise-menu-trigger'));
 });
 console.log('Passed '+checks+' active exercise replacement checks.');

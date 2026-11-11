@@ -138,19 +138,34 @@
   /* Powerbuilding is scheduling guidance, not a second AscensionX cycle.
      Each primary lift remains owned by its own existing AscensionX import. */
   const WEEKDAYS={3:['MON','WED','SAT'],4:['MON','TUE','THU','SAT'],5:['MON','TUE','THU','SAT','SUN']};
-  function supportExercises(position,week){
+  function supportExercises(position,week,lifts=[],lastDay=false){
     if(week>=5)return [];
-    const slots=[
-      [{name:'Machine Chest Press',sets:2,min:10,max:15,rir:3,rest:90},
-       {name:'Seated Cable Row',sets:2,min:10,max:15,rir:3,rest:90},
-       {name:'Leg Extension',sets:2,min:12,max:15,rir:3,rest:90},
-       {name:'Standing Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}],
-      [{name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
-       {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
-       {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75},
-       {name:'Seated Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}]
+    // Keep the day immediately before the next week light on lower-body
+    // and spinal loading. Heavy compound work belongs to AscensionX.
+    const low=[
+      {name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Seated Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}
     ];
-    return slots[position%slots.length].map(item=>({...item,sets:week===4?1:item.sets}));
+    const balanced=[
+      {name:'Machine Chest Press',sets:2,min:10,max:15,rir:3,rest:90},
+      {name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75},
+      {name:'Standing Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}
+    ];
+    let items=lastDay?low:balanced;
+    // Supply a missing lower-body movement only when no AscensionX squat is
+    // prescribed, rather than layering redundant heavy work onto squat day.
+    if(!lifts.includes('Back Squat')){
+      const lower={name:'Leg Press',sets:2,min:10,max:15,rir:3,rest:120};
+      items=lastDay?[lower,...items.slice(0,3)]:[lower,...items.slice(1)];
+    }
+    if(!lifts.includes('Back Squat')&&!lifts.includes('Deadlift')){
+      const curl={name:'Seated Leg Curl',sets:2,min:10,max:15,rir:3,rest:90};
+      items=[...items.slice(0,items.length-1),curl];
+    }
+    return items.map(item=>({...item,sets:week===4?1:item.sets}));
   }
   function schedule(days,storage=global.localStorage){
     const active=cycle(storage),preferenceData=preference(storage);
@@ -170,7 +185,7 @@
       return lift?{day,kind:'ascension',title:lift+' · AscensionX · Week '+liftWeek(lift),lift,
         week:liftWeek(lift),exercises:plan(lift,liftWeek(lift),{volume:preferenceData.volume,powerbuilding:true})}:
         {day,kind:'support',title:index===count-1?'Arms, Calves & Core':'Controlled Hypertrophy',
-        lift:null,exercises:supportExercises(index-lifts.length,week)};
+        lift:null,exercises:supportExercises(index-lifts.length,week,lifts,index===count-1)};
     });
     return {valid:true,message:'A suggested weekly layout: move sessions when needed and reassess effort, soreness and performance.',week,slots};
   }

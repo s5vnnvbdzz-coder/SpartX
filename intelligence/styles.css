@@ -520,3 +520,19 @@ tr:last-child td{border:0}
  .sx-session-metrics strong{font-size:17px}
  .sx-session-trend-panel .compact-select{width:100%;max-width:none}
 }
+
+
+/* Programme handoff from read-only Intelligence to the SpartanX workout builder. */
+.sx-programme-intelligence-entry{margin:18px 0;padding:24px}
+.sx-programme-intelligence-entry h3{margin:8px 0 9px}
+.sx-programme-intelligence-entry p{font-size:12px;line-height:1.7;max-width:750px}
+.sx-programme-intelligence-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+.sx-programme-intelligence-actions a{
+ display:inline-flex;justify-content:center;align-items:center;min-height:43px;
+ padding:11px 15px;border:1px solid var(--gold);border-radius:9px;
+ background:var(--surface2);color:var(--gold);font-weight:850;font-size:11px;
+ letter-spacing:.5px;text-decoration:none;
+}
+.sx-programme-intelligence-actions a:hover,.sx-programme-intelligence-actions a:focus-visible{
+ background:var(--surface3);outline:2px solid var(--gold);outline-offset:2px;
+}

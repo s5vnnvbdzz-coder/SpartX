@@ -138,9 +138,9 @@ test('coach-style squat stays away from redundant heavy lower compounds',()=>{
 test('bench press avoids duplicate shoulder strength day when OHP selected',()=>{
  const mainLifts=A.cycle(win.localStorage).lifts;
  assert.equal(A.plan('Bench Press',2,{powerbuilding:true,lifts:mainLifts})
-   .some(ex=>ex.name==='Shoulder Press'),false);
+   .some(ex=>ex.name==='Seated Dumbbell Shoulder Press'),false);
  assert.equal(A.plan('Bench Press',2,{powerbuilding:true,lifts:['Bench Press']})
-   .some(ex=>ex.name==='Shoulder Press'),true);
+   .some(ex=>ex.name==='Seated Dumbbell Shoulder Press'),true);
 });
 test('fourth day becomes Upper B when no AscensionX overhead press is selected',()=>{
  win.localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{

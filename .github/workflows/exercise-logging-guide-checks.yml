@@ -1,0 +1,51 @@
+name: SpartanX How to Log and Active Exercise Title
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'assets/cardio/cardio.js'
+      - 'assets/exercises/exercise-logging-guide.js'
+      - 'assets/exercises/exercise-logging-guide.css'
+      - 'assets/exercises/exercise-stats-layout.js'
+      - 'tests/exercise-logging-guide.test.js'
+      - 'tests/exercise-logging-guide.mobile.py'
+      - '.github/workflows/exercise-logging-guide-checks.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'sw.js'
+      - 'assets/cardio/cardio.js'
+      - 'assets/exercises/exercise-logging-guide.js'
+      - 'assets/exercises/exercise-logging-guide.css'
+      - 'assets/exercises/exercise-stats-layout.js'
+      - 'tests/exercise-logging-guide.test.js'
+      - 'tests/exercise-logging-guide.mobile.py'
+      - '.github/workflows/exercise-logging-guide-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exercise-logging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/exercises/exercise-logging-guide.js
+          node --check assets/exercises/exercise-stats-layout.js
+          node --check assets/cardio/cardio.js
+      - name: Test combined dumbbell and independent machine loads
+        run: node tests/exercise-logging-guide.test.js
+      - name: Verify iPhone UI and active rest timer
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+          google-chrome --version
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/spartanx-guide-server.log 2>&1 &
+          python3 tests/exercise-logging-guide.mobile.py

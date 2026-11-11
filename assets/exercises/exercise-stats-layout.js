@@ -151,7 +151,20 @@ function drawHowTo(muscles){
  const heading=document.createElement('h2');heading.textContent='Exercise information';
  const summary=document.createElement('p');summary.textContent=cardio()?'Record the time, '+(cardioMeasure()==='floors'?'floors climbed':cardioMeasure()==='steps'?'steps climbed':'distance')+' and optional calories from your machine. Each interval appears in your exercise history.':'Primary muscles: '+(muscleNames(muscles.primary)||'Not classified')+'. Secondary muscles: '+(muscleNames(muscles.secondary)||'Not classified')+'.';
  const note=document.createElement('p');note.textContent='Exercise-specific video instructions have not been added yet. This section will use the SpartanX exercise library.';
- el.append(heading,summary,note);
+ el.append(heading,summary);
+ const guideApi=window.SpartanXExerciseLoggingGuide;
+ if(guideApi?.get){
+  let weightUnit='kg';
+  try{weightUnit=JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}').weight==='lb'?'lb':'kg'}catch(_){}
+  const info=guideApi.get(exerciseName,weightUnit);
+  const logHeading=document.createElement('h2');logHeading.textContent='How to log';
+  const logRule=document.createElement('strong');logRule.textContent=info.title;
+  const logDescription=document.createElement('p');logDescription.textContent=info.description;
+  const example=document.createElement('p');example.textContent='Example: '+info.example;
+  const logNote=document.createElement('p');logNote.textContent=info.note;
+  el.append(logHeading,logRule,logDescription,example,logNote);
+ }
+ el.append(note);
 }
 function showTab(tab){
  activeTab=tab;

@@ -1,0 +1,100 @@
+/* SpartanX Build 303 — exercise titles are text, not outlined cards.
+   Apply after all theme styles so active exercise headings stay genuinely bare
+   on every user-selected theme, including iPhone Safari and premium themes. */
+body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link],
+body #activeWorkout #exerciseList .exercise-title-row > span.exercise-title[data-live-exercise-link],
+body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link]:hover,
+body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link]:active,
+body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link]:focus,
+body #activeWorkout #exerciseList .exercise-title-row > button.exercise-title[data-live-exercise-link]:focus-visible{
+ -webkit-appearance:none!important;appearance:none!important;
+ display:block!important;flex:0 1 auto!important;
+ min-width:0!important;min-height:0!important;width:auto!important;height:auto!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-width:0!important;border-color:transparent!important;
+ border-radius:0!important;
+ outline:0!important;outline-offset:0!important;
+ background:none!important;background-image:none!important;background-color:transparent!important;
+ box-shadow:none!important;text-shadow:inherit;
+ text-align:left!important;line-height:1.25!important;
+ color:var(--lime)!important;cursor:pointer;
+ -webkit-tap-highlight-color:transparent!important;
+}
+body #activeWorkout #exerciseList .exercise-title-row > [data-live-exercise-link]::before,
+body #activeWorkout #exerciseList .exercise-title-row > [data-live-exercise-link]::after{
+ content:none!important;display:none!important;border:0!important;box-shadow:none!important;
+}
+body #activeWorkout #exerciseList .exercise-title-row > .sx-exercise-menu-trigger{
+ margin-left:auto!important;
+}
+body #activeWorkout #exerciseList .exercise-title-row > [data-live-exercise-link]:focus-visible{
+ text-decoration:underline!important;text-decoration-thickness:2px!important;
+ text-underline-offset:5px!important;
+}
+#sxExerciseLogGuide[hidden]{display:none!important}
+#sxExerciseLogGuide{
+ position:fixed;inset:0;z-index:2147483647;
+ display:flex;align-items:flex-end;justify-content:center;
+ background:rgba(0,0,0,.7);
+ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+body.sx-exercise-log-guide-open #trackerNav{visibility:hidden!important;pointer-events:none!important}
+#sxExerciseLogGuide .sx-log-guide-panel{
+ width:min(100%,640px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - 22px);
+ overflow:auto;-webkit-overflow-scrolling:touch;
+ border:1px solid color-mix(in srgb,var(--lime) 28%,var(--line));border-bottom:0;
+ border-radius:25px 25px 0 0;
+ background:var(--panel);color:var(--txt);
+ padding:14px 18px calc(20px + env(safe-area-inset-bottom,0px));
+ box-shadow:0 -15px 45px #0009;
+}
+#sxExerciseLogGuide .sx-log-guide-grip{
+ width:48px;height:5px;border-radius:5px;margin:0 auto 20px;
+ background:var(--muted);opacity:.6;
+}
+#sxExerciseLogGuide .sx-log-guide-kicker{
+ font-size:10px;letter-spacing:1.2px;font-weight:900;color:var(--lime);
+}
+#sxExerciseLogGuide h2{
+ font-size:24px;font-weight:900;color:var(--txt);margin:9px 0 6px;
+}
+#sxExerciseLogGuide h3{
+ font-size:15px;color:var(--lime);font-weight:800;line-height:1.5;margin:0 0 20px;
+}
+#sxExerciseLogGuide #sxLogGuideRule{
+ display:block;font-size:15px;line-height:1.4;color:var(--txt);font-weight:850;
+}
+#sxExerciseLogGuide p{font-size:13px;color:var(--muted);line-height:1.65;margin:12px 0}
+#sxExerciseLogGuide .sx-log-guide-example{
+ background:color-mix(in srgb,var(--lime) 9%,var(--panel2));
+ border:1px solid color-mix(in srgb,var(--lime) 30%,var(--line));
+ border-radius:12px;padding:12px 14px;margin:18px 0 14px;
+}
+#sxExerciseLogGuide .sx-log-guide-example span{
+ font-size:10px;font-weight:900;letter-spacing:1px;color:var(--lime);
+}
+#sxExerciseLogGuide .sx-log-guide-example p{
+ color:var(--txt);font-size:15px;font-weight:800;line-height:1.55;margin:6px 0 0;
+}
+#sxExerciseLogGuide #sxLogGuideNote{font-size:12px}
+#sxExerciseLogGuide .sx-log-guide-actions{
+ display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;
+}
+#sxExerciseLogGuide .sx-log-guide-actions button{
+ min-height:49px;padding:10px 7px!important;min-width:0;
+ border-radius:10px!important;font-size:11px;font-weight:900;letter-spacing:.35px;
+ color:var(--txt)!important;background:var(--panel2)!important;
+ border:1px solid var(--line)!important;
+}
+#sxExerciseLogGuide #sxLogGuideStats{
+ border-color:var(--lime)!important;
+ background:color-mix(in srgb,var(--lime) 13%,var(--panel2))!important;
+}
+#sxExerciseLogGuide .sx-log-guide-actions button:focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:2px;
+}
+@media(max-width:375px){
+ #sxExerciseLogGuide .sx-log-guide-panel{padding-left:14px;padding-right:14px}
+ #sxExerciseLogGuide .sx-log-guide-actions{gap:7px}
+ #sxExerciseLogGuide .sx-log-guide-actions button{font-size:10px}
+}

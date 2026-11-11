@@ -26,6 +26,31 @@
       {name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}
     ]
   };
+  // Coach-style sessions: the main lift and all its warm-up/ramp sets are
+  // already supplied by AscensionX. The following are accessory working sets.
+  const POWER_PROFILES={
+    'Back Squat':[
+      {name:'Lying Leg Curl',sets:2,min:10,max:15,rir:3,rest:90},
+      {name:'Leg Extension',sets:2,min:10,max:15,rir:3,rest:90},
+      {name:'Walking Lunge',sets:2,min:8,max:12,rir:3,rest:120}
+    ],
+    'Bench Press':[
+      {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:120},
+      {name:'Chest-Supported Row',sets:2,min:8,max:12,rir:3,rest:120},
+      {name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}
+    ],
+    'Deadlift':[
+      {name:'Lying Leg Curl',sets:2,min:10,max:15,rir:3,rest:90},
+      {name:'Standing Calf Raise',sets:2,min:12,max:20,rir:3,rest:75},
+      {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75}
+    ],
+    'Overhead Press':[
+      {name:'Incline Dumbbell Press',sets:2,min:8,max:12,rir:3,rest:120},
+      {name:'Dumbbell Row',sets:2,min:8,max:12,rir:3,rest:120},
+      {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75}
+    ]
+  };
   const canonical=name=>{
     const n=String(name||'').trim().toLowerCase();
     if(/^(?:back |barbell )?squats?$/.test(n))return 'Back Squat';
@@ -99,13 +124,16 @@
     const main=canonical(lift),w=Number(week);
     if(!main||!Number.isInteger(w)||w<1||w>6)return [];
     const volume=opts.volume==='low'?'low':'balanced';
-    const extra=opts.powerbuilding?{
-      'Back Squat':[{name:'Standing Calf Raise',sets:2,min:10,max:15,rir:3,rest:75}],
-      'Bench Press':[{name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75}],
-      'Deadlift':[{name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}],
-      'Overhead Press':[{name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75}]
-    }[main]:[];
-    return PROFILES[main].concat(extra||[]).map((item,index)=>{
+    // One AscensionX main lift plus supporting accessories; no additional
+    // heavy squats, Romanian deadlifts or leg press after the main squat.
+    const selected=Array.isArray(opts.lifts)?opts.lifts:[];
+    const base=opts.powerbuilding?POWER_PROFILES[main]:PROFILES[main];
+    const exercises=base.map(item=>({...item}));
+    if(opts.powerbuilding&&main==='Bench Press'&&!selected.includes('Overhead Press')){
+      const index=exercises.findIndex(item=>item.name==='Rear Delt Fly');
+      if(index>=0)exercises[index]={name:'Shoulder Press',sets:2,min:8,max:12,rir:3,rest:120};
+    }
+    return exercises.map((item,index)=>{
       // During peak week, one low-fatigue accessory per lift.
       const sets=w===5&&index>0?0:setCount(item.sets,w,volume);
       return {...item,sets,sourceLift:main,week:w};
@@ -121,7 +149,7 @@
     // Existing paused bench and RDL are owned by their original AscensionX
     // accessory modules. Neither is generated or modified here.
     const exists=new Set(existingNames.map(normName));
-    return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding})
+    return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding,lifts:active.lifts})
       .filter(item=>!exists.has(normName(item.name)))
       .map(item=>({
         name:item.name,rest:item.rest,
@@ -138,8 +166,21 @@
   /* Powerbuilding is scheduling guidance, not a second AscensionX cycle.
      Each primary lift remains owned by its own existing AscensionX import. */
   const WEEKDAYS={3:['MON','WED','SAT'],4:['MON','TUE','THU','SAT'],5:['MON','TUE','THU','SAT','SUN']};
-  function supportExercises(position,week,lifts=[],lastDay=false){
+  function supportExercises(position,week,lifts=[],lastDay=false,trainingDays=4){
     if(week>=5)return [];
+    // Upper B fills the coached fourth-day slot when AscensionX has no OHP.
+    // It is moderate hypertrophy work, not another 5/3/1-style main lift.
+    if(trainingDays===4&&lastDay&&lifts.includes('Bench Press')&&!lifts.includes('Overhead Press')){
+      const upper=[
+        {name:'Incline Dumbbell Press',sets:2,min:8,max:12,rir:3,rest:120},
+        {name:'Dumbbell Row',sets:2,min:8,max:12,rir:3,rest:120},
+        {name:'Machine Chest Press',sets:2,min:10,max:15,rir:3,rest:90},
+        {name:'Lat Pulldown',sets:2,min:10,max:15,rir:3,rest:90},
+        {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+        {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75}
+      ];
+      return upper.map(item=>({...item,sets:week===4?1:item.sets}));
+    }
     // Keep the day immediately before the next week light on lower-body
     // and spinal loading. Heavy compound work belongs to AscensionX.
     const low=[
@@ -183,13 +224,13 @@
     const slots=WEEKDAYS[count].map((day,index)=>{
       const lift=lifts[index];
       return lift?{day,kind:'ascension',title:lift+' · AscensionX · Week '+liftWeek(lift),lift,
-        week:liftWeek(lift),exercises:plan(lift,liftWeek(lift),{volume:preferenceData.volume,powerbuilding:true})}:
-        {day,kind:'support',title:index===count-1?'Arms, Calves & Core':'Controlled Hypertrophy',
-        lift:null,exercises:supportExercises(index-lifts.length,week,lifts,index===count-1)};
+        week:liftWeek(lift),exercises:plan(lift,liftWeek(lift),{volume:preferenceData.volume,powerbuilding:true,lifts})}:
+        {day,kind:'support',title:count===4&&index===count-1&&lifts.includes('Bench Press')&&!lifts.includes('Overhead Press')?'Upper B · Hypertrophy':index===count-1?'Arms, Calves & Core':'Controlled Hypertrophy',
+        lift:null,exercises:supportExercises(index-lifts.length,week,lifts,index===count-1,count)};
     });
     return {valid:true,message:'A suggested weekly layout: move sessions when needed and reassess effort, soreness and performance.',week,slots};
   }
   global.SXAscensionCompanion=Object.freeze({
-    STORAGE,CYCLE_STORAGE,LIFTS,PROFILES,canonical,cycle,preference,savePreference,plan,forImport,schedule,supportExercises
+    STORAGE,CYCLE_STORAGE,LIFTS,PROFILES,POWER_PROFILES,canonical,cycle,preference,savePreference,plan,forImport,schedule,supportExercises
   });
 })(window);

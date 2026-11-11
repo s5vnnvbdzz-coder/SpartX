@@ -31,7 +31,7 @@ function element(id){
   });
 }
 doc={activeElement:null,getElementById:element,querySelectorAll:()=>[],querySelector:()=>({scrollIntoView(){}}),addEventListener(){}};
-const win={localStorage:storage,addEventListener(){}};
+const win={localStorage:storage,location:{search:''},addEventListener(){}};
 new Function('window',engine)(win);
 new Function('window',bridge)(win);
 new Function('window',live)(win);

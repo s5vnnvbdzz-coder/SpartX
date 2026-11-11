@@ -60,7 +60,7 @@
         trainingDays:[3,4,5].includes(Number(saved.trainingDays))?Number(saved.trainingDays):4,
         volume:saved.volume==='low'?'low':'balanced',
         excluded:Array.isArray(saved.excluded)?saved.excluded.filter(x=>LIFTS.includes(x)) :[]};
-    }catch(_){return {cycleId:active.id,enabled:false,volume:'balanced',excluded:[]}}
+    }catch(_){return {cycleId:active.id,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]}}
   }
   function savePreference(update,storage=global.localStorage){
     const active=cycle(storage);
@@ -156,7 +156,7 @@
     const active=cycle(storage),preferenceData=preference(storage);
     if(!active)return {valid:false,message:'Create an AscensionX cycle before enabling Powerbuilding.',slots:[]};
     const count=[3,4,5].includes(Number(days))?Number(days):preferenceData.trainingDays;
-    const lifts=LIFTS.filter(l=>active.lifts.includes(l));
+    const lifts=(count===3?['Back Squat','Deadlift','Bench Press','Overhead Press']:LIFTS).filter(l=>active.lifts.includes(l));
     if(count<lifts.length)return {valid:false,message:
       'Your AscensionX cycle has '+lifts.length+' primary lifts, but you selected '+count+
       ' training days. Choose at least '+lifts.length+' days so separately imported main lifts are not combined unsafely.',slots:[]};

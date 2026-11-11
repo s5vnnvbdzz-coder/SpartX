@@ -46,7 +46,9 @@
    if(src?.programmeId!==link.programmeId||src?.dayId!==link.dayId ||
       !(Number(src.week)>=1&&Number(src.week)<week))continue;
    const matching=(session.exercises||[]).find(x=>x.bodybuildingLink?.exerciseId===ex.id);
-   if(!matching)continue;
+   // A swapped exercise satisfies its scheduled slot, but its weights must
+   // not progress the original movement in later programme weeks.
+   if(!matching||norm(matching.name)!==norm(ex.name))continue;
    const sets=(matching.sets||[]).filter(workSet);
    if(!sets.length)continue;
    records.push({week:Number(src.week),date:Date.parse(session.date||session.createdAt||session.savedAt||'')||0,

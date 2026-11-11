@@ -22,7 +22,7 @@ const ex={id:'ex1',name:'Incline Dumbbell Press',sets:3,repsMin:8,repsMax:12,rir
 const link={programmeId:'p1',dayId:'d1'};
 function session(week,reps,rpe=8,weight=40){
  return {date:'2026-11-'+String(week).padStart(2,'0'),bodybuildingLink:{...link,week},
-   exercises:[{bodybuildingLink:{...link,exerciseId:'ex1'},sets:reps.map(rep=>({weight,reps:rep,rpe,done:true,type:'Working Set'}))}]};
+   exercises:[{name:'Incline Dumbbell Press',bodybuildingLink:{...link,exerciseId:'ex1'},sets:reps.map(rep=>({weight,reps:rep,rpe,done:true,type:'Working Set'}))}]};
 }
 test('3/4/5-day templates cover all major muscles',()=>{
  for(const days of [3,4,5]){

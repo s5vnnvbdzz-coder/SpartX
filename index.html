@@ -2672,7 +2672,89 @@ function renderWork(){
  updateLiveStats();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-window.removeEx=i=>{if(activeRestExercise!==null)skipRest(activeRestExercise);for(const t of Object.values(exerciseTimers))if(t?.interval)clearInterval(t.interval);exerciseTimers={};work.splice(i,1);renderWork();saveDraft();};
+// Keep the existing rest deadline when exercises change order. The timer's
+// interval is reattached under the new index; the countdown is NOT restarted.
+function remapActiveExerciseTimer(order){
+ const oldActive=activeRestExercise,oldPreview=restPreviewExercise;
+ const timer=oldActive===null?null:exerciseTimers[oldActive];
+ for(const t of Object.values(exerciseTimers))if(t?.interval)clearInterval(t.interval);
+ exerciseTimers={};activeRestExercise=null;
+ restPreviewExercise=oldPreview===null?null:(order.indexOf(oldPreview)>=0?order.indexOf(oldPreview):null);
+ if(timer){
+  const nextIndex=Number.isInteger(timer.nextSupersetIndex)?
+    order.indexOf(timer.nextSupersetIndex):-1;
+  if(nextIndex<0)delete timer.nextSupersetIndex;
+  else timer.nextSupersetIndex=nextIndex;
+  const newIndex=order.indexOf(oldActive);
+  if(newIndex>=0&&timer.deadline>Date.now()){
+   timer.interval=null;
+   timer.remaining=Math.max(1,Math.ceil((timer.deadline-Date.now())/1000));
+   activeRestExercise=newIndex;exerciseTimers[newIndex]=timer;
+   attachRestCountdown(newIndex,timer);
+  }
+ }
+ updateFloatingRestTimer();
+}
+function reconcileSupersetRest(){
+ if(activeRestExercise===null)return;
+ const timer=exerciseTimers[activeRestExercise];if(!timer)return;
+ const badge=window.SXActiveExerciseActions?.badge(work,activeRestExercise);
+ if(!badge||!Number.isInteger(timer.nextSupersetIndex)||
+    ![activeRestExercise,badge.partnerIndex].includes(timer.nextSupersetIndex)){
+  delete timer.nextSupersetIndex;
+  delete timer.supersetGroupId;
+ }
+ updateFloatingRestTimer();
+}
+function applyActiveExerciseOrder(order){
+ const updated=window.SXActiveExerciseActions?.reorder(work,order);
+ if(!updated)return false;
+ work=updated;remapActiveExerciseTimer(order);
+ renderWork();saveDraft();return true;
+}
+function saveActiveSuperset(selected,origin){
+ const updated=window.SXActiveExerciseActions?.setPair(work,selected,origin);
+ if(!updated)return false;
+ work=updated;reconcileSupersetRest();
+ renderWork();saveDraft();return true;
+}
+function removeActiveSuperset(origin){
+ if(!work[origin]?.sxSupersetId)return false;
+ work=window.SXActiveExerciseActions.removePair(work,origin);
+ reconcileSupersetRest();renderWork();saveDraft();return true;
+}
+window.removeEx=i=>{
+ if(!Number.isInteger(i)||!work[i])return false;
+ const item=work[i];
+ const logged=window.SpartanXExerciseReplacement?.hasRecordedData(item);
+ const tracked=!!(item.ascensionLink||item.bodybuildingLink||item.sxPowerbuildingSupport||item.sxStrengthSizeCompanion);
+ const cycleMain=!!activeCycle&&/(?:SpartanX cycle:|Imported from SpartanX Tools)/i.test(item.notes||'');
+ if((logged||tracked||cycleMain)&&!confirm('Remove '+item.name+' from this workout?'+
+  (logged?'\\n\\nIts entered and completed sets will be lost.':'')+
+  (tracked||cycleMain?'\\n\\nThis may leave the linked programme exercise incomplete.':'')+
+  '\\n\\nOther exercises will be kept.'))return false;
+ if(cycleMain)activeCycle=null;
+ const order=work.map((_,index)=>index).filter(index=>index!==i);
+ work=window.SXActiveExerciseActions?.removePair(work,i)||work;
+ work=order.map(index=>work[index]);
+ remapActiveExerciseTimer(order);
+ reconcileSupersetRest();renderWork();saveDraft();
+ return true;
+};
+const sxActiveActionsUI=window.SXActiveExerciseActions?.create({
+ getWork:()=>work,
+ onNavigate:id=>switchScreen(id,{instant:true}),
+ onBack:()=>returnToScreen('activeWorkout'),
+ onReorder:applyActiveExerciseOrder,
+ onSuperset:saveActiveSuperset,
+ onRemoveSuperset:removeActiveSuperset,
+ onReplace:i=>window.replaceExercise(i),
+ onRemove:i=>window.removeEx(i)
+});
+window.openExerciseActions=i=>{
+ if(!sessionActive||!Number.isInteger(i)||!work[i])return;
+ sxActiveActionsUI?.openMenu(i);
+};
 window.setVal=(i,j,k,v)=>{work[i].sets[j][['weight','reps','rpe'][k]]=k===0?(v===''?'':weightValueToKg(+v).toFixed(3)):v;saveDraft();updateLiveStats()};
 let pendingSetType=null;window.openSetTypeSheet=(i,j)=>{pendingSetType={i,j};const sheet=$('setTypeSheet');sheet.classList.add('is-open');sheet.setAttribute('aria-hidden','false');};window.closeSetTypeSheet=()=>{const sheet=$('setTypeSheet');sheet.classList.remove('is-open');sheet.setAttribute('aria-hidden','true');pendingSetType=null;};$('setTypeSheet').querySelectorAll('[data-set-type]').forEach(btn=>btn.addEventListener('click',()=>{if(!pendingSetType)return;const {i,j}=pendingSetType;closeSetTypeSheet();window.setType(i,j,btn.dataset.setType);}));
 let pendingRpe=null;window.openRpeSheet=(i,j)=>{pendingRpe={i,j};const current=Number(work[i]?.sets[j]?.rpe);const value=current>=6&&current<=10?Math.round(current*2)/2:8;$('rpeSheetSlider').value=String(value);updateRpeSheetDescription(value);$('rpeSheet').classList.add('is-open');$('rpeSheet').setAttribute('aria-hidden','false');};window.closeRpeSheet=()=>{$('rpeSheet').classList.remove('is-open');$('rpeSheet').setAttribute('aria-hidden','true');pendingRpe=null;};const rpeDescriptions={'6':'4 more reps in the tank','6.5':'3–4 more reps in the tank','7':'3 more reps in the tank','7.5':'2–3 more reps in the tank','8':'2 more reps in the tank','8.5':'1–2 more reps in the tank','9':'1 more rep in the tank','9.5':'Unlikely, but maybe 1 more','10':"I've got nothing left"};function updateRpeSheetDescription(value){const v=String(Number(value));$('rpeSheetValue').textContent=v;$('rpeSheetDescription').textContent=rpeDescriptions[v]||'';}$('rpeSheetSlider').addEventListener('input',e=>updateRpeSheetDescription(e.target.value));$('applyRpeSheet').addEventListener('click',()=>{if(!pendingRpe)return;const {i,j}=pendingRpe;const value=$('rpeSheetSlider').value;closeRpeSheet();window.setVal(i,j,2,value);renderWork();});

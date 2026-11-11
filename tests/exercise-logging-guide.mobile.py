@@ -48,49 +48,51 @@ try:
         assert info['background'] in ('rgba(0, 0, 0, 0)','transparent'),info
         assert 80<info['width']<info['parentWidth']*.75,info
         print('PASS borderless text-sized title in',theme,info['border'],info['background'],flush=True)
-    # Timer and workout data remain unchanged when viewing help.
+    # The exercise title must open Statistics directly, without a separate modal.
     run("preferences.theme='dark';applyTheme();window.startRest(0,0)")
     before=run("return {deadline:exerciseTimers[activeRestExercise].deadline,work:JSON.stringify(work)}")
     click("#exerciseList [data-live-exercise-link]")
-    assert run("return !!document.querySelector('#sxExerciseLogGuide:not([hidden])')")
-    assert run("return document.querySelector('#sxLogGuideExercise').textContent")=='Incline Dumbbell Press'
-    assert '20 kg in each hand = 40 kg logged.' in run("return document.querySelector('#sxLogGuideExample').textContent")
-    assert run("return document.querySelector('#sxExerciseLogGuide').getAttribute('role')") is None
-    assert run("return document.querySelector('#sxExerciseLogGuide [role=dialog]').getAttribute('aria-modal')")=='true'
-    assert run("return JSON.stringify(work)") == before['work']
-    click("#sxLogGuideClose")
-    assert run("return document.querySelector('#sxExerciseLogGuide').hidden")
-    assert run("return document.querySelector('#activeWorkout.screen.active')!==null")
-    assert run("return exerciseTimers[activeRestExercise].deadline") == before['deadline']
-    print('PASS How to Log opens/closes without mutating sets or rest deadline',flush=True)
-
-    # Specific two-sided row prescription, plus existing stats page access.
-    run("document.querySelectorAll('#exerciseList [data-live-exercise-link]')[1].click()")
-    assert run("return document.querySelector('#sxLogGuideExercise').textContent")=='Iso-Lateral Row'
-    assert '60 kg on the left + 60 kg on the right = 120 kg logged.' in run("return document.querySelector('#sxLogGuideExample').textContent")
-    click('#sxLogGuideStats')
-    assert run("return document.querySelector('#sxExerciseLogGuide').hidden")
     assert run("return document.querySelector('#exerciseHistoryScreen.screen.active')!==null")
+    assert run("return document.querySelector('#exerciseHistoryTitle').textContent")=='Incline Dumbbell Press'
+    hint=run("""return {
+      visible:!document.getElementById('sxExerciseLoggingSummaryNote').hidden,
+      text:document.getElementById('sxExerciseLoggingSummaryNote').textContent,
+      subtitle:document.getElementById('exerciseHistorySubtitle').textContent,
+      after:document.getElementById('exerciseHistorySubtitle').nextElementSibling.id
+    };""")
+    assert hint['visible'] and '10 kg per dumbbell = 20 kg total' in hint['text'],hint
+    assert hint['after']=='sxExerciseLoggingSummaryNote',hint
+    assert run("return JSON.stringify(work)")==before['work']
+    assert run("return exerciseTimers[activeRestExercise].deadline")==before['deadline']
+    click('#closeExerciseHistory')
+    assert run("return document.querySelector('#activeWorkout.screen.active')!==null")
+    print('PASS direct Statistics navigation and inline dumbbell hint; timer preserved',flush=True)
+
+    # Iso-Lateral Row shows 40 kg per side = 80 kg total.
+    run("document.querySelectorAll('#exerciseList [data-live-exercise-link]')[1].click()")
     assert run("return document.querySelector('#exerciseHistoryTitle').textContent")=='Iso-Lateral Row'
+    iso=run("return document.getElementById('sxExerciseLoggingSummaryNote').textContent")
+    assert '40 kg per side = 80 kg total' in iso,iso
     click('#sxExerciseTopTabs [data-sx-exercise-tab=howto]')
     assert '120 kg logged' in run("return document.querySelector('#sxExerciseHowTo').textContent")
     click('#closeExerciseHistory')
-    assert run("return document.querySelector('#activeWorkout.screen.active')!==null")
-    print('PASS Iso-Lateral Row 60+60 example and View Statistics preserved',flush=True)
+    print('PASS inline Iso-Lateral Row note and existing How to tab',flush=True)
 
+    # Single-arm exercises should not incorrectly advise doubling the weight.
     run("document.querySelectorAll('#exerciseList [data-live-exercise-link]')[2].click()")
-    assert run("return document.querySelector('#sxLogGuideRule').textContent")=='Log the actual dumbbell in use'
-    assert 'One 20 kg dumbbell = 20 kg logged.' in run("return document.querySelector('#sxLogGuideExample').textContent")
-    click('#sxLogGuideClose')
-    # Cardio title, rendered as a span, also opens the same sheet.
+    single=run("return document.getElementById('sxExerciseLoggingSummaryNote').textContent")
+    assert '10 kg logged' in single and 'Do not double' in single,single
+    click('#closeExerciseHistory')
+    # Cardio title remains borderless and opens Statistics directly with no strength hint.
     run("""work.push({name:'Rowing Machine',rest:120,notes:'',sets:[
       window.SpartanXCardio.blank()]});renderWork();""")
     el=run("""const span=document.querySelector('#exerciseList .sx-cardio-card [data-live-exercise-link]');
-       const s=getComputedStyle(span);return {exists:!!span,border:s.borderTopWidth,background:s.backgroundColor};""")
+       const style=getComputedStyle(span);return {exists:!!span,border:style.borderTopWidth,background:style.backgroundColor};""")
     assert el['exists'] and el['border']=='0px' and el['background'] in ('rgba(0, 0, 0, 0)','transparent'),el
     click('#exerciseList .sx-cardio-card [data-live-exercise-link]')
-    assert 'machine totals' in run("return document.querySelector('#sxLogGuideRule').textContent").lower()
-    click('#sxLogGuideClose')
-    print('PASS single-arm nuance and cardio title consistency',flush=True)
+    assert run("return document.querySelector('#exerciseHistoryTitle').textContent")=='Rowing Machine'
+    assert run("return document.querySelector('#sxExerciseLoggingSummaryNote').hidden")
+    click('#closeExerciseHistory')
+    print('PASS unilateral logging exception and cardio without strength note',flush=True)
 finally:
     browser.quit()

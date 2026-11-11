@@ -93,7 +93,7 @@ const render=(ex,i,unit,escape,previousSets=[])=>{
   '<div class="exercise-avatar" aria-hidden="true">🏃</div>'+
   '<span role="button" tabindex="0" class="exercise-title sx-exercise-stats-link" data-live-exercise-link="'+escape(ex.name)+
   '" aria-label="View statistics for '+escape(ex.name)+'">'+escape(ex.name)+'</span>'+
-  '<button class="exercise-menu secondary small" onclick="removeEx('+i+')" aria-label="Remove exercise">×</button></div>'+
+  '<button type="button" class="exercise-menu secondary small sx-replace-exercise" onclick="replaceExercise('+i+')" aria-label="Replace '+escape(ex.name)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15m0 0-4-4m4 4-4 4M20 17H5m0 0 4-4m-4 4 4 4"/></svg><span>REPLACE</span></button></div>'+
   '<textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+escape(ex.notes||'')+'</textarea>'+
   head+rows+extras+
   '<button type="button" class="add-set-button secondary" onclick="addCardioInterval('+i+')">＋ Add Set</button></article>';

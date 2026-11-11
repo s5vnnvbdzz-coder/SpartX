@@ -43,7 +43,7 @@
    exercise:result,hadLoggedData:hasRecordedData(exercise),
    unlinksAscension:!!exercise.ascensionLink,
    unlinksBodybuilding:!!exercise.bodybuildingLink&&isCardio,
-   source531:!!(exercise.notes&&/Imported from SpartanX Tools/.test(exercise.notes))
+   source531:!!(exercise.notes&&/(?:Imported from SpartanX Tools|SpartanX cycle:)/.test(exercise.notes))
   };
  }
  global.SpartanXExerciseReplacement=Object.freeze({prepare,hasRecordedData});

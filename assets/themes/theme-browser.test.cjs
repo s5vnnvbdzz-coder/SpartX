@@ -65,6 +65,7 @@ async function main(){
   await inspect('/index.html','crimson-forge');
   await page.screenshot({path:'crimson-forge-home-mobile.png'});
   await inspect('/tools/settings.html','crimson-forge');
+  assert.equal(await page.locator('#crimsonForgeThemeToggle').isChecked(),true,'Settings toggle survives multiple theme changes');
   await page.screenshot({path:'crimson-forge-settings-mobile.png'});
   assert.ok(!errors.some(x=>/shared-theme|crimson-forge/i.test(x)),
     'No palette-specific runtime errors: '+errors.slice(0,5).join(' / '));

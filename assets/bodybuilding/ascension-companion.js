@@ -75,6 +75,11 @@
   function preference(storage=global.localStorage){
     const active=cycle(storage);
     if(!active)return {cycleId:null,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]};
+    // Adaptive Programming is configured in AscensionX Manage Cycle.
+    // It takes precedence over the legacy standalone companion without changing its saved preferences.
+    const adaptive=global.SXAscensionAdaptive?.read(active.id,storage);
+    if(adaptive?.enabled)return {cycleId:active.id,enabled:true,powerbuilding:true,
+      trainingDays:adaptive.days,volume:'balanced',excluded:[],adaptive:true};
     try{
       const raw=storage.getItem(STORAGE);
       if(!raw||raw.length>25000)return {cycleId:active.id,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]};
@@ -123,6 +128,7 @@
   function plan(lift,week,opts={}){
     const main=canonical(lift),w=Number(week);
     if(!main||!Number.isInteger(w)||w<1||w>6)return [];
+    if(global.SXAscensionAdaptive?.enabled())return global.SXAscensionAdaptive.plan(main,w,opts);
     const volume=opts.volume==='low'?'low':'balanced';
     // One AscensionX main lift plus supporting accessories; no additional
     // heavy squats, Romanian deadlifts or leg press after the main squat.
@@ -153,13 +159,15 @@
       .filter(item=>!exists.has(normName(item.name)))
       .map(item=>({
         name:item.name,rest:item.rest,
-        notes:'AscensionX Strength & Size companion · '+main+' · Week '+week+
+        notes:(p.adaptive?'AscensionX Adaptive Programming':'AscensionX Strength & Size companion')+' · '+main+' · Week '+week+
           ' · '+item.min+'–'+item.max+' reps · ~'+item.rir+
-          ' reps in reserve. Optional. Does not affect AscensionX cycle progression.',
-        sxStrengthSizeCompanion:{cycleId:active.id,lift:main,week,
+          ' reps in reserve. Optional. Does not affect AscensionX cycle progression.'+
+          (item.reason?' '+item.reason:''),
+        sxStrengthSizeCompanion:{cycleId:active.id,lift:main,week,adaptive:p.adaptive===true,
           targetRir:item.rir,repsMin:item.min,repsMax:item.max,plannedSets:item.sets},
         sets:Array.from({length:item.sets},()=>({
-          weight:'',reps:String(item.min),rpe:'',type:'Working Set',done:false
+          weight:Number(item.suggestedKg)>0?String(item.suggestedKg):'',reps:String(item.targetReps||item.min),
+          rpe:'',type:'Working Set',done:false
         }))
       }));
   }
@@ -211,6 +219,8 @@
   function schedule(days,storage=global.localStorage){
     const active=cycle(storage),preferenceData=preference(storage);
     if(!active)return {valid:false,message:'Create an AscensionX cycle before enabling Powerbuilding.',slots:[]};
+    if(global.SXAscensionAdaptive?.enabled(active.id,storage))
+      return global.SXAscensionAdaptive.schedule(active,storage);
     const count=[3,4,5].includes(Number(days))?Number(days):preferenceData.trainingDays;
     const lifts=(count===3?['Back Squat','Deadlift','Bench Press','Overhead Press']:LIFTS).filter(l=>active.lifts.includes(l));
     if(count<lifts.length)return {valid:false,message:

@@ -18,16 +18,11 @@
   'olympian-athena':['#0d0912','#1a1422','#292033','#70577d','#f7edf6','#c2abc9','#e8b4dd'],
   'amazonian-crimson':['#160c14','#291b26','#392436','#784957','#f8e9f2','#d4b1bf','#f07192'],
   'athenas-aegis':['#110d1b','#251c36','#33274b','#64547d','#f3edff','#c1b0d6','#af93e6'],
-  'sx-halloween':['#120b14','#261326','#3a2031','#72435b','#f6f5ee','#c0b9b3','#ff872b'],
-  'sx-christmas':['#091b19','#142d29','#22423c','#4c8174','#f6f5ee','#c0b9b3','#e8c66b'],
   'sx-monster':['#090d09','#171e13','#24311c','#4b7134','#f6f5ee','#c0b9b3','#8fe51b'],
-  'premium-monster':['#050a06','#0d1610','#17261b','#467a36','#fff9ed','#c1bba9','#8cff12'],
   'premium-olympus':['#090c14','#111824','#1a2534','#a68043','#fff9ed','#c1bba9','#ffd376'],
   'sx-black-yellow':['#050505','#111113','#202024','#40371e','#f4f1e7','#beb7a3','#f4cd37'],
   'sx-obsidian-white':['#030303','#0b0b0b','#171717','#333333','#f0f0f0','#999999','#dfdfdf'],
-  'jade-sentinel':['#08130f','#142820','#233b31','#63846b','#f5f7ef','#bdcec0','#aaff37'],
   'cosmic-nebula':['#070919','#12162c','#202644','#6367a0','#f2f5ff','#afb9d8','#8bdcff'],
-  'crimson-forge':['#09090d','#18171c','#252027','#664049','#f4edef','#c1b1b6','#ff4654']
  };
  const accepted=Object.keys(palette);
  const tokenMap=['--bg','--panel','--panel2','--line','--txt','--muted','--lime'];
@@ -50,21 +45,21 @@
   const root=isTracker(),p=palette[selected]||palette.dark;
   body.dataset.sxTheme=selected;
   document.documentElement.dataset.sxTheme=selected;
-  body.classList.toggle('sx-crimson-forge',selected==='crimson-forge');
+
   body.classList.toggle('sx-theme-child',!root);
-  // Tracker defines legacy palettes already. Independent pages get all tokens.
-  if(!root||selected==='crimson-forge'){
+  // Tracker defines retained themes already. Independent pages receive the full palette.
+  if(!root){
    tokenMap.forEach((t,i)=>body.style.setProperty(t,p[i]));
    const derived={
     '--text':p[4],'--surface':p[1],'--surface2':p[2],
     '--surface3':p[2],'--stroke':p[3],'--gold':p[6],
     '--goldSoft':p[6],'--goldPale':p[4],
-    '--red':p[6],'--red2':p[6],'--redDeep':selected==='crimson-forge'?'#781926':p[3],
+    '--red':p[6],'--red2':p[6],'--redDeep':p[3],
     '--panel3':p[2],'--accent':p[6]
    };
    for(const [t,v] of Object.entries(derived))body.style.setProperty(t,v);
   }else{
-   // Switching theme must not leave an inline Crimson Forge palette.
+   // Switching themes clears stale inline colours from earlier versions.
    for(const t of tokenMap)body.style.removeProperty(t);
    for(const t of ['--text','--surface','--surface2','--surface3','--stroke','--gold',
      '--goldSoft','--goldPale','--red','--red2','--redDeep','--panel3','--accent'])

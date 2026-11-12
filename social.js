@@ -15,7 +15,7 @@
   const idSet=new Set(athletes.map(a=>a.id));
   let currentFilter='all';
   let searchText='';
-  let expanded=false;
+  let expanded=false; // Search controls are mounted on their own dedicated screen.
 
   function state() {
     if(!db.socialPrototype || typeof db.socialPrototype!=='object' || Array.isArray(db.socialPrototype)) db.socialPrototype={};
@@ -93,9 +93,7 @@
   function setExpanded(next) {
     expanded=!!next;
     const body=document.getElementById('sxSocialBody');
-    const toggle=document.getElementById('sxSocialToggle');
     if(body)body.hidden=!expanded;
-    if(toggle){toggle.setAttribute('aria-expanded',String(expanded));toggle.textContent=expanded?'CLOSE SEARCH':'FIND ATHLETES';}
     if(expanded)renderSearch();
   }
   function openSearch(filter) {
@@ -103,10 +101,17 @@
     searchText='';
     const input=document.getElementById('sxAthleteSearchInput');
     if(input)input.value='';
-    if(typeof switchScreen==='function')switchScreen('home');
+    // This is a real page; the former Athlete Search card is no longer
+    // mounted on Home. Use the existing SpartanX navigation/back stack.
+    if(typeof switchScreen==='function')switchScreen('athleteSearch');
     setExpanded(true);
-    const card=document.getElementById('sxSocialHome');
-    if(card)requestAnimationFrame(()=>card.scrollIntoView({behavior:'smooth',block:'start'}));
+    requestAnimationFrame(()=>input?.focus({preventScroll:true}));
+  }
+  function closeSearch(){
+    setExpanded(false);
+    if(typeof returnToScreen==='function')returnToScreen('home');
+    else if(typeof switchScreen==='function')switchScreen('home');
+    document.getElementById('sxSocialToggle')?.focus({preventScroll:true});
   }
   function toggleConnection(kind,id) {
     if(!idSet.has(id))return;
@@ -131,7 +136,9 @@
       return;
     }
     const toggle=event.target.closest('#sxSocialToggle');
-    if(toggle){event.preventDefault();setExpanded(!expanded);return;}
+    if(toggle){event.preventDefault();openSearch('all');return;}
+    const back=event.target.closest('#sxSocialBack');
+    if(back){event.preventDefault();closeSearch();return;}
     const filter=event.target.closest('[data-sx-social-filter]');
     if(filter){event.preventDefault();currentFilter=filter.dataset.sxSocialFilter;renderSearch();return;}
     const outbound=event.target.closest('[data-sx-social-follow]');

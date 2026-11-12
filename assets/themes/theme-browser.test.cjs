@@ -29,7 +29,7 @@ async function main(){
     background:css.getPropertyValue('--bg').trim(),
     colour:css.getPropertyValue('--txt').trim(),
     child:document.body.classList.contains('sx-theme-child'),
-    forge:document.body.classList.contains('sx-crimson-forge')
+    hasPalette:!!css.getPropertyValue('--lime').trim()
    };
   });
   assert.equal(data.theme,expected,path+' theme');
@@ -39,39 +39,46 @@ async function main(){
   return data;
  }
  try{
-  await setTheme('crimson-forge');
-  let root=await inspect('/index.html','crimson-forge');
-  assert.equal(root.accent,'#ff4654');
-  assert.equal(root.forge,true);
-  assert.equal(await page.locator('option[value="crimson-forge"]').count(),1);
-  await page.screenshot({path:'crimson-forge-home-desktop.png'});
-  await page.waitForFunction(()=>document.getElementById('native531Host')?.classList.contains('theme-crimson-forge'),null,{timeout:10000});
-  await inspect('/tools/settings.html','crimson-forge');
-  assert.equal(await page.locator('#crimsonForgeThemeToggle').isChecked(),true);
-  await inspect('/AscensionX/index.html?from=spartanx','crimson-forge');
-  await page.waitForFunction(()=>document.body.dataset.theme!=='dark',null,{timeout:10000});
-  await inspect('/intelligence/index.html','crimson-forge');
-  // Check cross-page consistency for contrasting existing theme families.
-  for(const value of ['cosmic-nebula','spartan-blue','light','spartan-red']){
+  const removed=['crimson-forge','sx-halloween','sx-christmas','premium-monster','jade-sentinel'];
+  const available=['cosmic-nebula','spartan-blue','light','spartan-red','sx-monster','premium-olympus'];
+  await setTheme('spartan-red');
+  assert.equal(await page.locator('option[value="spartan-red"]').count(),1);
+  for(const value of removed)
+   assert.equal(await page.locator('option[value="'+value+'"]').count(),0,
+    'Retired appearance must not be selectable: '+value);
+  await page.screenshot({path:'theme-cleanup-home-desktop.png'});
+  // Cross-page palette parity for all retained representative theme families.
+  for(const value of available){
    await setTheme(value);
-   for(const url of ['/tools/settings.html','/AscensionX/index.html?from=spartanx','/intelligence/index.html']){
-    const v=await inspect(url,value);
-    assert.notEqual(v.accent,'#ff4654',url+' should not retain Crimson Forge');
-   }
+   for(const url of ['/tools/settings.html','/AscensionX/index.html?from=spartanx','/intelligence/index.html'])
+    await inspect(url,value);
   }
-  // Reapply and verify a compact mobile viewport and selected-value survival.
-  await setTheme('crimson-forge');
+  // Cached preferences from older builds are migrated back to Dark safely.
+  for(const old of removed){
+   await page.goto(origin+'/index.html',{waitUntil:'domcontentloaded'});
+   await page.evaluate(value=>{
+    const key='spartx_preferences_v1';
+    const prefs=JSON.parse(localStorage.getItem(key)||'{}');
+    prefs.theme=value;
+    localStorage.setItem(key,JSON.stringify(prefs));
+    localStorage.setItem('spartanx_shared_active_theme_v1',value);
+   },old);
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>document.body.dataset.activeTheme==='dark' &&
+    document.body.dataset.sxTheme==='dark' &&
+    JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}').theme==='dark',
+    null,{timeout:12000});
+  }
+  await setTheme('spartan-red');
   await page.setViewportSize({width:390,height:844});
-  await inspect('/index.html','crimson-forge');
-  await page.screenshot({path:'crimson-forge-home-mobile.png'});
-  await inspect('/tools/settings.html','crimson-forge');
-  assert.equal(await page.locator('#crimsonForgeThemeToggle').isChecked(),true,'Settings toggle survives multiple theme changes');
-  await page.screenshot({path:'crimson-forge-settings-mobile.png'});
-  assert.ok(!errors.some(x=>/shared-theme|crimson-forge/i.test(x)),
-    'No palette-specific runtime errors: '+errors.slice(0,5).join(' / '));
-  console.log('Theme test passed: new theme and four legacy themes remain consistent across app surfaces.');
+  await inspect('/index.html','spartan-red');
+  await page.screenshot({path:'theme-cleanup-home-mobile.png'});
+  assert.ok(!errors.some(x=>/shared-theme/i.test(x)),
+    'No shared palette errors: '+errors.slice(0,5).join(' / '));
+  console.log('Theme cleanup passed: removed themes unavailable, legacy preferences migrated, retained themes consistent.');
+
  }catch(error){
-  try{await page.screenshot({path:'crimson-forge-failure.png'})}catch(_){}
+  try{await page.screenshot({path:'theme-cleanup-failure.png'})}catch(_){}
   console.error('Recent errors:',errors.slice(-10));
   throw error;
  }finally{await browser.close()}

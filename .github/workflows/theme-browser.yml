@@ -1,9 +1,11 @@
-name: SpartanX shared theme browser checks
+name: SpartanX appearance and Athlete Search browser checks
 on:
   pull_request:
     paths:
       - 'assets/themes/**'
       - 'index.html'
+      - 'social.js'
+      - 'assets/social/athlete-home-browser.test.cjs'
       - 'tools/settings.html'
       - 'tools/531-native.js'
       - 'tools/replica.js'
@@ -29,14 +31,17 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-theme-server.log 2>&1 &
           node assets/themes/theme-browser.test.cjs
+          node assets/social/athlete-home-browser.test.cjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: crimson-forge-theme-preview
+          name: appearance-and-athlete-search-316
           path: |
-            crimson-forge-home-desktop.png
-            crimson-forge-home-mobile.png
-            crimson-forge-settings-mobile.png
-            crimson-forge-failure.png
+            theme-cleanup-home-desktop.png
+            theme-cleanup-home-mobile.png
+            theme-cleanup-failure.png
+            athlete-home-mobile.png
+            athlete-search-mobile.png
+            athlete-search-failure.png
           if-no-files-found: ignore

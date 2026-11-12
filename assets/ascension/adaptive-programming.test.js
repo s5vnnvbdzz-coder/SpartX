@@ -63,6 +63,7 @@ localStorage.setItem('ascensionx_strength_v1',cycle(['Back Squat','Bench Press',
 api.save({days:3});
 assert.equal(api.schedule().valid,false,'Cannot assign four independent compounds to three separate days');
 localStorage.setItem('ascensionx_strength_v1',cycle(['Back Squat','Bench Press','Deadlift'],6));
+api.save({days:4});
 assert.equal(api.schedule().slots.find(x=>x.kind==='support').exercises.length,0,'Deload week has no support work');
 const fresh='2026-11-10T11:00:00.000Z';
 localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{created:fresh,exercises:['Bench Press'],weeks:{'Bench Press':1}},logs:[]}));

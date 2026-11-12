@@ -77,12 +77,16 @@
  }
  function intelligence(id,options={}){
   const host=$(id);if(!host)return;
-  if(!String(options.mode||'').startsWith('spartanx')){
-   host.innerHTML='<div class="eyebrow">PROGRAMME DECISION ENGINE</div><h3>Link your SpartanX training history</h3>'+
-    '<p class="small-copy">Cycle-specific recommendations only appear for real, saved SpartanX workouts on this device. Demo data never affects your programmes.</p>';
+  const data=load();
+  const linkedHistory=String(options.mode||'').startsWith('spartanx');
+  const ascensionEvidence=(data?.ascension?.recordedWeeks||0)>0;
+  // AscensionX-only athletes can still see their REAL saved cycle logs even
+  // if the general Intelligence charts are in demo mode. Label that boundary.
+  if(!linkedHistory&&!ascensionEvidence){
+   host.innerHTML='<div class="eyebrow">PROGRAMME DECISION ENGINE</div><h3>Link your training history</h3>'+
+    '<p class="small-copy">No completed AscensionX cycle logs or linked SpartanX workout evidence are available on this device. Demonstration data never changes training programmes.</p>';
    return;
   }
-  const data=load();
   if(!data||data.status==='unavailable'){
    host.innerHTML='<div class="eyebrow">PROGRAMME DECISION ENGINE</div><h3>Training analysis unavailable</h3>'+
     '<p class="small-copy">'+esc(data?.reason||'Unable to read linked workout history.')+'</p>';
@@ -91,6 +95,7 @@
   const r=data.ascension,active=r?.status!=='no-cycle',bodybuilding=data.bodybuilding;
   host.innerHTML='<div class="eyebrow">ASCENSIONX · PROGRAMME DECISION ENGINE</div>'+
    '<h3>Training decisions, grounded in your own linked sessions</h3>'+
+   (!linkedHistory?'<p class="small-copy"><strong>REAL ASCENSIONX CYCLE DATA:</strong> These recommendations use your saved AscensionX logs. Other general Intelligence charts may still be showing demonstration data.</p>':'')+
    (active?'<p class="small-copy">'+esc(r.message)+'</p>'+
     '<div class="sx-decision-intel-lifts">'+(r.lifts||[]).map(l=>
      '<article class="sx-decision-intel-lift"><div class="sx-decision-row"><strong>'+esc(l.lift)+

@@ -1,0 +1,45 @@
+name: SpartanX secondary page and routine browser checks
+on:
+  pull_request:
+    paths:
+      - 'assets/ui/**'
+      - 'assets/workouts/workout-card-order.js'
+      - 'assets/ascension/quick-access.js'
+      - 'assets/workouts/531-cycle-flow.js'
+      - 'index.html'
+      - 'social.js'
+      - 'tools/replica.js'
+      - 'tools/settings.html'
+      - 'tools/531-native.js'
+      - 'AscensionX/index.html'
+      - 'intelligence/index.html'
+      - '.github/workflows/navigation-ui-browser.yml'
+  push:
+    branches: [feature/uniform-back-navigation-317]
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Execute app navigation and workout interaction tests
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-ui-server.log 2>&1 &
+          node assets/ui/navigation-workflow-browser.test.cjs
+      - name: Save browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spartanx-navigation-317
+          path: |
+            uniform-navigation-workout-mobile.png
+            uniform-navigation-edit-profile-mobile.png
+            uniform-navigation-failure.png
+          if-no-files-found: ignore

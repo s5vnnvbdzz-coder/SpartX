@@ -376,7 +376,7 @@ function renderCard(){
  card.hidden=false;
  card.innerHTML=
   '<div class="sx-programme-head"><div><div class="sx-programme-kicker">5/3/1 · POWERLIFTING</div><h2 class="sx-programme-title">'+safe(c.name||'5/3/1 Strength Cycle')+'</h2></div>'+
-  '<div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sx531QuickMenu" aria-label="5/3/1 programme options" aria-expanded="false" aria-controls="sx531QuickOptions">•••</button>'+
+  '<div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sx531QuickMenu" aria-label="5/3/1 programme options" aria-expanded="false" aria-controls="sx531QuickOptions"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="19" height="19"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>'+
   '<div class="sx-programme-options" id="sx531QuickOptions" hidden><button type="button" id="sx531QuickView">VIEW CYCLE</button><button type="button" id="sx531QuickManage">MANAGE CYCLE</button></div></div></div>'+
   '<p class="sx-programme-meta">5/3/1 · Powerlifting · '+(next?'Week '+next.week+' of '+c.weeks:'Completed · '+c.weeks+' weeks')+(all.length>1?' · '+(all.length-1)+' more active':'')+'</p>'+
   '<div class="sx-programme-progressline"><span>CYCLE PROGRESS</span><strong>'+percent+'%</strong></div>'+

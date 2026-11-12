@@ -1,0 +1,197 @@
+/* SpartanX · unified secondary-page navigation · Build 317
+   Reference: charcoal 1px border, subtle bevel, white serif Back label.
+   The four main navigation tabs are NOT changed.
+   Every secondary page has the same Back component, right side of its header.
+ */
+.sx-page-back,
+button.sx-page-back,
+a.sx-page-back,
+body :is(button,a).sx-page-back{
+ box-sizing:border-box!important;
+ appearance:none!important;
+ display:inline-flex!important;
+ flex-direction:row!important;
+ align-items:center!important;
+ justify-content:center!important;
+ align-self:center!important;
+ flex:0 0 auto!important;
+ gap:8px!important;
+ width:auto!important;
+ min-width:96px!important;
+ max-width:100%!important;
+ height:48px!important;
+ min-height:48px!important;
+ max-height:48px!important;
+ padding:0 14px!important;
+ margin:0!important;
+ background:#1b1b1b!important;
+ background-image:linear-gradient(180deg,#272727 0%,#191919 60%,#141414 100%)!important;
+ border:1px solid #414141!important;
+ border-radius:13px!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 7px rgba(0,0,0,.23)!important;
+ color:#fafafa!important;
+ -webkit-text-fill-color:#fafafa!important;
+ text-shadow:none!important;
+ text-decoration:none!important;
+ font-family:Georgia,"Times New Roman",serif!important;
+ font-size:16px!important;
+ font-style:normal!important;
+ font-weight:700!important;
+ letter-spacing:0!important;
+ line-height:1!important;
+ text-transform:none!important;
+ white-space:nowrap!important;
+ cursor:pointer;
+}
+.sx-page-back .sx-page-back-arrow{
+ font-family:Arial,Helvetica,sans-serif!important;
+ font-size:17px!important;
+ font-weight:400!important;
+ line-height:1!important;
+ color:inherit!important;
+}
+.sx-page-back:focus-visible{outline:2px solid #f1f1f1!important;outline-offset:3px!important}
+.sx-page-back:active{background:#131313!important;transform:translateY(1px)}
+@media(prefers-reduced-motion:reduce){.sx-page-back{transition:none!important}}
+
+/* Main SpartanX contextual headers: page title first, other action second,
+   identical right-aligned Back last. No navigation changes to four main tabs. */
+body:has(#exerciseLibraryScreen.screen.active) > header #sxHeaderExerciseControls,
+body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls,
+body:has(#workoutSaveReview.screen.active) > header #sxHeaderSaveControls{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) auto auto!important;
+ align-items:center!important;
+ justify-items:stretch;
+ gap:9px!important;
+ width:100%!important;
+}
+body > header #sxHeaderExerciseControls h1,
+body > header #sxHeaderActiveControls h1,
+body > header #sxHeaderSaveControls h1{
+ grid-column:1!important;grid-row:1!important;
+ justify-self:start!important;
+ text-align:left!important;
+ margin:0!important;
+ min-width:0!important;
+ overflow:hidden;text-overflow:ellipsis;
+}
+body > header #sxHeaderExerciseControls .sx-custom-open,
+body > header #sxHeaderActiveControls #endWorkout,
+body > header #sxHeaderSaveControls #sxSaveReviewConfirm{
+ grid-column:2!important;grid-row:1!important;justify-self:end!important;
+}
+body > header #sxHeaderExerciseControls #closeExerciseLibrary,
+body > header #sxHeaderActiveControls #activeSessionBack,
+body > header #sxHeaderSaveControls #sxSaveReviewBack{
+ grid-column:3!important;grid-row:1!important;justify-self:end!important;
+}
+
+/* Standalone and embedded secondary screens. */
+#athleteSearch .sx-social-page-head,
+#exerciseHistoryScreen .sx-exercise-profile-heading,
+#editProfileOverlay .sx-profile-edit-heading{
+ display:flex!important;align-items:center!important;
+ justify-content:space-between!important;
+ flex-direction:row!important;gap:12px!important;
+}
+#athleteSearch .sx-social-page-head > div,
+#editProfileOverlay .sx-profile-edit-heading > h2,
+#exerciseHistoryScreen .sx-exercise-profile-heading > h1{
+ order:0!important;flex:1 1 auto!important;min-width:0!important;
+ text-align:left!important;margin-right:auto!important;
+}
+#athleteSearch .sx-social-page-head .sx-page-back,
+#editProfileOverlay .sx-profile-edit-heading .sx-page-back,
+#exerciseHistoryScreen .sx-exercise-profile-heading .sx-page-back{
+ order:3!important;margin-left:auto!important;
+}
+#exerciseHistoryScreen .sx-exercise-profile-heading #sxExerciseStatsShare{
+ order:2!important;flex:0 0 auto!important;
+}
+#exerciseStatsScreen > .row.between,
+#routineSelectScreen > .row.between,
+#routineBuilderScreen > .row.between{
+ align-items:center!important;gap:12px!important;
+}
+#exerciseStatsScreen > .row.between > div:first-child,
+#routineSelectScreen > .row.between > div:first-child,
+#routineBuilderScreen > .row.between > div:first-child{
+ flex:1 1 auto!important;min-width:0!important;
+}
+#exerciseStatsScreen > .row.between > .sx-page-back,
+#routineSelectScreen > .row.between > .sx-page-back,
+#routineBuilderScreen > .row.between > .sx-page-back{
+ margin-left:auto!important;
+}
+/* Override old left-aligned/compact header styles where they were theme-specific. */
+#exerciseLibraryScreen .sx-add-exercise-header #closeExerciseLibrary,
+#sxHeaderExerciseControls #closeExerciseLibrary,
+#sxHeaderActiveControls #activeSessionBack,
+#sxHeaderSaveControls #sxSaveReviewBack,
+#athleteSearch #sxSocialBack,
+#editProfileOverlay #closeEditProfile,
+#exerciseHistoryScreen #closeExerciseHistory{
+ min-width:96px!important;min-height:48px!important;
+ height:48px!important;font-size:16px!important;padding:0 14px!important;
+ justify-self:end!important;
+}
+/* 5/3/1 full-page Manage / Build cycle; never disturb fixed footer controls. */
+body.sx-cycle-page-active #sxQuick531CycleOverlay #sxQuick531CycleClose,
+#sxQuick531CycleHeader #sxQuick531CycleClose{
+ min-width:96px!important;width:auto!important;min-height:48px!important;height:48px!important;
+ max-height:48px!important;font-size:16px!important;
+ margin-left:auto!important;
+}
+#sxQuick531Heading .sx-page-back{margin-left:auto!important}
+
+/* Independent AscensionX dedicated editors and the embedded-app header. */
+body.sx-asc-cycle-page #cycleEditorBackdrop .cycle-editor-header,
+#sxCycleViewDialog .sx-cycle-view-head,
+body > header:has(#ascEmbeddedClose){
+ align-items:center!important;
+}
+#cycleEditorBackdrop .cycle-editor-header .sx-page-back,
+#sxCycleViewDialog .sx-cycle-view-head .sx-page-back{
+ margin-left:auto!important;
+ min-width:96px!important;width:auto!important;height:48px!important;
+ min-height:48px!important;padding:0 14px!important;
+}
+body > header #ascEmbeddedClose.sx-page-back{
+ margin-left:0!important;
+ width:auto!important;height:48px!important;
+ min-width:96px!important;
+}
+
+/* Intelligence standalone: navigation belongs in the real header, not body. */
+.topbar .topbar-actions .sx-page-back{margin-left:6px!important}
+.topbar .topbar-actions{display:flex!important;align-items:center!important;gap:8px!important}
+.topbar .topbar-title{min-width:0!important}
+.topbar .sx-return-app.sx-page-back{color:#fafafa!important}
+
+/* Dedicated Tools Settings: Back belongs to the header, right side. */
+body > header #settingsBack.sx-page-back{margin-left:auto!important}
+
+@media(max-width:420px){
+ body:has(#exerciseLibraryScreen.screen.active) > header #sxHeaderExerciseControls,
+ body:has(#activeWorkout.screen.active) > header #sxHeaderActiveControls,
+ body:has(#workoutSaveReview.screen.active) > header #sxHeaderSaveControls{
+  gap:5px!important;
+  grid-template-columns:minmax(0,1fr) auto auto!important;
+ }
+ body > header #sxHeaderActiveControls #endWorkout,
+ body > header #sxHeaderSaveControls #sxSaveReviewConfirm,
+ body > header #sxHeaderExerciseControls .sx-custom-open{
+  font-size:10px!important;padding-inline:7px!important;
+ }
+ body > header #sxHeaderExerciseControls h1,
+ body > header #sxHeaderActiveControls h1,
+ body > header #sxHeaderSaveControls h1{
+  font-size:clamp(14px,3.7vw,18px)!important;
+ }
+ #exerciseHistoryScreen .sx-exercise-profile-heading,
+ #athleteSearch .sx-social-page-head{gap:7px!important}
+ .sx-page-back,button.sx-page-back,a.sx-page-back{
+  min-width:96px!important;
+ }
+}

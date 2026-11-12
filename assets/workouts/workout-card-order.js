@@ -1,4 +1,4 @@
-/* SpartanX Workout cards: saved order, drag handles and accessible move controls. */
+/* SpartanX Workout cards: saved order and hold-to-drag handles. */
 (()=>{
  'use strict';
  const workout=document.getElementById('workout'),stack=document.getElementById('sxProgrammeStack');
@@ -24,7 +24,7 @@
  nodes.forEach(({el})=>stack.appendChild(el));
  const bar=document.createElement('div');
  bar.id='sxWorkoutOrderBar';bar.hidden=true;bar.setAttribute('role','group');bar.setAttribute('aria-label','Rearrange Workout cards');
- bar.innerHTML='<span>Drag a handle, or use ↑ and ↓ to reorder.</span>'+
+ bar.innerHTML='<span>Hold and drag a card handle to rearrange the order.</span>'+
   '<button type="button" id="sxWorkoutOrderCancel">CANCEL</button>'+
   '<button type="button" id="sxWorkoutOrderSave">SAVE</button>';
  stack.before(bar);
@@ -42,11 +42,10 @@
  #workout.sx-workout-ordering .sx-workout-sort-controls{display:flex}
  #workout .sx-workout-sort-controls .sx-workout-drag{flex:1;display:flex;align-items:center;gap:8px;min-height:34px;background:transparent;border:0;color:var(--txt);text-align:left;font-size:11px;font-weight:800;touch-action:none;cursor:grab}
  #workout .sx-workout-sort-controls .sx-workout-drag span{color:var(--lime);font-size:18px}
- #workout .sx-workout-sort-controls .sx-workout-move{min-height:35px;min-width:36px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--txt);font-size:17px}
  #workout.sx-workout-ordering .sx-workout-sort-item{outline:1px solid color-mix(in srgb,var(--lime) 45%,transparent);outline-offset:1px;border-radius:12px}
  #workout .sx-workout-sort-item.sx-workout-dragging{opacity:.67}
  #workout.sx-workout-ordering .sx-workout-sort-item button:not(.sx-workout-sort-controls button),#workout.sx-workout-ordering .sx-workout-sort-item a{pointer-events:none}
- #workout .sx-workout-sort-item .sx-workout-drag:focus-visible,#workout .sx-workout-sort-item .sx-workout-move:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+ #workout .sx-workout-sort-item .sx-workout-drag:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
  #workout .sx-workout-header-actions{display:flex;align-items:center;gap:8px}
  #workout .sx-workout-header-actions>a,#workout .sx-workout-header-actions>button{width:41px;height:41px;flex:none;display:grid;place-items:center;padding:0;border:1px solid color-mix(in srgb,var(--lime) 45%,var(--line));border-radius:50%;background:var(--panel2);color:var(--lime);text-decoration:none}
  #workout .sx-workout-header-actions svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
@@ -60,9 +59,7 @@
  const labels={start:'Start Workout','531':'5/3/1 Powerlifting',ascension:'AscensionX',bodybuilding:'Strength & Bodybuilding',routines:'Custom Routines'};
  for(const {id,el} of nodes){
   const controls=document.createElement('div');controls.className='sx-workout-sort-controls';
-  controls.innerHTML='<button type="button" class="sx-workout-drag" data-workout-drag="'+id+'" aria-label="Drag '+labels[id]+'"><span aria-hidden="true">⠿</span> '+labels[id]+'</button>'+
-   '<button type="button" class="sx-workout-move" data-workout-move="up" aria-label="Move '+labels[id]+' up">↑</button>'+
-   '<button type="button" class="sx-workout-move" data-workout-move="down" aria-label="Move '+labels[id]+' down">↓</button>';
+  controls.innerHTML='<button type="button" class="sx-workout-drag" data-workout-drag="'+id+'" aria-label="Hold and drag '+labels[id]+'"><span aria-hidden="true">⠿</span> Hold and drag · '+labels[id]+'</button>';
   el.prepend(controls);
  }
  const items=()=>Array.from(stack.children).filter(el=>el.matches('.sx-workout-sort-item'));
@@ -86,13 +83,6 @@
  toggle.addEventListener('click',()=>{if(workout.classList.contains('sx-workout-ordering'))return;original=current();setMode(true)});
  $('sxWorkoutOrderSave').addEventListener('click',()=>{finishDrag();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(current()))}catch(_){}original=null;setMode(false)});
  $('sxWorkoutOrderCancel').addEventListener('click',()=>{finishDrag();if(original)restore(original);original=null;setMode(false)});
- stack.addEventListener('click',e=>{
-  const button=e.target.closest('.sx-workout-move');if(!button||!workout.classList.contains('sx-workout-ordering'))return;
-  e.preventDefault();e.stopPropagation();
-  const item=button.closest('.sx-workout-sort-item');if(!item)return;
-  if(button.dataset.workoutMove==='up'&&item.previousElementSibling)stack.insertBefore(item,item.previousElementSibling);
-  if(button.dataset.workoutMove==='down'&&item.nextElementSibling)stack.insertBefore(item.nextElementSibling,item);
- });
  stack.addEventListener('pointerdown',e=>{
   if(!workout.classList.contains('sx-workout-ordering')||dragged||e.button!==0)return;
   const handle=e.target.closest('[data-workout-drag]');if(!handle)return;

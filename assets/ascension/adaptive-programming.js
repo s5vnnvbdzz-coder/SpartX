@@ -253,6 +253,9 @@
   try{frame.contentWindow.postMessage({
    type:'spartx:ascensionImportResult',requestId:event.data.requestId,success,message
   },global.location.origin)}catch(_){}
+  // The visible Workout Continue popup must close on success or show a retry message.
+  try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
+    {detail:{success,message}}))}catch(_){}
  });
  global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,recommend});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});

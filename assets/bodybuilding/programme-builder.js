@@ -176,12 +176,9 @@
       '<div class="sx-bb-companion-lifts">'+currentWeeks.map(({lift,week})=>{
         const enabled=!prefs.excluded.includes(lift);
         const planned=api.plan(lift,week,{volume:prefs.volume,powerbuilding:prefs.powerbuilding,lifts:cycle.lifts});
-        const legacy=lift==='Bench Press'?'Existing AscensionX: Paused Bench Press':
-          lift==='Deadlift'?'Existing AscensionX: Romanian Deadlift':'';
         return '<div class="sx-bb-companion-lift">'+
           '<label class="sx-bb-companion-lift-header"><input type="checkbox" data-bb-companion-lift="'+esc(lift)+'" '+(enabled?'checked':'')+'>'+
           '<span><strong>'+esc(lift)+'</strong><small>Week '+week+' of 6</small></span></label>'+
-          (legacy?'<div class="sx-bb-companion-existing">'+esc(legacy)+' · Existing optional accessory, not duplicated</div>':'')+
           (planned.length?planned.map(ex=>'<div class="sx-bb-companion-ex"><strong>'+esc(ex.name)+'</strong><span>'+
             ex.sets+' × '+ex.min+'–'+ex.max+' · '+ex.rir+' RIR</span></div>').join(''):
             '<p class="sx-bb-help">Recovery week: no new companion exercises.</p>')+

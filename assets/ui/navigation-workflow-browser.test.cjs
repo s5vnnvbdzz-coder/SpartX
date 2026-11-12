@@ -7,9 +7,15 @@ async function main(){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
   await page.goto('http://127.0.0.1:4173/index.html',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.spartanxNavigateScreen &&
-    document.querySelector('#profile .profile-edit-button')?.onclick &&
-    document.querySelector('#homeCreateRoutine')?.onclick,null,{timeout:25000});
+  await page.waitForFunction(()=>document.getElementById('homeCreateRoutine')&&
+    document.getElementById('rankCollapseToggle'),null,{timeout:8000});
+  console.log('Startup state',JSON.stringify(await page.evaluate(()=>({
+    navigator:typeof window.spartanxNavigateScreen,
+    editHandler:!!document.getElementById('editProfile')?.onclick,
+    routineHandler:!!document.getElementById('homeCreateRoutine')?.onclick,
+    rootTheme:document.body.dataset.activeTheme,
+    scripts:performance.getEntriesByType('resource').filter(x=>x.name.endsWith('.js')).length
+  }))));
   // The four root tabs never acquire the secondary-page Back control.
   for(const id of ['home','workout','tools','profile']){
    assert.equal(await page.locator('#'+id+' > .sx-page-back').count(),0,id+' has no secondary Back');

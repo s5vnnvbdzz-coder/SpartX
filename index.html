@@ -1822,6 +1822,21 @@ body:has(#athleteSearch.screen.active)>main{padding-top:calc(15px + env(safe-are
 .sx-saved-routine-actions{gap:5px;flex-wrap:wrap}
 .sx-saved-routine-actions button{padding:8px 9px;min-height:36px;font-size:11px}
 #routineDetailScreen{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+</style><style id="sx-programme-vertical-menu-v317">
+#workout .sx-programme-menu-button,
+#workout #sx531QuickMenu,
+#workout #sxAscensionOptions{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ width:40px!important;min-width:40px!important;max-width:40px!important;
+ height:40px!important;min-height:40px!important;max-height:40px!important;
+ padding:0!important;border:1px solid var(--line)!important;
+ border-radius:10px!important;aspect-ratio:1!important;
+ background:var(--panel2)!important;color:var(--txt)!important;
+ font-size:0!important;line-height:0!important;
+}
+#workout .sx-programme-menu-button svg{width:19px;height:19px;display:block;flex:none;pointer-events:none}
+#workout .sx-programme-menu-button:focus-visible{outline:2px solid var(--lime)!important;outline-offset:3px}
+#workout .sx-programme-menu-button[aria-expanded="true"]{border-color:var(--lime)!important;color:var(--lime)!important}
 </style></head>
 <body class="sx-main-header-layout">
 <header><div id="sxBrandHeader"><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div>
@@ -4303,7 +4318,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=307',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=316"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=316"></script><script src="./tools/531-native.js?v=316"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=292"></script>
+</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=316"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=316"></script><script src="./tools/531-native.js?v=316"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=317"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -4685,8 +4700,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  };
 })();
 </script>
-<script src="./assets/workouts/531-cycle-flow.js?v=296"></script>
-<script src="./assets/workouts/workout-card-order.js?v=291"></script>
+<script src="./assets/workouts/531-cycle-flow.js?v=317"></script>
+<script src="./assets/workouts/workout-card-order.js?v=317"></script>
 <script id="sx-programme-setup-actions">
 (()=>{
  document.getElementById("sxHeaderAscensionX")?.addEventListener("click",()=>{

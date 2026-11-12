@@ -66,9 +66,9 @@
   powerScreen.innerHTML='<header class="sx-bb-header sx-pb-header">'+
     '<button type="button" class="sx-bb-back" data-pb-back>← WORKOUT</button>'+
     '<div><div class="eyebrow">ASCENSIONX · CONNECTED STRENGTH TRAINING</div>'+
-    '<h1>Powerbuilding</h1></div><span class="sx-bb-pill">6-WEEK CYCLE</span></header>'+
+    '<h1>Powerbuilding</h1></div><span class="sx-bb-pill">ASCENSIONX · 6-WEEK WAVE</span></header>'+
     '<p class="sx-bb-subtitle">Build muscle around your existing AscensionX main lifts. This dashboard never changes the weights or progression of your strength cycle.</p>'+
-    '<div id="sxPBHero"></div>';
+    '<div id="sxPBHero"></div><section id="sxPBDecisionPanel" aria-label="Spartan Intelligence strength cycle decisions"></section>';
   main.appendChild(powerScreen);
   powerScreen.appendChild(companionCard);
   powerScreen.addEventListener('click',event=>{
@@ -129,6 +129,9 @@
   function renderCompanion(){
     const api=window.SXAscensionCompanion;
     const cycle=api?.cycle?.();
+    // Read-only; refreshes when the user opens Powerbuilding or saves a linked
+    // workout. The decision layer never advances AscensionX weeks.
+    window.SXDecisionPanels?.power?.('sxPBDecisionPanel');
     if(!cycle){companionCard.hidden=true;renderPowerCard();renderPowerHero(null,null);return}
     companionCard.hidden=false;
     const prefs=api.preference();
@@ -370,6 +373,11 @@
       }).join('')+'</div>'+
       '<article class="card sx-bb-info"><div class="eyebrow">SPARTANX WORKOUT INTEGRATION</div>'+
       '<p>Continue Training loads planned exercises and unchecked working sets into the normal SpartanX logger. Programme completion is calculated from saved working sets, not merely from starting a workout. Future loads are calculated from your previous completed sets, rep targets and recorded RPE. Week 5 automatically reduces training volume; planned sets remain adjustable.</p></article>';
+    const hero=host.querySelector('.sx-bb-view-hero');
+    if(hero){
+      hero.insertAdjacentHTML('afterend','<section id="sxBBDecisionPanel" aria-label="Spartan Intelligence bodybuilding programme decisions"></section>');
+      window.SXDecisionPanels?.body?.('sxBBDecisionPanel');
+    }
   }
   function input(label,key,value,day,ex,min,max,step){
     return '<label>'+label+'<input type="number" inputmode="decimal" data-bb-ex-field="'+key+'" data-day="'+day+
@@ -529,6 +537,7 @@
   window.addEventListener('storage',e=>{
     if(e.key==='ascensionx_strength_v1'||e.key==='sx_ascension_companion_v1')renderCompanion();
   });
+  window.addEventListener('spartx:ascensionLinkedSessionSaved',renderCompanion);
   window.addEventListener('spartx:bodybuildingSessionSaved',()=>{
     store=M.read();selectedId=store.activeId;
     if(screen.classList.contains('active')&&mode!=='edit')render();else cardRender();

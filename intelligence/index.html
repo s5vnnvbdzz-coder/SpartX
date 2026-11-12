@@ -10,13 +10,19 @@
   <title>SpartanX Intelligence — Athlete Dashboard</title>
   <link rel="stylesheet" href="./styles.css?v=12">
   <link rel="stylesheet" href="./goal-navigation.css?v=1">
+  <link rel="stylesheet" href="../assets/bodybuilding/decision-panels.css?v=305">
   <script src="../assets/anatomy/body-map.js?v=1" defer></script>
   <script src="./muscle-library.js?v=1" defer></script>
   <script src="./engine.js?v=4" defer></script>
   <script src="./bridge.js?v=3" defer></script>
   <script src="./live.js?v=2" defer></script>
   <script src="./session-breakdown.js?v=1" defer></script>
-  <script src="./app.js?v=9" defer></script>
+  <script src="../assets/bodybuilding/programme-model.js?v=4" defer></script>
+  <script src="../assets/bodybuilding/adaptive-engine.js?v=301" defer></script>
+  <script src="../assets/bodybuilding/ascension-companion.js?v=3" defer></script>
+  <script src="../assets/bodybuilding/decision-engine.js?v=305" defer></script>
+  <script src="../assets/bodybuilding/decision-panels.js?v=305" defer></script>
+  <script src="./app.js?v=305" defer></script>
   <script src="./goal-navigation.js?v=2" defer></script>
 </head>
 <body data-theme="black-yellow">
@@ -174,6 +180,7 @@
 
       <section class="page" id="intelligencePage" data-page="intelligence" hidden>
         <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Your next session, informed by your last.</h3><p>Simple, explainable recommendations from completed sets and RPE. Nothing is changed in your training plan.</p></div></div>
+        <article class="panel sx-decision-intelligence-host" id="sxDecisionIntelligence" aria-label="AscensionX and Bodybuilding programme decision analysis"></article>
         <div class="section-top"><div><h3>Progression suggestions</h3><p>Review a lift to see why a recommendation was made</p></div></div>
         <div class="recommendation-grid" id="recommendationGrid"></div>
         <article class="panel sx-session-insights-panel" id="sxLatestSessionInsight" aria-label="Latest completed session and accessory insight"></article>

@@ -344,6 +344,9 @@
       return '<article class="recommend-card"><div class="recommend-top"><div><h3>'+escapeHtml(name)+'</h3><p>Based on most recent comparable top sets</p></div><span class="flag '+rec.kind+'">'+escapeHtml(rec.kind==='positive'?'PROGRESS':rec.kind==='caution'?'REVIEW':'STEADY')+'</span></div><div class="recommend-label">RECOMMENDATION</div><div class="recommend-title">'+escapeHtml(rec.title)+'</div><p>'+escapeHtml(rec.detail)+'</p><div class="recommend-foot"><span>Suggested load: <strong>'+escapeHtml(suggestion)+'</strong></span><span>Confidence: <strong>'+escapeHtml(rec.confidence)+'</strong></span></div></article>';
     }).join('');
     $('allInsights').innerHTML=E.insights(state.analysis).map(x=>'<article class="insight-card"><span class="insight-kicker '+x.kind+'">'+(x.kind==='positive'?'POSITIVE TREND':x.kind==='caution'?'WORTH REVIEWING':'TRAINING OBSERVATION')+'</span><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.text)+'</p></article>').join('');
+    // Keep separate programme-link decisions out of the demo and general
+    // strength-estimate pathways. Only matching saved SpartanX links qualify.
+    window.SXDecisionPanels?.intelligence?.('sxDecisionIntelligence',{mode:state.source});
   }
   function renderAll(){
     if(!state.profile)return;

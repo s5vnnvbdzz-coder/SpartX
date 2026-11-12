@@ -1,0 +1,46 @@
+name: SpartanX Adaptive Programme Decision Engine
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'intelligence/**'
+      - 'assets/bodybuilding/**'
+      - 'tests/adaptive-decision-engine.test.js'
+      - 'tests/adaptive-decision-engine.mobile.py'
+      - '.github/workflows/adaptive-decision-engine-checks.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'intelligence/**'
+      - 'assets/bodybuilding/**'
+      - 'tests/adaptive-decision-engine.test.js'
+      - 'tests/adaptive-decision-engine.mobile.py'
+      - '.github/workflows/adaptive-decision-engine-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  decision-engine-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate decision engine scripts
+        run: |
+          node --check assets/bodybuilding/decision-engine.js
+          node --check assets/bodybuilding/decision-panels.js
+          node --check assets/bodybuilding/programme-builder.js
+          node --check intelligence/app.js
+      - name: Regression tests for two-week cycle and four-week reviews
+        run: node tests/adaptive-decision-engine.test.js
+      - name: Mobile Powerbuilding and Intelligence dashboard integration
+        run: |
+          python3 -m pip install --quiet --break-system-packages selenium
+          google-chrome --version
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/spartanx-adaptive-server.log 2>&1 &
+          python3 tests/adaptive-decision-engine.mobile.py

@@ -95,7 +95,7 @@
   const r=data.ascension,active=r?.status!=='no-cycle',bodybuilding=data.bodybuilding;
   host.innerHTML='<div class="eyebrow">ASCENSIONX · PROGRAMME DECISION ENGINE</div>'+
    '<h3>Training decisions, grounded in your own linked sessions</h3>'+
-   (!linkedHistory?'<p class="small-copy"><strong>REAL ASCENSIONX CYCLE DATA:</strong> These recommendations use your saved AscensionX logs. Other general Intelligence charts may still be showing demonstration data.</p>':'')+
+   ((!linkedHistory||data.status==='empty'||data.status==='partial')?'<p class="small-copy"><strong>REAL ASCENSIONX CYCLE DATA:</strong> These recommendations use your saved AscensionX logs. Other general Intelligence charts may still be showing demonstration data.</p>':'')+
    (active?'<p class="small-copy">'+esc(r.message)+'</p>'+
     '<div class="sx-decision-intel-lifts">'+(r.lifts||[]).map(l=>
      '<article class="sx-decision-intel-lift"><div class="sx-decision-row"><strong>'+esc(l.lift)+

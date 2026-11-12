@@ -178,4 +178,52 @@ test('corrupt and huge saved history fail safely without writes',()=>{
  assert.equal(D.fromStorage(storage).status,'unavailable');
  store.set('spartx_db',JSON.stringify({sessions:records}));
 });
+test('existing AscensionX-only strength logs establish two-week baseline without SpartanX imports',()=>{
+ const actualLogs=[
+  ...['Squats','Bench Press','Deadlift'].flatMap((lift,idx)=>[
+   {id:'a'+idx+'w1',cycleId:created,lift,week:1,date:today,setsComplete:true,
+    sets:[{label:'Top set',weight:100+idx*20,reps:5,rpe:8,done:true},
+      {label:'Back-off 1',weight:90+idx*20,reps:6,rpe:8,done:true}]},
+   {id:'a'+idx+'w2',cycleId:created,lift,week:2,date:today,setsComplete:true,
+    sets:[{label:'Top set',weight:110+idx*20,reps:3,rpe:8,done:true},
+      {label:'Back-off 1',weight:95+idx*20,reps:5,rpe:8,done:true}]}
+  ])
+ ];
+ store.set('ascensionx_strength_v1',JSON.stringify({cycle,logs:actualLogs}));
+ store.set('spartx_db',JSON.stringify({sessions:[]}));
+ const report=D.fromStorage(storage);
+ assert.equal(report.ascension.recordedWeeks,6);
+ for(const lift of report.ascension.lifts){
+  assert.equal(lift.recordedWeeks,2,lift.lift);
+  assert.equal(lift.week,3);
+  assert.equal(lift.confidence,'early');
+  assert(lift.records.every(record=>record.source==='AscensionX'));
+ }
+ assert(report.ascension.exposure.totalWorkingSets>0);
+ store.set('spartx_db',JSON.stringify({sessions:records}));
+ store.set('ascensionx_strength_v1',JSON.stringify({cycle}));
+});
+test('AscensionX and a synced SpartanX workout are counted as one evidence week',()=>{
+ const source=records[0];
+ const duplicated={id:'copy-from-sx',cycleId:created,lift:'Squats',week:1,
+  date:source.date,setsComplete:true,source:'SpartanX',sourceSessionId:source.id,
+  sets:[{label:'Top set',weight:125,reps:5,rpe:8,done:true}]};
+ store.set('ascensionx_strength_v1',JSON.stringify({cycle,logs:[duplicated]}));
+ const report=D.fromStorage(storage).ascension;
+ assert.equal(report.lifts.find(x=>x.lift==='Back Squat').recordedWeeks,2);
+ assert.equal(report.exposure.totalWorkingSets,6,'A synced AscensionX copy should not double count recent exposure');
+ store.set('ascensionx_strength_v1',JSON.stringify({cycle}));
+});
+test('partial and previous-cycle AscensionX logs are excluded without overwriting state',()=>{
+ store.set('ascensionx_strength_v1',JSON.stringify({cycle,logs:[
+  {cycleId:created,lift:'Squats',week:2,setsComplete:false,
+   sets:[{weight:400,reps:10,done:true}]},
+  {cycleId:'older-cycle',lift:'Squats',week:2,setsComplete:true,
+   sets:[{weight:500,reps:10,done:true}]}
+ ]}));
+ const r=D.fromStorage(storage);
+ const squat=r.ascension.lifts.find(x=>x.lift==='Back Squat');
+ assert.equal(squat.records[1].heaviest,137.5);
+ store.set('ascensionx_strength_v1',JSON.stringify({cycle}));
+});
 console.log('Passed '+count+' adaptive programme decision tests.');

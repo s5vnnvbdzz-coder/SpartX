@@ -1445,7 +1445,7 @@ function buildAscSpartanWorkout(lift){
  // Carry the human-readable cycle label across the app boundary.
  const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
  const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
- return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,cycleAccessories:{romanianDeadlift:cycleRomanianDeadliftEnabled()}};
+ return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,cycleAccessories:{romanianDeadlift:cycleRomanianDeadliftEnabled()&&!window.SXAscensionAdaptive?.enabled(state.cycle.created)}};
 }
 function renderAscSpartanImportPreview(){
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
@@ -1469,7 +1469,9 @@ function renderAscSpartanImportPreview(){
   '<span class="asc-spartan-import-label">NEXT EXERCISE · ROMANIAN DEADLIFT</span>'+
   '<div>'+rdl.sets+' × '+rdl.reps+' @ '+kg(rdl.weight)+' · 2–3-second lowering · RPE 6–7</div>'+
   '<div class="tiny" style="margin-top:5px">Added as an independent SpartanX accessory after Deadlift. It does not affect AscensionX week completion.</div>':'';
- panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+accessory;
+ const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
+ const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+adaptive.length+' EXERCISES</span>'+adaptive.map(x=>'<div>'+x.name+' · '+x.sets+' × '+x.min+'–'+x.max+' · '+x.rir+' RIR</div>').join(''):'';
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+accessory+support;
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;
@@ -1834,5 +1836,6 @@ function init(){
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 init();
 </script>
+<script src="../assets/ascension/adaptive-programming.js?v=308"></script>
 </body>
 </html>

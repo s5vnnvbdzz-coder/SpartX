@@ -699,14 +699,6 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
     <div class="sx-cycle-section-header"><div><div class="eyebrow">02 · PRIMARY LIFTS</div><p class="tiny sx-cycle-section-description">Choose which compound lifts belong to this six-week cycle.</p></div><span class="sx-cycle-count" id="sxCycleLiftCount">0 SELECTED</span></div>
     <div id="cycleExerciseOptions"></div>
   </section>
-  <div class="asc-cycle-accessory-settings" id="cycleAccessorySettings" aria-label="Deadlift assistance">
-    <div class="eyebrow">04 · OPTIONAL DEADLIFT ASSISTANCE</div>
-    <label class="asc-cycle-accessory-toggle" for="cycleRomanianDeadliftEnabled">
-      <span><strong>Romanian Deadlift</strong><small>Automatically programmed after Deadlift · Weeks 1–5</small></span>
-      <input type="checkbox" id="cycleRomanianDeadliftEnabled" checked>
-    </label>
-    <p class="tiny">Calculated from each week’s top deadlift set. It is not a separate cycle lift or a requirement for week completion. No RDL during Week 6 deload.</p>
-  </div>
   <button id="deleteCycleButton" type="button" class="secondary full" style="margin-top:9px;border-color:#934a50;color:#ff9ca2" onclick="openDeleteCycle()" hidden>DELETE PROGRAMME</button><div class="tiny" id="cycleBuilderStatus" style="margin-top:10px"></div></div>
   </div>
   <div class="cycle-editor-actions">
@@ -772,7 +764,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
  <div id="workoutPrescription"></div>
  </div>
  <div id="workoutLogger"></div>
- <section class="card asc-cycle-accessory-workout" id="ascWorkoutAccessory" aria-label="Planned deadlift accessory" hidden></section>
+
 </section>
 <div id="restTimerBar" class="rest-timer" aria-live="off"><span>REST <strong id="restTimerValue">03:00</strong></span><div class="rest-timer-actions"><button class="ghost small" onclick="adjustRestTimer(-15)">−15s</button><button class="ghost small" onclick="adjustRestTimer(15)">+15s</button><button class="ghost small" onclick="stopRestTimer()">✕</button></div></div>
 
@@ -821,8 +813,6 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 </main>
 <nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
-<script src="../assets/ascension/paused-bench.js?v=279"></script>
-<script src="../assets/ascension/romanian-deadlift.js?v=280"></script>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='ascensionx_strength_v1';
@@ -976,48 +966,6 @@ function e1rm(w,r){return r>0?w*(1+r/30):0}
 function tm(lift){return roundTo((Number(state.profile.max[lift])||0)*state.profile.tmPct/100)}
 function prescribed(lift,week){const p=PLAN[week-1],base=tm(lift);return {p,topLoad:roundTo(base*p.topPct/100),backLoad:p.backPct===null?null:roundTo(base*p.backPct/100)}}
 
-/* Secondary work belongs to the cycle's prescription, not required sets.
-   Older six-week cycles automatically inherit the new RDL accessory. */
-function cycleRomanianDeadliftEnabled(){
- return state.cycle?.accessories?.romanianDeadlift!==false;
-}
-function cycleRomanianDeadliftPlan(week){
- if(!state.cycle?.created||!selectedLifts().includes('Deadlift')||!cycleRomanianDeadliftEnabled()||window.SXAscensionAdaptive?.enabled(state.cycle.created))return null;
- const p=prescribed('Deadlift',week);
- return window.SpartanXRomanianDeadlift?.fromTopSet({
-  week,topLoad:p.topLoad,cycleId:state.cycle.created,tm:tm('Deadlift'),
-  rounding:Number(state.profile?.rounding)||2.5
- })||null;
-}
-function syncCycleAccessoryEditor(){
- const panel=$('cycleAccessorySettings'),toggle=$('cycleRomanianDeadliftEnabled');
- if(!panel||!toggle)return;
- panel.hidden=!!window.SXAscensionAdaptive?.previewEnabled?.()||![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
-}
-function renderWorkoutAccessory(lift,week){
- const panel=$('ascWorkoutAccessory');
- if(!panel)return;
- if(lift!=='Deadlift'||!selectedLifts().includes('Deadlift')||
-    !state.cycle.created||!cycleRomanianDeadliftEnabled()||window.SXAscensionAdaptive?.enabled(state.cycle.created)){
-  panel.hidden=true;panel.innerHTML='';return;
- }
- panel.hidden=false;
- const a=cycleRomanianDeadliftPlan(week);
- if(!a){
-  panel.innerHTML='<div class="eyebrow">SECONDARY EXERCISE · DELOAD</div>'+
-   '<h2>Romanian Deadlift — rest week</h2>'+
-   '<p class="tiny">No RDL in Week 6. Complete the lighter main Deadlift sets and focus on recovery.</p>';
-  return;
- }
- panel.innerHTML='<div class="eyebrow">AFTER DEADLIFT · OPTIONAL ACCESSORY</div>'+
-  '<div class="asc-accessory-main"><div><h2>Romanian Deadlift</h2>'+
-  '<div class="tiny">Week '+week+' · '+Math.round(a.factor*100)+'% of the '+kg(a.topLoad)+' top set</div></div>'+
-  '<strong>'+a.sets+' × '+a.reps+' @ '+kg(a.weight)+'</strong></div>'+
-  '<p class="tiny">Controlled 2–3-second lowering · RPE 6–7 · Rest 2–3 minutes. '+
-  'The accessory is automatically added after Deadlift through SpartanX Continue Training. '+
-  'Its sets are <strong>not required</strong> for AscensionX week completion.</p>';
-}
-
 // Build Your Cycle uses the existing Profile strength values, never duplicates.
 function cycleStrengthLift(){
  const select=$('cycleStrengthLift');
@@ -1129,29 +1077,16 @@ function saveCycleSelection(){
  const chosen=[...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].map(x=>x.value);
  if(!chosen.length){toast('Select at least one exercise');return}
  const existing=!!state.cycle.created;
- const romanianDeadlift=!!$('cycleRomanianDeadliftEnabled').checked;
- const sameLifts=chosen.length===selectedLifts().length&&chosen.every(x=>selectedLifts().includes(x));
- const accessoryChanged=romanianDeadlift!==cycleRomanianDeadliftEnabled();
- if(existing&&sameLifts){
-  if(!accessoryChanged){
-   toast('Cycle saved · strength and adaptive settings are up to date');
-   closeCycleEditor();return;
-  }
-  // Toggling an accessory must not restart the active lift's week.
-  const previous=state.cycle;
-  state.cycle={...previous,accessories:{...(previous.accessories||{}),romanianDeadlift}};
-  if(!persist(false)){state.cycle=previous;toast('Could not save the accessory setting');return}
-  renderWorkout();renderCycleLoads();renderCycle();renderDashboard();
-  closeCycleEditor();
-  toast(romanianDeadlift?'Romanian Deadlift added to Deadlift weeks 1–5':'Romanian Deadlift removed from future Deadlift sessions');
-  return;
+ if(existing&&chosen.length===selectedLifts().length&&chosen.every(l=>selectedLifts().includes(l))){
+  toast('Cycle saved · adaptive settings are up to date');
+  closeCycleEditor();return;
  }
  const added=chosen.filter(x=>!selectedLifts().includes(x));
  const removed=selectedLifts().filter(x=>!chosen.includes(x));
  const prompt=existing
   ? 'Update your active cycle?'+(added.length?'\n\nNew exercises start at Week 1.':'')+(removed.length?'\n\nRemoved exercises leave the active cycle, but their workout history will be kept.':'')
   : 'Create a six-week cycle for '+chosen.join(', ')+'?';
- pendingCycleSelection={chosen,existing,prompt,romanianDeadlift};
+ pendingCycleSelection={chosen,existing,prompt};
  $('cycleConfirmTitle').textContent=existing?'Save cycle changes?':'Start your six-week cycle?';
  $('cycleConfirmAction').textContent=existing?'Save':'Start';
  $('cycleConfirmSummary').textContent=prompt;
@@ -1161,18 +1096,17 @@ let pendingCycleSelection=null;
 function discardCycleConfirmation(){pendingCycleSelection=null;$('cycleConfirmBackdrop').classList.remove('open')}
 function confirmCycleStart(){
  if(!pendingCycleSelection)return;
- const {chosen,existing,romanianDeadlift}=pendingCycleSelection;
+ const {chosen,existing}=pendingCycleSelection;
  discardCycleConfirmation();
- applyCycleSelection(chosen,existing,romanianDeadlift);
+ applyCycleSelection(chosen,existing);
  closeCycleEditor();
  if(!existing)showScreen('workout');
 }
-function applyCycleSelection(chosen,existing,romanianDeadlift=cycleRomanianDeadliftEnabled()){
+function applyCycleSelection(chosen,existing){
  const weeks={...(state.cycle.weeks||{})};
  chosen.forEach(x=>{if(!weeks[x])weeks[x]=1});
  state.cycle={...state.cycle,created:state.cycle.created||new Date().toISOString(),
-  currentWeek:1,exercises:chosen,weeks,
-  accessories:{...(state.cycle.accessories||{}),romanianDeadlift}};
+  currentWeek:1,exercises:chosen,weeks};
  if(state.draft&&!chosen.includes(state.draft.lift))state.draft=null;
  const current=$('liftSelect').value;
  const next=chosen.includes(current)?current:chosen[0];
@@ -1476,7 +1410,7 @@ function buildAscSpartanWorkout(lift){
  // Carry the human-readable cycle label across the app boundary.
  const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
  const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
- return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,cycleAccessories:{romanianDeadlift:cycleRomanianDeadliftEnabled()&&!window.SXAscensionAdaptive?.enabled(state.cycle.created)}};
+ return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
 }
 function renderAscSpartanImportPreview(){
  if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
@@ -1494,25 +1428,9 @@ function renderAscSpartanImportPreview(){
  if(!prescription){panel.textContent='Select an active cycle exercise.';return}
  const warmup=prescription.warmupSets.map((x,i)=>'W'+(i+1)+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
  const main=prescription.sets.map((x,i)=>(i===0?'Main '+(i+1):'Set '+(i+1))+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
- const paused=prescription.exercise==='Bench Press'
-  ?window.SpartanXPausedBench?.fromTopSet({week:prescription.week,
-    topLoad:prescription.sets[0]?.weight,tm:prescription.tm,cycleId:prescription.cycleId})
-  :null;
- const rdl=prescription.exercise==='Deadlift'&&prescription.cycleAccessories?.romanianDeadlift!==false
-  ?window.SpartanXRomanianDeadlift?.fromTopSet({week:prescription.week,
-    topLoad:prescription.sets[0]?.weight,tm:prescription.tm,cycleId:prescription.cycleId})
-  :null;
- const accessory=paused?
-  '<span class="asc-spartan-import-label">NEXT EXERCISE · PAUSED BENCH PRESS</span>'+
-  '<div>'+paused.sets+' × '+paused.reps+' @ '+kg(paused.weight)+' · 2-second pause · RPE 6–7</div>'+
-  '<div class="tiny" style="margin-top:5px">Added as an independent SpartanX accessory after Bench Press. It does not affect AscensionX week completion.</div>'
-  :rdl?
-  '<span class="asc-spartan-import-label">NEXT EXERCISE · ROMANIAN DEADLIFT</span>'+
-  '<div>'+rdl.sets+' × '+rdl.reps+' @ '+kg(rdl.weight)+' · 2–3-second lowering · RPE 6–7</div>'+
-  '<div class="tiny" style="margin-top:5px">Added as an independent SpartanX accessory after Deadlift. It does not affect AscensionX week completion.</div>':'';
  const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
  const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+adaptive.length+' EXERCISES</span>'+adaptive.map(x=>'<div>'+x.name+' · '+x.sets+' × '+x.min+'–'+x.max+' · '+x.rir+' RIR</div>').join(''):'';
- panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+accessory+support;
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+support;
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;
@@ -1750,7 +1668,6 @@ function renderWorkout(){
  <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${p.topPct}% of TM · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${p.backPct}% of TM</div>`:''}</div>
  <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
- renderWorkoutAccessory(lift,week);
 }
 const RPE_GAUGE="<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4.2 17a9 9 0 1 1 15.6 0\"/><path d=\"M12 14.5 16.5 8\"/><circle cx=\"12\" cy=\"14.5\" r=\"1.5\"/></svg>";
 const RPE_DESCRIPTIONS={"6":"4 more reps in the tank","7":"3 more reps in the tank","8":"2 more reps in the tank","9":"1 more rep in the tank","10":"I've got nothing left","6.5":"3–4 more reps in the tank","7.5":"2–3 more reps in the tank","8.5":"1–2 more reps in the tank","9.5":"Unlikely, but maybe 1 more"};
@@ -1809,10 +1726,8 @@ function saveWorkout(lift,week,count){
 function editWorkout(lift,week){const old=activeCycleLogs().find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>x!==old);persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
 function renderCycle(){
  const selected=selectedLifts();
- $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" data-cycle-tm-lift="${l}" style="display:block">1RM: ${kg(state.profile.max[l])} · Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" onchange="selectCycleStrengthLift(this.value);syncCycleAccessoryEditor();window.SXAscensionAdaptive?.refreshEditor?.()" ${selected.includes(l)?'checked':''}></label>`).join('');
+ $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" data-cycle-tm-lift="${l}" style="display:block">1RM: ${kg(state.profile.max[l])} · Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" onchange="selectCycleStrengthLift(this.value);window.SXAscensionAdaptive?.refreshEditor?.()" ${selected.includes(l)?'checked':''}></label>`).join('');
  selectCycleStrengthLift();
- $('cycleRomanianDeadliftEnabled').checked=cycleRomanianDeadliftEnabled();
- syncCycleAccessoryEditor();
  $('cycleBuilderStatus').textContent=state.cycle.created?'Active: '+selected.map(l=>l+' (Week '+currentWeekFor(l)+')').join(' · '):'Ready to create your six-week cycle.';
  window.SXAscensionAdaptive?.refreshEditor?.();
  $('saveCycleSelectionBtn').textContent=state.cycle.created?'Save cycle changes':'Create six-week cycle';$('deleteCycleButton').hidden=!state.cycle.created;
@@ -1821,21 +1736,13 @@ function renderCycle(){
 }
 function renderCycleLoads(){
  const lift=$('cycleLift').value;
- const isDeadlift=lift==='Deadlift';
- const enabled=isDeadlift&&selectedLifts().includes('Deadlift')&&cycleRomanianDeadliftEnabled()&&!window.SXAscensionAdaptive?.enabled(state.cycle.created);
- const accessoryColumn=isDeadlift?'<th>After deadlift</th>':'';
  const rows=PLAN.map(p=>{
   const x=prescribed(lift,p.week);
-  const a=enabled?cycleRomanianDeadliftPlan(p.week):null;
-  const accessory=isDeadlift?'<td>'+
-    (enabled?(a?a.sets+'×'+a.reps+' @ '+kg(a.weight):'— · deload'):'Not enabled')+'</td>':'';
   return '<tr><td>W'+p.week+'</td><td>'+kg(tm(lift))+'</td><td>'+
-    kg(x.topLoad)+' · '+(p.deload?'3×5':'1×'+p.topReps)+'</td><td>'+
-    (x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps)+
-    '</td>'+accessory+'</tr>';
+   kg(x.topLoad)+' · '+(p.deload?'3×5':'1×'+p.topReps)+'</td><td>'+
+   (x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps)+'</td></tr>';
  }).join('');
- const note=isDeadlift?'<p class="tiny" style="margin:10px 0 0">Romanian Deadlift is optional assistance, calculated from each week’s main top deadlift set. It does not affect week completion or strength trends.</p>':'';
- $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th>'+accessoryColumn+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+note;
+ $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 function renderProgress(){
  const sets=state.logs.flatMap(l=>l.sets),volume=sets.reduce((a,s)=>a+s.weight*s.reps,0),bestW=Math.max(0,...sets.map(s=>s.weight)),bestE=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));
@@ -1891,6 +1798,6 @@ function init(){
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 init();
 </script>
-<script src="../assets/ascension/adaptive-programming.js?v=309"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=310"></script>
 </body>
 </html>

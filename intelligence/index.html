@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#090a0c">
   <meta name="description" content="SpartanX Intelligence: athlete performance analytics, strength trends and explainable training insights. Standalone preview.">
   <title>SpartanX Intelligence — Athlete Dashboard</title>
-  <link rel="stylesheet" href="./styles.css?v=12">
+  <link rel="stylesheet" href="./styles.css?v=13">
   <link rel="stylesheet" href="./goal-navigation.css?v=1">
   <link rel="stylesheet" href="../assets/bodybuilding/decision-panels.css?v=306">
   <script src="../assets/anatomy/body-map.js?v=1" defer></script>
@@ -22,8 +22,8 @@
   <script src="../assets/bodybuilding/ascension-companion.js?v=3" defer></script>
   <script src="../assets/bodybuilding/decision-engine.js?v=305" defer></script>
   <script src="../assets/bodybuilding/decision-policy.js?v=306" defer></script>
-  <script src="../assets/bodybuilding/decision-panels.js?v=306" defer></script>
-  <script src="./app.js?v=305" defer></script>
+  <script src="../assets/bodybuilding/decision-panels.js?v=307" defer></script>
+  <script src="./app.js?v=307" defer></script>
   <script src="./goal-navigation.js?v=2" defer></script>
 </head>
 <body data-theme="black-yellow">
@@ -96,48 +96,55 @@
       </section>
 
       <section class="page active" id="overviewPage" data-page="overview" aria-labelledby="pageTitle">
-        <div class="hero-card">
-          <div class="hero-text">
-            <div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">V0.3 · LIVE</span></div>
-            <h2>TRAIN WITH <em>PURPOSE.</em><br>PROGRESS WITH PROOF.</h2>
-            <p>Turn your logged workouts into clear strength trends, workload patterns and recommendations you can understand.</p>
-            <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
-          </div>
-          <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div><span class="hero-tag">S T R O N G E R &nbsp; E V E R Y &nbsp; D A Y</span></div>
+        <div class="section-top sx-overview-lift-priority">
+          <div><div class="eyebrow">ASCENSIONX · POWERLIFTING FIRST</div><h3>Powerlifting insights</h3>
+            <p>Squat, bench press and deadlift performance, strength trends and progression signals come first.</p></div>
+          <button type="button" class="text-button" data-go="intelligence">FULL STRENGTH ANALYSIS <span aria-hidden="true">↗</span></button>
         </div>
-
-        <div class="section-top sx-session-section-top">
-          <div><h3>Your latest completed workout</h3><p>All saved exercises and accessory sets, not just the main compound lift</p></div>
-          <span class="micro-tag">FULL SESSION ANALYSIS</span>
-        </div>
-        <div id="sxLatestWorkoutAnalysis" aria-live="polite"></div>
-        <div class="section-top sx-session-section-top">
-          <div><h3>Exercise-by-exercise progression</h3><p>Explore the training volume history of an exercise from your most recent workout</p></div>
-        </div>
-        <article class="panel sx-session-trend-panel">
-          <div class="panel-head"><div><div class="eyebrow">ADDITIONAL EXERCISES · TREND</div><h3>Recorded training volume</h3></div>
-            <select class="compact-select" id="sxSessionTrendSelect" aria-label="Choose a recorded exercise"></select>
-          </div>
-          <div id="sxSessionTrendChart" class="sx-session-trend-chart"></div>
-          <p class="sx-session-muted" id="sxSessionTrendNote"></p>
+        <article class="panel sx-overview-ascension-panel" id="sxOverviewAscensionInsights" aria-label="AscensionX powerlifting insights" aria-live="polite">
+          <p class="sx-overview-lift-loading">Checking completed AscensionX strength sessions on this device.</p>
         </article>
 
         <div class="section-top"><div><h3 id="snapshotTitle">Bench Press performance snapshot</h3><p id="snapshotSubtitle">All four metrics reflect your selected exercise.</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
-        <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
-        <div class="two-col">
-          <article class="panel">
-            <div class="panel-head"><div><div class="eyebrow">STRENGTH PROGRESSION</div><h3 id="overviewChartTitle">Estimated 1RM trend</h3></div><select class="compact-select" id="overviewLift" aria-label="Select lift"><option>Bench Press</option><option>Squat</option><option>Deadlift</option><option>Overhead Press</option></select></div>
-            <div id="overviewStrengthChart" class="chart-wrap"></div>
-            <div class="panel-foot"><span class="legend-dot"></span> Calculated from best completed work sets (Epley estimate)</div>
-          </article>
-          <article class="panel panel-insights">
-            <div class="panel-head"><div><div class="eyebrow">PERFORMANCE INTELLIGENCE</div><h3>What your data is telling us</h3></div><span class="spark-icon">✦</span></div>
-            <div id="overviewInsights" class="mini-insights"></div>
-            <button class="text-button" data-go="intelligence">EXPLORE ALL INSIGHTS <span>↗</span></button>
-          </article>
-        </div>
-        <div class="section-top"><div><h3 id="consistencyTitle">Bench Press training consistency</h3><p id="consistencySubtitle">Sessions containing the selected lift</p></div></div>
-        <article class="panel consistency-panel"><div id="consistencyChart"></div><div class="panel-foot">A completed session counts once. Consistency does not guarantee progression.</div></article>
+                <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
+                <div class="two-col">
+                  <article class="panel">
+                    <div class="panel-head"><div><div class="eyebrow">STRENGTH PROGRESSION</div><h3 id="overviewChartTitle">Estimated 1RM trend</h3></div><select class="compact-select" id="overviewLift" aria-label="Select lift"><option>Bench Press</option><option>Squat</option><option>Deadlift</option><option>Overhead Press</option></select></div>
+                    <div id="overviewStrengthChart" class="chart-wrap"></div>
+                    <div class="panel-foot"><span class="legend-dot"></span> Calculated from best completed work sets (Epley estimate)</div>
+                  </article>
+                  <article class="panel panel-insights">
+                    <div class="panel-head"><div><div class="eyebrow">PERFORMANCE INTELLIGENCE</div><h3>What your data is telling us</h3></div><span class="spark-icon">✦</span></div>
+                    <div id="overviewInsights" class="mini-insights"></div>
+                    <button class="text-button" data-go="intelligence">EXPLORE ALL INSIGHTS <span>↗</span></button>
+                  </article>
+                </div>
+                <div class="section-top"><div><h3 id="consistencyTitle">Bench Press training consistency</h3><p id="consistencySubtitle">Sessions containing the selected lift</p></div></div>
+                <article class="panel consistency-panel"><div id="consistencyChart"></div><div class="panel-foot">A completed session counts once. Consistency does not guarantee progression.</div></article>
+
+        <details class="sx-overview-supporting-training" id="sxOverviewSupportingTraining">
+          <summary><span><strong>Supporting workouts &amp; accessories</strong>
+            <small>Full-session breakdowns and individual exercise-volume trends</small></span>
+            <span class="sx-overview-support-toggle" aria-hidden="true">EXPAND <span>⌄</span></span>
+          </summary>
+          <div class="sx-overview-support-content">
+            <div class="section-top sx-session-section-top">
+                      <div><h3>Your latest completed workout</h3><p>All saved exercises and accessory sets, not just the main compound lift</p></div>
+                      <span class="micro-tag">FULL SESSION ANALYSIS</span>
+                    </div>
+                    <div id="sxLatestWorkoutAnalysis" aria-live="polite"></div>
+                    <div class="section-top sx-session-section-top">
+                      <div><h3>Exercise-by-exercise progression</h3><p>Explore the training volume history of an exercise from your most recent workout</p></div>
+                    </div>
+                    <article class="panel sx-session-trend-panel">
+                      <div class="panel-head"><div><div class="eyebrow">ADDITIONAL EXERCISES · TREND</div><h3>Recorded training volume</h3></div>
+                        <select class="compact-select" id="sxSessionTrendSelect" aria-label="Choose a recorded exercise"></select>
+                      </div>
+                      <div id="sxSessionTrendChart" class="sx-session-trend-chart"></div>
+                      <p class="sx-session-muted" id="sxSessionTrendNote"></p>
+                    </article>
+          </div>
+        </details>
       </section>
 
       <section class="page" id="performancePage" data-page="performance" hidden>

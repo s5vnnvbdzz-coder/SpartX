@@ -204,6 +204,8 @@
    document.getElementById('sxAscAdaptiveFocus').value=p.focus;
    document.getElementById('sxAscAdaptiveDays').value=p.days;
    document.getElementById('sxAscAdaptiveOptions').hidden=!p.enabled;
+   // Keep the pre-existing manual RDL control visually consistent with adaptive suppression.
+   if(typeof global.syncCycleAccessoryEditor==='function')global.syncCycleAccessoryEditor();
    const status=document.getElementById('sxAscAdaptiveStatus');
    const preview=document.getElementById('sxAscAdaptivePreview');
    if(!p.enabled){status.textContent='OFF · AscensionX main-lift programming remains unchanged.';preview.textContent='';return;}

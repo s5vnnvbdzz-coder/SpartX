@@ -11,7 +11,7 @@ async function main(){
   await page.goto(origin+'/index.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.SXSharedThemes?.refresh&&
     document.getElementById('themeChoice'),null,{timeout:20000});
-  await page.selectOption('#themeChoice',value);
+  await page.evaluate(value=>{const select=document.getElementById('themeChoice');select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));},value);
   await page.waitForFunction(expected=>
     document.body.dataset.sxTheme===expected &&
     JSON.parse(localStorage.getItem('spartx_preferences_v1')||'{}').theme===expected,

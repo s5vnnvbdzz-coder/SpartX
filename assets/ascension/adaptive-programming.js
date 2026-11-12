@@ -35,7 +35,7 @@
  };
  const FOURTH={
   strength:[
-   {name:'Paused Bench Press',sets:2,min:5,max:7,rir:3,rest:150,muscles:'bench technique',cost:2},
+   {name:'Machine Chest Press',sets:2,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
    {name:'Chest-Supported Row',sets:2,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
    {name:'Lateral Raise',sets:2,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
    {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
@@ -218,7 +218,7 @@
  }
  function mountEditor(){
   if(!global.document)return;
-  const anchor=document.getElementById('cycleAccessorySettings');
+  const anchor=document.getElementById('sxCycleLiftSection');
   if(!anchor||document.getElementById('sxAscAdaptiveCard'))return;
   const card=document.createElement('section');
   card.id='sxAscAdaptiveCard';card.className='card sx-cycle-setup-section';
@@ -252,7 +252,7 @@
    '</div>',
    '<p id="sxAscAdaptiveStatus" class="sx-adaptive-status" role="status" aria-live="polite"></p>'
   ].join('');
-  anchor.insertAdjacentElement('beforebegin',card);
+  anchor.insertAdjacentElement('afterend',card);
   function render(){
    const current=activeCycle(), selected=selectedDraftLifts();
    const pref=current?read(current.id):draft;
@@ -270,7 +270,6 @@
    document.getElementById('sxAscAdaptiveOptions').hidden=!pref.enabled;
    const status=document.getElementById('sxAscAdaptiveStatus');
    const preview=document.getElementById('sxAscAdaptivePreview');
-   if(typeof global.syncCycleAccessoryEditor==='function')global.syncCycleAccessoryEditor();
    if(!pref.enabled){
     status.textContent='OFF · Manual assistance options remain available below.';
     preview.replaceChildren();return;
@@ -314,7 +313,7 @@
    }
    const recovery=document.createElement('p');
    recovery.className='sx-adaptive-preview-note';
-   recovery.textContent='Heavy Romanian deadlifts are not automatically stacked after heavy deadlifts while this option is on.';
+   recovery.textContent='Only Adaptive Programming creates supporting exercises. Legacy Paused Bench Press and RDL add-ons are no longer applied.';
    preview.appendChild(recovery);
   }
   card.sxRender=render;

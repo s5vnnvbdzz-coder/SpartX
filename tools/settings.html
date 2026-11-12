@@ -94,6 +94,8 @@ function syncSettingsTheme(theme){
  };
  const selected=Object.hasOwn(themes,theme)||theme==='dark'?theme:'dark';
  document.body.dataset.sxSettingsTheme=selected;
+ const forgeToggle=document.getElementById('crimsonForgeThemeToggle');
+ if(forgeToggle)forgeToggle.checked=selected==='crimson-forge';
  for(const [name,cls] of Object.entries(themes))
   document.body.classList.toggle(cls,name===selected);
  document.documentElement.style.colorScheme=selected==='light'?'light':'dark';

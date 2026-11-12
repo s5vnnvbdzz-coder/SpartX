@@ -73,24 +73,15 @@
     }catch(_){return null}
   }
   function preference(storage=global.localStorage){
+    // Adaptive Programming is the ONLY automated source of supporting lifts.
+    // Old Powerbuilding/Strength & Size preferences are ignored but left in
+    // storage so already-recorded training history is never modified.
     const active=cycle(storage);
     if(!active)return {cycleId:null,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]};
-    // Adaptive Programming is configured in AscensionX Manage Cycle.
-    // It takes precedence over the legacy standalone companion without changing its saved preferences.
     const adaptive=global.SXAscensionAdaptive?.read(active.id,storage);
-    if(adaptive?.enabled)return {cycleId:active.id,enabled:true,powerbuilding:true,
-      trainingDays:adaptive.days,volume:'balanced',excluded:[],adaptive:true};
-    try{
-      const raw=storage.getItem(STORAGE);
-      if(!raw||raw.length>25000)return {cycleId:active.id,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]};
-      const entries=JSON.parse(raw);
-      const saved=entries?.[active.id]||{};
-      return {cycleId:active.id,enabled:saved.enabled===true,
-        powerbuilding:saved.powerbuilding===true,
-        trainingDays:[3,4,5].includes(Number(saved.trainingDays))?Number(saved.trainingDays):4,
-        volume:saved.volume==='low'?'low':'balanced',
-        excluded:Array.isArray(saved.excluded)?saved.excluded.filter(x=>LIFTS.includes(x)) :[]};
-    }catch(_){return {cycleId:active.id,enabled:false,powerbuilding:false,trainingDays:4,volume:'balanced',excluded:[]}}
+    const enabled=adaptive?.enabled===true;
+    return {cycleId:active.id,enabled,powerbuilding:enabled,
+      trainingDays:adaptive?.days||4,volume:'balanced',excluded:[],adaptive:enabled};
   }
   function savePreference(update,storage=global.localStorage){
     const active=cycle(storage);
@@ -128,32 +119,17 @@
   function plan(lift,week,opts={}){
     const main=canonical(lift),w=Number(week);
     if(!main||!Number.isInteger(w)||w<1||w>6)return [];
-    if(global.SXAscensionAdaptive?.enabled())return global.SXAscensionAdaptive.plan(main,w,opts);
-    const volume=opts.volume==='low'?'low':'balanced';
-    // One AscensionX main lift plus supporting accessories; no additional
-    // heavy squats, Romanian deadlifts or leg press after the main squat.
-    const selected=Array.isArray(opts.lifts)?opts.lifts:[];
-    const base=opts.powerbuilding?POWER_PROFILES[main]:PROFILES[main];
-    const exercises=base.map(item=>({...item}));
-    if(opts.powerbuilding&&main==='Bench Press'&&!selected.includes('Overhead Press')){
-      const index=exercises.findIndex(item=>item.name==='Rear Delt Fly');
-      if(index>=0)exercises[index]={name:'Seated Dumbbell Shoulder Press',sets:2,min:8,max:12,rir:3,rest:120};
-    }
-    return exercises.map((item,index)=>{
-      // During peak week, one low-fatigue accessory per lift.
-      const sets=w===5&&index>0?0:setCount(item.sets,w,volume);
-      return {...item,sets,sourceLift:main,week:w};
-    }).filter(x=>x.sets>0);
+    if(!global.SXAscensionAdaptive?.enabled())return [];
+    return global.SXAscensionAdaptive.plan(main,w,opts);
   }
   function forImport(details,existingNames=[],storage=global.localStorage){
     const active=cycle(storage),p=preference(storage);
-    if(!active||!p.enabled||p.cycleId!==active.id)return [];
+    if(!active||!p.enabled||!p.adaptive||p.cycleId!==active.id)return [];
     if(details?.source!=='AscensionX'||details.cycleId!==active.id)return [];
     const main=canonical(details.exercise),week=Number(details.week);
     if(!main||!active.lifts.includes(main)||p.excluded.includes(main))return [];
     if(!Number.isInteger(week)||week<1||week>6)return [];
-    // Existing paused bench and RDL are owned by their original AscensionX
-    // accessory modules. Neither is generated or modified here.
+    // No legacy RDL/paused-bench insertion; only adaptive-selected exercises.
     const exists=new Set(existingNames.map(normName));
     return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding,lifts:active.lifts})
       .filter(item=>!exists.has(normName(item.name)))
@@ -217,28 +193,10 @@
     return items.map(item=>({...item,sets:week===4?1:item.sets}));
   }
   function schedule(days,storage=global.localStorage){
-    const active=cycle(storage),preferenceData=preference(storage);
-    if(!active)return {valid:false,message:'Create an AscensionX cycle before enabling Powerbuilding.',slots:[]};
-    if(global.SXAscensionAdaptive?.enabled(active.id,storage))
-      return global.SXAscensionAdaptive.schedule(active,storage);
-    const count=[3,4,5].includes(Number(days))?Number(days):preferenceData.trainingDays;
-    const lifts=(count===3?['Back Squat','Deadlift','Bench Press','Overhead Press']:LIFTS).filter(l=>active.lifts.includes(l));
-    if(count<lifts.length)return {valid:false,message:
-      'Your AscensionX cycle has '+lifts.length+' primary lifts, but you selected '+count+
-      ' training days. Choose at least '+lifts.length+' days so separately imported main lifts are not combined unsafely.',slots:[]};
-    const liftWeek=lift=>{
-      const match=Object.entries(active.weeks||{}).find(([key])=>canonical(key)===lift);
-      return Math.max(1,Math.min(6,Number(match?.[1]||active.currentWeek)||1));
-    };
-    const week=Math.max(1,...lifts.map(liftWeek));
-    const slots=WEEKDAYS[count].map((day,index)=>{
-      const lift=lifts[index];
-      return lift?{day,kind:'ascension',title:lift+' · AscensionX · Week '+liftWeek(lift),lift,
-        week:liftWeek(lift),exercises:plan(lift,liftWeek(lift),{volume:preferenceData.volume,powerbuilding:true,lifts})}:
-        {day,kind:'support',title:count===4&&index===count-1&&lifts.includes('Bench Press')&&!lifts.includes('Overhead Press')?'Upper B · Hypertrophy':index===count-1?'Arms, Calves & Core':'Controlled Hypertrophy',
-        lift:null,exercises:supportExercises(index-lifts.length,week,lifts,index===count-1,count)};
-    });
-    return {valid:true,message:'A suggested weekly layout: move sessions when needed and reassess effort, soreness and performance.',week,slots};
+    const active=cycle(storage),prefs=preference(storage);
+    if(!active)return {valid:false,message:'Create an AscensionX cycle before scheduling support.',slots:[]};
+    if(!prefs.adaptive)return {valid:false,message:'Enable Adaptive Programming in AscensionX Manage Cycle.',slots:[]};
+    return global.SXAscensionAdaptive.schedule(null,storage);
   }
   global.SXAscensionCompanion=Object.freeze({
     STORAGE,CYCLE_STORAGE,LIFTS,PROFILES,POWER_PROFILES,canonical,cycle,preference,savePreference,plan,forImport,schedule,supportExercises

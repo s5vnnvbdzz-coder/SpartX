@@ -2134,8 +2134,6 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/workouts/exercise-replacement.js?v=301"></script>
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/exercises/exercise-logging-guide.js?v=303"></script>
-<script src="./assets/ascension/paused-bench.js?v=279"></script>
-<script src="./assets/ascension/romanian-deadlift.js?v=280"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -3420,119 +3418,6 @@ function renderRoutineDraft(){
 }
 function saveRoutine(){let n=$('routineName').value.trim();if(!n||!routineDraft.length){alert('Enter a name and add at least one exercise.');return;}db.routines=Array.isArray(db.routines)?db.routines:[];if(db.routines.length>=5){alert('You can save up to five routines.');return;}if(db.routines.some(r=>r.name.toLowerCase()===n.toLowerCase())){alert('A routine with that name already exists.');return;}db.routines.push({name:n,exercises:routineDraft.map(ex=>({name:ex.name,sets:window.SpartanXCardio?.isCardio(ex.name)?[window.SpartanXCardio.blank()]:ex.sets.map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:'Working Set',done:false}))}))});persist();renderSavedRoutines();libraryMode='workout';$('homeRoutineDetails').open=true;switchScreen('home');}
 function startSavedRoutine(i){let r=(db.routines||[])[i];if(!r)return;if(sessionActive){if(!confirm('A workout is already active. Replace it?'))return;resetSession();}work=r.exercises.map(ex=>({name:typeof ex==='string'?ex:ex.name,rest:120,notes:'',sets:window.SpartanXCardio?.isCardio(typeof ex==='string'?ex:ex.name)?[window.SpartanXCardio.blank()]:typeof ex==='string'?[{weight:'',reps:'',rpe:'',type:'Working Set',done:false}]:(ex.sets||[]).map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:set.type||'Working Set',done:false}))}));sessionActive=true;sessionStarted=null;clearInterval(sessionTicker);$('sessionClock').textContent='00:00:00';$('activeWorkoutName').textContent=r.name;beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();}
-// AscensionX accessory is an independent exercise, never a cycle completion requirement.
-function pausedBenchFromAscensionImport(d){
- if(d?.source!=='AscensionX'||d.exercise!=='Bench Press')return null;
- const api=window.SpartanXPausedBench;
- const plan=api?.fromTopSet({week:Number(d.week),topLoad:Number(d.sets?.[0]?.weight),
-  cycleId:String(d.cycleId||''),tm:Number(d.tm)});
- return plan?api.createExercise(plan):null;
-}
-function ensureAscensionPausedBench(benchIndex,d){
- if(benchIndex<0||benchIndex>=work.length)return false;
- // Preserve athlete-entered or already imported paused bench work.
- if(work.some(ex=>ex.ascensionAccessory?.id==='ascensionx-paused-bench-v1'||
-  /^Paused Bench Press$/i.test(String(ex.name||'').trim())))return false;
- const accessory=pausedBenchFromAscensionImport(d);
- if(!accessory)return false;
- work.splice(benchIndex+1,0,accessory);
- return true;
-}
-// One-time opt-in request made for TODAY's active Bench Week 2 workout.
-// The operation runs only on the athlete's device after the new build loads.
-function backfillActiveAscensionWeek2PausedBench(){
- if(!sessionActive||editingSessionId!==null||window.sxMissedWorkoutMode||window.sxManualWorkoutDate)return false;
- const api=window.SpartanXPausedBench;
- if(!api)return false;
- let state;try{state=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null')}catch(_){return false}
- const cycle=state?.cycle;
- if(!cycle?.created||!Array.isArray(cycle.exercises)||!cycle.exercises.includes('Bench Press')||
-  Number(cycle.weeks?.['Bench Press']??cycle.currentWeek)!==2)return false;
- const plan=api.fromAscensionState(state,2);
- if(!plan)return false;
- const marker='spartx_asc_paused_bench_w2_once_v1_'+cycle.created;
- try{if(localStorage.getItem(marker))return false}catch(_){}
- const benchIndex=work.findIndex(ex=>{
-  const link=ex?.ascensionLink;
-  if(link)return link.lift==='Bench Press'&&Number(link.week)===2&&link.cycleId===cycle.created;
-  return /^(?:Barbell\s+)?Bench Press$/i.test(String(ex?.name||'').trim());
- });
- if(benchIndex<0)return false;
- if(work.some(ex=>ex?.ascensionAccessory?.id==='ascensionx-paused-bench-v1'||
-  /^Paused Bench Press$/i.test(String(ex?.name||'').trim()))){
-  try{localStorage.setItem(marker,'already-present')}catch(_){}
-  return false;
- }
- const addition=api.createExercise(plan);
- if(!addition)return false;
- work.splice(benchIndex+1,0,addition);
- renderWork();updateMinimizedSession();saveDraft();
- // Only mark once the existing draft has actually persisted.
- try{
-  const persisted=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
-  if(persisted?.work?.some(ex=>ex?.ascensionAccessory?.id===addition.ascensionAccessory.id))
-   localStorage.setItem(marker,'applied');
- }catch(_){}
- return true;
-}
-// Deadlift accessory: Romanian Deadlift is never linked to week completion.
-function romanianDeadliftFromAscensionImport(d){
- if(d?.source!=='AscensionX'||d.exercise!=='Deadlift'||d.cycleAccessories?.romanianDeadlift===false||
-    window.SXAscensionAdaptive?.enabled(d.cycleId))return null;
- const api=window.SpartanXRomanianDeadlift;
- const plan=api?.fromTopSet({week:Number(d.week),topLoad:Number(d.sets?.[0]?.weight),
-  cycleId:String(d.cycleId||''),tm:Number(d.tm)});
- return plan?api.createExercise(plan):null;
-}
-function ensureAscensionRomanianDeadlift(deadliftIndex,d){
- if(deadliftIndex<0||deadliftIndex>=work.length)return false;
- // Never replace sets, notes or technique adjustments already entered.
- if(work.some(ex=>ex.ascensionAccessory?.id==='ascensionx-romanian-deadlift-v1'||
-  /^Romanian Deadlift$/i.test(String(ex.name||'').trim())))return false;
- const accessory=romanianDeadliftFromAscensionImport(d);
- if(!accessory)return false;
- work.splice(deadliftIndex+1,0,accessory);
- return true;
-}
-// Attach Week 2 RDL to an existing current Deadlift session after app update.
-// No edits of historic, backdated or other programmed sessions.
-function backfillActiveAscensionWeek2RomanianDeadlift(){
- if(!sessionActive||editingSessionId!==null||window.sxMissedWorkoutMode||window.sxManualWorkoutDate)return false;
- const api=window.SpartanXRomanianDeadlift;
- if(!api)return false;
- let state;
- try{state=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null')}catch(_){return false}
- const cycle=state?.cycle;
- if(!cycle?.created||!Array.isArray(cycle.exercises)||!cycle.exercises.includes('Deadlift')||
-  cycle.accessories?.romanianDeadlift===false||window.SXAscensionAdaptive?.enabled(cycle.created)||
-  Number(cycle.weeks?.Deadlift??cycle.currentWeek)!==2)return false;
- const plan=api.fromAscensionState(state,2);
- if(!plan)return false;
- const marker='spartx_asc_rdls_w2_once_v1_'+cycle.created;
- try{if(localStorage.getItem(marker))return false}catch(_){}
- const deadliftIndex=work.findIndex(ex=>{
-  const link=ex?.ascensionLink;
-  if(link)return link.lift==='Deadlift'&&Number(link.week)===2&&link.cycleId===cycle.created;
-  return /^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex?.name||'').trim());
- });
- if(deadliftIndex<0)return false;
- if(work.some(ex=>ex?.ascensionAccessory?.id==='ascensionx-romanian-deadlift-v1'||
-  /^Romanian Deadlift$/i.test(String(ex?.name||'').trim()))){
-  try{localStorage.setItem(marker,'already-present')}catch(_){}
-  return false;
- }
- const accessory=api.createExercise(plan);
- if(!accessory)return false;
- work.splice(deadliftIndex+1,0,accessory);
- renderWork();updateMinimizedSession();saveDraft();
- try{
-  const persisted=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
-  if(persisted?.work?.some(ex=>ex?.ascensionAccessory?.id===accessory.ascensionAccessory.id))
-   localStorage.setItem(marker,'applied');
- }catch(_){}
- return true;
-}
-
 // Strength & Size is an OPTIONAL companion to an AscensionX import.
 // It never alters the prescribed compound sets and never carries ascensionLink.
 function ensureAscensionStrengthSizeCompanions(d){
@@ -3563,29 +3448,20 @@ function import531IntoWorkout(d){
   // Never alter an athlete's custom workout title or completed sets.
   applyAscensionWorkoutTitle(d);
  }
- // Continue Training can be opened after benching has already started.
- // Do not create a second main bench lift; just append the accessory.
- if(source==='AscensionX'&&d.exercise==='Bench Press'){
-  const linkedIndex=work.findIndex(ex=>ex.ascensionLink?.lift==='Bench Press'&&
+ // If the compound is already in the current workout, never create a duplicate.
+ // Only add supporting exercises when Adaptive Programming is enabled.
+ if(source==='AscensionX'){
+  const linked=work.find(ex=>ex.ascensionLink?.lift===d.exercise&&
    ex.ascensionLink.cycleId===d.cycleId&&Number(ex.ascensionLink.week)===Number(d.week));
-  const unlinkedIndex=linkedIndex<0?work.findIndex(ex=>!ex.ascensionLink&&
-   /^(?:Barbell\s+)?Bench Press$/i.test(String(ex.name||'').trim())):-1;
-  const benchIndex=linkedIndex>=0?linkedIndex:unlinkedIndex;
-  if(benchIndex>=0){
-   ensureAscensionPausedBench(benchIndex,d);
-   ensureAscensionStrengthSizeCompanions(d);
-   switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
-   return true;
-  }
- }
- if(source==='AscensionX'&&d.exercise==='Deadlift'){
-  const linkedIndex=work.findIndex(ex=>ex.ascensionLink?.lift==='Deadlift'&&
-   ex.ascensionLink.cycleId===d.cycleId&&Number(ex.ascensionLink.week)===Number(d.week));
-  const unlinkedIndex=linkedIndex<0?work.findIndex(ex=>!ex.ascensionLink&&
-   /^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex.name||'').trim())):-1;
-  const deadliftIndex=linkedIndex>=0?linkedIndex:unlinkedIndex;
-  if(deadliftIndex>=0){
-   ensureAscensionRomanianDeadlift(deadliftIndex,d);
+  // Preserve the previous no-duplicate behaviour for an already-entered
+  // unlinked bench/deadlift, even though the fixed accessories are retired.
+  const existingUnlinked=(d.exercise==='Bench Press'||d.exercise==='Deadlift')&&work.some(ex=>{
+   if(ex.ascensionLink)return false;
+   return d.exercise==='Bench Press'
+    ?/^(?:Barbell\s+)?Bench Press$/i.test(String(ex.name||'').trim())
+    :/^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex.name||'').trim());
+  });
+  if(linked||existingUnlinked){
    ensureAscensionStrengthSizeCompanions(d);
    switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
    return true;
@@ -3596,8 +3472,6 @@ function import531IntoWorkout(d){
   imported.ascensionLink={cycleId:d.cycleId,cycleTitle:String(d.cycleTitle||d.cycleName||'').trim().slice(0,75),lift:d.exercise,week:Number(d.week),plannedSets:d.sets.map(x=>({weight:Number(x.weight),reps:Number(x.reps)})),targetRpe:Number(d.targetRpe)||null};
  }
  work.unshift(imported);
- if(source==='AscensionX'&&d.exercise==='Bench Press')ensureAscensionPausedBench(0,d);
- if(source==='AscensionX'&&d.exercise==='Deadlift')ensureAscensionRomanianDeadlift(0,d);
  if(source==='AscensionX')ensureAscensionStrengthSizeCompanions(d);
  beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();return true;
 }
@@ -4110,8 +3984,6 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
  }
  updateFloatingRestTimer();
 })();
-// Attach Week 2 paused bench once to an existing live bench workout after hydration.
-requestAnimationFrame(()=>{backfillActiveAscensionWeek2PausedBench();backfillActiveAscensionWeek2RomanianDeadlift()});
 try{if(JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')?.screen==='routineBuilderScreen')renderRoutineDraft();}catch(e){}stats();renderSavedRoutines();renderHomeCycles();$('rankSex').addEventListener('change',saveRankProfile);$('rankBodyweight').addEventListener('change',saveRankProfile);$('rankSex').value=db.profile?.standard||'male';$('rankSex').dataset.loaded='1';$('rankBodyweight').value=db.profile?.bodyweight||'';$('rankBodyweight').dataset.loaded='1';$('measureBodyweight').value=db.profile?.bodyweight||'';$('measureBodyweight').addEventListener('change',()=>{$('rankBodyweight').value=$('measureBodyweight').value;saveRankProfile();});
 let calendarCursor=new Date();calendarCursor.setDate(1);let selectedCalendarDate='';
 function calendarKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -4334,7 +4206,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=307',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=308"></script><script src="./tools/531-native.js?v=295"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/ascension/quick-access.js?v=292"></script>
+</script><script src="./assets/stats/statistics.js?v=262"></script><script src="./social.js?v=240"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=311"></script><script src="./tools/531-native.js?v=295"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/ascension/quick-access.js?v=292"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -4730,7 +4602,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=309;
+ const BUILD=311;
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;
  let checking=false;
@@ -4795,12 +4667,12 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-save-review.js?v=262"></script>
 <script src="./assets/profile/profile-social-pages.js?v=262"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=243"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=308"></script>
-<script src="./assets/bodybuilding/ascension-companion.js?v=308"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=311"></script>
+<script src="./assets/bodybuilding/ascension-companion.js?v=311"></script>
 <script src="./assets/bodybuilding/programme-model.js?v=4"></script>
 <script src="./assets/bodybuilding/adaptive-engine.js?v=301"></script>
 <script src="./assets/bodybuilding/decision-engine.js?v=305"></script>
 <script src="./assets/bodybuilding/decision-policy.js?v=306"></script>
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
-<script src="./assets/bodybuilding/programme-builder.js?v=309"></script>
+<script src="./assets/bodybuilding/programme-builder.js?v=311"></script>
 </body></html>

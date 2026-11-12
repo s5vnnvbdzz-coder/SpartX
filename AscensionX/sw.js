@@ -1,7 +1,7 @@
 // Keep the standalone AscensionX app fresh on iOS. Navigation and HTML are
 // network-first; all other shell assets remain available offline.
-const CACHE = 'ascensionx-shell-v78';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', '../assets/energy-can.svg', '../assets/themes/spartanx-ascension-embed.css?v=288', '../assets/ascension/paused-bench.js?v=279', '../assets/ascension/romanian-deadlift.js?v=280', '../assets/ascension/adaptive-programming.js?v=309', '../assets/ascension/cycle-builder-ui.css?v=309'];
+const CACHE = 'ascensionx-shell-v80';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', '../assets/energy-can.svg', '../assets/themes/spartanx-ascension-embed.css?v=288', '../assets/ascension/adaptive-programming.js?v=311', '../assets/ascension/cycle-builder-ui.css?v=309'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });

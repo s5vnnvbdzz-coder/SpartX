@@ -68,4 +68,52 @@ assert.equal(api.schedule().slots.find(x=>x.kind==='support').exercises.length,0
 const fresh='2026-11-10T11:00:00.000Z';
 localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{created:fresh,exercises:['Bench Press'],weeks:{'Bench Press':1}},logs:[]}));
 assert.equal(api.enabled(fresh),false,'New cycle must opt in independently');
+
+// Build 310: previously saved manual Powerbuilding preferences must NOT
+// silently re-enable the retired RDL / paused-bench accessory programmes.
+const oldPrefs={ [id]:{enabled:true,powerbuilding:true,trainingDays:4,volume:'balanced'} };
+const pastCycle=cycle(['Back Squat','Bench Press','Deadlift'],2);
+const legacyStorage=storage({
+  'ascensionx_strength_v1':pastCycle,
+  'sx_ascension_companion_v1':JSON.stringify(oldPrefs)
+});
+const bridgeWindow={localStorage:legacyStorage,addEventListener(){}};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'adaptive-programming.js'),'utf8'),{window:bridgeWindow});
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../bodybuilding/ascension-companion.js'),'utf8'),{window:bridgeWindow});
+const bridge=bridgeWindow.SXAscensionCompanion, adaptive=bridgeWindow.SXAscensionAdaptive;
+const imported={source:'AscensionX',cycleId:id,exercise:'Bench Press',week:2};
+assert.equal(bridge.preference(legacyStorage).enabled,false,'Old companion preferences cannot enable future accessories');
+assert.equal(bridge.forImport(imported,[],legacyStorage).length,0,'No automatic accessories when adaptive is off');
+assert.equal(bridge.schedule(4,legacyStorage).valid,false,'Legacy support days are disabled');
+adaptive.save({enabled:true,focus:'strength',days:4},legacyStorage);
+assert.equal(bridge.preference(legacyStorage).adaptive,true);
+assert.ok(bridge.forImport(imported,[],legacyStorage).length>0,'Adaptive exercises still load');
+for(const lift of ['Back Squat','Bench Press','Deadlift']){
+ const entries=bridge.forImport({...imported,exercise:lift},[],legacyStorage);
+ assert.ok(entries.every(ex=>!/(?:Romanian Deadlift|Paused Bench Press)/i.test(ex.name)),
+  'Neither retired accessory is added on the primary days');
+}
+assert.ok(adaptive.schedule(null,legacyStorage).slots.every(slot=>
+ slot.exercises.every(ex=>!/(?:Romanian Deadlift|Paused Bench Press)/i.test(ex.name))),
+ 'No RDL/paused bench prescriptions appear on the fourth day');
+assert.equal(legacyStorage.getItem('ascensionx_strength_v1'),pastCycle,'Prior cycle and history preserved');
+const ascHtml=fs.readFileSync(path.join(__dirname,'../../AscensionX/index.html'),'utf8');
+const hostHtml=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
+assert.equal(ascHtml.includes('cycleRomanianDeadliftEnabled'),false,'RDL selector removed from AscensionX builder');
+assert.equal(ascHtml.includes('SpartanXPausedBench'),false,'Paused bench preview removed');
+assert.equal(ascHtml.includes('SpartanXRomanianDeadlift'),false,'RDL preview removed');
+assert.equal(hostHtml.includes('ensureAscensionPausedBench'),false,'No automatic paused bench workout injection');
+assert.equal(hostHtml.includes('ensureAscensionRomanianDeadlift'),false,'No automatic RDL workout injection');
+assert.equal(hostHtml.includes('backfillActiveAscensionWeek2PausedBench'),false,'No old paused bench draft backfill');
+assert.equal(hostHtml.includes('backfillActiveAscensionWeek2RomanianDeadlift'),false,'No old RDL draft backfill');
+assert.ok(ascHtml.includes("cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage')"),
+ 'Tools and Workout entrances share the same full-page editor formatting');
+assert.ok(ascHtml.includes("if(!cycleEditorOpenedFromWorkout)document.body.classList.add('sx-asc-workout-manage')"),
+ 'Tools Edit Programme activates the same page layout as Manage Cycle');
+assert.ok(ascHtml.includes('const returnToSpartanX=cycleEditorOpenedFromWorkout;'),
+ 'Editor exit must distinguish the two entrances');
+assert.ok(ascHtml.includes("if(returnToSpartanX){\n  try{window.parent.postMessage({type:'spartx:ascensionManageExit'}"),
+ 'Only Workout Manage Cycle exits all the way back to SpartanX');
+
+
 console.log('AscensionX adaptive programming: tests passed');

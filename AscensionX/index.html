@@ -971,7 +971,7 @@ function cycleRomanianDeadliftEnabled(){
  return state.cycle?.accessories?.romanianDeadlift!==false;
 }
 function cycleRomanianDeadliftPlan(week){
- if(!state.cycle?.created||!selectedLifts().includes('Deadlift')||!cycleRomanianDeadliftEnabled())return null;
+ if(!state.cycle?.created||!selectedLifts().includes('Deadlift')||!cycleRomanianDeadliftEnabled()||window.SXAscensionAdaptive?.enabled(state.cycle.created))return null;
  const p=prescribed('Deadlift',week);
  return window.SpartanXRomanianDeadlift?.fromTopSet({
   week,topLoad:p.topLoad,cycleId:state.cycle.created,tm:tm('Deadlift'),
@@ -981,13 +981,13 @@ function cycleRomanianDeadliftPlan(week){
 function syncCycleAccessoryEditor(){
  const panel=$('cycleAccessorySettings'),toggle=$('cycleRomanianDeadliftEnabled');
  if(!panel||!toggle)return;
- panel.hidden=![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
+ panel.hidden=!!window.SXAscensionAdaptive?.enabled(state.cycle.created)||![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
 }
 function renderWorkoutAccessory(lift,week){
  const panel=$('ascWorkoutAccessory');
  if(!panel)return;
  if(lift!=='Deadlift'||!selectedLifts().includes('Deadlift')||
-    !state.cycle.created||!cycleRomanianDeadliftEnabled()){
+    !state.cycle.created||!cycleRomanianDeadliftEnabled()||window.SXAscensionAdaptive?.enabled(state.cycle.created)){
   panel.hidden=true;panel.innerHTML='';return;
  }
  panel.hidden=false;
@@ -1796,7 +1796,7 @@ function renderCycle(){
 function renderCycleLoads(){
  const lift=$('cycleLift').value;
  const isDeadlift=lift==='Deadlift';
- const enabled=isDeadlift&&selectedLifts().includes('Deadlift')&&cycleRomanianDeadliftEnabled();
+ const enabled=isDeadlift&&selectedLifts().includes('Deadlift')&&cycleRomanianDeadliftEnabled()&&!window.SXAscensionAdaptive?.enabled(state.cycle.created);
  const accessoryColumn=isDeadlift?'<th>After deadlift</th>':'';
  const rows=PLAN.map(p=>{
   const x=prescribed(lift,p.week);

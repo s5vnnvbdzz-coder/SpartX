@@ -205,22 +205,28 @@
   }
   const days=programme.sessions.length;
   const complete=progress?.days||[];
-  const blockStart=week<=4?1:week<=8?5:9;
-  const blockEnd=Math.min(programme.weeks,blockStart+3);
-  const rows=(progress?.completeCount||0);
-  const completedBlock=Array.from({length:blockEnd-blockStart+1},(_,j)=>blockStart+j)
-   .every(w=>programme.sessions.every(day=>{
-    // progress.days only refers to current week; look at session links via
-    // historical week coverage to ensure all four-week sessions are complete.
-    return history.some(s=>Number(model?.linkedSession?.(s)?.week)===w&&
-      model?.linkedSession?.(s)?.dayId===day.id&&model?.completion?.(s)?.complete===true);
-   }));
-  const review={start:blockStart,end:blockEnd,
-   due:completedBlock&&blockEnd%4===0,
+  const rows=progress?.completeCount||0;
+  const blocks=Array.from({length:Math.ceil(programme.weeks/4)},(_,i)=>{
+   const start=i*4+1,end=Math.min(programme.weeks,start+3);
+   let completed=0;
+   for(let w=start;w<=end;w++)for(const day of programme.sessions){
+    if(history.some(session=>Number(model?.linkedSession?.(session)?.week)===w&&
+      model?.linkedSession?.(session)?.dayId===day.id&&
+      model?.completion?.(session)?.complete===true))completed++;
+   }
+   return {start,end,completed,total:(end-start+1)*days};
+  });
+  // Every fully completed 4-week block is a review milestone. Don't lose the
+  // week-4 review just because next programme week is already 5.
+  const ready=blocks.filter(b=>b.end%4===0&&b.completed===b.total).at(-1);
+  const upcoming=blocks.find(b=>b.completed<b.total)||blocks.at(-1);
+  const block=ready||upcoming||{start:1,end:4,completed:0,total:4*days};
+  const review={start:block.start,end:block.end,due:!!ready,
+   completedBlockSessions:block.completed,blockSessions:block.total,
    completedSessions:rows,totalProgrammeSessions:days*programme.weeks,
-   advice:completedBlock?
-     'Block review ready. Preserve successful exercises and inspect repeatedly underperforming slots before changing next-block exercises.':
-     'Collect linked completed sessions; unlinked workouts are excluded from programme decisions.'};
+   advice:ready?
+     'Four-week review ready. Keep effective exercises; consider substitutions only after repeated underperformance and a recovery check. Proposed changes require explicit approval.':
+     'Complete linked programme sessions to reach the next four-week review. Unlinked workouts are excluded.'};
   return {status:history.length?'evidence':'waiting',programmeId:programme.id,week,
    sessions:history.length,decisions,review,readOnly:true,
    message:'Only saved, linked programme sessions inform these recommendations.'};

@@ -108,10 +108,24 @@ assert.equal(hostHtml.includes('backfillActiveAscensionWeek2PausedBench'),false,
 assert.equal(hostHtml.includes('backfillActiveAscensionWeek2RomanianDeadlift'),false,'No old RDL draft backfill');
 assert.ok(ascHtml.includes("cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage')"),
  'Tools and Workout entrances share the same full-page editor formatting');
-assert.ok(ascHtml.includes("if(!cycleEditorOpenedFromWorkout)document.body.classList.add('sx-asc-workout-manage')"),
- 'Tools Edit Programme activates the same page layout as Manage Cycle');
-assert.ok(ascHtml.includes('const returnToSpartanX=cycleEditorOpenedFromWorkout;'),
+assert.ok(ascHtml.includes("document.body.classList.add('sx-asc-workout-manage','sx-asc-cycle-page')"),
+ 'Tools Edit Programme activates the same dedicated page as Manage Cycle');
+assert.ok(ascHtml.includes('const returnToSpartanX=cycleEditorOpenedFromWorkout,returnScreen=cycleEditorReturnScreen;'),
  'Editor exit must distinguish the two entrances');
+assert.ok(ascHtml.includes('<section id="cycleEditorBackdrop" class="cycle-editor-page" role="main"'),
+ 'Build and Edit Programme share an actual main page, not a popup dialog');
+assert.ok(!ascHtml.includes('class="cycle-editor-dialog" role="dialog"'),
+ 'The programme page must not keep dialog semantics');
+assert.ok(ascHtml.includes("history.pushState({screen:'programme',returnScreen:cycleEditorReturnScreen}"),
+ 'Tools editing creates a navigable route');
+assert.ok(ascHtml.includes("if($('cycleEditorBackdrop')?.classList.contains('open'))closeCycleEditor(true);"),
+ 'Browser Back restores the preceding AscensionX screen');
+const editorCss=fs.readFileSync(path.join(__dirname,'cycle-builder-ui.css'),'utf8');
+assert.ok(editorCss.includes('body.sx-asc-cycle-page #cycleEditorBackdrop.open{')&&
+ editorCss.includes('display:flex!important;position:relative!important;'),
+ 'Editor is laid out as a normal dedicated page, not a fixed overlay');
+assert.ok(editorCss.includes('body.sx-asc-cycle-page > main,'),
+ 'Underlying AscensionX dashboard is not visible beneath the programme page');
 assert.ok(ascHtml.includes("if(returnToSpartanX){\n  try{window.parent.postMessage({type:'spartx:ascensionManageExit'}"),
  'Only Workout Manage Cycle exits all the way back to SpartanX');
 

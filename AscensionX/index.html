@@ -616,7 +616,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
  }
 }
 </style>
-<link rel="stylesheet" href="../assets/ascension/cycle-builder-ui.css?v=309">
+<link rel="stylesheet" href="../assets/ascension/cycle-builder-ui.css?v=312">
 </head>
 <body>
 <header>
@@ -672,8 +672,8 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
   <div class="sx-cycle-view-foot"><button type="button" class="secondary" onclick="closeSXWorkoutCycleView(false)">CANCEL</button><button type="button" id="sxCycleViewSave" onclick="closeSXWorkoutCycleView(true)">SAVE</button></div>
  </section>
 </div>
-<div id="cycleEditorBackdrop" class="cycle-editor-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeCycleEditor()">
- <section class="cycle-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleEditorTitle">
+<section id="cycleEditorBackdrop" class="cycle-editor-page" role="main" aria-label="AscensionX programme editor" aria-hidden="true">
+ <div class="cycle-editor-dialog" aria-labelledby="cycleEditorTitle">
   <div class="cycle-editor-header">
    <div class="sx-cycle-editor-heading"><div class="eyebrow">ASCENSIONX · PROGRAMME</div><h2 id="cycleEditorTitle">Build your cycle</h2><p id="sxCycleEditorSubtitle" class="tiny">Configure your six-week strength progression.</p></div>
    <button type="button" id="cycleEditorClose" class="iconbtn" onclick="closeCycleEditor()" aria-label="Close programme editor">×</button>
@@ -705,8 +705,8 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
    <button type="button" class="secondary" onclick="closeCycleEditor()">CANCEL</button>
    <button type="button" id="saveCycleSelectionBtn" onclick="saveCycleSelection()">SAVE CYCLE CHANGES</button>
   </div>
- </section>
-</div>
+ </div>
+</section>
 <main>
 <section id="home" class="screen active">
  <div class="eyebrow">TRAINING HQ</div><h1>Ascension dashboard</h1><p class="muted tiny" id="todayDate"></p>
@@ -908,16 +908,20 @@ function closeSXWorkoutCycleView(save=false){
  try{window.parent.postMessage({type:'spartx:ascensionViewExit'},location.origin)}catch(_){}
 }
 
-let cycleEditorLock=null,cycleEditorCaller=null,cycleEditorOpenedFromWorkout=false;
+// One actual single-page-application view for BOTH programme editor routes.
+// The old backdrop markup is now an ordinary <section role="main">; when
+// selected, AscensionX's dashboard/header/nav are hidden rather than dimmed.
+let cycleEditorLock=null,cycleEditorCaller=null;
+let cycleEditorOpenedFromWorkout=false,cycleEditorReturnScreen='home',cycleEditorHasHistoryEntry=false;
 function openCycleEditor(){
- const overlay=$('cycleEditorBackdrop');
- if(!overlay||overlay.classList.contains('open'))return;
- // Both entry points use precisely the same dedicated page layout. A Tools
- // entry stays inside AscensionX when closed; a Workout entry returns to
- // SpartanX Workout, but the editor UI itself is identical.
+ const page=$('cycleEditorBackdrop');
+ if(!page||page.classList.contains('open'))return;
  cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage');
- if(!cycleEditorOpenedFromWorkout)document.body.classList.add('sx-asc-workout-manage');
- // Always start from saved data; unchecked edits are not retained after Cancel.
+ cycleEditorReturnScreen=document.querySelector('.screen.active')?.id||'home';
+ cycleEditorHasHistoryEntry=false;
+ // The same page class drives the identical full-width header, scrolling
+ // content, and fixed footer for Workout Manage and Tools Edit.
+ document.body.classList.add('sx-asc-workout-manage','sx-asc-cycle-page');
  renderCycle();
  $('cycleEditorTitle').textContent=state.cycle.created?'Manage your cycle':'Build your cycle';
  const summary=$('sxCycleEditorSubtitle');
@@ -928,24 +932,24 @@ function openCycleEditor(){
  cycleEditorCaller=document.activeElement;
  cycleEditorLock={body:document.body.style.overflow,html:document.documentElement.style.overflow};
  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
- overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
- if(document.body.classList.contains('sx-asc-workout-manage')){
-  overlay.setAttribute('role','main');overlay.removeAttribute('aria-modal');
+ page.classList.add('open');page.setAttribute('aria-hidden','false');
+ // Tools/standalone gets a navigable SPA page; Workout owns its own parent
+ // navigation and therefore must not acquire an iframe history entry.
+ if(!cycleEditorOpenedFromWorkout&&history.state?.screen!=='programme'){
+  history.pushState({screen:'programme',returnScreen:cycleEditorReturnScreen},'', '#programme');
+  cycleEditorHasHistoryEntry=true;
  }
  $('cycleEditorScroll').scrollTop=0;
  $('cycleEditorClose').focus({preventScroll:true});
 }
-function closeCycleEditor(){
- const overlay=$('cycleEditorBackdrop');
- if(!overlay||!overlay.classList.contains('open'))return;
- const returnToSpartanX=cycleEditorOpenedFromWorkout;
+function closeCycleEditor(fromPopState=false){
+ const page=$('cycleEditorBackdrop');
+ if(!page||!page.classList.contains('open'))return;
+ const returnToSpartanX=cycleEditorOpenedFromWorkout,returnScreen=cycleEditorReturnScreen;
  cycleEditorOpenedFromWorkout=false;
  window.SXAscensionAdaptive?.discardDraft?.();
- overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
- overlay.setAttribute('role','presentation');overlay.removeAttribute('aria-modal');
- // Restore the dashboard under a Tools entry; the Workout entry instead
- // exits its dedicated embedded Manage Cycle page via the host handshake.
- document.body.classList.remove('sx-asc-workout-manage');
+ page.classList.remove('open');page.setAttribute('aria-hidden','true');
+ document.body.classList.remove('sx-asc-workout-manage','sx-asc-cycle-page');
  if(cycleEditorLock){
   document.body.style.overflow=cycleEditorLock.body;
   document.documentElement.style.overflow=cycleEditorLock.html;
@@ -953,6 +957,17 @@ function closeCycleEditor(){
  cycleEditorLock=null;
  const caller=cycleEditorCaller;cycleEditorCaller=null;
  if(caller?.isConnected)caller.focus({preventScroll:true});
+ if(!returnToSpartanX){
+  if(!fromPopState&&cycleEditorHasHistoryEntry&&history.state?.screen==='programme')
+   history.replaceState({screen:returnScreen},'', '#'+returnScreen);
+  // Restore the previously selected AscensionX screen; no underlying
+  // dashboard/modal remains mounted over the page.
+  if(!fromPopState){
+   document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id===returnScreen));
+   document.querySelectorAll('nav button').forEach(el=>el.classList.toggle('active',el.dataset.screen===returnScreen));
+  }
+ }
+ cycleEditorHasHistoryEntry=false;
  if(returnToSpartanX){
   try{window.parent.postMessage({type:'spartx:ascensionManageExit'},location.origin)}catch(_){}
  }
@@ -1162,9 +1177,8 @@ function resetEmbeddedAscensionOpening(){
  });
 }
 function showScreen(id,addHistory=true){
- // The programme editor is a separate modal, not part of View Full Cycle.
- if(id==='cycle'){
-  if(!document.querySelector('#home.screen.active'))showScreen('home',addHistory);
+ // Build/Edit Programme is a navigable SPA page, shared with Workout Manage Cycle.
+ if(id==='cycle'||id==='programme'){
   openCycleEditor();
   return;
  }
@@ -1184,7 +1198,15 @@ function showScreen(id,addHistory=true){
  });
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
-window.addEventListener('popstate',e=>showScreen(e.state?.screen||'workout',false));
+window.addEventListener('popstate',e=>{
+ const requested=e.state?.screen||'home';
+ if(requested==='programme'){
+  if(!$('cycleEditorBackdrop')?.classList.contains('open'))openCycleEditor();
+  return;
+ }
+ if($('cycleEditorBackdrop')?.classList.contains('open'))closeCycleEditor(true);
+ showScreen(requested,false);
+});
 function setupProfileCollapse(){
  const cards=[...document.querySelectorAll('#profile .card')];
  cards.forEach((card,i)=>{

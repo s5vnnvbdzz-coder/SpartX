@@ -227,3 +227,56 @@ body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body{
  #cycleEditorBackdrop .cycle-editor-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
  #sxAscAdaptiveCard h3{font-size:16px}
 }
+
+
+/* Build 312: the editor is an actual SPA page, not a backdrop/modal.
+   Shared by Tools > AscensionX > Edit Programme and Workout > Manage Cycle. */
+html:has(body.sx-asc-cycle-page),
+body.sx-asc-cycle-page{
+ width:100%!important;height:100dvh!important;min-height:0!important;
+ margin:0!important;padding:0!important;
+ overflow:hidden!important;overscroll-behavior:none!important;
+ background:var(--bg)!important;
+}
+body.sx-asc-cycle-page > header,
+body.sx-asc-cycle-page > main,
+body.sx-asc-cycle-page > nav[aria-label="Main navigation"]{
+ display:none!important;
+}
+body.sx-asc-cycle-page #cycleEditorBackdrop.open{
+ display:flex!important;position:relative!important;
+ inset:auto!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;
+ width:100%!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;
+ padding:0!important;margin:0!important;
+ background:var(--bg)!important;background-image:none!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ overflow:hidden!important;overscroll-behavior:contain!important;
+ align-items:stretch!important;justify-content:stretch!important;
+}
+body.sx-asc-cycle-page #cycleEditorBackdrop > .cycle-editor-dialog{
+ display:flex!important;flex-direction:column!important;flex:1 1 auto!important;
+ width:100%!important;max-width:none!important;height:100%!important;max-height:100%!important;
+ min-height:0!important;min-width:0!important;
+ margin:0!important;padding:0!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ background:var(--bg)!important;
+}
+body.sx-asc-cycle-page #cycleEditorBackdrop .cycle-editor-header{
+ flex:0 0 auto!important;
+ width:100%!important;border-radius:0!important;
+ padding:calc(13px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 15px max(16px,env(safe-area-inset-left,0px))!important;
+ background:var(--panel)!important;
+}
+body.sx-asc-cycle-page #cycleEditorBackdrop .cycle-editor-body{
+ flex:1 1 auto!important;min-height:0!important;
+ width:100%!important;max-height:none!important;
+ padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))!important;
+ background:var(--bg)!important;overflow-y:auto!important;overflow-x:hidden!important;
+ -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+}
+body.sx-asc-cycle-page #cycleEditorBackdrop .cycle-editor-actions{
+ flex:0 0 auto!important;width:100%!important;
+ padding:13px max(16px,env(safe-area-inset-right,0px)) calc(15px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))!important;
+ background:var(--panel)!important;border-radius:0!important;
+}

@@ -106,5 +106,14 @@ assert.equal(hostHtml.includes('ensureAscensionPausedBench'),false,'No automatic
 assert.equal(hostHtml.includes('ensureAscensionRomanianDeadlift'),false,'No automatic RDL workout injection');
 assert.equal(hostHtml.includes('backfillActiveAscensionWeek2PausedBench'),false,'No old paused bench draft backfill');
 assert.equal(hostHtml.includes('backfillActiveAscensionWeek2RomanianDeadlift'),false,'No old RDL draft backfill');
+assert.ok(ascHtml.includes("cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage')"),
+ 'Tools and Workout entrances share the same full-page editor formatting');
+assert.ok(ascHtml.includes("if(!cycleEditorOpenedFromWorkout)document.body.classList.add('sx-asc-workout-manage')"),
+ 'Tools Edit Programme activates the same page layout as Manage Cycle');
+assert.ok(ascHtml.includes('const returnToSpartanX=cycleEditorOpenedFromWorkout;'),
+ 'Editor exit must distinguish the two entrances');
+assert.ok(ascHtml.includes("if(returnToSpartanX){\n  try{window.parent.postMessage({type:'spartx:ascensionManageExit'}"),
+ 'Only Workout Manage Cycle exits all the way back to SpartanX');
+
 
 console.log('AscensionX adaptive programming: tests passed');

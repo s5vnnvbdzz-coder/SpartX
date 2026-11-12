@@ -73,7 +73,17 @@ try:
  assert 'READ-ONLY' in insight.upper(),insight
  print('PASS Spartan Intelligence Insights shares the cycle analysis',flush=True)
 
- # Do not show private actual-session recommendations while demo is selected.
- run("document.getElementById('applyDemo').click()") if False else None
+ # A user logging only through AscensionX must still see those real cycle
+ # recommendations when the general Strength dashboard uses demo mode.
+ run("localStorage.removeItem('spartx_db')")
+ driver.refresh()
+ wait.until(lambda d:run("""return !!window.SXDecisionPanels &&
+  !!document.querySelector('[data-tab="intelligence"]');"""))
+ run("document.querySelector('button[data-tab=intelligence]').click()")
+ wait.until(lambda d:run("""return !!document.querySelector('#intelligencePage:not([hidden])')"""))
+ fallback=run("return document.getElementById('sxDecisionIntelligence').textContent")
+ assert 'REAL ASCENSIONX CYCLE DATA' in fallback,fallback
+ assert 'Back Squat' in fallback and 'Bench Press' in fallback and 'Deadlift' in fallback,fallback
+ print('PASS AscensionX-only data remains visible and separate from demo charts',flush=True)
 finally:
  driver.quit()

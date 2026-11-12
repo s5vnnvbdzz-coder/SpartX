@@ -1,0 +1,42 @@
+name: SpartanX shared theme browser checks
+on:
+  pull_request:
+    paths:
+      - 'assets/themes/**'
+      - 'index.html'
+      - 'tools/settings.html'
+      - 'tools/531-native.js'
+      - 'tools/replica.js'
+      - 'AscensionX/index.html'
+      - 'intelligence/index.html'
+      - '.github/workflows/theme-browser.yml'
+  push:
+    branches: [feature/crimson-forge-theme-315]
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check actual page palette and live theme updates
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-theme-server.log 2>&1 &
+          node assets/themes/theme-browser.test.cjs
+      - name: Preserve screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crimson-forge-theme-preview
+          path: |
+            crimson-forge-home-desktop.png
+            crimson-forge-home-mobile.png
+            crimson-forge-settings-mobile.png
+            crimson-forge-failure.png
+          if-no-files-found: ignore

@@ -81,7 +81,7 @@ try:
  assert render['stacked'],render
  assert render['maxRight']<=render['viewport']+2,render
  print('PASS mobile-width cards are vertically stacked and inside screen',flush=True)
- driver.find_element('css selector','#sxOverviewSupportingTraining > summary').click()
+ run("document.querySelector('#sxOverviewSupportingTraining > summary').click()")
  assert run("return document.getElementById('sxOverviewSupportingTraining').open")
  assert run("return !!document.getElementById('sxSessionTrendChart')")
  assert run("return !!document.getElementById('sxLatestWorkoutAnalysis')")

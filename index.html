@@ -3453,7 +3453,15 @@ function import531IntoWorkout(d){
  if(source==='AscensionX'){
   const linked=work.find(ex=>ex.ascensionLink?.lift===d.exercise&&
    ex.ascensionLink.cycleId===d.cycleId&&Number(ex.ascensionLink.week)===Number(d.week));
-  if(linked){
+  // Preserve the previous no-duplicate behaviour for an already-entered
+  // unlinked bench/deadlift, even though the fixed accessories are retired.
+  const existingUnlinked=(d.exercise==='Bench Press'||d.exercise==='Deadlift')&&work.some(ex=>{
+   if(ex.ascensionLink)return false;
+   return d.exercise==='Bench Press'
+    ?/^(?:Barbell\s+)?Bench Press$/i.test(String(ex.name||'').trim())
+    :/^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex.name||'').trim());
+  });
+  if(linked||existingUnlinked){
    ensureAscensionStrengthSizeCompanions(d);
    switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
    return true;

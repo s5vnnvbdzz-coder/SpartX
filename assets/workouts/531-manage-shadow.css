@@ -1,0 +1,131 @@
+/* Shared design tokens with AscensionX Manage Cycle.
+   Only active in the native 5/3/1 full-page Manage editor. */
+:host(.sx-531-manage-inline) #editModal #setupCard,
+:host(.sx-531-manage-inline) #editModal .edit-dialog #setupCard{
+ border:0!important;border-radius:0!important;background:transparent!important;
+ box-shadow:none!important;margin:0!important;padding:0!important;
+}
+:host(.sx-531-manage-inline) #editModalBody{min-width:0}
+:host(.sx-531-manage-inline) #editModal .edit-dialog{margin:0!important;padding:0!important;}
+:host(.sx-531-manage-inline) #editModal #setupCard > .card-head{display:none!important}
+:host(.sx-531-manage-inline) #editModal #setupCard > .hint{display:none!important}
+:host(.sx-531-manage-inline) #editModal #setupCard > #generate{display:none!important}
+:host(.sx-531-manage-inline) .sx531-unified-sections{
+ display:flex;flex-direction:column;gap:13px;width:100%;min-width:0;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section{
+ display:block;min-width:0;
+ padding:16px;border:1px solid var(--line);border-radius:15px;
+ background:var(--panel2);
+}
+:host(.sx-531-manage-inline) .sx531-unified-section-head{
+ margin:0 0 12px;
+}
+:host(.sx-531-manage-inline) .sx531-unified-eyebrow{
+ font-size:11px;font-weight:850;letter-spacing:1.45px;
+ color:var(--lime);line-height:1.35;
+}
+:host(.sx-531-manage-inline) .sx531-unified-description{
+ font-size:12px;line-height:1.55;color:var(--muted);
+ margin:6px 0 0;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .fields{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;margin:12px 0 0;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .field{min-width:0;margin:0!important}
+:host(.sx-531-manage-inline) .sx531-unified-section .field label{
+ margin:0 0 6px;font-size:12px;line-height:1.4;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section input:not([type="checkbox"]),
+:host(.sx-531-manage-inline) .sx531-unified-section select{
+ border-radius:10px;min-height:44px;
+ width:100%;max-width:100%;font-size:14px;
+ padding:10px 11px;background:var(--panel);color:var(--txt);
+ border:1px solid var(--line);
+}
+:host(.sx-531-manage-inline) .sx531-unified-section input:focus-visible,
+:host(.sx-531-manage-inline) .sx531-unified-section select:focus-visible{
+ outline:2px solid var(--lime);outline-offset:2px;
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker{
+ background:transparent!important;border:0!important;padding:0!important;
+ border-radius:0!important;margin:3px 0 0!important;
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-picker-head{
+ margin-bottom:10px;justify-content:flex-end;min-height:29px;
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-picker-head > strong{display:none}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-picker-head > button{
+ background:var(--panel);color:var(--txt);
+ border:1px solid var(--line);font-size:10px;font-weight:800;
+ border-radius:8px;min-height:30px;
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-choices{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:9px;
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-choices label{
+ min-width:0;min-height:52px;
+ display:flex;align-items:center;gap:10px;
+ padding:12px!important;background:var(--panel);
+ border:1px solid var(--line);border-radius:10px;
+ font-size:13px;color:var(--txt);font-weight:700;
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-choices label.chosen{
+ border-color:color-mix(in srgb,var(--lime) 68%,var(--line));
+ background:color-mix(in srgb,var(--lime) 7%,var(--panel));
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .sx531-choices label input{
+ width:20px;height:20px;flex:0 0 20px;
+ padding:0;margin:0;accent-color:var(--lime);
+}
+:host(.sx-531-manage-inline) #sx531LiftPicker .hint{
+ font-size:11px;line-height:1.5;margin:10px 0 0;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section #lengthChoices{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:8px;margin:6px 0 0;
+}
+:host(.sx-531-manage-inline) #lengthChoices button{
+ min-width:0;min-height:44px;padding:10px 4px;
+ background:var(--panel);color:var(--txt);
+ border:1px solid var(--line);border-radius:10px;
+ font-size:12px;font-weight:800;white-space:nowrap;
+}
+:host(.sx-531-manage-inline) #lengthChoices button.active{
+ background:color-mix(in srgb,var(--lime) 19%,var(--panel))!important;
+ border-color:var(--lime)!important;color:var(--txt)!important;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .hint{
+ margin-top:13px;font-size:11px;line-height:1.55;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .switch-row{
+ margin:0;padding:4px 0 0;border-top:0;gap:13px;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .switch-row strong{
+ font-size:13px;line-height:1.45;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .switch-row small{
+ font-size:11px;line-height:1.5;margin-top:3px;
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .switch span{
+ background:color-mix(in srgb,var(--muted) 32%,var(--panel));
+}
+:host(.sx-531-manage-inline) .sx531-unified-section .switch input:checked+span{
+ background:color-mix(in srgb,var(--lime) 35%,var(--panel));
+ border:1px solid var(--lime);
+}
+:host(.sx-531-manage-inline) .sx531-unified-section #bbbOptions{
+ margin-top:15px;
+}
+@media(max-width:520px){
+ :host(.sx-531-manage-inline) .sx531-unified-sections{gap:11px}
+ :host(.sx-531-manage-inline) .sx531-unified-section{padding:13px}
+ :host(.sx-531-manage-inline) #sx531LiftPicker .sx531-choices{grid-template-columns:minmax(0,1fr)}
+ :host(.sx-531-manage-inline) #sx531LiftPicker .sx531-choices label{min-height:47px;padding:10px!important}
+}
+@media(max-width:380px){
+ :host(.sx-531-manage-inline) .sx531-unified-section .fields{grid-template-columns:minmax(0,1fr)}
+ :host(.sx-531-manage-inline) #lengthChoices button{font-size:11px}
+}

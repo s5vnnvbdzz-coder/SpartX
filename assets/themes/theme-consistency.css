@@ -1,0 +1,77 @@
+/* SpartanX shared surface contract v315.
+   Applied to standalone/embedded application pages after the page's own CSS.
+   Theme colours use the palette from shared-theme.js, not per-page copies.
+ */
+body.sx-theme-child{
+ color:var(--txt)!important;
+ background-color:var(--bg)!important;
+}
+body.sx-theme-child :is(.card,.panel,.dashboard-card,.goal-card,.metric-card,.insight-card,.stat,.week-card,.detail-panel,.programme-card){
+ color:var(--txt);
+ border-color:var(--line);
+}
+body.sx-theme-child :is(.card,.dashboard-card,.goal-card,.metric-card,.insight-card,.week-card,.programme-card){
+ background-color:var(--panel)!important;
+}
+body.sx-theme-child :is(.eyebrow,.accent,.section-label,.status,.result,.section-heading){
+ color:var(--lime)!important;
+}
+body.sx-theme-child :is(input,select,textarea){
+ background-color:var(--panel2)!important;
+ color:var(--txt)!important;
+ border-color:var(--line)!important;
+}
+body.sx-theme-child :is(input,select,textarea,button,a):focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:2px;
+}
+body.sx-theme-child :is(.progress-fill,.rank-progress>i,.rank-progress-track>span){
+ background:linear-gradient(90deg,color-mix(in srgb,var(--lime) 35%,var(--panel2)),var(--lime))!important;
+}
+body.sx-theme-child :is(.cycle-editor-header,.cycle-editor-actions,.sidebar,.topbar,.top-bar){
+ background:var(--panel)!important;border-color:var(--line)!important;
+}
+/* Intelligence embeds its former blackout-yellow design tokens in :root.
+   These overrides use the shared --surface / --gold bridge and don't
+   destroy individual chart series or data-dependent colours. */
+body.sx-theme-child .sidebar{
+ background:linear-gradient(165deg,var(--panel2),var(--panel) 65%)!important;
+}
+body.sx-theme-child .sidebar-nav .nav-item.active{
+ color:var(--gold)!important;
+ border-color:color-mix(in srgb,var(--gold) 36%,var(--stroke))!important;
+ background:color-mix(in srgb,var(--gold) 11%,var(--panel))!important;
+}
+body.sx-theme-child :is(.hero,.hero-card,.performance-layout .card,.insight-card,.progress-card){
+ border-color:var(--stroke)!important;
+ background-color:var(--surface)!important;
+}
+body.sx-theme-child :is(.brand-symbol,.goal-progress .fill){
+ background:linear-gradient(130deg,var(--gold),color-mix(in srgb,var(--gold) 48%,var(--panel)))!important;
+}
+body.sx-theme-child .sidebar :is(.brand,.nav-item){color:var(--txt)}
+/* AscensionX: theme also applies to its dedicated Manage/View pages,
+   not just the dashboard behind them. */
+body.sx-theme-child :is(.cycle-editor-page,.cycle-editor-body,#sxCycleViewBackdrop.open,#sxCycleViewDialog){
+ background:var(--bg)!important;color:var(--txt)!important;
+}
+body.sx-theme-child :is(.cycle-editor-header,.cycle-editor-actions,.sx-cycle-setup-section,.sx-adaptive-details,.sx-cycle-section-header,.asc-programme-panel){
+ border-color:var(--line)!important;
+}
+body.sx-theme-child :is(.cycle-editor-header,.cycle-editor-actions){
+ background:var(--panel)!important;
+}
+body.sx-theme-child :is(.sx-cycle-setup-section,#cycleStrengthEditor,#sxAscAdaptiveCard){
+ background:linear-gradient(150deg,color-mix(in srgb,var(--lime) 5%,var(--panel2)),var(--panel))!important;
+ border-color:var(--line)!important;
+}
+body.sx-theme-child :is(#sxAscAdaptiveCard .sx-adaptive-head,.sx-adaptive-status,.cycle-editor-header .eyebrow){
+ color:var(--lime)!important;
+}
+body.sx-theme-child :is(.cycle-editor-actions button,.cycle-editor-header button){
+ border-color:var(--line)!important;
+}
+body.sx-theme-child[data-sx-theme="light"] :is(.card,.sx-cycle-setup-section,.sx-adaptive-details){
+ box-shadow:0 4px 14px #1d253010!important;
+}
+/* When switching on an already-open window, the selected palette arrives
+   through variables; no refresh or re-opening of that page is necessary. */

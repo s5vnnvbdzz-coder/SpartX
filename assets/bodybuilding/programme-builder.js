@@ -78,6 +78,10 @@
   powerCard.id='sxPowerbuildingProgrammeCard';
   powerCard.className='card sx-programme-card sx-pb-card';
   powerCard.setAttribute('aria-label','AscensionX Powerbuilding programme');
+  // Legacy stand-alone Powerbuilding card is retired from the Workout stack.
+  // Keep the feature and its stored data intact; new programme settings live
+  // directly inside AscensionX's Build / Manage Cycle screen.
+  powerCard.hidden=true;
   card.insertAdjacentElement('afterend',powerCard);
   powerCard.addEventListener('click',event=>{
     if(event.target.closest('[data-pb-open]'))openPowerbuilding();

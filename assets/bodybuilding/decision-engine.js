@@ -42,7 +42,19 @@
    return {status:'ready',sessions,reason:''};
   }catch(_){return {status:'unavailable',sessions:[],reason:'Unable to read workout history on this device.'}}
  };
- function recordsForLift(lift,cycleId,sessions){
+ function readAscensionLogs(storage,cycleId){
+  try{
+   const raw=storage?.getItem?.('ascensionx_strength_v1');
+   if(!raw||raw.length>4*1024*1024)return [];
+   const value=JSON.parse(raw);
+   // These are AscensionX's saved training logs, not an active workout draft.
+   return (Array.isArray(value?.logs)?value.logs:[]).slice(-2000).filter(log=>
+    log?.cycleId===cycleId&&log.setsComplete===true&&
+    canonicalLift(log.lift)!==null&&Number.isInteger(Number(log.week))&&
+    Number(log.week)>=1&&Number(log.week)<=6&&Array.isArray(log.sets));
+  }catch(_){return []}
+ }
+ function recordsForLift(lift,cycleId,sessions,ascensionLogs=[]){
   const found=[];
   const seen=new Set();
   for(const [position,session] of sessions.entries()){
@@ -67,6 +79,23 @@
     });
    });
   }
+  // AscensionX has its own completed workout log. Read it directly so athletes
+  // midway through a strength wave do not need to re-import their workouts.
+  // A session synced from SpartanX may exist in both stores; week-level
+  // deduplication below makes sure it counts only once.
+  for(const [position,log] of ascensionLogs.entries()){
+   if(log?.cycleId!==cycleId||canonicalLift(log.lift)!==lift||
+      log.setsComplete!==true||!Number.isInteger(Number(log.week))||
+      Number(log.week)<1||Number(log.week)>6)continue;
+   const sets=(Array.isArray(log.sets)?log.sets:[]).filter(validSet);
+   if(!sets.length)continue;
+   found.push({week:Number(log.week),date:dateValue(log),position:100000+position,
+    sessionId:'ascension:'+String(log.id??position),source:'AscensionX',
+    sets:sets.length,estimatedMax:estimatedMax(sets),
+    heaviest:Math.max(...sets.map(x=>Number(x.weight))),
+    volume:round(sets.reduce((a,x)=>a+Number(x.weight)*Number(x.reps),0),0),
+    avgRpe:effort(sets),highEffort:sets.some(x=>numeric(x.rpe)>=9.5)});
+  }
   // A repeated/edited week is not an additional progression week. The latest
   // linked session for that week is shown, rather than cherry-picking a PR.
   const weeks=new Map();
@@ -77,8 +106,8 @@
   }
   return [...weeks.values()].sort((a,b)=>a.week-b.week);
  }
- function analyseLift(lift,cycle,sessions){
-  const records=recordsForLift(lift,cycle.id,sessions);
+ function analyseLift(lift,cycle,sessions,ascensionLogs=[]){
+  const records=recordsForLift(lift,cycle.id,sessions,ascensionLogs);
   const recent=records[records.length-1],before=records[records.length-2];
   const comparable=recent?.estimatedMax!=null&&before?.estimatedMax!=null;
   const delta=comparable&&before.estimatedMax>0?
@@ -89,7 +118,7 @@
   if(!records.length){
    status='missing';
    title='No linked strength sessions yet';
-   reason='Only completed workouts saved with this exact AscensionX cycle link count. Standalone training remains excluded.';
+   reason='No completed AscensionX log or matching cycle-linked SpartanX session was found in this browser. Unlinked workouts remain excluded.';
   }else if(records.length===1){
    title='One week of evidence';
    reason='A completed linked session is available. Keep the prescribed AscensionX progression; one week cannot establish a trend.';
@@ -115,9 +144,10 @@
    action:status==='caution'||status==='watch'?'review_accessories':'keep_main_lift',
    mainLiftProtected:true};
  }
- function linkedExposure(cycleId,sessions){
+ function linkedExposure(cycleId,sessions,ascensionLogs=[]){
   const grouping=global.SXProgrammeIntelligence;
   const counts={},last7=[],now=Date.now(),day=86400000;
+  const sourceSessions=new Set();
   for(const session of sessions){
    const date=dateValue(session);
    if(!date||date>now+day||now-date>7*day)continue;
@@ -126,12 +156,26 @@
     return meta?.cycleId===cycleId;
    });
    for(const ex of tagged){
+    if(ex?.ascensionLink)sourceSessions.add(String(session.id||''));
     const count=validWorking(ex).length;
     if(!count)continue;
     const groups=grouping?.groups?.(ex.name)||[];
     for(const muscle of groups)counts[muscle]=(counts[muscle]||0)+count;
     last7.push({name:ex.name,sets:count,date});
    }
+  }
+  // Count completed standalone AscensionX logs too. Skip copies already
+  // synced from a saved SpartanX session with the same sourceSessionId.
+  for(const log of ascensionLogs){
+   if(log?.cycleId!==cycleId||log.setsComplete!==true||
+      (log.sourceSessionId&&sourceSessions.has(String(log.sourceSessionId))))continue;
+   const date=dateValue(log);
+   if(!date||date>now+day||now-date>7*day)continue;
+   const sets=(log.sets||[]).filter(validSet),name=canonicalLift(log.lift);
+   if(!sets.length||!name)continue;
+   for(const muscle of grouping?.groups?.(name)||[])
+    counts[muscle]=(counts[muscle]||0)+sets.length;
+   last7.push({name,sets:sets.length,date});
   }
   return {groups:counts,exercises:last7,totalWorkingSets:last7.reduce((sum,x)=>sum+x.sets,0),
    disclaimer:'Multi-joint exercises contribute to several muscle-group counts. These are training exposures, not measured recovery.'};
@@ -163,19 +207,20 @@
   return warnings.length?warnings:[{status:'ok',title:'No obvious scheduling conflict detected',
     detail:'The current template avoids obvious consecutive heavy lower-body assistance. This is not a guarantee of recovery.'}];
  }
- function analyseAscension(cycle,sessions=[],schedule=null){
+ function analyseAscension(cycle,sessions=[],schedule=null,ascensionLogs=[]){
   if(!cycle?.id||!Array.isArray(cycle?.lifts)||!cycle.lifts.length)
    return {status:'no-cycle',lifts:[],warnings:[],message:'No active AscensionX cycle in this browser.'};
   const selected=[...new Set(cycle.lifts.map(canonicalLift).filter(Boolean))];
   const relevant=Array.isArray(sessions)?sessions:[];
-  const lifts=selected.map(lift=>analyseLift(lift,cycle,relevant));
-  const exposure=linkedExposure(cycle.id,relevant);
+  const logs=Array.isArray(ascensionLogs)?ascensionLogs:[];
+  const lifts=selected.map(lift=>analyseLift(lift,cycle,relevant,logs));
+  const exposure=linkedExposure(cycle.id,relevant,logs);
   const warnings=reviewSchedule(schedule,exposure);
   const weeksWithEvidence=lifts.reduce((n,x)=>n+x.recordedWeeks,0);
   return {status:weeksWithEvidence?'evidence':'waiting',cycleId:cycle.id,lifts,warnings,
    exposure,recordedWeeks:weeksWithEvidence,readOnly:true,
-   message:weeksWithEvidence?'Evidence from saved, cycle-linked working sets only.':
-    'Your cycle is preserved. No saved, matching AscensionX main-lift sets were found on this device.'};
+   message:weeksWithEvidence?'Evidence from saved AscensionX logs and cycle-linked SpartanX working sets only.':
+    'Your cycle is preserved. No completed AscensionX logs or matching linked strength sets were found on this device.'};
  }
  function analyseBodybuilding(programme,sessions=[],model=global.SXBodybuildingModel,
   prescription=global.SXProgrammeIntelligence){
@@ -235,15 +280,17 @@
   const data=safeSessions(storage),api=global.SXAscensionCompanion;
   const cycle=api?.cycle?.(storage),prefs=api?.preference?.(storage);
   const schedule=cycle?api?.schedule?.(prefs?.trainingDays,storage):null;
-  const ascension=analyseAscension(cycle,data.sessions,schedule);
+  const ascensionLogs=cycle?readAscensionLogs(storage,cycle.id):[];
+  const ascension=analyseAscension(cycle,data.sessions,schedule,ascensionLogs);
   const saved=global.SXBodybuildingModel?.read?.(storage);
   const programme=saved?.programmes?.find(p=>p.id===saved.activeId)||saved?.programmes?.[0]||null;
   const bodybuilding=analyseBodybuilding(programme,data.sessions);
-  return {status:data.status,reason:data.reason,ascension,bodybuilding,cycle,
+  return {status:data.status==='unavailable'&&ascension.recordedWeeks?'partial':data.status,
+   reason:data.reason,ascension,bodybuilding,cycle,
    programmeName:programme?.name||null,readOnly:true};
  }
  global.SXDecisionEngine=Object.freeze({
-  LIFTS,canonicalLift,validSet,validWorking,estimatedMax,safeSessions,
+  LIFTS,canonicalLift,validSet,validWorking,estimatedMax,safeSessions,readAscensionLogs,
   recordsForLift,analyseLift,analyseAscension,linkedExposure,reviewSchedule,
   analyseBodybuilding,fromStorage
  });

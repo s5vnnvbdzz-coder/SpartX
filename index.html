@@ -1809,6 +1809,19 @@ body:has(#athleteSearch.screen.active) #sxMainHeaderSpacer{display:none!importan
 body:has(#athleteSearch.screen.active)>header{display:none!important}
 body:has(#athleteSearch.screen.active)>main{padding-top:calc(15px + env(safe-area-inset-top,0px))!important}
 #athleteSearch{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+</style><style id="sx-routine-view-v317">
+#routineDetailScreen .sx-routine-detail-header{align-items:center;gap:12px}
+#routineDetailScreen .sx-routine-detail-header>div:first-child{min-width:0;flex:1}
+#routineDetailScreen .sx-routine-preview-card{margin:10px 0;padding:16px}
+#routineDetailScreen .sx-routine-preview-card h2{font-size:17px;margin:7px 0 12px}
+#routineDetailScreen .sx-routine-set{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:12px}
+#routineDetailScreen .sx-routine-set span{color:var(--muted);font-size:10px}
+#routineDetailScreen .sx-routine-set strong{font-size:12px}
+.sx-saved-routine-item{gap:10px;flex-wrap:wrap}
+.sx-saved-routine-item>div:first-child{min-width:0;flex:1 1 120px}
+.sx-saved-routine-actions{gap:5px;flex-wrap:wrap}
+.sx-saved-routine-actions button{padding:8px 9px;min-height:36px;font-size:11px}
+#routineDetailScreen{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
 </style></head>
 <body class="sx-main-header-layout">
 <header><div id="sxBrandHeader"><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div>
@@ -1986,6 +1999,15 @@ body:has(#athleteSearch.screen.active)>main{padding-top:calc(15px + env(safe-are
  </div>
 </div>
 <section id="routineSelectScreen" class="screen"><div class="row between"><div><div class="eyebrow">WORKOUT LOGGER</div><h1>Start a workout</h1></div><button class="back-button sx-page-back" id="closeRoutineSelect"><span class="sx-page-back-arrow" aria-hidden="true">←</span><span>Back</span></button></div><div class="card start-card"><div class="eyebrow">FRESH SESSION</div><h2>Blank workout</h2><p class="muted">Start empty and add exercises as you go.</p><button id="startBlankWorkout" class="start-workout-button">＋ START BLANK WORKOUT</button></div><div class="card"><div class="row between"><h2>Your routines</h2><span class="tiny" id="routineCount">0 / 5</span></div><div id="savedRoutineList"><p class="muted tiny">No routines created yet.</p></div><button id="createRoutine" class="secondary" style="width:100%;margin-top:12px">＋ CREATE ROUTINE</button><p class="tiny muted">Create up to five routines and reuse them whenever you train.</p></div></section>
+<section id="routineDetailScreen" class="screen" aria-labelledby="sxRoutineDetailTitle">
+ <div class="row between sx-routine-detail-header">
+  <div><div class="eyebrow">CUSTOM ROUTINES</div><h1 id="sxRoutineDetailTitle">Saved routine</h1></div>
+  <button type="button" id="sxRoutineDetailBack" class="sx-page-back" aria-label="Back to saved routines"><span class="sx-page-back-arrow" aria-hidden="true">←</span><span>Back</span></button>
+ </div>
+ <p class="tiny muted" id="sxRoutineDetailSummary">Review the planned exercises and sets before starting a workout.</p>
+ <div id="sxRoutineDetailExercises" class="sx-routine-detail-exercises"></div>
+ <button type="button" id="sxRoutineDetailStart" class="start-workout-button" style="width:100%;margin-top:14px">START THIS ROUTINE</button>
+</section>
 <section id="routineBuilderScreen" class="screen"><div class="row between"><div><div class="eyebrow">ROUTINE BUILDER</div><h1>Create routine</h1></div><button type="button" class="back-button spartan-back-button sx-page-back" id="cancelRoutineBuilder"><span class="sx-page-back-arrow" aria-hidden="true">←</span><span>Back</span></button></div><div class="card"><label for="routineName">ROUTINE NAME</label><input id="routineName" maxlength="40" placeholder="e.g. Upper body A"><div class="row between" style="margin-top:15px"><h2>Exercises</h2><span class="tiny" id="routineExerciseCount">0 exercises</span></div><div id="routineDraftList"><p class="muted tiny">Add exercises to build your routine.</p></div><button id="addRoutineExercise" class="secondary" style="width:100%;margin-top:10px">＋ ADD EXERCISE</button><button id="saveRoutine" class="start-workout-button">SAVE ROUTINE</button></div></section>
 <section id="activeWorkout" class="screen">
  <div class="sx-active-workout-name"><h1 id="activeWorkoutName" role="button" tabindex="0" title="Tap to rename workout" aria-label="Rename active workout">Workout</h1></div>
@@ -3438,9 +3460,47 @@ window.SpartanXStartPowerbuildingSupportSession=function(payload){
  return true;
 };
 function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
-function renderSavedRoutines(){let a=Array.isArray(db.routines)?db.routines:[];const count=a.length+'/5';if($('routineCount'))$('routineCount').textContent=count;if($('homeRoutineCount'))$('homeRoutineCount').textContent=count;if($('homeRoutineSummary'))$('homeRoutineSummary').textContent='View created routines ('+a.length+')';const html=a.length?a.map((r,i)=>'<div class="listitem row between"><div><strong>'+esc(r.name)+'</strong><div class="tiny muted">'+r.exercises.length+' exercises</div></div><div class="row"><button class="secondary small" data-delete-routine="'+i+'" aria-label="Delete routine">DELETE</button><button class="small" data-start-routine="'+i+'">START</button></div></div>').join(''):'<p class="muted tiny">No routines created yet.</p>';if($('savedRoutineList'))$('savedRoutineList').innerHTML=html;if($('homeRoutineList'))$('homeRoutineList').innerHTML=html;}
+function renderSavedRoutines(){
+ const a=Array.isArray(db.routines)?db.routines:[];
+ const count=a.length+'/5';
+ if($('routineCount'))$('routineCount').textContent=count;
+ if($('homeRoutineCount'))$('homeRoutineCount').textContent=count;
+ if($('homeRoutineSummary'))$('homeRoutineSummary').textContent='View created routines ('+a.length+')';
+ const html=a.length?a.map((r,i)=>
+  '<div class="listitem row between sx-saved-routine-item"><div><strong>'+esc(r.name)+'</strong><div class="tiny muted">'+r.exercises.length+' exercises</div></div>'+
+  '<div class="row sx-saved-routine-actions">'+
+  '<button type="button" class="secondary small" data-view-routine="'+i+'">VIEW</button>'+
+  '<button type="button" class="secondary small" data-delete-routine="'+i+'" aria-label="Delete routine">DELETE</button>'+
+  '<button type="button" class="small" data-start-routine="'+i+'">START</button></div></div>').join(''):
+  '<p class="muted tiny">No routines created yet.</p>';
+ if($('savedRoutineList'))$('savedRoutineList').innerHTML=html;
+ if($('homeRoutineList'))$('homeRoutineList').innerHTML=html;
+}
+let routineDetailIndex=null;
+function showSavedRoutine(index){
+ const routine=db.routines?.[index];if(!routine)return;
+ routineDetailIndex=index;
+ $('sxRoutineDetailTitle').textContent=routine.name;
+ $('sxRoutineDetailSummary').textContent=routine.exercises.length+' planned exercise'+(routine.exercises.length===1?'':'s')+
+  ' · Preview only — this does not start or change a workout.';
+ $('sxRoutineDetailExercises').innerHTML=routine.exercises.map((ex,i)=>{
+  const name=typeof ex==='string'?ex:ex.name;
+  const sets=typeof ex==='string'?[]:Array.isArray(ex.sets)?ex.sets:[];
+  const description=window.SpartanXCardio?.isCardio(name)
+   ?'Cardio — duration and distance/floors are entered when logging'
+   :sets.map((set,j)=>{
+     const w=set.weight!==''&&set.weight!=null?esc(String(set.weight))+' kg':'Weight not set';
+     const reps=set.reps!==''&&set.reps!=null?esc(String(set.reps))+' reps':'Reps not set';
+     return '<div class="sx-routine-set"><span>SET '+(j+1)+'</span><strong>'+w+' · '+reps+'</strong></div>';
+    }).join('');
+  return '<div class="card sx-routine-preview-card"><div class="eyebrow">EXERCISE '+(i+1)+'</div><h2>'+esc(name)+'</h2>'+
+   (sets.length?description:'<p class="tiny muted">No prescribed sets</p>')+'</div>';
+ }).join('');
+ switchScreen('routineDetailScreen');
+}
+
 function openRoutineSelect(){renderSavedRoutines();switchScreen('routineSelectScreen');}
-function beginRoutineBuilder(){if((db.routines||[]).length>=5){alert('You can save up to five routines.');return;}routineDraft=[];$('routineName').value='';renderRoutineDraft();switchScreen('routineBuilderScreen');}
+function beginRoutineBuilder(){if((db.routines||[]).length>=5){alert('You can save up to five routines.');return;}libraryMode='routine';routineDraft=[];$('routineName').value='';renderRoutineDraft();switchScreen('routineBuilderScreen',{instant:true});}
 function renderRoutineDraft(){
  $('routineExerciseCount').textContent=routineDraft.length+' exercises';
  $('routineDraftList').innerHTML=routineDraft.length?routineDraft.map((ex,i)=>{
@@ -3451,7 +3511,7 @@ function renderRoutineDraft(){
   '<button class="secondary small" data-add-routine-set="'+i+'">＋ Add set</button></div>';
  }).join(''):'<p class="muted tiny">Add exercises to build your routine.</p>';
 }
-function saveRoutine(){let n=$('routineName').value.trim();if(!n||!routineDraft.length){alert('Enter a name and add at least one exercise.');return;}db.routines=Array.isArray(db.routines)?db.routines:[];if(db.routines.length>=5){alert('You can save up to five routines.');return;}if(db.routines.some(r=>r.name.toLowerCase()===n.toLowerCase())){alert('A routine with that name already exists.');return;}db.routines.push({name:n,exercises:routineDraft.map(ex=>({name:ex.name,sets:window.SpartanXCardio?.isCardio(ex.name)?[window.SpartanXCardio.blank()]:ex.sets.map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:'Working Set',done:false}))}))});persist();renderSavedRoutines();libraryMode='workout';$('homeRoutineDetails').open=true;switchScreen('home');}
+function saveRoutine(){let n=$('routineName').value.trim();if(!n||!routineDraft.length){alert('Enter a name and add at least one exercise.');return;}db.routines=Array.isArray(db.routines)?db.routines:[];if(db.routines.length>=5){alert('You can save up to five routines.');return;}if(db.routines.some(r=>r.name.toLowerCase()===n.toLowerCase())){alert('A routine with that name already exists.');return;}db.routines.push({name:n,exercises:routineDraft.map(ex=>({name:ex.name,sets:window.SpartanXCardio?.isCardio(ex.name)?[window.SpartanXCardio.blank()]:ex.sets.map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:'Working Set',done:false}))}))});persist();renderSavedRoutines();libraryMode='workout';$('homeRoutineDetails').open=true;switchScreen('workout',{instant:true});}
 function startSavedRoutine(i){let r=(db.routines||[])[i];if(!r)return;if(sessionActive){if(!confirm('A workout is already active. Replace it?'))return;resetSession();}work=r.exercises.map(ex=>({name:typeof ex==='string'?ex:ex.name,rest:120,notes:'',sets:window.SpartanXCardio?.isCardio(typeof ex==='string'?ex:ex.name)?[window.SpartanXCardio.blank()]:typeof ex==='string'?[{weight:'',reps:'',rpe:'',type:'Working Set',done:false}]:(ex.sets||[]).map(set=>({weight:String(set.weight||''),reps:String(set.reps||''),rpe:'',type:set.type||'Working Set',done:false}))}));sessionActive=true;sessionStarted=null;clearInterval(sessionTicker);$('sessionClock').textContent='00:00:00';$('activeWorkoutName').textContent=r.name;beginSessionClock();switchScreen('activeWorkout');renderWork();updateMinimizedSession();}
 // Strength & Size is an OPTIONAL companion to an AscensionX import.
 // It never alters the prescribed compound sets and never carries ascensionLink.
@@ -3887,8 +3947,10 @@ $('customExerciseForm').addEventListener('submit',e=>{
  if(!name){$('customExerciseName').focus();return;}
  closeCustomExerciseDialog();
  window.pickExercise(name);
-});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});// Start New Workout now opens the workout-type chooser below.$('homeCreateRoutine').onclick=beginRoutineBuilder;$('closeRoutineSelect').onclick=()=>returnToScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=beginRoutineBuilder;$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';returnToScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();returnToScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=saveRoutine;$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
-$('homeRoutineList').addEventListener('click',e=>{let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});$('openExerciseLibrary').onclick=openLibrary;$('closeExerciseLibrary').onclick=returnFromExerciseLibrary;if($('endWorkout'))$('endWorkout').onclick=()=>finishSession();
+});$('discardWorkout').onclick=()=>{if(sessionActive)$('discardWorkoutOverlay').classList.remove('hidden');};$('cancelDiscardWorkout').onclick=()=> $('discardWorkoutOverlay').classList.add('hidden');$('confirmDiscardWorkout').onclick=()=>{if(!sessionActive){$('discardWorkoutOverlay').classList.add('hidden');return;}$('discardWorkoutOverlay').classList.add('hidden');resetSession();switchScreen('workout');};$('discardWorkoutOverlay').addEventListener('click',e=>{if(e.target===$('discardWorkoutOverlay'))$('discardWorkoutOverlay').classList.add('hidden');});// Start New Workout now opens the workout-type chooser below.$('homeCreateRoutine').onclick=event=>{event.preventDefault();beginRoutineBuilder();};$('closeRoutineSelect').onclick=()=>returnToScreen('workout');$('startBlankWorkout').onclick=()=>{libraryMode='workout';startSession();};$('createRoutine').onclick=event=>{event.preventDefault();beginRoutineBuilder();};$('cancelRoutineBuilder').onclick=()=>{libraryMode='workout';returnToScreen('workout');};$('activeSessionBack').onclick=()=>{if(editingSessionId!==null){cancelHistoricalWorkoutEdit();return;}saveDraft();returnToScreen('workout');updateMinimizedSession();};$('addRoutineExercise').onclick=()=>{libraryMode='routine';openLibrary();};$('saveRoutine').onclick=event=>{event.preventDefault();saveRoutine();};
+$('sxRoutineDetailBack').onclick=()=>returnToScreen('workout');
+$('sxRoutineDetailStart').onclick=()=>{if(routineDetailIndex!==null)startSavedRoutine(routineDetailIndex)};$('routineDraftList').addEventListener('click',e=>{let b=e.target.closest('[data-remove-routine]');if(b){routineDraft.splice(+b.dataset.removeRoutine,1);renderRoutineDraft();return;}let add=e.target.closest('[data-add-routine-set]');if(add){routineDraft[+add.dataset.addRoutineSet].sets.push({weight:'',reps:''});renderRoutineDraft();return;}let del=e.target.closest('[data-remove-routine-set]');if(del){let ex=routineDraft[+del.dataset.removeRoutineSet];if(ex.sets.length>1)ex.sets.splice(+del.dataset.routineSet,1);renderRoutineDraft();}});$('routineDraftList').addEventListener('input',e=>{let i=e.target.dataset.routineWeight??e.target.dataset.routineReps,j=e.target.dataset.routineSet;if(i===undefined||j===undefined)return;let ex=routineDraft[+i],set=ex?.sets[+j];if(!set)return;if(e.target.hasAttribute('data-routine-weight'))set.weight=e.target.value;else set.reps=e.target.value;});$('savedRoutineList').addEventListener('click',e=>{const view=e.target.closest('[data-view-routine]');if(view){showSavedRoutine(+view.dataset.viewRoutine);return;}let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});
+$('homeRoutineList').addEventListener('click',e=>{const view=e.target.closest('[data-view-routine]');if(view){showSavedRoutine(+view.dataset.viewRoutine);return;}let b=e.target.closest('[data-start-routine]');if(b)startSavedRoutine(+b.dataset.startRoutine);const del=e.target.closest('[data-delete-routine]');if(del){const index=+del.dataset.deleteRoutine;const routine=db.routines?.[index];if(routine)requestProgramDelete('Delete '+routine.name+'? This cannot be undone.',()=>{db.routines.splice(index,1);persist();renderSavedRoutines();});}});$('openExerciseLibrary').onclick=openLibrary;$('closeExerciseLibrary').onclick=returnFromExerciseLibrary;if($('endWorkout'))$('endWorkout').onclick=()=>finishSession();
 if($('finishWorkoutBottom'))$('finishWorkoutBottom').onclick=()=>finishSession();
 // Durable completion queue. A successful SpartanX save creates at most one
 // AscensionX sync record per imported exercise; reopening either app can retry it.

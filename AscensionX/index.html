@@ -908,10 +908,15 @@ function closeSXWorkoutCycleView(save=false){
  try{window.parent.postMessage({type:'spartx:ascensionViewExit'},location.origin)}catch(_){}
 }
 
-let cycleEditorLock=null,cycleEditorCaller=null;
+let cycleEditorLock=null,cycleEditorCaller=null,cycleEditorOpenedFromWorkout=false;
 function openCycleEditor(){
  const overlay=$('cycleEditorBackdrop');
  if(!overlay||overlay.classList.contains('open'))return;
+ // Both entry points use precisely the same dedicated page layout. A Tools
+ // entry stays inside AscensionX when closed; a Workout entry returns to
+ // SpartanX Workout, but the editor UI itself is identical.
+ cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage');
+ if(!cycleEditorOpenedFromWorkout)document.body.classList.add('sx-asc-workout-manage');
  // Always start from saved data; unchecked edits are not retained after Cancel.
  renderCycle();
  $('cycleEditorTitle').textContent=state.cycle.created?'Manage your cycle':'Build your cycle';
@@ -933,11 +938,14 @@ function openCycleEditor(){
 function closeCycleEditor(){
  const overlay=$('cycleEditorBackdrop');
  if(!overlay||!overlay.classList.contains('open'))return;
- const returnToSpartanX=document.body.classList.contains('sx-asc-workout-manage');
+ const returnToSpartanX=cycleEditorOpenedFromWorkout;
+ cycleEditorOpenedFromWorkout=false;
  window.SXAscensionAdaptive?.discardDraft?.();
  overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
  overlay.setAttribute('role','presentation');overlay.removeAttribute('aria-modal');
- if(returnToSpartanX)document.body.classList.remove('sx-asc-workout-manage');
+ // Restore the dashboard under a Tools entry; the Workout entry instead
+ // exits its dedicated embedded Manage Cycle page via the host handshake.
+ document.body.classList.remove('sx-asc-workout-manage');
  if(cycleEditorLock){
   document.body.style.overflow=cycleEditorLock.body;
   document.documentElement.style.overflow=cycleEditorLock.html;

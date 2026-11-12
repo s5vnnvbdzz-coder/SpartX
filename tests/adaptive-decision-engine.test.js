@@ -209,9 +209,11 @@ test('AscensionX and a synced SpartanX workout are counted as one evidence week'
   date:source.date,setsComplete:true,source:'SpartanX',sourceSessionId:source.id,
   sets:[{label:'Top set',weight:125,reps:5,rpe:8,done:true}]};
  store.set('ascensionx_strength_v1',JSON.stringify({cycle,logs:[duplicated]}));
+ const baselineExposure=D.analyseAscension(A.cycle(storage),records).exposure.totalWorkingSets;
  const report=D.fromStorage(storage).ascension;
  assert.equal(report.lifts.find(x=>x.lift==='Back Squat').recordedWeeks,2);
- assert.equal(report.exposure.totalWorkingSets,6,'A synced AscensionX copy should not double count recent exposure');
+ assert.equal(report.exposure.totalWorkingSets,baselineExposure,
+   'A synced AscensionX copy should not double count recent exposure');
  store.set('ascensionx_strength_v1',JSON.stringify({cycle}));
 });
 test('partial and previous-cycle AscensionX logs are excluded without overwriting state',()=>{

@@ -16,10 +16,10 @@
   const head=document.createElement('div');
   head.className='sx531-unified-section-head';
   const eyebrow=document.createElement('div');
-  eyebrow.className='sx531-unified-eyebrow';
+  eyebrow.id=id;eyebrow.className='sx531-unified-eyebrow';
   eyebrow.textContent=number+' · '+title.toUpperCase();
   const label=document.createElement('p');
-  label.id=id;label.className='sx531-unified-description';
+  label.className='sx531-unified-description';
   label.textContent=description;
   head.append(eyebrow,label);
   return head;

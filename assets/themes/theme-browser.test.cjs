@@ -10,7 +10,7 @@ async function main(){
  async function setTheme(value){
   await page.goto(origin+'/index.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.SXSharedThemes?.refresh&&
-    document.getElementById('themeChoice'),{timeout:20000});
+    document.getElementById('themeChoice'),null,{timeout:20000});
   await page.selectOption('#themeChoice',value);
   await page.waitForFunction(expected=>
     document.body.dataset.sxTheme===expected &&
@@ -20,7 +20,7 @@ async function main(){
  async function inspect(path,expected){
   await page.goto(origin+path,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(value=>
-    document.body?.dataset.sxTheme===value,{timeout:15000},expected);
+    document.body?.dataset.sxTheme===value,expected,{timeout:15000});
   const data=await page.evaluate(()=>{
    const css=getComputedStyle(document.body);
    return {
@@ -45,11 +45,11 @@ async function main(){
   assert.equal(root.forge,true);
   assert.equal(await page.locator('option[value="crimson-forge"]').count(),1);
   await page.screenshot({path:'crimson-forge-home-desktop.png'});
-  await page.waitForFunction(()=>document.getElementById('native531Host')?.classList.contains('theme-crimson-forge'),{timeout:10000});
+  await page.waitForFunction(()=>document.getElementById('native531Host')?.classList.contains('theme-crimson-forge'),null,{timeout:10000});
   await inspect('/tools/settings.html','crimson-forge');
   assert.equal(await page.locator('#crimsonForgeThemeToggle').isChecked(),true);
   await inspect('/AscensionX/index.html?from=spartanx','crimson-forge');
-  await page.waitForFunction(()=>document.body.dataset.theme!=='dark',{timeout:10000});
+  await page.waitForFunction(()=>document.body.dataset.theme!=='dark',null,{timeout:10000});
   await inspect('/intelligence/index.html','crimson-forge');
   // Check cross-page consistency for contrasting existing theme families.
   for(const value of ['cosmic-nebula','spartan-blue','light','spartan-red']){

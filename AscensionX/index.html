@@ -1311,18 +1311,24 @@ window.addEventListener('message',e=>{
  // AscensionX remains the sole source of prescribed sets and accessories.
  if(e.data?.type==='spartx:ascensionHostPreviewRequest'&&ascensionEmbeddedBySpartanX){
   const lifts=state.cycle.created?selectedLifts():[];
-  const preferred=typeof e.data.lift==='string'&&lifts.includes(e.data.lift)?e.data.lift:lifts[0];
+  const support=window.SXAscensionAdaptive?.enabled(state.cycle.created)?
+    window.SXAscensionAdaptive.schedule()?.slots?.find(x=>x.kind==='support'&&x.exercises.length):null;
+  const choice=e.data.lift;
+  const preferred=choice==='__ADAPTIVE_SUPPORT__'&&support?choice:
+    typeof choice==='string'&&lifts.includes(choice)?choice:lifts[0];
   const picker=$('ascSpartanImportLift'),panel=$('ascSpartanImportPreview');
   if(!preferred||!picker||!panel){
    window.parent.postMessage({type:'spartx:ascensionHostPreview',ready:false,message:'No active AscensionX cycle was found on this device.'},location.origin);
    return;
   }
   picker.innerHTML=lifts.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
+  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+' · '+support.day+'</option>');
   picker.value=preferred;
   renderAscSpartanImportPreview();
   window.parent.postMessage({
    type:'spartx:ascensionHostPreview',ready:true,
-   lifts:lifts.map(lift=>({lift,week:currentWeekFor(lift)})),
+   lifts:[...lifts.map(lift=>({lift,week:currentWeekFor(lift)})),
+    ...(support?[{lift:'__ADAPTIVE_SUPPORT__',week:support.week,label:support.title+' · '+support.day}]:[])],
    selectedLift:preferred,
    previewHtml:panel.innerHTML
   },location.origin);
@@ -1330,7 +1336,9 @@ window.addEventListener('message',e=>{
  }
  if(e.data?.type==='spartx:ascensionHostLoad'&&ascensionEmbeddedBySpartanX){
   const lift=e.data.lift;
-  if(typeof lift==='string'&&state.cycle.created&&selectedLifts().includes(lift)){
+  const support=window.SXAscensionAdaptive?.enabled(state.cycle.created)?
+    window.SXAscensionAdaptive.schedule()?.slots?.some(x=>x.kind==='support'&&x.exercises.length):false;
+  if(typeof lift==='string'&&state.cycle.created&&(selectedLifts().includes(lift)||(lift==='__ADAPTIVE_SUPPORT__'&&support))){
    const picker=$('ascSpartanImportLift');
    picker.value=lift;
    requestAscensionSpartanImport();

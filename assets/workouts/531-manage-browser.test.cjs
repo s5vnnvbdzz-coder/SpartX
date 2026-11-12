@@ -44,6 +44,8 @@ async function run(){
       const deleteArea=document.getElementById('sx531ManageDeleteArea');
       return {
         title:document.getElementById('sxQuick531CycleTitle').textContent,
+        topGap:sections[0].getBoundingClientRect().top-
+          document.getElementById('sxQuick531CycleHeader').getBoundingClientRect().bottom,
         subtitle:document.getElementById('sxQuick531CycleSubtitle').textContent,
         eyebrow:document.getElementById('sxQuick531CycleEyebrow').textContent,
         isPage:overlay.classList.contains('sx-531-manage-page')&&overlay.getAttribute('role')==='main',
@@ -63,6 +65,7 @@ async function run(){
     assert.equal(state.eyebrow,'5/3/1 · PROGRAMME');
     assert.ok(state.subtitle.includes('completed training weeks'));
     assert.equal(state.isPage,true);
+    assert.ok(state.topGap>=-2&&state.topGap<95,'Cards must start just below header with no empty-page gap');
     assert.deepEqual(state.headings,[
       '01 · STARTING STRENGTH','02 · PRIMARY LIFTS',
       '03 · CYCLE PROGRESSION','04 · OPTIONAL ASSISTANCE'

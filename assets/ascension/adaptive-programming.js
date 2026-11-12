@@ -232,6 +232,28 @@
   if(dialog&&typeof MutationObserver==='function')new MutationObserver(()=>{if(dialog.classList.contains('open'))render()}).observe(dialog,{attributes:true,attributeFilter:['class']});
   render();
  }
+ // Verified same-origin message from the embedded AscensionX Continue Training dialog.
+ // Only the host can create the support workout; no historical workout is ever modified.
+ global.addEventListener('message',event=>{
+  if(event?.data?.type!=='spartx:ascensionAdaptiveSupport')return;
+  const frame=global.document?.getElementById('ascensionXEmbedFrame');
+  if(!frame||event.origin!==global.location.origin||event.source!==frame.contentWindow)return;
+  const payload=event.data.payload||{},c=activeCycle();
+  let success=false,message='Unable to load the selected adaptive training day.';
+  if(c&&read(c.id).enabled&&payload.cycleId===c.id){
+   const approved=schedule(c),slot=approved.slots?.find(x=>x.kind==='support'&&x.day===payload.day&&x.title===payload.name);
+   if(approved.valid&&slot&&slot.week===Number(payload.week)&&typeof global.SpartanXStartPowerbuildingSupportSession==='function'){
+    try{
+     success=global.SpartanXStartPowerbuildingSupportSession({
+      cycleId:c.id,week:approved.week,day:slot.day,name:slot.title,exercises:slot.exercises
+     })===true;
+    }catch(_){}
+   }
+  }
+  try{frame.contentWindow.postMessage({
+   type:'spartx:ascensionImportResult',requestId:event.data.requestId,success,message
+  },global.location.origin)}catch(_){}
+ });
  global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,recommend});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();

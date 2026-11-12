@@ -88,7 +88,7 @@ ascensionOverlay.setAttribute('tabindex','-1');
 ascensionOverlay.innerHTML=
  '<div class="sx-ascension-window">'+
  '<div class="ascensionx-embedded-toolbar">'+
-   '<button id="closeAscensionX" type="button" aria-label="Close AscensionX and return to Training Tools">← TOOLS</button>'+
+   '<button id="closeAscensionX" type="button" class="sx-page-back" aria-label="Back to Training Tools"><span class="sx-page-back-arrow" aria-hidden="true">←</span><span>Back</span></button>'+
    '<div class="ascensionx-embedded-brand"><strong id="ascensionXOverlayTitle">ASCENSION<span>X</span></strong><small>STRENGTH METHOD</small></div>'+
  '</div>'+
  '<iframe id="ascensionXEmbedFrame" title="AscensionX full training application" src="about:blank" allow="fullscreen" referrerpolicy="same-origin"></iframe>'+
@@ -108,6 +108,7 @@ ascensionStyle.textContent=[
  '#ascensionXOverlay.sx-ascension-quick #closeAscensionX{display:inline-flex!important;align-items:center;justify-content:center;order:2;margin-left:auto}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar{display:flex;flex:0 0 auto;align-items:center;gap:12px;min-height:54px;padding:calc(7px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(100deg,var(--bg,#111419),var(--panel,#111419));border-bottom:1px solid var(--line,#343b44);box-shadow:0 2px 12px #0007}',
  '#ascensionXOverlay .ascensionx-embedded-toolbar button{min-height:37px;flex-shrink:0;padding:8px 12px;background:color-mix(in srgb,var(--panel2) 80%,#111)!important;border:1px solid var(--line)!important;color:var(--txt)!important;border-radius:10px;font-weight:850;font-size:11px}',
+ '#ascensionXOverlay .ascensionx-embedded-toolbar #closeAscensionX.sx-page-back{order:3;margin-left:auto!important;min-width:96px!important;min-height:48px!important;height:48px!important;background:linear-gradient(#272727,#141414)!important;color:#fafafa!important;border:1px solid #414141!important;border-radius:13px!important;font:700 16px Georgia,serif!important}',
  '#ascensionXOverlay .ascensionx-embedded-brand{display:flex;flex-direction:column;gap:2px;min-width:0}',
  '#ascensionXOverlay .ascensionx-embedded-brand strong{font-size:15px;letter-spacing:1.7px;font-weight:950}',
  '#ascensionXOverlay .ascensionx-embedded-brand strong span{color:var(--lime)}',
@@ -328,7 +329,7 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  if(viewOnly||manageOnly)ascensionOverlay.removeAttribute('aria-modal');else ascensionOverlay.setAttribute('aria-modal','true');
  ascensionOverlay.classList.remove('sx-ascension-import-visible','sx-ascension-manage-visible','sx-ascension-view-visible');
  ascensionQuickPending={mode:option,lift:typeof lift==='string'?lift:null,quickImport:quick,importOnly};
- ascensionCloseButton.textContent=quick?'← Back':fromProgrammeSetup?'← WORKOUT':'← TOOLS';
+ ascensionCloseButton.innerHTML='<span class="sx-page-back-arrow" aria-hidden="true">←</span><span>Back</span>';
  ascensionCloseButton.setAttribute('aria-label',quick?'Back to workout choices':fromProgrammeSetup?'Close AscensionX and return to Workout':'Close AscensionX and return to Training Tools');
  openEmbeddedAscensionX();
  if(!ascensionOverlay.classList.contains('open')){ascensionQuickPending=null;return false}

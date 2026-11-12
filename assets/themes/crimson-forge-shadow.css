@@ -1,1 +1,7 @@
 :host(.theme-crimson-forge){--bg:#09090d;--panel:#18171c;--panel2:#252027;--line:#664049;--txt:#f4edef;--muted:#c1b1b6;--lime:#ff4654}
+:host(.sx-crimson-forge){--bg:#09090d;--panel:#18171c;--panel2:#252027;--line:#664049;--txt:#f4edef;--muted:#c1b1b6;--lime:#ff4654}
+:host(.theme-crimson-forge) :is(.card,.sx531-unified-section,.week-card,.stat,.edit-dialog,.saved-item),:host(.sx-crimson-forge) :is(.card,.week-card,.stat,.edit-dialog){color:var(--txt)!important;border-color:var(--line)!important;background:linear-gradient(155deg,#342630,#1b181f 50%,#100f14)!important;box-shadow:inset 0 1px 0 #f2d8dc16,0 9px 25px #0005!important}
+:host(.theme-crimson-forge) :is(.eyebrow,.result,.sx531-unified-eyebrow,.block-title),:host(.sx-crimson-forge) :is(.eyebrow,.result,.brand span){color:#ff7f89!important}
+:host(.theme-crimson-forge) :is(button:not(.danger),.segment button.active),:host(.sx-crimson-forge) :is(button,.primary){background:linear-gradient(155deg,#3e303a,#202027)!important;color:#f6edef!important;border:1px solid #81505d!important}
+:host(.theme-crimson-forge) :is(.segment button.active,.primary),:host(.sx-crimson-forge) :is(.primary,.ascension-launch){border-color:#f34f60!important;background:linear-gradient(150deg,#782838,#301e29)!important;box-shadow:0 0 12px #f34f6025!important}
+:host(.theme-crimson-forge) input,:host(.theme-crimson-forge) select,:host(.sx-crimson-forge) input,:host(.sx-crimson-forge) select{background:#111118!important;color:#f4edef!important;border-color:#664049!important}

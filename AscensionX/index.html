@@ -830,7 +830,7 @@ const PLAN=[
  {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
 ];
 let state=load();
-function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1])),accessories:{romanianDeadlift:true}},logs:[],metrics:[],draft:null,theme:'dark',prestige:{level:0,xpOffset:0}}}
+function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1])),accessories:{}},logs:[],metrics:[],draft:null,theme:'dark',prestige:{level:0,xpOffset:0}}}
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!Array.isArray(x.cycle.exercises))x.cycle.exercises=LIFTS.slice();if(!x.cycle.weeks)x.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(x.cycle.currentWeek)||1]));if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!x.profile.unit)x.profile.unit='kg';if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];if(!x.prestige)x.prestige={level:0,xpOffset:0};return x}}catch(e){}return defaults()}
 function persist(shouldRender=true){try{localStorage.setItem(KEY,JSON.stringify(state));if(shouldRender)renderAll();return true}catch(e){toast('Could not save data. Export a backup and free browser storage.');return false}}
 function toast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
@@ -1806,6 +1806,6 @@ function init(){
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 init();
 </script>
-<script src="../assets/ascension/adaptive-programming.js?v=310"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=311"></script>
 </body>
 </html>

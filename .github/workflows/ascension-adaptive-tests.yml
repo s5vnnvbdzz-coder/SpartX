@@ -1,0 +1,26 @@
+name: AscensionX adaptive programming tests
+on:
+  pull_request:
+    paths:
+      - 'assets/ascension/**'
+      - 'assets/bodybuilding/ascension-companion.js'
+      - 'AscensionX/index.html'
+      - 'index.html'
+      - '.github/workflows/ascension-adaptive-tests.yml'
+  push:
+    branches: [feature/ascensionx-adaptive-programming]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate syntax
+        run: |
+          node --check assets/ascension/adaptive-programming.js
+          node --check assets/bodybuilding/ascension-companion.js
+          node --check assets/ascension/adaptive-programming.test.js
+      - name: Run adaptive programme regression tests
+        run: node assets/ascension/adaptive-programming.test.js

@@ -971,7 +971,7 @@ function cycleRomanianDeadliftEnabled(){
  return state.cycle?.accessories?.romanianDeadlift!==false;
 }
 function cycleRomanianDeadliftPlan(week){
- if(!state.cycle?.created||!selectedLifts().includes('Deadlift')||!cycleRomanianDeadliftEnabled())return null;
+ if(!state.cycle?.created||!selectedLifts().includes('Deadlift')||!cycleRomanianDeadliftEnabled()||window.SXAscensionAdaptive?.enabled(state.cycle.created))return null;
  const p=prescribed('Deadlift',week);
  return window.SpartanXRomanianDeadlift?.fromTopSet({
   week,topLoad:p.topLoad,cycleId:state.cycle.created,tm:tm('Deadlift'),
@@ -981,13 +981,13 @@ function cycleRomanianDeadliftPlan(week){
 function syncCycleAccessoryEditor(){
  const panel=$('cycleAccessorySettings'),toggle=$('cycleRomanianDeadliftEnabled');
  if(!panel||!toggle)return;
- panel.hidden=![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
+ panel.hidden=!!window.SXAscensionAdaptive?.enabled(state.cycle.created)||![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
 }
 function renderWorkoutAccessory(lift,week){
  const panel=$('ascWorkoutAccessory');
  if(!panel)return;
  if(lift!=='Deadlift'||!selectedLifts().includes('Deadlift')||
-    !state.cycle.created||!cycleRomanianDeadliftEnabled()){
+    !state.cycle.created||!cycleRomanianDeadliftEnabled()||window.SXAscensionAdaptive?.enabled(state.cycle.created)){
   panel.hidden=true;panel.innerHTML='';return;
  }
  panel.hidden=false;
@@ -1311,18 +1311,24 @@ window.addEventListener('message',e=>{
  // AscensionX remains the sole source of prescribed sets and accessories.
  if(e.data?.type==='spartx:ascensionHostPreviewRequest'&&ascensionEmbeddedBySpartanX){
   const lifts=state.cycle.created?selectedLifts():[];
-  const preferred=typeof e.data.lift==='string'&&lifts.includes(e.data.lift)?e.data.lift:lifts[0];
+  const support=window.SXAscensionAdaptive?.enabled(state.cycle.created)?
+    window.SXAscensionAdaptive.schedule()?.slots?.find(x=>x.kind==='support'&&x.exercises.length):null;
+  const choice=e.data.lift;
+  const preferred=choice==='__ADAPTIVE_SUPPORT__'&&support?choice:
+    typeof choice==='string'&&lifts.includes(choice)?choice:lifts[0];
   const picker=$('ascSpartanImportLift'),panel=$('ascSpartanImportPreview');
   if(!preferred||!picker||!panel){
    window.parent.postMessage({type:'spartx:ascensionHostPreview',ready:false,message:'No active AscensionX cycle was found on this device.'},location.origin);
    return;
   }
   picker.innerHTML=lifts.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
+  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+' · '+support.day+'</option>');
   picker.value=preferred;
   renderAscSpartanImportPreview();
   window.parent.postMessage({
    type:'spartx:ascensionHostPreview',ready:true,
-   lifts:lifts.map(lift=>({lift,week:currentWeekFor(lift)})),
+   lifts:[...lifts.map(lift=>({lift,week:currentWeekFor(lift)})),
+    ...(support?[{lift:'__ADAPTIVE_SUPPORT__',week:support.week,label:support.title+' · '+support.day}]:[])],
    selectedLift:preferred,
    previewHtml:panel.innerHTML
   },location.origin);
@@ -1330,7 +1336,9 @@ window.addEventListener('message',e=>{
  }
  if(e.data?.type==='spartx:ascensionHostLoad'&&ascensionEmbeddedBySpartanX){
   const lift=e.data.lift;
-  if(typeof lift==='string'&&state.cycle.created&&selectedLifts().includes(lift)){
+  const support=window.SXAscensionAdaptive?.enabled(state.cycle.created)?
+    window.SXAscensionAdaptive.schedule()?.slots?.some(x=>x.kind==='support'&&x.exercises.length):false;
+  if(typeof lift==='string'&&state.cycle.created&&(selectedLifts().includes(lift)||(lift==='__ADAPTIVE_SUPPORT__'&&support))){
    const picker=$('ascSpartanImportLift');
    picker.value=lift;
    requestAscensionSpartanImport();
@@ -1411,6 +1419,12 @@ function continueAscensionTraining(){
  const picker=$('ascSpartanImportLift');
  const preferred=choices.includes($('liftSelect').value)?$('liftSelect').value:choices[0];
  picker.innerHTML=choices.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
+ // The adaptive fourth day uses the same Continue → Load workflow, but does not advance the primary lifts.
+ const adaptive=window.SXAscensionAdaptive;
+ if(adaptive?.enabled(state.cycle.created)){
+  const support=adaptive.schedule()?.slots?.find(slot=>slot.kind==='support'&&slot.exercises.length);
+  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+' · '+support.day+'</option>');
+ }
  picker.value=preferred;
  renderAscSpartanImportPreview();
  $('ascSpartanImportBackdrop').classList.add('open');
@@ -1445,9 +1459,19 @@ function buildAscSpartanWorkout(lift){
  // Carry the human-readable cycle label across the app boundary.
  const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
  const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
- return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,cycleAccessories:{romanianDeadlift:cycleRomanianDeadliftEnabled()}};
+ return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,cycleAccessories:{romanianDeadlift:cycleRomanianDeadliftEnabled()&&!window.SXAscensionAdaptive?.enabled(state.cycle.created)}};
 }
 function renderAscSpartanImportPreview(){
+ if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
+  const support=window.SXAscensionAdaptive?.schedule()?.slots?.find(slot=>slot.kind==='support'&&slot.exercises.length);
+  const panel=$('ascSpartanImportPreview');
+  if(!support){panel.textContent='No support training day is available this week.';return}
+  panel.innerHTML='<strong>'+support.title+' · '+support.day+'</strong>'+
+   '<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+support.exercises.length+' EXERCISES</span>'+
+   support.exercises.map(ex=>'<div>'+ex.name+' · '+ex.sets+' × '+ex.min+'–'+ex.max+' · '+ex.rir+' RIR</div>').join('')+
+   '<p class="tiny">All sets start unchecked. This day supports the strength cycle and does not advance any main lift.</p>';
+  return;
+ }
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
  const panel=$('ascSpartanImportPreview');
  if(!prescription){panel.textContent='Select an active cycle exercise.';return}
@@ -1469,10 +1493,25 @@ function renderAscSpartanImportPreview(){
   '<span class="asc-spartan-import-label">NEXT EXERCISE · ROMANIAN DEADLIFT</span>'+
   '<div>'+rdl.sets+' × '+rdl.reps+' @ '+kg(rdl.weight)+' · 2–3-second lowering · RPE 6–7</div>'+
   '<div class="tiny" style="margin-top:5px">Added as an independent SpartanX accessory after Deadlift. It does not affect AscensionX week completion.</div>':'';
- panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+accessory;
+ const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
+ const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+adaptive.length+' EXERCISES</span>'+adaptive.map(x=>'<div>'+x.name+' · '+x.sets+' × '+x.min+'–'+x.max+' · '+x.rir+' RIR</div>').join(''):'';
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+accessory+support;
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;
+ if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
+  const support=window.SXAscensionAdaptive?.schedule();
+  const slot=support?.slots?.find(x=>x.kind==='support'&&x.exercises.length);
+  if(!support?.valid||!slot){toast('No support day is currently available');return}
+  ascSpartanImportPending=String(Date.now());
+  $('ascSpartanImportConfirm').disabled=true;
+  $('ascSpartanImportConfirm').textContent='LOADING WORKOUT…';
+  try{
+   window.parent.postMessage({type:'spartx:ascensionAdaptiveSupport',requestId:ascSpartanImportPending,
+    payload:{cycleId:state.cycle.created,week:support.week,day:slot.day,name:slot.title}},location.origin);
+  }catch(_){ascSpartanImportPending=null;$('ascSpartanImportConfirm').disabled=false;toast('Unable to connect to SpartanX')}
+  return;
+ }
  const workout=buildAscSpartanWorkout($('ascSpartanImportLift').value);
  if(!workout){toast('Select a lift in your active cycle');return}
  ascSpartanImportPending=String(Date.now());
@@ -1765,7 +1804,7 @@ function renderCycle(){
 function renderCycleLoads(){
  const lift=$('cycleLift').value;
  const isDeadlift=lift==='Deadlift';
- const enabled=isDeadlift&&selectedLifts().includes('Deadlift')&&cycleRomanianDeadliftEnabled();
+ const enabled=isDeadlift&&selectedLifts().includes('Deadlift')&&cycleRomanianDeadliftEnabled()&&!window.SXAscensionAdaptive?.enabled(state.cycle.created);
  const accessoryColumn=isDeadlift?'<th>After deadlift</th>':'';
  const rows=PLAN.map(p=>{
   const x=prescribed(lift,p.week);
@@ -1834,5 +1873,6 @@ function init(){
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 init();
 </script>
+<script src="../assets/ascension/adaptive-programming.js?v=308"></script>
 </body>
 </html>

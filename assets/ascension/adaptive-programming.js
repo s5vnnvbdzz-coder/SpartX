@@ -186,6 +186,7 @@
   return {valid:true,message:'Suggested layout, not guaranteed recovery. Main sets stay owned by AscensionX; reschedule around sleep, soreness and performance.',week,slots};
  }
  function mountEditor(){
+  if(!global.document)return; // Pure programme logic also runs in headless regression tests.
   const anchor=document.getElementById('cycleBuilderCard');
   if(!anchor||document.getElementById('sxAscAdaptiveCard'))return;
   const card=document.createElement('section');

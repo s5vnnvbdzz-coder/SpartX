@@ -37,7 +37,6 @@ try:
       {type:'Working Set',weight:999,reps:3,rpe:10,done:true}
     ]}]
   }]}));
-  window.__originalTraining=['ascensionx_strength_v1','spartx_db'].map(k=>localStorage.getItem(k));
  """)
  driver.refresh()
  wait.until(lambda _:run("return document.querySelectorAll('#sxOverviewAscensionInsights .sx-overview-lift-card').length===3"))
@@ -49,10 +48,6 @@ try:
  assert text.count('2 completed linked weeks')==3,text
  assert '999' not in text,'Standalone Bench Press contaminates AscensionX insights'
  assert 'Estimated 1RM' in text or 'ESTIMATED 1RM' in text,text
- assert run("""return ['ascensionx_strength_v1','spartx_db'].every(
-   (k,i)=>localStorage.getItem(k)===JSON.parse(JSON.stringify(window.__originalTraining||[]))[i])""") is False or True
- # Compare saved values with expected structure instead of relying on JS globals
- # that disappear during refresh.
  assert run("return JSON.parse(localStorage.getItem('ascensionx_strength_v1')).logs.length")==6
  print('PASS top section shows independent squat, bench and deadlift weeks from saved logs',flush=True)
  ordering=run("""const page=document.getElementById('overviewPage');

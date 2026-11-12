@@ -185,54 +185,159 @@
   });
   return {valid:true,message:'Suggested layout, not guaranteed recovery. Main sets stay owned by AscensionX; reschedule around sleep, soreness and performance.',week,slots};
  }
+ // A new cycle has no stable ID yet: keep the builder's choices in memory
+ // and commit them ONLY after the athlete confirms creating that cycle.
+ const DEFAULT_DRAFT=()=>({enabled:false,focus:'strength',days:4});
+ let draft=DEFAULT_DRAFT();
+ function selectedDraftLifts(){
+  if(!global.document)return [];
+  return [...global.document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')]
+   .map(input=>input.value).filter(lift=>LIFTS.includes(lift));
+ }
+ function previewEnabled(){
+  const active=activeCycle();
+  return active?read(active.id).enabled:draft.enabled;
+ }
+ function beginEditor(){
+  if(!activeCycle())draft=DEFAULT_DRAFT();
+  refreshEditor();
+ }
+ function discardDraft(){
+  if(!activeCycle())draft=DEFAULT_DRAFT();
+ }
+ function commitDraft(){
+  const current=activeCycle();
+  if(!current||!draft.enabled)return null;
+  const configured={...draft};
+  draft=DEFAULT_DRAFT();
+  return save(configured);
+ }
+ function refreshEditor(){
+  const card=global.document?.getElementById('sxAscAdaptiveCard');
+  if(card&&typeof card.sxRender==='function')card.sxRender();
+ }
  function mountEditor(){
-  if(!global.document)return; // Pure programme logic also runs in headless regression tests.
-  const anchor=document.getElementById('cycleBuilderCard');
+  if(!global.document)return;
+  const anchor=document.getElementById('cycleAccessorySettings');
   if(!anchor||document.getElementById('sxAscAdaptiveCard'))return;
   const card=document.createElement('section');
-  card.id='sxAscAdaptiveCard';card.className='card';card.hidden=true;
-  card.innerHTML='<div class="row between" style="align-items:center;gap:9px"><div><div class="eyebrow">SPARTAN INTELLIGENCE · ASCENSIONX</div><h2 style="margin:5px 0">Adaptive Programming</h2></div><label style="display:flex;align-items:center;gap:8px;margin:0"><span class="tiny">ENABLE</span><input id="sxAscAdaptiveEnabled" type="checkbox" style="width:24px;height:24px;accent-color:var(--red)"></label></div>'+
-   '<p class="tiny" style="margin:7px 0 13px">Generate complete, recovery-aware supporting sessions for your existing six-week cycle. Compound weights and completed weeks are preserved.</p>'+
-   '<div id="sxAscAdaptiveOptions"><div class="fields"><div class="field"><label for="sxAscAdaptiveFocus">Training priority</label><select id="sxAscAdaptiveFocus"><option value="strength">Maximum Compound Strength · Powerlifting</option><option value="balanced">Balanced Powerbuilding · Strength + size</option><option value="hypertrophy">Hypertrophy + Strength · Size first</option></select></div><div class="field"><label for="sxAscAdaptiveDays">Training days</label><select id="sxAscAdaptiveDays"><option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option></select></div></div>'+
-   '<p class="tiny" id="sxAscAdaptiveStatus" role="status" aria-live="polite"></p><div id="sxAscAdaptivePreview" class="tiny" style="line-height:1.8"></div></div>';
-  anchor.insertAdjacentElement('afterend',card);
+  card.id='sxAscAdaptiveCard';card.className='card sx-cycle-setup-section';
+  card.setAttribute('aria-label','Adaptive Programming settings');
+  card.innerHTML=[
+   '<div class="sx-adaptive-head">',
+    '<div><div class="eyebrow">03 · INTELLIGENT ASSISTANCE</div><h3>Adaptive Programming</h3></div>',
+    '<label class="sx-adaptive-switch" for="sxAscAdaptiveEnabled">',
+     '<input id="sxAscAdaptiveEnabled" type="checkbox" role="switch">',
+     '<span class="sx-adaptive-track" aria-hidden="true"></span>',
+     '<span class="sx-adaptive-state" id="sxAscAdaptiveToggleLabel">OFF</span>',
+    '</label>',
+   '</div>',
+   '<p class="sx-adaptive-intro">Build complete training days around your AscensionX lifts. Supporting exercises are selected to develop weak points and muscle size without unnecessary heavy overlap.</p>',
+   '<div id="sxAscAdaptiveOptions" hidden>',
+    '<div class="sx-adaptive-fields">',
+     '<div class="field"><label for="sxAscAdaptiveFocus">TRAINING PRIORITY</label><select id="sxAscAdaptiveFocus">',
+      '<option value="strength">Maximum Compound Strength · Powerlifting</option>',
+      '<option value="balanced">Balanced Powerbuilding · Strength + Size</option>',
+      '<option value="hypertrophy">Hypertrophy + Strength · Size First</option>',
+     '</select></div>',
+     '<div class="field"><label for="sxAscAdaptiveDays">DAYS PER WEEK</label><select id="sxAscAdaptiveDays">',
+      '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
+     '</select></div>',
+    '</div>',
+    '<p class="sx-adaptive-rule">Main-lift loading remains unchanged. Accessory volume reduces during heavy weeks, with no additional work on Week 6.</p>',
+    '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details">',
+     '<summary>Preview your training days <span aria-hidden="true">⌄</span></summary>',
+     '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
+    '</details>',
+   '</div>',
+   '<p id="sxAscAdaptiveStatus" class="sx-adaptive-status" role="status" aria-live="polite"></p>'
+  ].join('');
+  anchor.insertAdjacentElement('beforebegin',card);
   function render(){
-   const c=activeCycle(),p=read(c?.id),enabledBox=document.getElementById('sxAscAdaptiveEnabled');
-   card.hidden=!c;
-   if(!c)return;
-   enabledBox.checked=p.enabled;
-   document.getElementById('sxAscAdaptiveFocus').value=p.focus;
-   document.getElementById('sxAscAdaptiveDays').value=p.days;
-   document.getElementById('sxAscAdaptiveOptions').hidden=!p.enabled;
-   // Keep the pre-existing manual RDL control visually consistent with adaptive suppression.
-   if(typeof global.syncCycleAccessoryEditor==='function')global.syncCycleAccessoryEditor();
+   const current=activeCycle(), selected=selectedDraftLifts();
+   const pref=current?read(current.id):draft;
+   const enabledBox=document.getElementById('sxAscAdaptiveEnabled');
+   const requiredDays=Math.max(3,Math.min(5,selected.length));
+   const daysPicker=document.getElementById('sxAscAdaptiveDays');
+   enabledBox.checked=pref.enabled;
+   document.getElementById('sxAscAdaptiveToggleLabel').textContent=pref.enabled?'ON':'OFF';
+   document.getElementById('sxAscAdaptiveFocus').value=pref.focus;
+   [...daysPicker.options].forEach(option=>{option.disabled=Number(option.value)<selected.length});
+   // Selecting an extra main lift never corrupts an existing saved programme.
+   // Temporarily preview a valid layout; persist changes only on a user action.
+   const previewDays=Math.max(requiredDays,pref.days);
+   daysPicker.value=String(previewDays);
+   document.getElementById('sxAscAdaptiveOptions').hidden=!pref.enabled;
    const status=document.getElementById('sxAscAdaptiveStatus');
    const preview=document.getElementById('sxAscAdaptivePreview');
-   if(!p.enabled){status.textContent='OFF · AscensionX main-lift programming remains unchanged.';preview.textContent='';return;}
-   const proposal=schedule(c);status.textContent=proposal.valid?'Saved automatically · accessory sets start unchecked in SpartanX.':'Adjust training days: '+proposal.message;
+   if(typeof global.syncCycleAccessoryEditor==='function')global.syncCycleAccessoryEditor();
+   if(!pref.enabled){
+    status.textContent='OFF · Manual assistance options remain available below.';
+    preview.replaceChildren();return;
+   }
+   const waiting=!current;
+   const incompatible=previewDays!==pref.days;
+   status.textContent=waiting?'Settings will be saved when you create this cycle.':
+     incompatible?'Select '+previewDays+' training days for '+selected.length+' primary lifts.':
+     'Enabled for this cycle · changes to these controls save automatically.';
    preview.replaceChildren();
-   if(!proposal.valid)return;
-   for(const slot of proposal.slots){
-    const line=document.createElement('div');
-    const names=slot.exercises.map(x=>x.name+' '+x.sets+'×'+x.min+'–'+x.max).join(' · ');
-    line.textContent=slot.day+' · '+(slot.lift||slot.title)+' — '+(names||'Recovery / main lift only');
-    preview.appendChild(line);
+   const note=document.createElement('p');
+   note.className='sx-adaptive-preview-note';
+   note.textContent=waiting?'Illustrative Week 1 preview · prescriptions become cycle-specific after creation.':
+    'Preview reflects your saved main-lift weeks; supporting sets do not advance AscensionX progression.';
+   preview.appendChild(note);
+   const days=DAYS[previewDays]||DAYS[4];
+   const lastWeek=current?Math.max(1,...selected.map(lift=>
+    clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6))):1;
+   for(const [index,day] of days.entries()){
+    const lift=selected[index]||null,week=lift&&current?
+     clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6):lastWeek;
+    const box=document.createElement('div');
+    box.className='sx-adaptive-preview-day';
+    const heading=document.createElement('strong');
+    heading.textContent=day+' · '+(lift?lift+' · Week '+week:'Low-fatigue support');
+    box.appendChild(heading);
+    let exercises=[];
+    if(lift){
+     if(current&&current.lifts.includes(lift)&&pref.enabled&&!incompatible&&
+      selected.length===current.lifts.length&&selected.every(l=>current.lifts.includes(l)))
+      exercises=plan(lift,week);
+     else if(week<6)exercises=(LIB[lift]||[]).slice(0,lift==='Deadlift'?2:3);
+    }else if(lastWeek<6){
+     exercises=(FOURTH[pref.focus]||FOURTH.strength).slice(0,index===selected.length?3:2);
+    }
+    const details=document.createElement('div');
+    details.textContent=exercises.length?
+     exercises.map(ex=>ex.name+' · '+ex.sets+' × '+ex.min+'–'+ex.max).join(' · '):
+     'No additional assistance prescribed';
+    box.appendChild(details);preview.appendChild(box);
    }
-   const note=document.createElement('p');note.textContent='Heavy RDLs are not added after heavy deadlifts. The existing automatic RDL is suspended while Adaptive Programming is enabled.';preview.appendChild(note);
+   const recovery=document.createElement('p');
+   recovery.className='sx-adaptive-preview-note';
+   recovery.textContent='Heavy Romanian deadlifts are not automatically stacked after heavy deadlifts while this option is on.';
+   preview.appendChild(recovery);
   }
+  card.sxRender=render;
   card.addEventListener('change',event=>{
-   const c=activeCycle();if(!c)return;
-   const id=event.target.id;
-   const update=id==='sxAscAdaptiveEnabled'?{enabled:event.target.checked}:id==='sxAscAdaptiveFocus'?{focus:event.target.value}:id==='sxAscAdaptiveDays'?{days:Number(event.target.value)}:null;
+   const id=event.target.id,current=activeCycle();
+   const update=id==='sxAscAdaptiveEnabled'?{enabled:event.target.checked}:
+     id==='sxAscAdaptiveFocus'?{focus:event.target.value}:
+     id==='sxAscAdaptiveDays'?{days:Number(event.target.value)}:null;
    if(!update)return;
-   if(id==='sxAscAdaptiveDays'&&Number(event.target.value)<c.lifts.length){
-    document.getElementById('sxAscAdaptiveStatus').textContent='Choose at least '+c.lifts.length+' training days.';render();return;
-   }
-   try{save(update)}catch(_){document.getElementById('sxAscAdaptiveStatus').textContent='Could not save the Adaptive Programming preference.';return}
+   if(id==='sxAscAdaptiveDays'&&Number(event.target.value)<selectedDraftLifts().length){render();return}
+   if(current){
+    try{save(update)}catch(_){
+     const status=document.getElementById('sxAscAdaptiveStatus');
+     status.textContent='Could not save the setting. Try again.';return;
+    }
+   }else draft={...draft,...update};
    render();
+   if(typeof global.renderCycleLoads==='function')global.renderCycleLoads();
   });
   const dialog=document.getElementById('cycleEditorBackdrop');
-  if(dialog&&typeof MutationObserver==='function')new MutationObserver(()=>{if(dialog.classList.contains('open'))render()}).observe(dialog,{attributes:true,attributeFilter:['class']});
+  if(dialog&&typeof MutationObserver==='function')
+   new MutationObserver(()=>{if(dialog.classList.contains('open'))render()})
+    .observe(dialog,{attributes:true,attributeFilter:['class']});
   render();
  }
  // Verified same-origin message from the embedded AscensionX Continue Training dialog.
@@ -260,7 +365,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,recommend});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

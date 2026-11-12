@@ -616,6 +616,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
  }
 }
 </style>
+<link rel="stylesheet" href="../assets/ascension/cycle-builder-ui.css?v=309">
 </head>
 <body>
 <header>
@@ -674,14 +675,15 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <div id="cycleEditorBackdrop" class="cycle-editor-backdrop" role="presentation" aria-hidden="true" onclick="if(event.target===this)closeCycleEditor()">
  <section class="cycle-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="cycleEditorTitle">
   <div class="cycle-editor-header">
-   <div><div class="eyebrow">ASCENSIONX · PROGRAMME</div><h2 id="cycleEditorTitle">Edit programme</h2></div>
+   <div class="sx-cycle-editor-heading"><div class="eyebrow">ASCENSIONX · PROGRAMME</div><h2 id="cycleEditorTitle">Build your cycle</h2><p id="sxCycleEditorSubtitle" class="tiny">Configure your six-week strength progression.</p></div>
    <button type="button" id="cycleEditorClose" class="iconbtn" onclick="closeCycleEditor()" aria-label="Close programme editor">×</button>
   </div>
   <div class="cycle-editor-body" id="cycleEditorScroll">
-<div class="card" id="cycleBuilderCard"><div class="row between"><div><h2 style="margin:0">Build your cycle</h2><div class="tiny">Choose the compound exercises you want to progress.</div></div><span class="pill red">6 WEEKS</span></div><p class="tiny" style="margin-top:12px">Each selected exercise has its own week counter. Save a completed session to move that exercise forward; your other lifts stay on their own schedule.</p>
+<div class="card" id="cycleBuilderCard">
+ <div class="row between sx-cycle-setup-intro"><div><div class="eyebrow">SIX-WEEK STRENGTH CYCLE</div><p class="tiny">Set up your lifts, training maxes and supporting exercises. Every compound progresses on its own week counter.</p></div><span class="pill red">6 WEEKS</span></div>
   <div class="asc-cycle-strength-editor" id="cycleStrengthEditor" aria-label="Starting strength for your cycle">
-    <div class="eyebrow">SET YOUR STARTING STRENGTH</div>
-    <p class="tiny" style="margin:6px 0 12px">Each lift remembers its own 1RM. Your Training Max and cycle weights recalculate automatically.</p>
+    <div class="eyebrow">01 · STARTING STRENGTH</div>
+    <p class="tiny sx-cycle-section-description">Select a compound lift and edit its 1RM. AscensionX automatically recalculates its Training Max.</p>
     <div class="fields">
       <div class="field"><label for="cycleStrengthLift">Exercise</label><select id="cycleStrengthLift" onchange="selectCycleStrengthLift()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div>
       <div class="field"><label id="cycleStrengthOneRmLabel" for="cycleStrengthOneRm">1RM (kg)</label><input id="cycleStrengthOneRm" type="number" min="0.5" step="any" inputmode="decimal" placeholder="Enter your 1RM" oninput="saveCycleStrengthOneRm()"></div>
@@ -693,9 +695,12 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
     <div id="cycleStrengthFeedback" class="tiny" role="status" aria-live="polite">Changes save automatically.</div>
     <div id="cycleStrengthRoundNote" class="tiny" style="margin-top:5px"></div>
   </div>
-  <div id="cycleExerciseOptions" style="margin-top:12px"></div>
+  <section class="sx-cycle-setup-section" id="sxCycleLiftSection" aria-label="Primary lifts">
+    <div class="sx-cycle-section-header"><div><div class="eyebrow">02 · PRIMARY LIFTS</div><p class="tiny sx-cycle-section-description">Choose which compound lifts belong to this six-week cycle.</p></div><span class="sx-cycle-count" id="sxCycleLiftCount">0 SELECTED</span></div>
+    <div id="cycleExerciseOptions"></div>
+  </section>
   <div class="asc-cycle-accessory-settings" id="cycleAccessorySettings" aria-label="Deadlift assistance">
-    <div class="eyebrow">SECONDARY EXERCISE · DEADLIFT</div>
+    <div class="eyebrow">04 · OPTIONAL DEADLIFT ASSISTANCE</div>
     <label class="asc-cycle-accessory-toggle" for="cycleRomanianDeadliftEnabled">
       <span><strong>Romanian Deadlift</strong><small>Automatically programmed after Deadlift · Weeks 1–5</small></span>
       <input type="checkbox" id="cycleRomanianDeadliftEnabled" checked>
@@ -919,7 +924,12 @@ function openCycleEditor(){
  if(!overlay||overlay.classList.contains('open'))return;
  // Always start from saved data; unchecked edits are not retained after Cancel.
  renderCycle();
- $('cycleEditorTitle').textContent=state.cycle.created?'Edit programme':'Build your cycle';
+ $('cycleEditorTitle').textContent=state.cycle.created?'Manage your cycle':'Build your cycle';
+ const summary=$('sxCycleEditorSubtitle');
+ if(summary)summary.textContent=state.cycle.created
+   ?'Edit your active six-week programme without resetting its completed training weeks.'
+   :'Choose primary lifts and configure your full training programme.';
+ window.SXAscensionAdaptive?.beginEditor?.();
  cycleEditorCaller=document.activeElement;
  cycleEditorLock={body:document.body.style.overflow,html:document.documentElement.style.overflow};
  document.body.style.overflow='hidden';document.documentElement.style.overflow='hidden';
@@ -934,6 +944,7 @@ function closeCycleEditor(){
  const overlay=$('cycleEditorBackdrop');
  if(!overlay||!overlay.classList.contains('open'))return;
  const returnToSpartanX=document.body.classList.contains('sx-asc-workout-manage');
+ window.SXAscensionAdaptive?.discardDraft?.();
  overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
  overlay.setAttribute('role','presentation');overlay.removeAttribute('aria-modal');
  if(returnToSpartanX)document.body.classList.remove('sx-asc-workout-manage');
@@ -981,7 +992,7 @@ function cycleRomanianDeadliftPlan(week){
 function syncCycleAccessoryEditor(){
  const panel=$('cycleAccessorySettings'),toggle=$('cycleRomanianDeadliftEnabled');
  if(!panel||!toggle)return;
- panel.hidden=!!window.SXAscensionAdaptive?.enabled(state.cycle.created)||![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
+ panel.hidden=!!window.SXAscensionAdaptive?.previewEnabled?.()||![...document.querySelectorAll('#cycleExerciseOptions input[type="checkbox"]:checked')].some(x=>x.value==='Deadlift');
 }
 function renderWorkoutAccessory(lift,week){
  const panel=$('ascWorkoutAccessory');
@@ -1123,7 +1134,7 @@ function saveCycleSelection(){
  const accessoryChanged=romanianDeadlift!==cycleRomanianDeadliftEnabled();
  if(existing&&sameLifts){
   if(!accessoryChanged){
-   toast('Cycle selection unchanged · 1RM and TM changes already saved');
+   toast('Cycle saved · strength and adaptive settings are up to date');
    closeCycleEditor();return;
   }
   // Toggling an accessory must not restart the active lift's week.
@@ -1167,6 +1178,12 @@ function applyCycleSelection(chosen,existing,romanianDeadlift=cycleRomanianDeadl
  const next=chosen.includes(current)?current:chosen[0];
  persist();
  $('liftSelect').value=next;$('workWeek').value=currentWeekFor(next);
+ // New-cycle Adaptive Programming was a draft until the cycle ID existed.
+ if(!existing)window.SXAscensionAdaptive?.commitDraft?.();
+ else{
+  const p=window.SXAscensionAdaptive?.read?.(state.cycle.created);
+  if(p?.enabled&&p.days<chosen.length)window.SXAscensionAdaptive?.save?.({days:chosen.length});
+ }
  renderWorkout();renderCycle();renderDashboard();renderProfile();renderProgress();
  toast(existing?'Cycle updated · workout history retained':'Exercise-specific cycle created');
 }
@@ -1792,11 +1809,12 @@ function saveWorkout(lift,week,count){
 function editWorkout(lift,week){const old=activeCycleLogs().find(x=>x.lift===lift&&x.week===week);if(!old)return;state.draft={lift,week,sets:old.sets.map(s=>({weight:s.weight,reps:s.reps,rpe:s.rpe??'',done:s.done})),notes:old.notes||'',updatedAt:new Date().toISOString()};state.logs=state.logs.filter(x=>x!==old);persist();$('liftSelect').value=lift;$('workWeek').value=week;renderWorkout()}
 function renderCycle(){
  const selected=selectedLifts();
- $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" data-cycle-tm-lift="${l}" style="display:block">1RM: ${kg(state.profile.max[l])} · Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" onchange="selectCycleStrengthLift(this.value);syncCycleAccessoryEditor()" ${selected.includes(l)?'checked':''}></label>`).join('');
+ $('cycleExerciseOptions').innerHTML=LIFTS.map(l=>`<label class="listitem" style="cursor:pointer;color:var(--text);font-size:14px"><span>${l}<small class="tiny" data-cycle-tm-lift="${l}" style="display:block">1RM: ${kg(state.profile.max[l])} · Training Max: ${kg(tm(l))}</small></span><input type="checkbox" value="${l}" style="width:22px;height:22px;accent-color:var(--red)" onchange="selectCycleStrengthLift(this.value);syncCycleAccessoryEditor();window.SXAscensionAdaptive?.refreshEditor?.()" ${selected.includes(l)?'checked':''}></label>`).join('');
  selectCycleStrengthLift();
  $('cycleRomanianDeadliftEnabled').checked=cycleRomanianDeadliftEnabled();
  syncCycleAccessoryEditor();
- $('cycleBuilderStatus').textContent=state.cycle.created?'Active: '+selected.map(l=>l+' (Week '+currentWeekFor(l)+')').join(' · '):'No active cycle. Select one or more exercises, then create your cycle.';
+ $('cycleBuilderStatus').textContent=state.cycle.created?'Active: '+selected.map(l=>l+' (Week '+currentWeekFor(l)+')').join(' · '):'Ready to create your six-week cycle.';
+ window.SXAscensionAdaptive?.refreshEditor?.();
  $('saveCycleSelectionBtn').textContent=state.cycle.created?'Save cycle changes':'Create six-week cycle';$('deleteCycleButton').hidden=!state.cycle.created;
  $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');
  renderCycleLoads();
@@ -1873,6 +1891,6 @@ function init(){
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 init();
 </script>
-<script src="../assets/ascension/adaptive-programming.js?v=308"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=309"></script>
 </body>
 </html>

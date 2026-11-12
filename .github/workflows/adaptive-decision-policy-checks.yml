@@ -1,0 +1,42 @@
+name: SpartanX Adaptive Decision Policy
+
+on:
+  push:
+    paths:
+      - 'assets/bodybuilding/decision-policy.js'
+      - 'assets/bodybuilding/decision-panels.js'
+      - 'assets/bodybuilding/decision-panels.css'
+      - 'tests/adaptive-decision-policy.test.js'
+      - 'index.html'
+      - 'intelligence/index.html'
+      - '.github/workflows/adaptive-decision-policy-checks.yml'
+  pull_request:
+    paths:
+      - 'assets/bodybuilding/decision-policy.js'
+      - 'assets/bodybuilding/decision-panels.js'
+      - 'assets/bodybuilding/decision-panels.css'
+      - 'tests/adaptive-decision-policy.test.js'
+      - 'index.html'
+      - 'intelligence/index.html'
+      - '.github/workflows/adaptive-decision-policy-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  training-decisions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate decision module syntax
+        run: |
+          node --check assets/bodybuilding/decision-policy.js
+          node --check assets/bodybuilding/decision-panels.js
+      - name: Run conservative decision-policy rules
+        run: node tests/adaptive-decision-policy.test.js
+      - name: Re-run existing saved-cycle decision tests
+        run: node tests/adaptive-decision-engine.test.js

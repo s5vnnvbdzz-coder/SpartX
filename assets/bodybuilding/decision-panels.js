@@ -29,6 +29,13 @@
     '<p>'+esc(lift.reason)+'</p></article>';
   }).join('');
  }
+ function decisionCards(policy){
+  return (policy?.decisions||[]).map(d=>
+   '<article class="sx-decision-next-action"><div class="sx-decision-row"><strong>'+esc(d.lift)+
+   '</strong><small>WEEK '+esc(d.cycleWeek)+' · '+esc(d.completedWeeks)+' LINKED WEEK(S)</small></div>'+
+   '<h4>'+esc(d.title)+'</h4><p>'+esc(d.details)+'</p>'+
+   '<span class="sx-decision-readonly">ASCENSIONX MAIN LIFT PROTECTED</span></article>').join('');
+ }
  function power(id,snapshot){
   const host=$(id);if(!host)return;
   const data=snapshot||load(),report=data?.ascension;
@@ -39,11 +46,15 @@
    host.innerHTML='<article class="card sx-decision-card"><div class="eyebrow">SPARTAN INTELLIGENCE</div>'+
     '<h2>Cycle analysis will appear here</h2><p>Activate an AscensionX programme to review its completed, linked strength sessions.</p>'+readOnlyMessage+'</article>';return;
   }
+  const guidance=global.SXDecisionPolicy?.powerbuilding(report);
   host.innerHTML='<article class="card sx-decision-card"><div class="sx-decision-head">'+
    '<div><div class="eyebrow">SPARTAN INTELLIGENCE · ASCENSIONX</div><h2>Strength cycle analysis</h2></div>'+
    '<span class="sx-decision-readonly">READ-ONLY</span></div>'+
    '<p class="sx-decision-intro">'+esc(report.message)+' Each lift remains on its own six-week progression, even when their current weeks differ.</p>'+
    '<div class="sx-decision-lift-grid">'+liftCards(report)+'</div>'+
+   '<div class="sx-decision-subhead">NEXT-SESSION DECISIONS</div>'+
+   '<p class="sx-decision-intro">'+esc(guidance?.summary||'Awaiting linked workout evidence.')+'</p>'+
+   '<div class="sx-decision-next-grid">'+decisionCards(guidance)+'</div>'+
    '<div class="sx-decision-subhead">WORKLOAD AND RECOVERY CHECK</div>'+
    '<div class="sx-decision-warnings">'+(report.warnings||[]).map(x=>
     '<div class="sx-decision-warning '+statusClass(x.status)+'"><strong>'+esc(x.title)+'</strong><p>'+esc(x.detail)+'</p></div>').join('')+'</div>'+
@@ -58,6 +69,7 @@
    host.innerHTML='<article class="card sx-decision-card"><div class="eyebrow">SPARTAN INTELLIGENCE</div>'+
     '<h2>Bodybuilding programme analysis</h2><p>Create or select a programme to build a linked-session performance history.</p></article>';return;
   }
+  const policy=global.SXDecisionPolicy?.bodybuilding(report);
   const withEvidence=report.decisions.filter(x=>x.observations>0);
   const show=(withEvidence.length?withEvidence:report.decisions).slice(0,8);
   host.innerHTML='<article class="card sx-decision-card"><div class="sx-decision-head">'+
@@ -71,6 +83,9 @@
     '<p>'+esc(d.reason)+'</p></div>').join('')+'</div>'+
    (report.decisions.length>show.length?'<p class="sx-decision-note">Showing the first '+show.length+
     ' exercises with available evidence. Other programme exercises retain their planned targets.</p>':'')+
+   (policy?.review?'<div class="sx-decision-warning '+(policy.review.due?'good':'neutral')+'">'+
+     '<strong>BLOCK DECISION · '+(policy.review.due?'REVIEW READY':'EVIDENCE ACCUMULATING')+'</strong>'+
+     '<p>'+esc(policy.review.recommendation)+'</p></div>':'')+
    '<div class="sx-decision-warning '+(report.review.due?'good':'neutral')+'">'+
     '<strong>FOUR-WEEK BLOCK REVIEW · '+(report.review.due?'READY':'GATHERING EVIDENCE')+'</strong>'+
     '<p>'+esc(report.review.advice)+'</p></div>'+readOnlyMessage+'</article>';
@@ -93,6 +108,7 @@
    return;
   }
   const r=data.ascension,active=r?.status!=='no-cycle',bodybuilding=data.bodybuilding;
+  const decisions=global.SXDecisionPolicy?.powerbuilding(r);
   host.innerHTML='<div class="eyebrow">ASCENSIONX · PROGRAMME DECISION ENGINE</div>'+
    '<h3>Training decisions, grounded in your own linked sessions</h3>'+
    ((!linkedHistory||data.status==='empty'||data.status==='partial')?'<p class="small-copy"><strong>REAL ASCENSIONX CYCLE DATA:</strong> These recommendations use your saved AscensionX logs. Other general Intelligence charts may still be showing demonstration data.</p>':'')+
@@ -102,6 +118,11 @@
      '</strong><small>Cycle week '+l.week+' · '+l.recordedWeeks+' logged week(s)</small></div>'+
      '<p>'+esc(l.title)+': '+esc(l.reason)+'</p></article>').join('')+'</div>':
     '<p class="small-copy">No active AscensionX cycle is available in this browser.</p>')+
+   (active&&decisions?.decisions?.length?
+    '<p class="small-copy"><strong>NEXT-SESSION POLICY:</strong> '+esc(decisions.summary)+'</p>'+
+     '<div class="sx-decision-intel-lifts">'+decisions.decisions.map(d=>
+       '<article class="sx-decision-intel-lift"><strong>'+esc(d.lift)+'</strong>'+
+        '<p>'+esc(d.title)+': '+esc(d.details)+'</p></article>').join('')+'</div>':'')+
    (bodybuilding?.status!=='no-programme'?
     '<p class="small-copy">Bodybuilding: '+bodybuilding.sessions+' linked saved sessions. Next block review: '+
      (bodybuilding.review.due?'ready':'awaiting completed linked sessions')+'.</p>':'')+

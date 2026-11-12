@@ -10,6 +10,11 @@ class Node{
   this.attrs={};this.classList={contains:value=>classes.includes(value)};
  }
  get childNodes(){return this.children}
+ get nextSibling(){
+  if(!this.parentNode)return null;
+  const siblings=this.parentNode.children,index=siblings.indexOf(this);
+  return siblings[index+1]||null;
+ }
  append(...nodes){for(const node of nodes)this.appendChild(node)}
  appendChild(node){this.insertBefore(node,null);return node}
  insertBefore(node,before){

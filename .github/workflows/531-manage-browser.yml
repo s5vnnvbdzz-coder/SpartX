@@ -1,0 +1,39 @@
+name: 5/3/1 Manage Cycle rendered browser check
+on:
+  pull_request:
+    paths:
+      - 'assets/workouts/531-manage-*'
+      - 'assets/workouts/531-manage-browser.test.cjs'
+      - 'tools/531-native.js'
+      - 'tools/531-multilift.js'
+      - 'index.html'
+      - '.github/workflows/531-manage-browser.yml'
+  push:
+    branches: [fix/531-manage-render-verification-314]
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run real desktop and mobile editor checks
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartx-test-server.log 2>&1 &
+          node assets/workouts/531-manage-browser.test.cjs
+      - name: Save visual test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: five-three-one-manage-browser
+          path: |
+            531-manage-desktop.png
+            531-manage-mobile.png
+            531-manage-failure.png
+          if-no-files-found: ignore

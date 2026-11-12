@@ -9,7 +9,7 @@
  if(!root)return;
  const style=document.createElement('link');
  style.rel='stylesheet';
- style.href='./assets/workouts/531-manage-shadow.css?v=313';
+ style.href='./assets/workouts/531-manage-shadow.css?v=314';
  root.appendChild(style);
  let current=null;
  function header(number,title,description,id){

@@ -218,7 +218,7 @@ function openSXAscWorkout(lift){
  sxAscNative.querySelector('#sxAscCancel').focus({preventScroll:true});
  if(ascensionEmbedReadyForShortcut)requestSXAscPreview(sxAscRequestedLift);
  else if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=296';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=308';
  return true;
 }
 function closeSXAscWorkout(success=false){
@@ -236,6 +236,12 @@ function closeSXAscWorkout(success=false){
  else{window.scrollTo(0,sxAscOldScroll);if(caller?.isConnected)caller.focus({preventScroll:true})}
  window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
 }
+window.addEventListener('spartx:ascensionAdaptiveSupportResult',event=>{
+ if(sxAscNative.hidden)return;
+ if(event.detail?.success){closeSXAscWorkout(true);return}
+ sxAscLoad.disabled=false;sxAscLoad.textContent='LOAD INTO SPARTANX';
+ sxAscMessage.textContent=event.detail?.message||'Unable to load the support session.';
+});
 sxAscNative.querySelector('#sxAscCancel').addEventListener('click',()=>closeSXAscWorkout());
 sxAscNative.addEventListener('click',e=>{if(e.target===sxAscNative)closeSXAscWorkout()});
 sxAscLift.addEventListener('change',()=>{
@@ -347,7 +353,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=296';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=308';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});
@@ -406,7 +412,7 @@ window.addEventListener('message',e=>{
 
  if(e.data?.type==='spartx:ascensionHostPreview'&&!sxAscNative.hidden){
   const data=e.data;
-  const allowed=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+  const allowed=['Back Squat','Bench Press','Deadlift','Overhead Press','__ADAPTIVE_SUPPORT__'];
   if(data.ready!==true||!Array.isArray(data.lifts)){
    sxAscPreview.textContent=String(data.message||'No active AscensionX programme was found.');
    sxAscLift.disabled=true;sxAscLoad.disabled=true;
@@ -416,7 +422,7 @@ window.addEventListener('message',e=>{
   for(const item of data.lifts){
    if(!allowed.includes(item?.lift))continue;
    const option=document.createElement('option');
-   option.value=item.lift;option.textContent=item.lift+' · Week '+(Number(item.week)||1);
+   option.value=item.lift;option.textContent=String(item.label||item.lift+' · Week '+(Number(item.week)||1));
    sxAscLift.appendChild(option);
   }
   if(!sxAscLift.options.length){sxAscPreview.textContent='No programme lifts available.';return}

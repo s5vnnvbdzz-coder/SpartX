@@ -350,3 +350,8 @@ body:has(#sxPowerbuildingScreen.screen.active) #minimizedSession{display:none!im
 @media(max-width:450px){
  #sxPowerbuildingScreen .sx-pb-hero-lifts{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Build 309: Adaptive Programming is now controlled inside AscensionX Build/Manage Cycle.
+   Hide the former duplicate Powerbuilding card only on the Workout page. */
+#workout #sxPowerbuildingProgrammeCard[hidden],
+#workout #sxPowerbuildingProgrammeCard{display:none!important}

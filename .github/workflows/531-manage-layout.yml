@@ -1,0 +1,24 @@
+name: 5/3/1 unified Manage Cycle UI
+on:
+  pull_request:
+    paths:
+      - 'assets/workouts/531-manage-*.js'
+      - 'assets/workouts/531-manage-*.css'
+      - 'index.html'
+      - '.github/workflows/531-manage-layout.yml'
+  push:
+    branches: [feature/531-manage-layout-unification-313]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/workouts/531-manage-design.js
+          node --check assets/workouts/531-manage-design.test.js
+      - name: Verify design and preservation of editor inputs
+        run: node assets/workouts/531-manage-design.test.js

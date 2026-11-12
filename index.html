@@ -3477,7 +3477,8 @@ function backfillActiveAscensionWeek2PausedBench(){
 }
 // Deadlift accessory: Romanian Deadlift is never linked to week completion.
 function romanianDeadliftFromAscensionImport(d){
- if(d?.source!=='AscensionX'||d.exercise!=='Deadlift'||d.cycleAccessories?.romanianDeadlift===false)return null;
+ if(d?.source!=='AscensionX'||d.exercise!=='Deadlift'||d.cycleAccessories?.romanianDeadlift===false||
+    window.SXAscensionAdaptive?.enabled(d.cycleId))return null;
  const api=window.SpartanXRomanianDeadlift;
  const plan=api?.fromTopSet({week:Number(d.week),topLoad:Number(d.sets?.[0]?.weight),
   cycleId:String(d.cycleId||''),tm:Number(d.tm)});
@@ -3503,7 +3504,7 @@ function backfillActiveAscensionWeek2RomanianDeadlift(){
  try{state=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null')}catch(_){return false}
  const cycle=state?.cycle;
  if(!cycle?.created||!Array.isArray(cycle.exercises)||!cycle.exercises.includes('Deadlift')||
-  cycle.accessories?.romanianDeadlift===false||
+  cycle.accessories?.romanianDeadlift===false||window.SXAscensionAdaptive?.enabled(cycle.created)||
   Number(cycle.weeks?.Deadlift??cycle.currentWeek)!==2)return false;
  const plan=api.fromAscensionState(state,2);
  if(!plan)return false;
@@ -4794,7 +4795,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-save-review.js?v=262"></script>
 <script src="./assets/profile/profile-social-pages.js?v=262"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=243"></script>
-<script src="./assets/bodybuilding/ascension-companion.js?v=3"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=308"></script>
+<script src="./assets/bodybuilding/ascension-companion.js?v=308"></script>
 <script src="./assets/bodybuilding/programme-model.js?v=4"></script>
 <script src="./assets/bodybuilding/adaptive-engine.js?v=301"></script>
 <script src="./assets/bodybuilding/decision-engine.js?v=305"></script>

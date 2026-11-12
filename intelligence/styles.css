@@ -576,6 +576,7 @@ tr:last-child td{border:0}
 #overviewPage .sx-overview-support-toggle{flex:0 0 auto;color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.55px}
 #overviewPage .sx-overview-support-toggle span{font-size:18px;vertical-align:middle;display:inline-block;transition:transform .18s}
 #overviewPage .sx-overview-supporting-training[open] .sx-overview-support-toggle span{transform:rotate(180deg)}
+#overviewPage .sx-overview-supporting-training:not([open])>.sx-overview-support-content{display:none!important}
 #overviewPage .sx-overview-support-content{padding:0 18px 17px;border-top:1px solid var(--stroke)}
 #overviewPage .sx-overview-support-content .section-top{margin-top:20px}
 #overviewPage .sx-overview-supporting-training:focus-within{border-color:color-mix(in srgb,var(--gold) 45%,var(--stroke))}

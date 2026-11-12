@@ -32,7 +32,7 @@ async function main(){
   await page.waitForSelector('#athleteSearch.screen.active');
   assert.equal(await page.locator('#trackerNav').evaluate(el=>getComputedStyle(el).display),'none');
   let nav=page.locator('#sxSocialBack');
-  assert.equal((await nav.innerText()).trim(),'← Back');
+  assert.equal((await nav.innerText()).trim().replace(/\s+/g,' '),'← Back');
   await assertStandardBack(nav,'athlete search');
   await nav.click();
   await page.waitForSelector('#home.screen.active');

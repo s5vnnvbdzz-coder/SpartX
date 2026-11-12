@@ -1,0 +1,229 @@
+/* Build 309 — AscensionX six-week cycle builder: shared Build/Manage layout.
+   Uses AscensionX theme tokens; avoids an extra scroll container and preserves
+   iPhone safe-area header/footer controls. */
+#cycleEditorBackdrop .cycle-editor-dialog{
+ width:min(100%,760px);max-height:100%;min-height:0;
+}
+#cycleEditorBackdrop .cycle-editor-header{
+ padding:16px clamp(15px,3vw,25px) 14px;
+ align-items:flex-start;min-height:76px;
+}
+#cycleEditorBackdrop .sx-cycle-editor-heading{min-width:0;flex:1}
+#cycleEditorBackdrop .sx-cycle-editor-heading h2{
+ margin:5px 0 4px;font-size:clamp(19px,2.5vw,23px);line-height:1.2;
+}
+#cycleEditorBackdrop .sx-cycle-editor-heading .tiny{
+ margin:0;font-size:12px;line-height:1.4;color:var(--muted);
+}
+#cycleEditorBackdrop .cycle-editor-body{
+ padding:17px clamp(12px,3vw,22px) 24px;
+ scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+}
+#cycleEditorBackdrop .cycle-editor-body #cycleBuilderCard,
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleBuilderCard{
+ display:flex!important;flex-direction:column;gap:14px;
+ margin:0 auto!important;padding:0!important;
+ width:min(100%,760px)!important;max-width:760px!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+#cycleEditorBackdrop #cycleBuilderCard > .sx-cycle-setup-intro{
+ padding:0 3px 1px;align-items:flex-start;gap:15px;
+}
+#cycleEditorBackdrop .sx-cycle-setup-intro .eyebrow{margin-top:3px}
+#cycleEditorBackdrop .sx-cycle-setup-intro p{
+ margin:7px 0 0!important;max-width:58ch;
+ font-size:12px;line-height:1.5;color:var(--muted);
+}
+#cycleEditorBackdrop .sx-cycle-setup-intro .pill{
+ flex:none;margin-top:1px;font-size:10px;
+}
+#cycleEditorBackdrop #cycleStrengthEditor,
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleStrengthEditor{
+ margin:0!important;padding:16px!important;
+ background:var(--panel2)!important;
+ border:1px solid var(--line)!important;border-radius:15px!important;
+}
+#cycleStrengthEditor .eyebrow{margin:0}
+#cycleEditorBackdrop .sx-cycle-section-description{
+ font-size:12px;line-height:1.5;color:var(--muted);
+ margin:7px 0 0!important;
+}
+#cycleStrengthEditor .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 0;}
+#cycleStrengthEditor .field{min-width:0;}
+#cycleStrengthEditor .field label{
+ display:block;max-width:100%;font-size:12px;line-height:1.3;margin-bottom:6px;
+}
+#cycleStrengthEditor select,#cycleStrengthEditor input,#cycleStrengthEditor output{
+ width:100%;min-height:44px;height:auto;margin:0;border-radius:10px;
+ font-size:14px;padding:10px 11px;
+}
+#cycleStrengthEditor #cycleStrengthTm{
+ align-items:center;display:flex;min-height:44px;font-size:16px;
+ background:var(--panel);color:var(--red2);
+}
+#cycleStrengthEditor #cycleStrengthFeedback{
+ min-height:0;margin:10px 0 0;font-size:11px;line-height:1.45;
+}
+#cycleStrengthEditor #cycleStrengthRoundNote{
+ margin:4px 0 0!important;font-size:11px;line-height:1.4;color:var(--muted);
+}
+#cycleEditorBackdrop .sx-cycle-setup-section{
+ display:block;min-width:0;margin:0!important;
+ padding:15px 16px;background:var(--panel2);
+ border:1px solid var(--line);border-radius:15px;
+}
+#cycleEditorBackdrop .sx-cycle-section-header{
+ display:flex;align-items:start;justify-content:space-between;gap:12px;
+ margin-bottom:8px;
+}
+#cycleEditorBackdrop .sx-cycle-count{
+ flex:none;padding:5px 9px;border-radius:999px;
+ border:1px solid var(--line);font-size:10px;
+ font-weight:800;letter-spacing:.5px;color:var(--red2);
+}
+#cycleEditorBackdrop #cycleExerciseOptions,
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleExerciseOptions{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:9px!important;margin:11px 0 0!important;
+ padding:0!important;background:transparent!important;border:0!important;
+}
+#cycleExerciseOptions .listitem{
+ min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;
+ border:1px solid var(--line)!important;border-radius:11px;
+ background:var(--panel);margin:0;padding:12px!important;
+ min-height:70px;
+}
+#cycleExerciseOptions .listitem:hover{
+ border-color:color-mix(in srgb,var(--red2) 50%,var(--line))!important;
+}
+#cycleExerciseOptions .listitem span{min-width:0;font-weight:750;overflow-wrap:anywhere;}
+#cycleExerciseOptions .listitem small{
+ margin-top:4px;color:var(--muted);font-size:11px;
+ font-weight:400;line-height:1.45;white-space:normal;
+}
+#cycleExerciseOptions input[type="checkbox"]{
+ flex:0 0 23px;width:23px!important;height:23px!important;
+ margin:0;accent-color:var(--red2);
+}
+#sxAscAdaptiveCard{
+ border-color:color-mix(in srgb,var(--red2) 38%,var(--line))!important;
+ background:linear-gradient(160deg,
+  color-mix(in srgb,var(--red2) 7%,var(--panel2)),
+  var(--panel2) 62%)!important;
+}
+#sxAscAdaptiveCard .sx-adaptive-head{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+#sxAscAdaptiveCard h3{font-size:18px;line-height:1.25;margin:5px 0 0;color:var(--text)}
+#sxAscAdaptiveCard .sx-adaptive-intro{
+ margin:10px 0 0;font-size:12px;line-height:1.55;color:var(--muted);
+}
+#sxAscAdaptiveCard .sx-adaptive-switch{
+ display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+ position:relative;flex:none;margin:0;min-height:36px;
+}
+#sxAscAdaptiveCard .sx-adaptive-switch input{
+ position:absolute;width:36px;height:26px;inset:4px auto auto 0;
+ margin:0;opacity:0;cursor:pointer;z-index:1;
+}
+#sxAscAdaptiveCard .sx-adaptive-track{
+ width:43px;height:25px;border-radius:25px;
+ border:1px solid color-mix(in srgb,var(--red2) 35%,var(--line));
+ background:var(--panel);position:relative;transition:background .15s;
+}
+#sxAscAdaptiveCard .sx-adaptive-track::before{
+ content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;
+ border-radius:50%;background:var(--muted);transition:transform .15s,background .15s;
+}
+#sxAscAdaptiveCard input:checked + .sx-adaptive-track{
+ background:color-mix(in srgb,var(--red2) 27%,var(--panel));
+ border-color:var(--red2);
+}
+#sxAscAdaptiveCard input:checked + .sx-adaptive-track::before{
+ transform:translateX(18px);background:var(--red2);
+}
+#sxAscAdaptiveCard .sx-adaptive-switch:has(input:focus-visible) .sx-adaptive-track{
+ outline:2px solid var(--red2);outline-offset:3px;
+}
+#sxAscAdaptiveCard .sx-adaptive-state{min-width:25px;color:var(--text);font-size:11px;font-weight:900;}
+#sxAscAdaptiveCard #sxAscAdaptiveOptions[hidden],
+#sxAscAdaptiveCard #sxAscAdaptivePlanDetails[hidden]{display:none!important}
+#sxAscAdaptiveCard .sx-adaptive-fields{
+ margin-top:15px;display:grid;grid-template-columns:minmax(0,2fr) minmax(130px,1fr);
+ gap:10px;
+}
+#sxAscAdaptiveCard .sx-adaptive-fields .field{min-width:0}
+#sxAscAdaptiveCard .sx-adaptive-fields label{
+ display:block;font-size:10px;font-weight:800;letter-spacing:.6px;
+ color:var(--red2);margin:0 0 7px;
+}
+#sxAscAdaptiveCard select{
+ width:100%;min-height:44px;font-size:13px;
+ border:1px solid var(--line);background:var(--panel);
+ color:var(--text);border-radius:10px;padding:9px 10px;
+}
+#sxAscAdaptiveCard .sx-adaptive-rule{
+ margin:12px 0;font-size:11px;line-height:1.55;color:var(--muted);
+}
+#sxAscAdaptiveCard .sx-adaptive-details{
+ border:1px solid var(--line);border-radius:10px;
+ overflow:hidden;background:var(--panel);
+}
+#sxAscAdaptiveCard .sx-adaptive-details summary{
+ cursor:pointer;padding:12px;font-size:12px;font-weight:800;color:var(--text);
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+#sxAscAdaptiveCard .sx-adaptive-details[open] summary{border-bottom:1px solid var(--line)}
+#sxAscAdaptiveCard .sx-adaptive-preview{padding:3px 13px 12px;font-size:11px;line-height:1.6;}
+#sxAscAdaptiveCard .sx-adaptive-preview-day{padding:10px 0;border-bottom:1px solid var(--line)}
+#sxAscAdaptiveCard .sx-adaptive-preview-day:last-child{border:0}
+#sxAscAdaptiveCard .sx-adaptive-preview-day strong{display:block;margin-bottom:3px;color:var(--text)}
+#sxAscAdaptiveCard .sx-adaptive-preview-day div{color:var(--muted)}
+#sxAscAdaptiveCard .sx-adaptive-preview-note{margin:9px 0 4px;color:var(--muted)}
+#sxAscAdaptiveCard .sx-adaptive-status{
+ margin:9px 0 0;font-size:11px;line-height:1.45;color:var(--red2);
+}
+#cycleEditorBackdrop #cycleAccessorySettings,
+body.sx-asc-workout-manage #cycleEditorBackdrop #cycleAccessorySettings{
+ margin:0!important;padding:14px 16px!important;
+ border:1px solid var(--line);border-radius:15px;background:var(--panel2);
+}
+#cycleEditorBackdrop #cycleAccessorySettings[hidden]{display:none!important}
+#cycleEditorBackdrop #cycleBuilderStatus{display:none!important}
+#cycleEditorBackdrop #deleteCycleButton:not([hidden]){
+ margin:4px 0 0!important;min-height:47px;
+}
+#cycleEditorBackdrop .cycle-editor-actions{
+ grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);
+ gap:10px;padding:12px clamp(14px,3vw,24px) calc(12px + env(safe-area-inset-bottom,0px));
+}
+#cycleEditorBackdrop .cycle-editor-actions button{
+ padding:10px 12px;min-height:47px;font-size:12px;line-height:1.35;
+}
+body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body{
+ padding:16px max(15px,env(safe-area-inset-right,0px)) 26px max(15px,env(safe-area-inset-left,0px))!important;
+}
+@media(min-width:760px){
+ #cycleEditorBackdrop .cycle-editor-actions{
+  padding-left:max(22px,calc((100% - 760px)/2));
+  padding-right:max(22px,calc((100% - 760px)/2));
+ }
+}
+@media(max-width:520px){
+ #cycleEditorBackdrop .cycle-editor-header{padding:12px 15px}
+ #cycleEditorBackdrop .cycle-editor-body{padding:13px 12px 24px}
+ #cycleEditorBackdrop #cycleBuilderCard{gap:11px}
+ #cycleEditorBackdrop #cycleStrengthEditor,
+ #cycleEditorBackdrop .sx-cycle-setup-section,
+ #cycleEditorBackdrop #cycleAccessorySettings{padding:13px!important}
+ #cycleEditorBackdrop #cycleExerciseOptions{grid-template-columns:minmax(0,1fr)!important;gap:7px!important}
+ #cycleExerciseOptions .listitem{min-height:58px!important;padding:10px 12px!important}
+ #sxAscAdaptiveCard .sx-adaptive-fields{grid-template-columns:minmax(0,1fr);gap:11px}
+ #sxAscAdaptiveCard .sx-adaptive-fields select{width:100%}
+ #cycleEditorBackdrop .cycle-editor-actions{padding:10px 13px calc(10px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:360px){
+ #cycleStrengthEditor .fields{grid-template-columns:minmax(0,1fr)}
+ #cycleEditorBackdrop .cycle-editor-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ #sxAscAdaptiveCard h3{font-size:16px}
+}

@@ -17,7 +17,7 @@ card.hidden=true;
 card.innerHTML=`
  <div class="sx-programme-head">
   <div><div class="sx-programme-kicker">ASCENSIONX · POWERLIFTING</div><h2 class="sx-programme-title" id="sxAscensionTitle">AscensionX</h2></div>
-  <div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sxAscensionOptions" aria-label="AscensionX programme options" aria-expanded="false" aria-controls="sxAscensionOptionsMenu">•••</button>
+  <div class="sx-programme-menu-wrap"><button type="button" class="sx-programme-menu-button" id="sxAscensionOptions" aria-label="AscensionX programme options" aria-expanded="false" aria-controls="sxAscensionOptionsMenu"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="19" height="19"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>
    <div class="sx-programme-options" id="sxAscensionOptionsMenu" hidden><button type="button" id="sxAscensionView">VIEW CYCLE</button><button type="button" id="sxAscensionManage">MANAGE CYCLE</button></div>
   </div>
  </div>

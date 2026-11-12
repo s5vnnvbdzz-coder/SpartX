@@ -536,3 +536,57 @@ tr:last-child td{border:0}
 .sx-programme-intelligence-actions a:hover,.sx-programme-intelligence-actions a:focus-visible{
  background:var(--surface3);outline:2px solid var(--gold);outline-offset:2px;
 }
+
+
+/* Build 307 · Overview prioritises AscensionX main-lift performance.
+   Accessory and full-session analysis stays available below the strength charts. */
+#overviewPage .sx-overview-lift-priority{margin-top:8px;align-items:center}
+#overviewPage .sx-overview-lift-priority .eyebrow{color:var(--gold);font-size:10px;font-weight:900;letter-spacing:1.2px}
+#overviewPage .sx-overview-lift-priority h3{font-size:23px;letter-spacing:-.6px;margin:7px 0}
+#overviewPage .sx-overview-lift-priority p{font-size:12px;color:var(--muted);line-height:1.55;max-width:650px}
+#overviewPage .sx-overview-lift-priority .text-button{flex:0 0 auto}
+#overviewPage .sx-overview-ascension-panel{padding:19px 20px;margin-bottom:8px;border-color:color-mix(in srgb,var(--gold) 30%,var(--stroke));}
+#overviewPage .sx-overview-lift-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:17px}
+#overviewPage .sx-overview-lift-head .eyebrow{font-size:9px;letter-spacing:1px;color:var(--gold);font-weight:900}
+#overviewPage .sx-overview-lift-head h3{font-size:17px;margin:5px 0 5px;color:var(--txt)}
+#overviewPage .sx-overview-lift-head p{font-size:11px;color:var(--muted);margin:0;line-height:1.65}
+#overviewPage .sx-overview-lift-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+#overviewPage .sx-overview-lift-card{min-width:0;border:1px solid var(--stroke);border-radius:12px;background:var(--surface2);padding:14px}
+#overviewPage .sx-overview-lift-row{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+#overviewPage .sx-overview-lift-row strong{font-size:13px;font-weight:900;color:var(--txt)}
+#overviewPage .sx-overview-lift-row span{font-size:9px;font-weight:850;color:var(--gold);white-space:nowrap}
+#overviewPage .sx-overview-lift-meta{font-size:10px;color:var(--muted);margin:7px 0 12px}
+#overviewPage .sx-overview-lift-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#overviewPage .sx-overview-lift-values>div{min-width:0;background:var(--surface);border-radius:8px;padding:10px}
+#overviewPage .sx-overview-lift-values small{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.5px;margin-bottom:5px}
+#overviewPage .sx-overview-lift-values b{font-size:20px;color:var(--txt);font-weight:950;font-variant-numeric:tabular-nums}
+#overviewPage .sx-overview-lift-values b span{font-size:10px;font-weight:600;color:var(--muted)}
+#overviewPage .sx-overview-lift-trend{font-size:10px;font-weight:850;margin:11px 0 7px;color:var(--muted)}
+#overviewPage .sx-overview-lift-trend.good{color:var(--good)}
+#overviewPage .sx-overview-lift-trend.watch{color:var(--warn)}
+#overviewPage .sx-overview-lift-signal{font-size:11px;color:var(--muted);line-height:1.65;margin:4px 0 0}
+#overviewPage .sx-overview-lift-signal strong{color:var(--txt)}
+#overviewPage .sx-overview-lift-disclaimer{font-size:10px;line-height:1.6;color:var(--muted);margin:14px 0 0}
+#overviewPage .sx-overview-lift-empty{font-size:12px;line-height:1.65;color:var(--muted)}
+#overviewPage .sx-overview-supporting-training{margin:31px 0 6px;border:1px solid var(--stroke);background:var(--surface);border-radius:14px;overflow:hidden}
+#overviewPage .sx-overview-supporting-training>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;cursor:pointer;padding:17px 19px;min-height:67px}
+#overviewPage .sx-overview-supporting-training>summary::-webkit-details-marker{display:none}
+#overviewPage .sx-overview-supporting-training>summary strong{display:block;font-size:14px;color:var(--txt)}
+#overviewPage .sx-overview-supporting-training>summary small{display:block;font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px}
+#overviewPage .sx-overview-support-toggle{flex:0 0 auto;color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.55px}
+#overviewPage .sx-overview-support-toggle span{font-size:18px;vertical-align:middle;display:inline-block;transition:transform .18s}
+#overviewPage .sx-overview-supporting-training[open] .sx-overview-support-toggle span{transform:rotate(180deg)}
+#overviewPage .sx-overview-supporting-training:not([open])>.sx-overview-support-content{display:none!important}
+#overviewPage .sx-overview-support-content{padding:0 18px 17px;border-top:1px solid var(--stroke)}
+#overviewPage .sx-overview-support-content .section-top{margin-top:20px}
+#overviewPage .sx-overview-supporting-training:focus-within{border-color:color-mix(in srgb,var(--gold) 45%,var(--stroke))}
+@media(max-width:1100px){#overviewPage .sx-overview-lift-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ #overviewPage .sx-overview-lift-priority{align-items:flex-start;flex-wrap:wrap}
+ #overviewPage .sx-overview-lift-priority h3{font-size:21px}
+ #overviewPage .sx-overview-ascension-panel{padding:14px 12px}
+ #overviewPage .sx-overview-lift-grid{grid-template-columns:minmax(0,1fr)}
+ #overviewPage .sx-overview-support-content{padding:0 12px 12px}
+ #overviewPage .sx-overview-supporting-training>summary{padding:14px 12px}
+ #overviewPage .sx-overview-support-toggle{font-size:8px}
+}

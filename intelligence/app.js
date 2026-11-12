@@ -252,6 +252,9 @@
       kpi('Training days',format(metrics.activeDays),'Unique '+escapeHtml(lift)+' training days','◷');
   }
   function renderOverview(){
+    // Read-only AscensionX cycle insights take priority over accessory history.
+    // General charts may use demo data; this panel must never use those figures.
+    window.SXDecisionPanels?.overview?.('sxOverviewAscensionInsights');
     renderKpis();
     const records=state.analysis.strength[state.overviewLift].records;
     $('overviewChartTitle').textContent=state.overviewLift+' estimated 1RM';

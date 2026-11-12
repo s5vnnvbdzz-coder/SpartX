@@ -29,6 +29,39 @@
     '<p>'+esc(lift.reason)+'</p></article>';
   }).join('');
  }
+ // Overview leads with actual AscensionX strength evidence, not assistance.
+ // Do not infer completed weeks from cycle position or silently mix demo charts.
+ function overview(id,snapshot){
+  const host=$(id);if(!host)return;
+  const data=snapshot||load(),report=data?.ascension;
+  if(!report||report.status==='no-cycle'){
+   host.innerHTML='<div class="sx-overview-lift-head"><div><div class="eyebrow">ASCENSIONX · STRENGTH CYCLE</div>'+
+    '<h3>Your main lifts come first</h3></div><span class="sx-decision-readonly">NO ACTIVE CYCLE</span></div>'+
+    '<p class="sx-overview-lift-empty">Activate an AscensionX cycle on this device to see your squat, bench press and deadlift performance here. The general strength charts below may use demonstration data when no saved workout history is connected.</p>'+
+    '<p class="sx-overview-lift-disclaimer">The strength programme is never modified by this dashboard.</p>';
+   return;
+  }
+  const lifts=(report.lifts||[]).filter(l=>['Back Squat','Bench Press','Deadlift','Overhead Press'].includes(l.lift));
+  const total=lifts.reduce((n,l)=>n+(Number(l.recordedWeeks)||0),0);
+  const fmtChange=x=>x==null||!Number.isFinite(Number(x))?'No comparable trend yet':
+    (x>0?'+':'')+fmt(x)+'% estimated change';
+  host.innerHTML='<div class="sx-overview-lift-head"><div><div class="eyebrow">ASCENSIONX · MAIN LIFT INTELLIGENCE</div>'+
+   '<h3>Strength cycle progression</h3><p>Real saved, cycle-linked working sets only. Each main lift follows its own week.</p></div>'+
+   '<span class="sx-decision-readonly">'+esc(total)+' LIFT-WEEKS LOGGED</span></div>'+
+   '<div class="sx-overview-lift-grid">'+lifts.map(l=>{
+    const rec=l.latest,week=Math.max(1,Math.min(6,Number(l.week)||1));
+    return '<section class="sx-overview-lift-card"><div class="sx-overview-lift-row">'+
+     '<strong>'+esc(l.lift)+'</strong><span>WEEK '+week+' / 6</span></div>'+
+     '<div class="sx-overview-lift-meta">'+l.recordedWeeks+' completed linked week'+(l.recordedWeeks===1?'':'s')+
+      ' · '+esc(l.confidence||'insufficient')+' evidence</div>'+
+     '<div class="sx-overview-lift-values"><div><small>TOP WEIGHT</small><b>'+fmt(rec?.heaviest)+
+      ' <span>kg</span></b></div><div><small>ESTIMATED 1RM</small><b>'+fmt(rec?.estimatedMax)+
+      ' <span>kg</span></b></div></div>'+
+     '<div class="sx-overview-lift-trend '+statusClass(l.status)+'">'+esc(fmtChange(l.delta))+'</div>'+
+     '<p class="sx-overview-lift-signal"><strong>'+esc(l.title)+'</strong> '+esc(l.reason)+'</p></section>';
+   }).join('')+'</div>'+
+   '<p class="sx-overview-lift-disclaimer">Estimated strength varies with reps, effort and fatigue. AscensionX training maxes, prescribed weights and cycle weeks remain unchanged.</p>';
+ }
  function decisionCards(policy){
   return (policy?.decisions||[]).map(d=>
    '<article class="sx-decision-next-action"><div class="sx-decision-row"><strong>'+esc(d.lift)+
@@ -129,5 +162,5 @@
    '<p class="small-copy">Read-only · Existing AscensionX training maxes and all programmes remain unchanged.</p>'+
    '<a href="../?sxOpen=powerbuilding" class="sx-decision-link">OPEN FULL CYCLE ANALYSIS</a>';
  }
- global.SXDecisionPanels=Object.freeze({power,body,intelligence,load});
+ global.SXDecisionPanels=Object.freeze({overview,power,body,intelligence,load});
 })(window);

@@ -187,7 +187,7 @@ function renderChart(){
  const values=series.map(p=>p.value),low=Math.min(...values),high=Math.max(...values);
  const cushion=Math.max((high-low)*.2,metric==='bodyFat'?0.3:0.5);
  const yMin=Math.max(0,low-cushion),yMax=high+cushion;
- const w=640,h=230,L=66,R=18,T=20,B=36,chartH=h-T-B,chartW=w-L-R;
+ const w=640,h=360,L=66,R=18,T=20,B=40,chartH=h-T-B,chartW=w-L-R;
  const times=series.map(p=>dateStamp(p.date)),minT=Math.min(...times),maxT=Math.max(...times);
  const x=(time,i)=>minT===maxT?L+chartW/2:L+(time-minT)/(maxT-minT)*chartW;
  const y=value=>T+chartH-(value-yMin)/(yMax-yMin)*chartH;

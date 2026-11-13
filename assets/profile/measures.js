@@ -124,6 +124,10 @@ for(const id of ['measureBodyweight','rankProfileHint']){
  if(node){node.hidden=true;node.style.display='none';view.appendChild(node);}
 }
 oldPage.replaceWith(view,entry);
+// Keep the sheet in the document body: on iOS a transformed page/carousel
+// can otherwise shift fixed-position overlays below the visual viewport.
+const floatingRangeSheet=view.querySelector('#sxMeasureRangeSheet');
+if(floatingRangeSheet)document.body.appendChild(floatingRangeSheet);
 const fieldHost=$('sxMeasureFields');
 fieldHost.innerHTML=fields.map(([key,label,unit,max])=>`
  <label class="sx-measure-row" for="sxMeasureField_${key}">

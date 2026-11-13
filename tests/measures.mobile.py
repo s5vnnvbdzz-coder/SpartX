@@ -49,8 +49,15 @@ try:
  range_open=run("""
   const sheet=document.getElementById('sxMeasureRangeSheet'),
     box=sheet.querySelector('.sx-measure-sheet-panel').getBoundingClientRect();
+  const host=sheet.getBoundingClientRect(),styles=getComputedStyle(sheet);
   return {visible:!sheet.hidden,expanded:document.getElementById('sxMeasureRangeOpen').getAttribute('aria-expanded'),
-    bottom:box.bottom,windowHeight:window.innerHeight,
+    bottom:box.bottom,top:box.top,windowHeight:window.innerHeight,
+    hostTop:host.top,hostBottom:host.bottom,hostHeight:host.height,
+    docHeight:document.documentElement.clientHeight,
+    outerHeight:window.outerHeight,
+    visualHeight:window.visualViewport?.height,
+    visualTop:window.visualViewport?.offsetTop,
+    sheetPosition:styles.position,sheetHeight:styles.height,sheetParent:sheet.parentElement?.tagName,
     options:[...sheet.querySelectorAll('[data-measure-range]')].map(x=>x.textContent.trim())};
  """)
  assert range_open['visible'] and range_open['expanded']=='true' and abs(range_open['bottom']-range_open['windowHeight'])<3,range_open

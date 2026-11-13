@@ -1,0 +1,54 @@
+/* SpartanX anatomy role colours · v326.
+   Shared by Statistics, live workout and Spartan Intelligence.
+   Explicit role contrast, not just opacity against a pale unworked body. */
+:root{
+ --sx-muscle-inactive:#323a40;
+ --sx-muscle-secondary:#8998a3;
+ --sx-muscle-primary:var(--lime,#c8f169);
+}
+body .sx-anatomy-figure .sx-anatomy-view .sx-anatomy-region.sx-muscle-neutral{
+ fill:var(--sx-muscle-inactive)!important;
+ stroke:#66717b!important;
+ stroke-width:1.8px!important;
+ filter:none!important;
+}
+body .sx-anatomy-figure .sx-anatomy-view .sx-anatomy-region.sx-muscle-secondary{
+ fill:var(--sx-muscle-secondary)!important;
+ stroke:#d2dce4!important;
+ stroke-width:1.3px!important;
+ stroke-dasharray:2.2 2.4;
+ filter:none!important;
+}
+body .sx-anatomy-figure .sx-anatomy-view .sx-anatomy-region.sx-muscle-primary{
+ fill:var(--sx-muscle-primary)!important;
+ stroke:color-mix(in srgb,var(--sx-muscle-primary) 55%,white)!important;
+ stroke-width:2.1px!important;
+ stroke-dasharray:none!important;
+ filter:drop-shadow(0 0 2px color-mix(in srgb,var(--sx-muscle-primary) 50%,transparent))!important;
+}
+body .sx-muscle-map-legend .sx-highlight-swatch,
+body .sx-week-legend i:not(.sx-secondary-swatch),
+body .sx-intel-anatomy-legend .sx-highlight-swatch{
+ opacity:1!important;background:var(--sx-muscle-primary)!important;
+ border:1px solid color-mix(in srgb,var(--sx-muscle-primary) 55%,white)!important;
+}
+body .sx-muscle-map-legend .sx-highlight-swatch.is-secondary,
+body .sx-week-legend .sx-secondary-swatch,
+body .sx-intel-anatomy-legend .sx-highlight-swatch.is-secondary{
+ background:var(--sx-muscle-secondary)!important;
+ border:1px dashed #d2dce4!important;opacity:1!important;
+}
+body .sx-muscle-map-legend .sx-highlight-swatch,
+body .sx-week-legend i,
+body .sx-intel-anatomy-legend .sx-highlight-swatch{
+ width:13px;height:13px;border-radius:4px;
+}
+body .sx-muscle-map-legend,
+body .sx-week-legend,
+body .sx-intel-anatomy-legend{color:var(--txt,#f3f4f6)!important}
+body .sx-muscle-map-legend span,
+body .sx-week-legend span,
+body .sx-intel-anatomy-legend span{gap:7px}
+@media(prefers-reduced-motion:reduce){
+ body .sx-anatomy-figure .sx-anatomy-region{transition:none!important}
+}

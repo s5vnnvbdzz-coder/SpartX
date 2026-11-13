@@ -78,4 +78,57 @@ assert.equal(overview30.byLift['Bench Press'].trend,overview30.strength['Bench P
 assert.equal(overview90.byLift['Bench Press'].trend,overview90.strength['Bench Press'].delta,'Trend matches chart after range change');
 assert.ok(overview90.weeklyByLift['Bench Press'].some(w=>w.count>0),'Bench consistency shows actual Bench sessions');
 assert.ok(overview90.weeklyByLift['Squat'].some(w=>w.count>0),'Squat consistency independent');
+// Real AscensionX Week 3 squat regression: 4 reps are prescribed, not an
+// arbitrary failure of the generic five-rep progression heuristic.
+const ascDate=new Date(Date.now()-3600000).toISOString();
+const ascWeek3={
+ id:'asc-squat-w3',date:ascDate,name:'Back Squat - Week 3',
+ exercises:[{
+  name:'Back Squat',
+  ascensionLink:{
+   cycleId:'2026-10-01T12:00:00.000Z',lift:'Back Squat',week:3,
+   plannedSets:[{weight:140,reps:4},...Array.from({length:4},()=>({weight:132.5,reps:4}))],
+   targetRpe:7.5
+  },
+  sets:[
+   ...[67.5,92.5,110,127.5].map((weight,i)=>({
+    weight,reps:[5,3,2,1][i],rpe:6,type:'Warm-up',done:true
+   })),
+   ...[7,7.5,7.5,8,8.5].map((rpe,i)=>({
+    weight:i===0?140:132.5,reps:4,rpe,type:'Working Set',done:true
+   }))
+  ]
+ }]
+};
+const ascInput=JSON.stringify(ascWeek3);
+const ascNormalized=E.normalizeSessions([ascWeek3]);
+assert.equal(JSON.stringify(ascWeek3),ascInput,'AscensionX analysis does not alter original session');
+assert.equal(ascNormalized[0].exercises[0].ascensionLink.week,3,'Programme metadata preserved');
+const ascAnalysis=E.analyse(ascNormalized,90);
+const ascRec=E.recommendation('Squat',ascAnalysis.strength.Squat.records);
+assert.equal(ascRec.title,'Proceed to Week 4','Prescribed four-rep Week 3 advances');
+assert.equal(ascRec.kind,'positive');
+assert.equal(ascRec.programme,true);
+assert.equal(ascRec.next,null,'No arbitrary kg increase for linked programme');
+assert.match(ascRec.nextLabel,/AscensionX Week 4/);
+assert.match(ascRec.detail,/140 kg × 4 at RPE 7/);
+assert.match(ascRec.detail,/Average working-set RPE 7.7/);
+assert.match(ascRec.detail,/RPE 8.5/);
+assert.match(ascRec.detail,/not a recommendation to increase your Training Max/);
+const partialWeek3=JSON.parse(ascInput);
+partialWeek3.exercises[0].sets.pop();
+const partialRec=E.recommendation('Squat',E.analyse([partialWeek3],90).strength.Squat.records);
+assert.equal(partialRec.title,'Review Week 3 before advancing','Incomplete working sets must not advance');
+const missedReps=JSON.parse(ascInput);
+missedReps.exercises[0].sets.at(-1).reps=3;
+assert.equal(E.recommendation('Squat',E.analyse([missedReps],90).strength.Squat.records).kind,
+ 'caution','Missed prescribed reps trigger review');
+const week6=JSON.parse(ascInput);
+week6.exercises[0].ascensionLink.week=6;
+assert.match(E.recommendation('Squat',E.analyse([week6],90).strength.Squat.records).title,
+ /review the cycle/,'Final week prompts cycle review rather than arbitrary Week 7');
+const unlinked=[{max:150,set:{weight:135,reps:4,rpe:7.5}},
+ {max:158.7,set:{weight:140,reps:4,rpe:7}}];
+assert.equal(E.recommendation('Squat',unlinked).title,'Repeat before progressing',
+ 'Generic non-programme workouts retain the existing rule');
 console.log('PASS — SpartanX Intelligence engine regression tests.');

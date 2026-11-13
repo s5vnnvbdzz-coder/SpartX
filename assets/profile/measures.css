@@ -127,3 +127,158 @@ body:has(#sxMeasureLogPage.screen.active)>main{
  .sx-measure-save{min-width:65px;padding:0 10px!important}
  .sx-measure-entry-group input{width:120px}
 }
+
+
+/* Build 327: open, uncluttered Measures overview; Hevy-like information flow
+   with SpartanX colours, typography and universal arrow navigation. */
+#measuresOverlay.sx-measures-page .sx-measure-page-head{
+ border-bottom:0!important;margin-bottom:18px!important;padding-bottom:8px!important;
+}
+.sx-measures-compact-overview{display:block;width:100%;margin:0;padding:0 0 30px}
+.sx-measure-overview-head{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;min-width:0;margin:13px 0 19px;
+}
+body .sx-measure-latest-button{
+ display:inline-flex!important;flex-wrap:wrap!important;align-items:baseline!important;
+ justify-content:flex-start!important;gap:7px!important;
+ min-width:0;width:auto;min-height:50px;margin:0!important;padding:0!important;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;background:transparent!important;color:var(--txt)!important;
+ text-align:left!important;line-height:1.22!important;
+}
+.sx-measure-overview-reading{
+ font-size:clamp(20px,5.6vw,28px);font-weight:850;color:var(--txt);
+ letter-spacing:-.8px;white-space:nowrap;
+}
+.sx-measure-overview-date{font-size:clamp(12px,3.6vw,17px);font-weight:750;color:var(--lime);
+ white-space:nowrap}
+.sx-measure-overview-edit{color:var(--muted);font-weight:850;font-size:23px;line-height:1;opacity:.7}
+body .sx-measure-range-trigger{
+ display:inline-flex!important;align-items:center!important;gap:7px!important;
+ justify-content:flex-end!important;min-height:44px;min-width:0;
+ margin:0!important;padding:4px 0 4px 5px!important;
+ border:0!important;background:transparent!important;border-radius:0!important;
+ box-shadow:none!important;color:var(--lime)!important;
+ font-size:clamp(11px,3.4vw,16px)!important;font-weight:750!important;
+ white-space:nowrap!important;
+}
+.sx-measure-range-chevron{font-size:22px;color:var(--lime);font-weight:450;line-height:1}
+.sx-measure-main-chart{margin:0 0 20px;min-height:210px!important;overflow:hidden}
+.sx-measure-main-chart svg{width:100%;height:auto;max-height:310px;display:block}
+.sx-measure-main-chart .grid-line{stroke:color-mix(in srgb,var(--line) 75%,var(--txt) 12%);stroke-width:1}
+.sx-measure-main-chart .chart-axis-label{fill:var(--muted);font-size:15px}
+.sx-measure-main-chart .chart-point{stroke:var(--bg);stroke-width:3;fill:var(--lime)}
+.sx-measure-main-chart .chart-trend{stroke-width:3;fill:none}
+.sx-measure-metric-chooser{margin:10px 0 25px}
+.sx-measure-metric-pill{
+ display:inline-flex;align-items:center;gap:5px;position:relative;
+ max-width:100%;border-radius:99px;padding:9px 14px;
+ background:color-mix(in srgb,var(--lime) 92%,#fff);
+ color:#0a120c;font-size:14px;font-weight:780;line-height:1.2;
+ box-shadow:0 0 13px color-mix(in srgb,var(--lime) 18%,transparent);
+ cursor:pointer;overflow:hidden;
+}
+.sx-measure-metric-pill .sx-measure-metric-chevron{font-weight:800;font-size:16px}
+.sx-measure-metric-pill select{
+ position:absolute;inset:0;width:100%!important;max-width:none!important;height:100%;
+ min-height:0!important;padding:0!important;opacity:0;cursor:pointer;
+}
+.sx-measure-history-heading{
+ display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+ margin:14px 0 8px;
+}
+.sx-measure-history-heading h2{font-size:22px!important;line-height:1.2;margin:0!important}
+.sx-measures-compact-overview .sx-measure-history{display:block;margin:12px 0 0!important}
+.sx-measures-compact-overview .sx-measure-history button{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ width:100%;min-height:64px;margin:0!important;
+ padding:17px 0!important;background:transparent!important;border:0!important;
+ border-bottom:1px solid var(--sx-measure-line)!important;border-radius:0!important;
+ box-shadow:none!important;color:var(--txt)!important;text-align:left!important;
+}
+.sx-measures-compact-overview .sx-measure-history button:first-child{
+ border-top:1px solid var(--sx-measure-line)!important;
+}
+.sx-measures-compact-overview .sx-measure-history button strong{
+ font-size:15px;font-weight:650;line-height:1.35;
+}
+.sx-measures-compact-overview .sx-measure-history button>span:last-child{
+ font-size:17px;font-weight:800;color:var(--txt)!important;
+}
+.sx-measures-compact-overview .sx-measure-history button small{display:none}
+.sx-measure-history-note{font-size:11px;color:var(--muted);line-height:1.5;margin:16px 0}
+.sx-measure-history-empty{font-size:13px;line-height:1.6;color:var(--muted);padding:18px 0}
+.sx-measure-sheet[hidden]{display:none!important}
+.sx-measure-sheet{
+ position:fixed!important;inset:0!important;z-index:10000!important;
+ display:flex!important;align-items:flex-end!important;justify-content:center!important;
+ width:100vw;height:100dvh;margin:0;padding:0;overflow:hidden;
+ overscroll-behavior:contain;
+}
+body.sx-measure-sheet-open{overflow:hidden!important}
+.sx-measure-sheet-scrim{
+ position:absolute;inset:0;display:block;width:100%;height:100%;
+ margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+ background:rgba(0,0,0,.66)!important;box-shadow:none!important;
+}
+.sx-measure-sheet-panel{
+ position:relative;z-index:1;width:100%;max-width:790px;
+ padding:11px 18px calc(18px + env(safe-area-inset-bottom,0px));
+ border:1px solid color-mix(in srgb,var(--line) 85%,var(--txt) 16%);
+ border-bottom:0;border-radius:25px 25px 0 0;
+ background:linear-gradient(180deg,var(--panel2),var(--panel))!important;
+ color:var(--txt);box-shadow:0 -16px 44px #0009;
+ animation:sx-measure-sheet-rise .21s ease-out both;
+}
+@keyframes sx-measure-sheet-rise{from{transform:translateY(35%);opacity:.65}to{transform:translateY(0);opacity:1}}
+.sx-measure-sheet-handle{height:5px;width:52px;border-radius:8px;
+ margin:0 auto 12px;background:var(--muted);opacity:.67}
+.sx-measure-sheet-title{text-align:center;font-size:13px;font-weight:800;
+ letter-spacing:.8px;color:var(--muted);margin:7px 0 14px}
+.sx-measure-sheet-options{display:grid;overflow:hidden;border-radius:15px;
+ border:1px solid var(--sx-measure-line);background:var(--panel)}
+.sx-measure-sheet-options button{
+ display:flex!important;justify-content:space-between!important;align-items:center!important;
+ width:100%;min-height:62px;
+ padding:13px 17px!important;margin:0!important;
+ border:0!important;border-bottom:1px solid var(--sx-measure-line)!important;border-radius:0!important;
+ background:transparent!important;color:var(--txt)!important;
+ text-align:left!important;box-shadow:none!important;
+ font-size:16px!important;font-weight:600!important;
+}
+.sx-measure-sheet-options button:last-child{border-bottom:0!important}
+.sx-measure-sheet-options button[aria-pressed=true]{background:color-mix(in srgb,var(--lime) 9%,transparent)!important}
+.sx-range-check{opacity:0;font-size:23px;font-weight:750;color:var(--lime);line-height:1}
+.sx-measure-sheet-options button[aria-pressed=true] .sx-range-check{opacity:1}
+/* Compact date is just one row, no repeated label/title. */
+#sxMeasureLogPage .sx-measure-date-single-row{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ min-height:61px;padding:0 0 12px;margin:0 0 20px;
+ border-bottom:1px solid var(--sx-measure-line);
+}
+#sxMeasureLogPage .sx-measure-date-single-row label{flex:1;min-width:0;
+ font-size:14px;font-weight:760;white-space:nowrap}
+#sxMeasureLogPage .sx-measure-date-single-row input{
+ width:180px;max-width:60%;min-height:45px;margin:0;padding:7px 10px!important;
+ font-size:14px!important;color:var(--txt)!important;background:var(--panel2)!important;
+ border:1px solid var(--sx-measure-line)!important;border-radius:10px!important;
+ text-align:right;box-shadow:none!important;
+}
+#sxMeasureLogPage .sx-measure-photo-section{margin:0 0 21px;padding:0;border:0!important;background:transparent!important}
+#sxMeasureLogPage .sx-measure-photo-section h2{font-size:18px!important;margin:0 0 13px!important}
+#sxMeasureLogPage .sx-measure-photo-section .sx-measure-photo-picker{margin:0}
+.sx-measure-sr-only{position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;
+ white-space:nowrap!important;border:0!important}
+@media(max-width:420px){
+ .sx-measure-overview-head{gap:5px}
+ .sx-measure-overview-edit{font-size:18px}
+ .sx-measure-overview-reading{font-size:21px}
+ .sx-measure-overview-date{font-size:12px}
+ .sx-measure-range-trigger{font-size:12px!important;gap:4px!important}
+ #sxMeasureLogPage .sx-measure-date-single-row input{width:170px;max-width:58%}
+}
+@media(prefers-reduced-motion:reduce){
+ .sx-measure-sheet-panel{animation:none!important}
+}

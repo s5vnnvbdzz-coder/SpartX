@@ -72,4 +72,13 @@
 #muscleDiagramLarge .sx-anatomy-view svg{height:min(63vh,370px)!important;width:auto!important}
 @media(min-width:650px){.sx-overview-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.sx-stats-anatomy .sx-anatomy-view svg{height:400px!important}.sx-stats-module{padding:19px 20px}}
 @media(max-width:360px){.sx-week-date{width:31px;height:31px}.sx-stats-module{padding:11px 8px}.sx-stats-anatomy .sx-anatomy-view svg{height:225px!important}}
+
+/* Secondary Statistics screen uses the same iPhone safe-area and icon Back
+   standard as the new Measures pages. Keep its existing 4-tab footer. */
+@media(max-width:700px){
+ #trainingStatsOverlay.sx-statistics-page.active{
+  padding-top:max(54px,calc(12px + env(safe-area-inset-top,0px)))!important;
+ }
+}
+.sx-statistics-heading .sx-page-back{margin-left:auto!important}
 @media(prefers-reduced-motion:reduce){.sx-anatomy-region{transition:none}}

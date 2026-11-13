@@ -75,6 +75,40 @@ try:
  """)
  assert run("return document.getElementById('sxMeasuresChart').querySelectorAll('.chart-point').length")==2
  print('PASS metric charts include multiple dated values; backdated measurements do not overwrite current bodyweight',flush=True)
+ # Progress photo is optional, but must persist separately from workout JSON.
+ run("document.querySelector('#sxMeasuresHistory button[data-measure-edit]').click()")
+ wait.until(lambda _:run("return document.getElementById('sxMeasureLogPage').classList.contains('active')"))
+ inserted=browser.execute_async_script("""
+  const done=arguments[arguments.length-1],canvas=document.createElement('canvas');
+  canvas.width=50;canvas.height=50;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#17bba6';ctx.fillRect(0,0,50,50);
+  canvas.toBlob(blob=>{
+    const input=document.getElementById('sxMeasurePhotoInput');
+    const data=new DataTransfer();
+    data.items.add(new File([blob],'progress.png',{type:'image/png'}));
+    input.files=data.files;
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+    done(!!document.querySelector('#sxMeasurePhotoPreview img'));
+  },'image/png');
+ """)
+ assert inserted,'Image preview should appear after selection'
+ run("document.getElementById('sxMeasureEntryForm').requestSubmit()")
+ wait.until(lambda _:run("return document.getElementById('measuresOverlay').classList.contains('active')"))
+ assert run("return db.measurements.some(x=>x.hasPhoto)") is True
+ stored=browser.execute_async_script("""
+  const done=arguments[arguments.length-1];
+  const entry=db.measurements.find(x=>x.hasPhoto);
+  const req=indexedDB.open('spartx_measurement_photos_v1',1);
+  req.onerror=()=>done(false);
+  req.onsuccess=()=>{
+   const tx=req.result.transaction('photos','readonly');
+   const r=tx.objectStore('photos').get(entry.id);
+   r.onsuccess=()=>done(r.result instanceof Blob && r.result.size>0);
+   r.onerror=()=>done(false);
+  };
+ """)
+ assert stored,'Progress photo should survive in separate IndexedDB storage'
+ print('PASS optional progress pictures persist without increasing the workout JSON size',flush=True)
  run("document.querySelector('#sxMeasuresHistory button[data-measure-edit]').click()")
  wait.until(lambda _:run("return document.getElementById('sxMeasureLogPage').classList.contains('active')"))
  assert run("return document.getElementById('sxMeasureEntryTitle').textContent")=='Edit Measurements'

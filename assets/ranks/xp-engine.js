@@ -1,4 +1,4 @@
-/* SpartanX XP / Prestige engine, Build 323.
+/* SpartanX XP / Prestige engine, Build 324.
  * Pure calculation from completed, saved training: never grants XP on a tap,
  * draft, incomplete AscensionX day or repeat save. No monthly expiry.
  */
@@ -23,9 +23,13 @@
   return d.toISOString().slice(0,10);
  };
  const validSavedSession=s=>Array.isArray(s?.exercises)&&s.exercises.some(ex=>
-  Array.isArray(ex?.sets)&&ex.sets.some(set=>set?.done===true&&
-   Number.isFinite(Number(set.weight))&&Number.isFinite(Number(set.reps))&&
-   (Number(set.reps)>0||Number(set.weight)>0)));
+  Array.isArray(ex?.sets)&&ex.sets.some(set=>{
+   if(set?.done!==true)return false;
+   if(set.type==='Cardio')return Number(set.durationSeconds)>0&&
+    [set.floors,set.steps,set.distanceKm].some(v=>Number(v)>0);
+   return Number.isFinite(Number(set.weight))&&Number.isFinite(Number(set.reps))&&
+    (Number(set.reps)>0||Number(set.weight)>0);
+  }));
  const validAscLink=(ex)=>{
   const link=ex?.ascensionLink;
   if(!link||typeof link.cycleId!=='string'||!Number.isFinite(Date.parse(link.cycleId))||

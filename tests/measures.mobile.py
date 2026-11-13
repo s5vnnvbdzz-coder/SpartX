@@ -82,9 +82,9 @@ try:
  run("document.getElementById('sxMeasureLatestOpen').click()")
  wait.until(lambda _:run("return document.getElementById('sxMeasureLogPage').classList.contains('active')"))
  assert run("return document.querySelectorAll('#sxMeasureLogPage .sx-measure-date-single-row label').length")==1
- assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-date-single-row label').textContent.strip()")=='Entry Date'
+ assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-date-single-row label').textContent.trim()")=='Entry Date'
  assert run("return document.querySelectorAll('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-section-title').length")==1
- assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-section-title').textContent.strip()")=='Progress Picture'
+ assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-section-title').textContent.trim()")=='Progress Picture'
  assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-photo-picker')") is not None
  run("document.getElementById('sxMeasureEntryBack').click()")
  wait.until(lambda _:run("return document.getElementById('measuresOverlay').classList.contains('active')"))

@@ -1,4 +1,4 @@
-/* SpartanX Profile header + offline social list pages v240.
+/* SpartanX Profile header + offline social list pages v322.
  * The existing Edit / Share / Settings controls are MOVED, not recreated.
  * Existing bottom navigation and all workout/profile persistence stay intact. */
 (()=>{
@@ -17,7 +17,7 @@
  back.type='button';back.id='sxProfileConnectionsBack';
  back.className='sx-profile-connections-back';
  back.setAttribute('aria-label','Back to Profile');
- back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg><span>Back</span>';
+ back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg>';
  const title=document.createElement('strong');
  title.id='sxProfileConnectionsHeaderTitle';title.className='sx-profile-connections-header-title';
  heading.prepend(back);heading.append(title);
@@ -34,7 +34,7 @@
  const pageHeading=document.getElementById('sxProfileConnectionsTitle');
  const desc=document.getElementById('sxProfileConnectionsDescription');
  const list=document.getElementById('sxProfileConnectionsList');
- let current=null,addedHistoryEntry=false,profileReturnScroll=null;
+ let current=null,addedHistoryEntry=false,profileReturnScroll=null,sourceScreen=null;
  const readScroll=()=>Math.max(0,window.scrollY||0,document.documentElement.scrollTop||0,document.body.scrollTop||0);
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const rankMale=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
@@ -70,7 +70,9 @@
   }).join('');
  }
  function hide(){
-  if(!current)return;
+  if(!current)return null;
+  const origin=sourceScreen;
+  sourceScreen=null;
   current=null;addedHistoryEntry=false;
   page.hidden=true;
   root.classList.remove('sx-connections-open');
@@ -87,12 +89,29 @@
    };
    restore();requestAnimationFrame(restore);
   }
+  return origin;
+ }
+ function returnToSource(origin){
+  if(!origin||origin==='profile'||!root.classList.contains('active'))return;
+  // Restore the Home/feed scroll and navigation origin instead of trapping
+  // the user on their main Profile page after opening a feed-card counter.
+  if(typeof window.spartanxReturnToScreen==='function')window.spartanxReturnToScreen(origin);
+  else if(typeof window.spartanxNavigateScreen==='function')window.spartanxNavigateScreen(origin,{back:true,instant:true});
  }
  function show(kind,push){
   if(kind!=='followers'&&kind!=='following')return;
-  // The established screen switcher keeps the real nav's Profile tab active.
-  if(!root.classList.contains('active')&&typeof switchScreen==='function')switchScreen('profile');
-  if(!current)profileReturnScroll=readScroll();
+  // Feed-card taps must reach the same real Profile list as the Profile counters.
+  // Bypass the optional main-page swipe carousel: it can otherwise delay or
+  // intercept the switch while the list is being opened on iPhone.
+  if(!current){
+   const activeId=document.querySelector('.screen.active')?.id||null;
+   sourceScreen=activeId&&activeId!=='profile'?activeId:null;
+   profileReturnScroll=root.classList.contains('active')?readScroll():null;
+  }
+  if(!root.classList.contains('active')){
+   if(typeof window.spartanxNavigateScreen==='function')window.spartanxNavigateScreen('profile',{instant:true});
+   else if(typeof switchScreen==='function')switchScreen('profile',{instant:true});
+  }
   current=kind;
   page.hidden=false;
   root.classList.add('sx-connections-open');
@@ -107,15 +126,18 @@
  }
  back.addEventListener('click',()=>{
   const hadEntry=addedHistoryEntry;
-  hide();
+  const origin=hide();
   if(hadEntry)history.back();
-  const followers=root.querySelector('[data-sx-social-jump="followers"]');
-  followers?.focus({preventScroll:true});
+  returnToSource(origin);
+  if(!origin){
+   const followers=root.querySelector('[data-sx-social-jump="followers"]');
+   followers?.focus({preventScroll:true});
+  }
  });
  window.addEventListener('popstate',event=>{
   const kind=event.state?.sxProfileConnections;
   if(kind==='followers'||kind==='following')show(kind,false);
-  else hide();
+  else returnToSource(hide());
  });
  // A swipe/tab change closes only the subpage. The navigation bar is unmodified.
  const observer=new MutationObserver(()=>{

@@ -1,0 +1,27 @@
+name: Verify SpartanX XP and Prestige rewards
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/ranks/xp-engine.js'
+      - 'assets/ranks/xp-engine.test.cjs'
+      - '.github/workflows/xp-prestige-checks.yml'
+  pull_request:
+    paths:
+      - 'assets/ranks/xp-engine.js'
+      - 'assets/ranks/xp-engine.test.cjs'
+      - '.github/workflows/xp-prestige-checks.yml'
+permissions:
+  contents: read
+jobs:
+  validate-rank-xp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate XP engine syntax
+        run: node --check assets/ranks/xp-engine.js
+      - name: Test standard and AscensionX XP rewards
+        run: node assets/ranks/xp-engine.test.cjs

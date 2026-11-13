@@ -106,7 +106,7 @@
   '</div>';
  heading.insertAdjacentElement('afterend',dashboard);
  const subpage=document.createElement('div');subpage.id='sxSettingsSubpage';subpage.className='sx-settings-subpage';subpage.hidden=true;
- subpage.innerHTML='<div class="sx-settings-subhead"><button type="button" id="sxSettingsBack" aria-label="Back to Settings">← Back</button><h2 id="sxSettingsSubpageTitle"></h2></div><div id="sxSettingsSubpageContent"></div>';
+ subpage.innerHTML='<div class="sx-settings-subhead"><h2 id="sxSettingsSubpageTitle"></h2><button type="button" id="sxSettingsBack" class="sx-page-back" aria-label="Back to Settings"><span class="sx-page-back-arrow" aria-hidden="true">←</span></button></div><div id="sxSettingsSubpageContent"></div>';
  panel.appendChild(subpage);
  const subContent=byId('sxSettingsSubpageContent');
  let currentSub='';

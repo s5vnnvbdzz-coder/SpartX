@@ -1,4 +1,4 @@
-/* SpartanX Build 317 secondary-page workflow acceptance — real Chromium. */
+/* SpartanX Build 318 secondary-page workflow acceptance — real Chromium. */
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 async function main(){
@@ -32,7 +32,7 @@ async function main(){
   await page.waitForSelector('#athleteSearch.screen.active');
   assert.equal(await page.locator('#trackerNav').evaluate(el=>getComputedStyle(el).display),'none');
   let nav=page.locator('#sxSocialBack');
-  assert.equal((await nav.innerText()).trim().replace(/\s+/g,' '),'← Back');
+  assert.equal((await nav.innerText()).trim(),'←');
   await assertStandardBack(nav,'athlete search');
   await nav.click();
   await page.waitForSelector('#home.screen.active');
@@ -120,7 +120,7 @@ async function main(){
   });
   assert.ok(rect.height>=47&&rect.height<=49,where+' fixed-height Back');
   assert.equal(rect.border,'1px',where+' border');
-  assert.ok(rect.width>=94,where+' Back min-width');
+  assert.ok(rect.width>=47&&rect.width<=49,where+' compact arrow-only Back width');
   assert.ok(rect.parentRight-rect.right<25,where+' Back at right of header');
  }
 }

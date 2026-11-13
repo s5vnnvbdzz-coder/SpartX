@@ -1,4 +1,4 @@
-/* SpartanX · unified secondary-page navigation · Build 317
+/* SpartanX · unified secondary-page navigation · Build 318
    Reference: charcoal 1px border, subtle bevel, white serif Back label.
    The four main navigation tabs are NOT changed.
    Every secondary page has the same Back component, right side of its header.
@@ -15,14 +15,14 @@ body :is(button,a).sx-page-back{
  justify-content:center!important;
  align-self:center!important;
  flex:0 0 auto!important;
- gap:8px!important;
- width:auto!important;
- min-width:96px!important;
- max-width:100%!important;
+ gap:0!important;
+ width:48px!important;
+ min-width:48px!important;
+ max-width:48px!important;
  height:48px!important;
  min-height:48px!important;
  max-height:48px!important;
- padding:0 14px!important;
+ padding:0!important;
  margin:0!important;
  background:#1b1b1b!important;
  background-image:linear-gradient(180deg,#272727 0%,#191919 60%,#141414 100%)!important;
@@ -34,7 +34,7 @@ body :is(button,a).sx-page-back{
  text-shadow:none!important;
  text-decoration:none!important;
  font-family:Georgia,"Times New Roman",serif!important;
- font-size:16px!important;
+ font-size:0!important;
  font-style:normal!important;
  font-weight:700!important;
  letter-spacing:0!important;
@@ -45,7 +45,7 @@ body :is(button,a).sx-page-back{
 }
 .sx-page-back .sx-page-back-arrow{
  font-family:Arial,Helvetica,sans-serif!important;
- font-size:17px!important;
+ font-size:23px!important;
  font-weight:400!important;
  line-height:1!important;
  color:inherit!important;
@@ -132,15 +132,15 @@ body > header #sxHeaderSaveControls #sxSaveReviewBack{
 #athleteSearch #sxSocialBack,
 #editProfileOverlay #closeEditProfile,
 #exerciseHistoryScreen #closeExerciseHistory{
- min-width:96px!important;min-height:48px!important;
- height:48px!important;font-size:16px!important;padding:0 14px!important;
+ min-width:48px!important;min-height:48px!important;
+ height:48px!important;font-size:0!important;padding:0!important;
  justify-self:end!important;
 }
 /* 5/3/1 full-page Manage / Build cycle; never disturb fixed footer controls. */
 body.sx-cycle-page-active #sxQuick531CycleOverlay #sxQuick531CycleClose,
 #sxQuick531CycleHeader #sxQuick531CycleClose{
- min-width:96px!important;width:auto!important;min-height:48px!important;height:48px!important;
- max-height:48px!important;font-size:16px!important;
+ min-width:48px!important;width:48px!important;min-height:48px!important;height:48px!important;
+ max-height:48px!important;font-size:0!important;
  margin-left:auto!important;
 }
 #sxQuick531Heading .sx-page-back{margin-left:auto!important}
@@ -154,13 +154,13 @@ body > header:has(#ascEmbeddedClose){
 #cycleEditorBackdrop .cycle-editor-header .sx-page-back,
 #sxCycleViewDialog .sx-cycle-view-head .sx-page-back{
  margin-left:auto!important;
- min-width:96px!important;width:auto!important;height:48px!important;
- min-height:48px!important;padding:0 14px!important;
+ min-width:48px!important;width:48px!important;height:48px!important;
+ min-height:48px!important;padding:0!important;
 }
 body > header #ascEmbeddedClose.sx-page-back{
  margin-left:0!important;
- width:auto!important;height:48px!important;
- min-width:96px!important;
+ width:48px!important;height:48px!important;
+ min-width:48px!important;
 }
 
 /* Intelligence standalone: navigation belongs in the real header, not body. */
@@ -192,6 +192,12 @@ body > header #settingsBack.sx-page-back{margin-left:auto!important}
  #exerciseHistoryScreen .sx-exercise-profile-heading,
  #athleteSearch .sx-social-page-head{gap:7px!important}
  .sx-page-back,button.sx-page-back,a.sx-page-back{
-  min-width:96px!important;
+  min-width:48px!important;
  }
 }
+
+/* Build 318: compact arrow-only Back buttons; accessible labels stay in aria-label. */
+.sx-page-back,button.sx-page-back,a.sx-page-back,body :is(button,a).sx-page-back{width:48px!important;min-width:48px!important;max-width:48px!important;height:48px!important;min-height:48px!important;max-height:48px!important;padding:0!important;gap:0!important;font-family:Arial,Helvetica,sans-serif!important;font-size:0!important;line-height:1!important;flex:none!important}
+.sx-page-back .sx-page-back-arrow{display:block!important;font-size:23px!important;line-height:1!important;font-family:Arial,Helvetica,sans-serif!important}
+.sx-page-back>span:not(.sx-page-back-arrow){position:absolute!important;clip-path:inset(50%)!important;width:1px!important;height:1px!important;overflow:hidden!important;white-space:nowrap!important}
+@media(max-width:420px){.sx-page-back,button.sx-page-back,a.sx-page-back{width:48px!important;min-width:48px!important;max-width:48px!important}}

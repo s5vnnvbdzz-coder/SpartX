@@ -71,11 +71,11 @@ body.theme-red .pill{background:#35191e;border-color:#71303a;color:#ff7a85}body.
 <link rel="stylesheet" href="../assets/themes/jade-sentinel.css?v=237">
 <link rel="stylesheet" href="../assets/themes/spartan-pantheon.css?v=284">
 <style>body.spartanx-pantheon :is(.week-card,.cycle-detail,.stat){background:linear-gradient(145deg,#302923,#191e1d)!important;border-color:#98764c!important}body.spartanx-pantheon :is(.segment button.active,.pill,.switch input:checked+span){background:#71342c!important;border-color:#d6aa70!important;color:#f8dba6!important}body.spartanx-pantheon :is(.page-top .back-button,.expand-btn){background:#302e28!important;border-color:#b08b53!important;color:#f1dfbd!important}</style>
-</head>
+<link rel="stylesheet" href="../assets/ui/page-navigation.css?v=318"><style>body>header{display:none!important}main{padding-top:calc(18px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(50px + env(safe-area-inset-bottom,0px))!important}.page-top{align-items:center!important;margin-bottom:17px!important}.page-top-copy{flex:1;min-width:0}</style></head>
 <body>
-<header><div><div class="brand">SPARTAN<span>X</span></div><div class="sub">STRENGTH · PERFORMANCE · PROGRESS</div></div></header>
+
 <main>
-<div class="page-top"><div class="page-top-copy"><div class="eyebrow">PLAN WITH PURPOSE</div><h1>5/3/1 Cycle Planner</h1></div><a class="back-button" id="plannerBack" href="./index.html">← Back</a></div>
+<div class="page-top"><div class="page-top-copy"><div class="eyebrow">PLAN WITH PURPOSE</div><h1>5/3/1 Cycle Planner</h1></div><a class="back-button sx-page-back" id="plannerBack" href="./index.html" aria-label="Back to Training Tools"><span class="sx-page-back-arrow" aria-hidden="true">←</span></a></div>
 <p class="intro">Build a progressive 4, 8 or 12-week block from your Training Max. Save it to revisit your working weights whenever you need them.</p>
 
 <div id="setupPlaceholder"></div>
@@ -237,7 +237,7 @@ $('savedList').addEventListener('click',e=>{
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)renderSaved()});
 window.addEventListener('pageshow',sync531CreationControls);window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='spartx:cycleUpdated')renderSaved()});
 $('closeEdit').addEventListener('click',closeEditForm);$('cancelEdit').addEventListener('click',closeEditForm);$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEditForm();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editModal').hidden)closeEditForm();});
-if(new URLSearchParams(location.search).get('embedded')==='1'){$('plannerBack').textContent='← Back to Tools';$('plannerBack').addEventListener('click',e=>{e.preventDefault();parent.postMessage({type:'spartx:closeCyclePlanner'},location.origin);});}
+if(new URLSearchParams(location.search).get('embedded')==='1'){$('plannerBack').setAttribute('aria-label','Back to Training Tools');$('plannerBack').addEventListener('click',e=>{e.preventDefault();parent.postMessage({type:'spartx:closeCyclePlanner'},location.origin);});}
 restoreDraft();setLength();$('bbbOptions').hidden=!$('bbb').checked;$('setupCard').hidden=false;renderSaved();
 document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('focus',()=>el.select()));
 })();

@@ -1,0 +1,39 @@
+name: Verify Cyberpunk Black iPhone theme
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assets/themes/cyberpunk-black.css"
+      - "assets/themes/shared-theme.js"
+      - "index.html"
+      - "tools/531-native.js"
+      - "tools/settings.html"
+      - "AscensionX/index.html"
+      - "intelligence/index.html"
+      - "intelligence/goals.html"
+      - "tests/cyberpunk-theme.mobile.py"
+      - ".github/workflows/cyberpunk-theme-check.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cyberpunk-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check theme and planner syntax
+        run: |
+          node --check assets/themes/shared-theme.js
+          node --check tools/531-native.js
+      - name: Install mobile browser tests
+        run: |
+          google-chrome --version
+          python3 -m pip install --quiet --break-system-packages selenium
+      - name: Check Cyberpunk on all SpartanX surfaces
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/spartanx-cyber-server.log 2>&1 &
+          python3 tests/cyberpunk-theme.mobile.py

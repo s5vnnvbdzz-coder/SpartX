@@ -46,6 +46,10 @@ try:
  assert run("return document.querySelectorAll('#measuresOverlay .sx-measure-panel').length")==0
  assert run("return document.getElementById('sxMeasureRangeLabel').textContent")=='Last 3 months'
  run("document.getElementById('sxMeasureRangeOpen').click()")
+ # The bottom sheet intentionally animates upward for 210 ms; check its
+ # resting position instead of the intermediate frame.
+ wait.until(lambda _:run("""const box=document.querySelector('#sxMeasureRangeSheet .sx-measure-sheet-panel').getBoundingClientRect();
+   return Math.abs(box.bottom-window.innerHeight)<3;"""))
  range_open=run("""
   const sheet=document.getElementById('sxMeasureRangeSheet'),
     box=sheet.querySelector('.sx-measure-sheet-panel').getBoundingClientRect();

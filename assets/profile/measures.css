@@ -111,6 +111,14 @@ body:has(#sxMeasureLogPage.screen.active)>main{
 .sx-measure-cancel{background:var(--panel2)!important;border:1px solid var(--sx-measure-line)!important;color:var(--txt)!important}
 #sxMeasureEntryStatus{font-size:12px;min-height:18px;line-height:1.5}
 #sxMeasureEntryStatus[role="alert"]{color:#f2a2a7}
+@media(max-width:700px){
+ /* iOS stand-alone PWAs can return zero for env(safe-area-inset-top).
+    Leave a guaranteed status-bar margin instead of overlapping 15:53. */
+ body:has(#measuresOverlay.screen.active)>main,
+ body:has(#sxMeasureLogPage.screen.active)>main{
+  padding-top:max(64px,calc(20px + env(safe-area-inset-top,0px)))!important;
+ }
+}
 @media(max-width:420px){
  .sx-measure-top{grid-template-columns:1fr}
  .sx-measure-panel{padding:16px 14px}

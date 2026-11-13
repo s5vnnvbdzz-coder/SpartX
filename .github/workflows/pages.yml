@@ -1,7 +1,5 @@
 name: Deploy SPARTANX to GitHub Pages
 
-# Pages source is now GitHub Actions, so this workflow is the sole
-# publisher. The old legacy branch publisher is no longer used.
 on:
   push:
     branches: [main]
@@ -12,25 +10,34 @@ permissions:
   pages: write
   id-token: write
 
+# Complete the current publishing attempt rather than cancelling deployment.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload site
+      - name: Upload versioned site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}

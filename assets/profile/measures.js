@@ -1,4 +1,4 @@
-/* SpartanX Measures · v326
+/* SpartanX Measures · v327
  * Two real screens, local dated history, native mobile input and optional
  * separately stored progress photos. Never deletes existing workout data.
  */
@@ -42,39 +42,47 @@ view.innerHTML=`
   <button type="button" class="sx-page-back" id="closeMeasures" aria-label="Back to Profile"><span class="sx-page-back-arrow" aria-hidden="true">←</span></button>
  </div>
 </div>
-<section class="sx-measure-panel sx-measure-current">
- <div class="sx-measure-top">
-  <div><div class="sx-measure-eyebrow">CURRENT PROFILE WEIGHT</div>
-   <div class="sx-measure-main-number" id="sxMeasuresCurrent">—</div>
-   <div class="sx-measure-current-note">Private to you · used for your strength-to-bodyweight rankings</div>
-  </div>
-  <div class="sx-measure-current-note">Log your measurements regularly to see genuine progress over time. Previous bodyweight settings are preserved.</div>
+<div class="sx-measures-compact-overview">
+ <div class="sx-measure-overview-head">
+  <button type="button" class="sx-measure-latest-button" id="sxMeasureLatestOpen" aria-label="Open latest logged measurement">
+   <span class="sx-measure-overview-reading" id="sxMeasuresCurrent">—</span>
+   <span class="sx-measure-overview-date" id="sxMeasuresCurrentDate">Not dated</span>
+   <span class="sx-measure-overview-edit" aria-hidden="true">›</span>
+  </button>
+  <button type="button" class="sx-measure-range-trigger" id="sxMeasureRangeOpen"
+   aria-haspopup="dialog" aria-expanded="false" aria-controls="sxMeasureRangeSheet">
+   <span id="sxMeasureRangeLabel">Last 3 months</span><span class="sx-measure-range-chevron" aria-hidden="true">⌄</span>
+  </button>
  </div>
- <div class="sx-measure-small-stats">
-  <div class="sx-measure-small-stat"><small>LOGGED ENTRIES</small><strong id="sxMeasureEntryCount">0</strong></div>
-  <div class="sx-measure-small-stat"><small>LATEST MEASUREMENT</small><strong id="sxMeasuresLatest">—</strong></div>
+ <div id="sxMeasuresChart" class="sx-measure-chart sx-measure-main-chart" aria-live="polite"></div>
+ <div class="sx-measure-metric-chooser">
+  <label class="sx-measure-metric-pill" for="sxMeasureMetric">
+   <span id="sxMeasureMetricLabel">Weight</span>
+   <span class="sx-measure-metric-chevron" aria-hidden="true">⌄</span>
+   <select id="sxMeasureMetric" aria-label="Choose measurement to display"></select>
+  </label>
  </div>
-</section>
-<section class="sx-measure-panel" aria-labelledby="sxMeasuresChartTitle">
- <div class="sx-measure-chart-controls"><h2 class="sx-measure-section-title" id="sxMeasuresChartTitle">Progress over time</h2>
-  <label for="sxMeasureMetric">Metric <select id="sxMeasureMetric" class="sx-measure-compact-select"></select></label>
- </div>
- <div id="sxMeasuresChart" class="sx-measure-chart" aria-live="polite"></div>
- <div class="sx-measure-range" role="group" aria-label="Measurement chart date range">
-  <button type="button" data-measure-range="1">1M</button>
-  <button type="button" data-measure-range="3" aria-pressed="true">3M</button>
-  <button type="button" data-measure-range="6">6M</button>
-  <button type="button" data-measure-range="12">1Y</button>
-  <button type="button" data-measure-range="0">ALL</button>
- </div>
-</section>
-<section class="sx-measure-panel" aria-labelledby="sxMeasuresHistoryTitle">
- <div class="sx-measure-chart-controls"><h2 class="sx-measure-section-title" id="sxMeasuresHistoryTitle">Measurement history</h2>
+ <div class="sx-measure-history-heading">
+  <h2 class="sx-measure-section-title" id="sxMeasuresHistoryTitle">Weight History</h2>
   <span class="sx-measure-eyebrow" id="sxMeasuresCountLabel">0 ENTRIES</span>
  </div>
  <div id="sxMeasuresHistory" class="sx-measure-history"></div>
- <p class="sx-measure-help">Tap a measurement to view or edit it. All measurements are stored locally on this device.</p>
-</section>`;
+ <p class="sx-measure-history-note">Tap a saved measurement to view or edit it. Your measurements remain private on this device.</p>
+ <span id="sxMeasureEntryCount" hidden>0</span>
+</div>
+<div class="sx-measure-sheet" id="sxMeasureRangeSheet" role="dialog" aria-modal="true"
+ aria-labelledby="sxMeasureRangeSheetTitle" hidden>
+ <button type="button" class="sx-measure-sheet-scrim" id="sxMeasureRangeScrim" aria-label="Close date range options"></button>
+ <div class="sx-measure-sheet-panel" role="document">
+  <div class="sx-measure-sheet-handle" aria-hidden="true"></div>
+  <h2 class="sx-measure-sheet-title" id="sxMeasureRangeSheetTitle">Chart date range</h2>
+  <div class="sx-measure-sheet-options" role="group" aria-label="Measurement time range">
+   <button type="button" data-measure-range="3" aria-pressed="true"><span>Last 3 months</span><span class="sx-range-check" aria-hidden="true">✓</span></button>
+   <button type="button" data-measure-range="12" aria-pressed="false"><span>1 year</span><span class="sx-range-check" aria-hidden="true">✓</span></button>
+   <button type="button" data-measure-range="0" aria-pressed="false"><span>All time</span><span class="sx-range-check" aria-hidden="true">✓</span></button>
+  </div>
+ </div>
+</div>`;
 const entry=document.createElement('section');
 entry.id='sxMeasureLogPage';entry.className='screen sx-measure-entry-page';entry.setAttribute('aria-labelledby','sxMeasureEntryTitle');
 entry.innerHTML=`
@@ -86,20 +94,15 @@ entry.innerHTML=`
  </div>
 </div>
 <form id="sxMeasureEntryForm" novalidate>
- <section class="sx-measure-panel">
-  <h2 class="sx-measure-section-title">Entry date</h2>
-  <div class="sx-measure-entry-group">
-   <label class="sx-measure-row" for="sxMeasureDate">Date
-    <input id="sxMeasureDate" name="date" type="date" required>
-   </label>
-  </div>
- </section>
- <section class="sx-measure-panel">
-  <h2 class="sx-measure-section-title">Progress picture <small class="sx-measure-help">(optional)</small></h2>
-  <p class="sx-measure-help">Progress pictures stay on this device in separate photo storage and are not included in your workout JSON backup.</p>
+ <div class="sx-measure-date-single-row">
+  <label for="sxMeasureDate">Entry Date</label>
+  <input id="sxMeasureDate" name="date" type="date" required>
+ </div>
+ <section class="sx-measure-photo-section">
+  <h2 class="sx-measure-section-title">Progress Picture</h2>
   <input id="sxMeasurePhotoInput" type="file" accept="image/*" hidden>
   <button type="button" id="sxMeasurePhotoPicker" class="sx-measure-photo-picker" aria-label="Add a progress picture">
-   <span id="sxMeasurePhotoPreview">＋ Add picture</span><small id="sxMeasurePhotoNote">Choose a photo or take a picture</small>
+   <span id="sxMeasurePhotoPreview">＋ Add picture</span><small id="sxMeasurePhotoNote" class="sx-measure-sr-only">Choose a photo or take a picture</small>
   </button>
   <button type="button" id="sxMeasurePhotoRemove" class="sx-measure-cancel" hidden>Remove picture</button>
  </section>
@@ -206,29 +209,55 @@ function renderChart(){
   ' over the selected period, '+series.length+' logged measurements">'+lines+
   (points.length>1?'<path class="chart-trend" d="'+path+'"/>':'')+marker+labelDates+'</svg>';
 }
+const rangeLabels={3:'Last 3 months',12:'1 year',0:'All time'};
+const metricLabel=key=>key==='bodyweight'?'Weight':descriptors[key]?.label||'Weight';
+const hasMeasure=(item,key)=>item?.values?.[key]!==null&&item?.values?.[key]!==undefined&&
+ item?.values?.[key]!==''&&Number.isFinite(Number(item.values[key]));
+function latestMeasure(key){return records().find(item=>hasMeasure(item,key))||null}
 function render(){
- const all=records(),current=Number(db.profile?.bodyweight);
- $('sxMeasuresCurrent').innerHTML=Number.isFinite(current)&&current>0?
-  nice(current,'kg').replace(' kg','<small> kg</small>'):'—';
+ const all=records(),relevant=all.filter(item=>hasMeasure(item,metric));
+ const latest=relevant[0]||null;
+ const profileWeight=Number(db.profile?.bodyweight);
+ const fallback=metric==='bodyweight'&&!latest&&Number.isFinite(profileWeight)&&profileWeight>0;
+ const current=latest?Number(latest.values[metric]):fallback?profileWeight:null;
+ $('sxMeasuresCurrent').textContent=current===null?'—':nice(current,descriptors[metric].unit).replace(' ','');
+ $('sxMeasuresCurrentDate').textContent=latest?prettyDate(latest.date):
+  fallback?'Not dated':'No entries';
+ $('sxMeasureLatestOpen').setAttribute('aria-label',latest?
+  'Open '+metricLabel(metric)+' measurement from '+prettyDate(latest.date):
+  'Log a '+metricLabel(metric).toLowerCase()+' measurement');
  $('sxMeasureEntryCount').textContent=String(all.length);
- $('sxMeasuresCountLabel').textContent=all.length+' '+(all.length===1?'ENTRY':'ENTRIES');
- $('sxMeasuresLatest').textContent=all.length?prettyDate(all[0].date):'Not logged';
+ $('sxMeasuresCountLabel').textContent=relevant.length+' '+(relevant.length===1?'ENTRY':'ENTRIES');
+ $('sxMeasuresHistoryTitle').textContent=metricLabel(metric)+' History';
+ $('sxMeasureMetricLabel').textContent=metricLabel(metric);
  $('sxMeasureMetric').value=metric;
+ $('sxMeasureRangeLabel').textContent=rangeLabels[range];
  document.querySelectorAll('[data-measure-range]').forEach(button=>
   button.setAttribute('aria-pressed',String(Number(button.dataset.measureRange)===range)));
- const items=all.map(item=>{
-  const keys=fields.filter(([key])=>item.values[key]!==null&&item.values[key]!==undefined&&item.values[key]!=='');
-  const detail=keys.slice(0,3).map(([key,label])=>label).join(' · ');
-  const preview=item.values[metric]!=null?formatMetric(item.values,metric):
-   keys.length?formatMetric(item.values,keys[0][0]):'Photo only';
-  return '<button type="button" data-measure-edit="'+escapeText(item.id)+'" aria-label="Edit measurement from '+
-    escapeText(prettyDate(item.date))+'"><span><strong>'+escapeText(prettyDate(item.date))+'</strong><small>'+
-    escapeText(detail||'Progress photo')+(keys.length>3?' · +'+(keys.length-3)+' more':'')+
-    '</small></span><span>'+escapeText(preview)+'<small>VIEW DETAILS ›</small></span></button>';
- });
+ const items=relevant.map(item=>
+  '<button type="button" data-measure-edit="'+escapeText(item.id)+'" aria-label="Edit '+escapeText(metricLabel(metric))+
+  ' measurement from '+escapeText(prettyDate(item.date))+'"><span><strong>'+
+  escapeText(prettyDate(item.date))+'</strong><small>VIEW MEASUREMENT</small></span><span>'+
+  escapeText(formatMetric(item.values,metric))+'</span></button>');
  $('sxMeasuresHistory').innerHTML=items.length?items.join(''):
-  '<p class="sx-measure-help">No measurements logged yet. Your current profile bodyweight has been preserved, and you can start a dated history with +.</p>';
+  '<p class="sx-measure-history-empty">No '+escapeText(metricLabel(metric).toLowerCase())+
+  ' measurements recorded yet. Use + to log your first entry.</p>';
  renderChart();
+}
+function showRangeSheet(){
+ const sheet=$('sxMeasureRangeSheet');
+ sheet.hidden=false;
+ document.body.classList.add('sx-measure-sheet-open');
+ $('sxMeasureRangeOpen').setAttribute('aria-expanded','true');
+ sheet.querySelector('[data-measure-range="'+range+'"]').focus({preventScroll:true});
+}
+function hideRangeSheet(){
+ const sheet=$('sxMeasureRangeSheet');
+ if(sheet.hidden)return;
+ sheet.hidden=true;
+ document.body.classList.remove('sx-measure-sheet-open');
+ $('sxMeasureRangeOpen').setAttribute('aria-expanded','false');
+ $('sxMeasureRangeOpen').focus({preventScroll:true});
 }
 function setPreview(blob){
  clearPreview();
@@ -334,14 +363,27 @@ async function deleteEntry(){
  editingId=null;pendingPhoto=null;clearPreview();render();returnToScreen('measuresOverlay');
 }
 $('openMeasures').onclick=()=>{render();switchScreen('measuresOverlay',{instant:true});window.scrollTo(0,0)};
-$('closeMeasures').onclick=()=>returnToScreen('profile');
+$('closeMeasures').onclick=()=>{hideRangeSheet();returnToScreen('profile')};
 $('sxMeasuresPlus').onclick=()=>openEntry();
 $('sxMeasureEntryBack').onclick=()=>{clearPreview();returnToScreen('measuresOverlay')};
 $('sxMeasureCancel').onclick=()=>{clearPreview();returnToScreen('measuresOverlay')};
 $('sxMeasureMetric').onchange=event=>{metric=descriptors[event.target.value]?event.target.value:'bodyweight';render()};
+$('sxMeasureLatestOpen').onclick=()=>openEntry(latestMeasure(metric)?.id||null);
+$('sxMeasureRangeOpen').onclick=showRangeSheet;
+$('sxMeasureRangeScrim').onclick=hideRangeSheet;
+$('sxMeasureRangeSheet').addEventListener('click',event=>{
+ const option=event.target.closest('[data-measure-range]');
+ if(!option)return;
+ const value=Number(option.dataset.measureRange);
+ if(![0,3,12].includes(value))return;
+ range=value;hideRangeSheet();render();
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&!$('sxMeasureRangeSheet').hidden){
+  event.preventDefault();hideRangeSheet();
+ }
+});
 $('measuresOverlay').addEventListener('click',event=>{
- const rangeButton=event.target.closest('[data-measure-range]');
- if(rangeButton){range=Number(rangeButton.dataset.measureRange);render();return}
  const historyButton=event.target.closest('[data-measure-edit]');
  if(historyButton)openEntry(historyButton.dataset.measureEdit);
 });

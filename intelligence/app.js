@@ -343,8 +343,15 @@
     $('recommendationGrid').innerHTML=core.map(name=>{
       const records=stats[name].records,rec=E.recommendation(name,records);
       const latest=records.at(-1);
-      const suggestion=rec.next==null?'Collect more sessions':rec.next===latest?.set.weight?'Maintain '+fmtKg(rec.next):rec.next>latest?.set.weight?'Consider '+fmtKg(rec.next):'Consider '+fmtKg(rec.next);
-      return '<article class="recommend-card"><div class="recommend-top"><div><h3>'+escapeHtml(name)+'</h3><p>Based on most recent comparable top sets</p></div><span class="flag '+rec.kind+'">'+escapeHtml(rec.kind==='positive'?'PROGRESS':rec.kind==='caution'?'REVIEW':'STEADY')+'</span></div><div class="recommend-label">RECOMMENDATION</div><div class="recommend-title">'+escapeHtml(rec.title)+'</div><p>'+escapeHtml(rec.detail)+'</p><div class="recommend-foot"><span>Suggested load: <strong>'+escapeHtml(suggestion)+'</strong></span><span>Confidence: <strong>'+escapeHtml(rec.confidence)+'</strong></span></div></article>';
+      const suggestion=rec.nextLabel||(
+        rec.next==null?'Collect more sessions':
+        rec.next===latest?.set.weight?'Maintain '+fmtKg(rec.next):
+        'Consider '+fmtKg(rec.next));
+      // Programme-linked advice must not suggest arbitrary loads or conflict
+      // with the next AscensionX prescription.
+      const sourceLabel=rec.sourceLabel||'Based on most recent comparable top sets';
+      const actionLabel=rec.programme?'Next programmed step':'Suggested load';
+      return '<article class="recommend-card"><div class="recommend-top"><div><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(sourceLabel)+'</p></div><span class="flag '+rec.kind+'">'+escapeHtml(rec.kind==='positive'?'PROGRESS':rec.kind==='caution'?'REVIEW':'STEADY')+'</span></div><div class="recommend-label">RECOMMENDATION</div><div class="recommend-title">'+escapeHtml(rec.title)+'</div><p>'+escapeHtml(rec.detail)+'</p><div class="recommend-foot"><span>'+actionLabel+': <strong>'+escapeHtml(suggestion)+'</strong></span><span>Confidence: <strong>'+escapeHtml(rec.confidence)+'</strong></span></div></article>';
     }).join('');
     $('allInsights').innerHTML=E.insights(state.analysis).map(x=>'<article class="insight-card"><span class="insight-kicker '+x.kind+'">'+(x.kind==='positive'?'POSITIVE TREND':x.kind==='caution'?'WORTH REVIEWING':'TRAINING OBSERVATION')+'</span><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.text)+'</p></article>').join('');
     // Keep separate programme-link decisions out of the demo and general

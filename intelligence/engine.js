@@ -46,6 +46,31 @@
     const t=String(set.type||'working').toLowerCase();
     return !/(warm|drop|failure|excluded)/.test(t) && !['w','b','x'].includes(t);
   };
+  // A saved AscensionX import is the only reliable proof of a programmed day.
+  // Names/notes alone are NOT evidence that this was a prescribed lift.
+  function ascensionLink(raw,name){
+    if(!raw||typeof raw!=='object'||!raw.cycleId||
+       !Number.isFinite(Date.parse(raw.cycleId))||
+       !Number.isInteger(Number(raw.week))||Number(raw.week)<1||Number(raw.week)>6||
+       !CORE.includes(name)||canonical(raw.lift)!==name||
+       !Array.isArray(raw.plannedSets)||raw.plannedSets.length<1||raw.plannedSets.length>20)return null;
+    const plannedSets=raw.plannedSets.map(s=>({weight:Number(s.weight),reps:Number(s.reps)}));
+    if(plannedSets.some(s=>!Number.isFinite(s.weight)||s.weight<=0||s.weight>1500||
+         !Number.isInteger(s.reps)||s.reps<1||s.reps>100))return null;
+    const target=raw.targetRpe==null||raw.targetRpe===''?null:Number(raw.targetRpe);
+    return {
+      cycleId:String(raw.cycleId),week:Number(raw.week),lift:name,plannedSets,
+      targetRpe:target!==null&&Number.isFinite(target)&&target>=6&&target<=10?target:null
+    };
+  }
+  function normalisedProgramme(ex){
+    const link=ex.ascensionLink;
+    if(!link)return null;
+    const working=ex.sets.filter(isWorking);
+    const complete=working.length===link.plannedSets.length&&
+      working.every((set,i)=>set.weight>0&&set.reps>=link.plannedSets[i].reps);
+    return {...link,complete,workingSets:working};
+  }
   function normalizeSessions(items){
     if(!Array.isArray(items)) return [];
     return items.slice(0,5000).flatMap((s,idx)=>{
@@ -59,9 +84,9 @@
           const weight=safeNumber(set.weight,NaN),reps=safeNumber(set.reps,NaN);
           if(!Number.isFinite(weight)||weight<0||weight>1500||!Number.isFinite(reps)||reps<1||reps>100)return [];
           const rpe=set.rpe==null||set.rpe===''?null:safeNumber(set.rpe,NaN);
-          return [{weight,reps,rpe:Number.isFinite(rpe)&&rpe>=6&&rpe<=10?rpe:null,type:String(set.type||'Working Set')}];
+          return [{weight,reps,rpe:Number.isFinite(rpe)&&rpe>=6&&rpe<=10?rpe:null,type:String(set.type||'Working Set'),done:true}];
         });
-        return sets.length?{name,sets}:null;
+        return sets.length?{name,sets,ascensionLink:ascensionLink(ex.ascensionLink,name)}:null;
       }).filter(Boolean):[];
       return exercises.length?[{id:String(s.id??'import-'+idx),name:String(s.name||'Workout').slice(0,100),date:new Date(time).toISOString(),duration:clamp(safeNumber(s.duration,0),0,86400),exercises}]:[];
     }).sort((a,b)=>dayStamp(a.date)-dayStamp(b.date));
@@ -126,7 +151,10 @@
     for(const s of valid)for(const ex of s.exercises){
       const set=topSet(ex);
       if(!set)continue;
-      (moves[ex.name] ||= []).push({date:s.date,set,max:estimatedMax(set),id:s.id});
+      (moves[ex.name] ||= []).push({
+        date:s.date,set,max:estimatedMax(set),id:s.id,
+        programme:normalisedProgramme(ex)
+      });
     }
     const strength={};
     for(const name of CORE){
@@ -195,9 +223,52 @@
       activeDays30:new Set(last30.map(s=>s.date.slice(0,10))).size
     };
   }
+  function ascensionRecommendation(data){
+    const week=data.week,working=data.workingSets,top=working[0];
+    const expected=data.plannedSets.length;
+    const completed=data.complete;
+    const target=data.targetRpe;
+    const validRpe=working.map(s=>s.rpe).filter(r=>r!=null);
+    const average=validRpe.length?
+      Math.round(validRpe.reduce((sum,n)=>sum+n,0)/validRpe.length*10)/10:null;
+    const fmt=n=>Number(n).toLocaleString('en-GB',{maximumFractionDigits:1});
+    const topText=top?'Top set '+fmt(top.weight)+' kg × '+top.reps+
+      ' at '+(top.rpe==null?'unrecorded RPE':'RPE '+fmt(top.rpe)):'Top set unavailable';
+    const backRpe=working.slice(1).map(s=>s.rpe).filter(x=>x!=null);
+    const highestBack=backRpe.length?Math.max(...backRpe):null;
+    const fatigue=highestBack!==null?
+      ' Back-off effort reached RPE '+fmt(highestBack)+
+      (target!==null?' against the programme target of '+fmt(target):'')+'.':'';
+    const averageText=average!==null?' Average working-set RPE '+fmt(average)+'.':'';
+    const limitation=' AscensionX controls the prescribed loads for each week; this is not a recommendation to increase your Training Max.';
+    if(!completed){
+      return {kind:'caution',title:'Review Week '+week+' before advancing',
+        detail:'Only '+working.length+' of '+expected+' prescribed working sets were verified, or one or more set rep targets were missed. Review the original AscensionX prescription and workout log before continuing.'+
+          limitation,
+        next:null,nextLabel:'Review AscensionX Week '+week,sourceLabel:'ASCENSIONX · WEEK '+week+' · PRESCRIBED SESSION',
+        programme:true,confidence:'Moderate'};
+    }
+    if(week===6){
+      return {kind:'positive',title:'Week 6 completed — review the cycle',
+        detail:'All '+expected+' prescribed working sets and reps were completed. '+topText+'.'+averageText+fatigue+
+          ' Review the complete six-week trend, technique and recovery before choosing a new Training Max.',
+        next:null,nextLabel:'Review full AscensionX cycle',sourceLabel:'ASCENSIONX · WEEK 6 · PRESCRIBED SESSION',
+        programme:true,confidence:'Moderate'};
+    }
+    return {kind:'positive',title:'Proceed to Week '+(week+1),
+      detail:'All '+expected+' prescribed working sets and repetitions were completed. '+topText+'.'+averageText+
+        fatigue+' Monitor technique and recovery as intensity changes.'+limitation,
+      next:null,nextLabel:'Follow AscensionX Week '+(week+1)+' prescription',
+      sourceLabel:'ASCENSIONX · WEEK '+week+' · PRESCRIBED SESSION',
+      programme:true,confidence:'Moderate'};
+  }
   function recommendation(name, records){
+    const latest=Array.isArray(records)?records.at(-1):null;
+    // An AscensionX progression is rep-prescription driven, not a generic
+    // five-rep strength-estimate rule. Handle even the first logged week.
+    if(latest?.programme)return ascensionRecommendation(latest.programme);
     if(!records||records.length<2)return {kind:'neutral',title:'More data needed',detail:'Log at least two comparable work sessions to establish a trend.',next:null,confidence:'Low'};
-    const latest=records.at(-1),previous=records.at(-2),rpe=latest.set.rpe;
+    const previous=records.at(-2),rpe=latest.set.rpe;
     const step=MOVES[name]?.step||2.5;
     const trend=100*(latest.max-previous.max)/Math.max(previous.max,1);
     if(rpe==null)return {kind:'neutral',title:'Hold and collect RPE',detail:'Recent session has no RPE entry. Keep the current load and record perceived effort before increasing.',next:latest.set.weight,confidence:'Low'};

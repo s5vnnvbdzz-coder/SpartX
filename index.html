@@ -914,7 +914,7 @@ body.completed-workout-open #trackerNav{display:none!important}
 @media(max-width:380px){.sx-week-strip{gap:1px}.sx-week-date{width:34px;height:34px}.sx-body-map-panel{padding:8px 2px}}
 @media(prefers-reduced-motion:reduce){.sx-anatomy-region{transition:none}}
 </style>
-<link rel="stylesheet" href="./assets/stats/statistics.css">
+<link rel="stylesheet" href="./assets/stats/statistics.css?v=326">
 <link rel="stylesheet" href="./assets/ascension/quick-access.css">
 <link rel="stylesheet" href="./assets/workouts/programme-cards.css?v=285">
 <link rel="stylesheet" href="./assets/bodybuilding/programme-builder.css?v=309">
@@ -4514,7 +4514,7 @@ document.addEventListener('keydown',e=>{
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=326',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
-</script><script src="./assets/stats/statistics.js?v=262"></script>
+</script><script src="./assets/stats/statistics.js?v=326"></script>
 <script src="./assets/profile/measures.js?v=326"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=318"></script><script src="./tools/531-native.js?v=319"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=317"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>

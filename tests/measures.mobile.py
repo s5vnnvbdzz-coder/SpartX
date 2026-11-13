@@ -15,7 +15,7 @@ browser=webdriver.Chrome(options=options)
 wait=WebDriverWait(browser,45)
 run=lambda code,*args:browser.execute_script(code,*args)
 try:
- browser.get('http://127.0.0.1:8765/?measures-smoke=326')
+ browser.get('http://127.0.0.1:8765/?measures-smoke=327')
  wait.until(lambda _:run("return !!window.SpartanXMeasures && !!document.querySelector('#sxMeasureLogPage')"))
  run("""
   db.profile={...(db.profile||{}),name:'QA Athlete',bodyweight:91,standard:'male'};
@@ -41,6 +41,43 @@ try:
  """)
  assert all(layout.values()),layout
  print('PASS Measures is a status-safe secondary screen retaining existing bodyweight',flush=True)
+ # The new overview is a compact weight/date heading, not the old set of cards.
+ assert run("return document.getElementById('sxMeasuresCurrentDate').textContent")=='Not dated'
+ assert run("return document.querySelectorAll('#measuresOverlay .sx-measure-panel').length")==0
+ assert run("return document.getElementById('sxMeasureRangeLabel').textContent")=='Last 3 months'
+ run("document.getElementById('sxMeasureRangeOpen').click()")
+ range_open=run("""
+  const sheet=document.getElementById('sxMeasureRangeSheet'),
+    box=sheet.querySelector('.sx-measure-sheet-panel').getBoundingClientRect();
+  return {visible:!sheet.hidden,expanded:document.getElementById('sxMeasureRangeOpen').getAttribute('aria-expanded'),
+    bottom:box.bottom,windowHeight:window.innerHeight,
+    options:[...sheet.querySelectorAll('[data-measure-range]')].map(x=>x.textContent.trim())};
+ """)
+ assert range_open['visible'] and range_open['expanded']=='true' and abs(range_open['bottom']-range_open['windowHeight'])<3,range_open
+ assert len(range_open['options'])==3,range_open
+ run("document.querySelector('#sxMeasureRangeSheet [data-measure-range=\"12\"]').click()")
+ assert run("return document.getElementById('sxMeasureRangeLabel').textContent")=='1 year'
+ assert run("return document.getElementById('sxMeasureRangeSheet').hidden")
+ run("document.getElementById('sxMeasureRangeOpen').click()")
+ run("document.querySelector('#sxMeasureRangeSheet [data-measure-range=\"0\"]').click()")
+ assert run("return document.getElementById('sxMeasureRangeLabel').textContent")=='All time'
+ run("document.getElementById('sxMeasureRangeOpen').click()")
+ run("document.getElementById('sxMeasureRangeScrim').click()")
+ assert run("return document.getElementById('sxMeasureRangeSheet').hidden")
+ run("document.getElementById('sxMeasureRangeOpen').click()")
+ run("document.querySelector('#sxMeasureRangeSheet [data-measure-range=\"3\"]').click()")
+ assert run("return document.getElementById('sxMeasureRangeLabel').textContent")=='Last 3 months'
+ print('PASS iPhone date-range bottom sheet, 3 months / 1 year / all time, outside-tap close',flush=True)
+ run("document.getElementById('sxMeasureLatestOpen').click()")
+ wait.until(lambda _:run("return document.getElementById('sxMeasureLogPage').classList.contains('active')"))
+ assert run("return document.querySelectorAll('#sxMeasureLogPage .sx-measure-date-single-row label').length")==1
+ assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-date-single-row label').textContent.strip()")=='Entry Date'
+ assert run("return document.querySelectorAll('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-section-title').length")==1
+ assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-section-title').textContent.strip()")=='Progress Picture'
+ assert run("return document.querySelector('#sxMeasureLogPage .sx-measure-photo-section .sx-measure-photo-picker')") is not None
+ run("document.getElementById('sxMeasureEntryBack').click()")
+ wait.until(lambda _:run("return document.getElementById('measuresOverlay').classList.contains('active')"))
+ print('PASS weight/date summary opens the compact entry form, with simplified Entry Date and Progress Picture sections',flush=True)
  run("document.getElementById('sxMeasuresPlus').click()")
  wait.until(lambda _:run("return document.getElementById('sxMeasureLogPage').classList.contains('active')"))
  assert run("return document.getElementById('sxMeasureField_bodyweight').value")=='91'
@@ -59,6 +96,14 @@ try:
  """)
  assert saved['count']==1 and saved['weight']==91.5 and saved['waist']==84,saved
  assert saved['profile']==91.5 and saved['sessions']==['keep-me'] and saved['chart'],saved
+ assert run("return document.getElementById('sxMeasuresCurrent').textContent")=='91.5kg'
+ assert run("return document.getElementById('sxMeasuresCurrentDate').textContent")!='Not dated'
+ run("document.getElementById('sxMeasureLatestOpen').click()")
+ wait.until(lambda _:run("return document.getElementById('sxMeasureLogPage').classList.contains('active')"))
+ assert run("return document.getElementById('sxMeasureEntryTitle').textContent")=='Edit Measurements'
+ assert run("return document.getElementById('sxMeasureField_bodyweight').value")=='91.5'
+ run("document.getElementById('sxMeasureEntryBack').click()")
+ wait.until(lambda _:run("return document.getElementById('measuresOverlay').classList.contains('active')"))
  print('PASS adding bodyweight and waist saves dated history and updates rankings without altering workouts',flush=True)
  run("""
   document.getElementById('sxMeasuresPlus').click();

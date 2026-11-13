@@ -14,7 +14,7 @@ page.setAttribute('aria-labelledby','trainingStatsTitle');
 page.innerHTML=`
 <div class="sx-statistics-heading">
  <div><div class="eyebrow">YOUR TRAINING, TRACKED</div><h1 id="trainingStatsTitle">Statistics</h1></div>
- <button type="button" class="back-button" id="closeTrainingStats">← PROFILE</button>
+ <button type="button" class="back-button sx-page-back" id="closeTrainingStats" aria-label="Back to Profile"><span class="sx-page-back-arrow" aria-hidden="true">←</span></button>
 </div>
 <div class="sx-stats-module sx-stats-week">
  <div class="sx-seven-day-header"><strong>LAST 7 DAYS</strong><span id="sxSevenDayCount">0 workouts</span></div>

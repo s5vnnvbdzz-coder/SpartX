@@ -308,12 +308,35 @@
       const muscleKeys={
         'chest':['chest'],'quads':['quads'],'hamstrings':['hamstrings'],
         'glutes':['glutes'],'calves':['calves'],'back':['back'],
+        'upper back':['upper_back'],'lats':['lats'],'lower back':['lower_back'],
         'shoulders':['shoulders'],'triceps':['triceps'],
         'biceps':['biceps'],'traps':['traps'],'core':['core'],
         'posterior chain':['glutes','hamstrings']
       };
-      const primary=new Set(rows.filter(row=>row.sets>0)
-        .flatMap(row=>muscleKeys[String(row.name).toLowerCase()]||[]));
+      // Use the same primary/secondary exercise roles as SpartanX itself.
+      // Workload cards still count primary sets only; the diagram additionally
+      // shows the other trained muscles in the softer secondary highlight.
+      const primary=new Set(),secondary=new Set();
+      for(const session of state.analysis.last7||[]){
+        for(const ex of session.exercises||[]){
+          const hasWorkingSet=(ex.sets||[]).some(set=>{
+            const type=String(set.type||'Working Set').toLowerCase();
+            return !/(warm|drop|failure|excluded)/.test(type)&&
+              !['w','b','x'].includes(type);
+          });
+          if(!hasWorkingSet)continue;
+          const roles=window.SXMuscleLibrary?.muscles?.(ex.name);
+          for(const muscle of roles?.primary||[])primary.add(muscle);
+          for(const muscle of roles?.secondary||[])secondary.add(muscle);
+        }
+      }
+      for(const muscle of primary)secondary.delete(muscle);
+      // Legacy/demo data may use an older exercise name; keep its diagram.
+      if(!primary.size){
+        for(const row of rows.filter(row=>row.sets>0))
+          for(const muscle of muscleKeys[String(row.name).toLowerCase()]||[])
+            primary.add(muscle);
+      }
       let gender='male';
       // The SpartanX profile's anatomy preference is already saved locally.
       // Read without modifying the existing athlete profile or workouts.
@@ -326,7 +349,7 @@
           }
         }catch(_){}
       }
-      mapNode.innerHTML=anatomy.render(primary,new Set(),{gender});
+      mapNode.innerHTML=anatomy.render(primary,secondary,{gender});
       mapNode.setAttribute('aria-label',primary.size
         ?'Front and back SpartanX muscle map: '+[...primary].join(', ')+' highlighted as trained in the last seven days.'
         :'Front and back SpartanX muscle map: no recognised muscle groups trained in the last seven days.');

@@ -147,35 +147,40 @@
   }
   return changed;
  }
- // Apply the current cycle's rear-delt PROGRAMME change to an active
- // imported AscensionX supporting exercise. The completed-set guard prevents
- // changing a logged different movement into an Iso Rear Delt Fly.
+ // Apply the current cycle's rear-delt programme selection to a restored
+ // active AscensionX support entry. Both the original Rear Delt Fly and the
+ // short-lived Iso Rear Delt Fly programme version need a safe migration.
+ // Never reinterpret finished sets as a different exercise.
  function renameActiveAscensionRearDelts(work,adaptive){
   if(!Array.isArray(work))return 0;
   let cycle=null;
   try{cycle=adaptive?.activeCycle?.()}catch(_){}
   if(!cycle?.id||!Array.isArray(cycle.lifts))return 0;
+  const oldNames=new Set(['Rear Delt Fly','Iso Rear Delt Fly'].map(norm));
+  const newName='Rear Delt Reverse Fly';
   let changed=0;
   for(const exercise of work){
-   if(!exercise||norm(exercise.name)!==norm('Rear Delt Fly')||
-      clean(exercise.replacementOf)||exercise.ascensionLink||exercise.bodybuildingLink)continue;
+   if(!exercise||!oldNames.has(norm(exercise.name))||
+      exercise.ascensionLink||exercise.bodybuildingLink)continue;
+   // Preserve deliberate substitutions, except an Iso swap directly from
+   // the previous programme's Rear Delt Fly.
+   const replaced=norm(exercise.replacementOf);
+   if(replaced&&!(norm(exercise.name)===norm('Iso Rear Delt Fly')&&
+      replaced===norm('Rear Delt Fly')))continue;
    const link=exercise.sxStrengthSizeCompanion;
    const week=Number(link?.week);
    if(!link||link.cycleId!==cycle.id||!cycle.lifts.includes(link.lift)||
       !Number.isInteger(week)||week<1||week>6)continue;
-   // Programme change applies only if this is truly the planned accessory
-   // for the lift/week, and adaptive support remains enabled.
    let prescription=null;
    try{
     if(!adaptive?.enabled?.(cycle.id))continue;
-    prescription=adaptive.plan(link.lift,week).find(p=>norm(p.name)===norm('Iso Rear Delt Fly'));
+    prescription=adaptive.plan(link.lift,week).find(p=>norm(p.name)===norm(newName));
    }catch(_){continue}
    if(!prescription)continue;
-   // Never relabel performed Rear Delt Fly sets as a different machine.
    if((exercise.sets||[]).some(set=>set?.done===true))continue;
-   exercise.name='Iso Rear Delt Fly';
-   // Existing prescribed/entered sets, rest, notes and links stay intact.
-   // Loads for the new machine are NOT inferred from prior rear-delt history.
+   // Rename in place: set quantities, entered values, rest, RIR guidance,
+   // the cycle/bench linkage and other exercises are all left untouched.
+   exercise.name=newName;
    changed++;
   }
   return changed;

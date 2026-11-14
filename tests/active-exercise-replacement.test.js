@@ -142,6 +142,48 @@ test('active draft repair does not overwrite completed sets or unrelated free ex
  assert.equal(linked.sets[0].rpe,'8');
  assert.equal(manual.notes,undefined);
 });
+test('bar and rope triceps swaps retain AscensionX prescription but never copy logged results',()=>{
+ const original={name:'Triceps Pushdown (Bar)',rest:75,
+  notes:'AscensionX Adaptive Programming · Bench Press · Week 2 · 10–15 reps',
+  sxStrengthSizeCompanion:{cycleId:'current',lift:'Bench Press',week:2,repsMin:10,repsMax:15,plannedSets:3},
+  sets:[{weight:'25',reps:'12',rpe:'8',type:'Working Set',done:true},
+   {weight:'25',reps:'12',rpe:'',type:'Working Set',done:false},
+   {weight:'',reps:'',rpe:'',type:'Working Set',done:false}]};
+ const rope=R.prepare(original,'Triceps Pushdown (Rope)',cardio);
+ assert.equal(rope.exercise.name,'Triceps Pushdown (Rope)');
+ assert.equal(rope.exercise.notes,original.notes);
+ assert.equal(rope.exercise.rest,75);
+ assert.equal(rope.exercise.sxStrengthSizeCompanion.cycleId,'current');
+ assert.deepEqual(Array.from(rope.exercise.sets,x=>x.reps),['12','12','10']);
+ assert(rope.exercise.sets.every(x=>x.weight===''&&x.rpe===''&&x.done===false),
+  'Do not carry logged load or completion into a different attachment');
+ assert.equal(original.sets[0].weight,'25','No mutation of source');
+});
+test('active AscensionX pushdown rename keeps tracked sets and excludes manual rows',()=>{
+ const link={cycleId:'current',lift:'Bench Press',week:2,repsMin:10,repsMax:15,plannedSets:3};
+ const linked={name:'Triceps Pushdown',notes:'AscensionX Adaptive Programming · Bench Press',
+  rest:75,sxStrengthSizeCompanion:link,
+  sets:[{weight:'35',reps:'12',rpe:'8',done:true,type:'Working Set'},
+   {weight:'35',reps:'12',rpe:'',done:false,type:'Working Set'}]};
+ const separate={name:'Triceps Pushdown',notes:'User choice',sets:[{weight:'45',reps:'10',done:true}]};
+ const manuallyReplaced={name:'Triceps Pushdown',replacementOf:'Cable Curl',
+  sxStrengthSizeCompanion:link,sets:[{weight:'20',reps:'10',done:false}]};
+ const otherCycle={name:'Triceps Pushdown',
+  sxStrengthSizeCompanion:{...link,cycleId:'old'},sets:[{weight:'40',reps:'10',done:true}]};
+ const rope={name:'Triceps Pushdown (Rope)',sxStrengthSizeCompanion:link,
+  sets:[{weight:'22',reps:'15',done:true}]};
+ const work=[linked,separate,manuallyReplaced,otherCycle,rope];
+ const snapshots=work.map(x=>JSON.parse(JSON.stringify(x)));
+ const adaptive={activeCycle:()=>({id:'current',lifts:['Bench Press']})};
+ assert.equal(R.renameActiveAscensionPushdowns(work,adaptive),1);
+ assert.equal(linked.name,'Triceps Pushdown (Bar)');
+ assert.deepEqual(linked.sets,snapshots[0].sets,'Entered weight/reps/RPE/done remain intact');
+ assert.deepEqual(linked.sxStrengthSizeCompanion,link,'Preserve the AscensionX programme link');
+ for(let i=1;i<work.length;i++)assert.deepEqual(work[i],snapshots[i],'Unaffected record '+i);
+ assert.equal(R.renameActiveAscensionPushdowns(work,adaptive),0,'Safe on repeated refresh');
+ assert.equal(R.renameActiveAscensionPushdowns([{...snapshots[0]}],
+  {activeCycle:()=>({id:'different',lifts:['Bench Press']})}),0,'Do not rename another cycle');
+});
 test('substituted movement performance never advances a different planned movement',()=>{
  const ex={id:'e1',name:'Incline Dumbbell Press',sets:2,repsMin:8,repsMax:12,rir:2,startingKg:40};
  const session={date:'2026-11-01',bodybuildingLink:{programmeId:'p1',dayId:'d1',week:1},
@@ -162,6 +204,8 @@ test('both workout cards expose Replace through the options menu and existing ex
  assert(html.includes("returnFromExerciseLibrary()"));
  assert(html.includes('window.SpartanXExerciseReplacement?.prepare'));
  assert(html.includes('repairActiveIsoLateralRows(work,window.SXAscensionAdaptive)'));
+ assert(html.includes('renameActiveAscensionPushdowns(work,window.SXAscensionAdaptive)'));
+
 
  assert(html.includes('window.spartanxNavigateScreen'));
  assert(html.includes('sx-exercise-menu-trigger'));

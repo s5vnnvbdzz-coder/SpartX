@@ -55,8 +55,9 @@
    adjusted:false,sourceWeek:null,sourceTop:null,sourceBack:null,projected:false,
    changeKg:0};
   if(w===1||p.deload||!cycleId)return result;
-  const source=fromLogs(lift,w,cycleId,logs)||
-   fromSpartan(lift,w,cycleId,sessions);
+  const history=fromLogs(lift,w,cycleId,logs);
+  const source=history||fromSpartan(lift,w,cycleId,
+   typeof sessions==='function'?sessions():sessions);
   if(!source)return result;
   const previousPlan=plan[source.week-1];
   if(!previousPlan||previousPlan.deload)return result;

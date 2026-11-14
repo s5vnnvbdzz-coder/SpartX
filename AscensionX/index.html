@@ -818,6 +818,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 </main>
 <nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
+<script src="../assets/ascension/load-guard.js?v=338"></script>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='ascensionx_strength_v1';
@@ -992,7 +993,38 @@ function renderSettings(){$('themeChoices').innerHTML=ASC_THEMES.map(([id,name])
 function exitMetrics(){showScreen('profile')}
 function e1rm(w,r){return r>0?w*(1+r/30):0}
 function tm(lift){return roundTo((Number(state.profile.max[lift])||0)*state.profile.tmPct/100)}
-function prescribed(lift,week){const p=PLAN[week-1],base=tm(lift);return {p,topLoad:roundTo(base*p.topPct/100),backLoad:p.backPct===null?null:roundTo(base*p.backPct/100)}}
+function spartanHistoryForLoadGuard(){
+ try{
+  const raw=localStorage.getItem('spartx_db');
+  if(!raw||raw.length>8000000)return [];
+  const data=JSON.parse(raw);
+  return Array.isArray(data?.sessions)?data.sessions:[];
+ }catch(_){return []}
+}
+// One authoritative load calculation for View Cycle, logger and import.
+// The guard only reduces excessive jumps after a completed lower-than-plan
+// cycle-linked week. A stored workout is never rewritten or retroactively
+// judged against a newly edited 1RM / TM.
+function prescribed(lift,week){
+ const p=PLAN[week-1],base=tm(lift),normalTop=roundTo(base*p.topPct/100),
+  normalBack=p.backPct===null?null:roundTo(base*p.backPct/100);
+ const safe=window.SXAscensionLoadGuard?.reconcile({
+  lift,week,trainingMax:base,rounding:state.profile.rounding||2.5,
+  plan:PLAN,cycleId:state.cycle.created,logs:activeCycleLogs(),
+  sessions:spartanHistoryForLoadGuard
+ });
+ return {p,topLoad:safe?.topLoad??normalTop,
+  backLoad:safe?.backLoad??normalBack,loadGuard:safe?.adjusted?safe:null};
+}
+function loadGuardSummary(info){
+ const g=info?.loadGuard;
+ if(!g)return '';
+ return 'RECOVERY BRIDGE · W'+g.sourceWeek+' logged '+kg(g.sourceTop)+
+  ' (current template '+kg(g.currentPreviousNominal)+'). '+
+  (g.projected?'Provisional future target':'Next-session target')+
+  ' '+kg(info.topLoad)+' instead of '+kg(g.nominalTop)+
+  '. Back-off weights adjusted together. Training max unchanged.';
+}
 
 // Build Your Cycle uses the existing Profile strength values, never duplicates.
 function cycleStrengthLift(){
@@ -1254,9 +1286,15 @@ function closeEmbeddedAscensionFromHeader(){
 const ASC_WARMUP_PCTS=[40,55,65,75],ASC_WARMUP_REPS=[5,3,2,1];
 // Keep every suggested warm-up BELOW the prescribed main set, including deload.
 function ascWarmupPlan(lift,week){
- const p=PLAN[week-1],trainingMax=tm(lift);
+ const p=PLAN[week-1],trainingMax=tm(lift),main=prescribed(lift,week).topLoad;
  const percentages=p.deload?[25,35,45,55]:p.topPct<=75?[30,40,50,60]:ASC_WARMUP_PCTS;
- return percentages.map((pct,i)=>({pct,weight:roundTo(trainingMax*pct/100),reps:ASC_WARMUP_REPS[i]}));
+ const step=Number(state.profile.rounding)||2.5;
+ // Never warm up above the effective main load when a recovery bridge
+ // has reduced that load below the normal TM-percentage prescription.
+ return percentages.map((pct,i)=>({
+  pct,weight:Math.max(step,Math.min(roundTo(trainingMax*pct/100),main-(4-i)*step)),
+  reps:ASC_WARMUP_REPS[i]
+ }));
 }
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
@@ -1445,7 +1483,12 @@ function buildAscSpartanWorkout(lift){
  // Carry the human-readable cycle label across the app boundary.
  const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
  const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
- return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,tm:trainingMax,targetRpe:p.rpe,warmupSets,sets};
+ return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,
+  tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,
+  recoveryBridge:info.loadGuard?{
+   fromWeek:info.loadGuard.sourceWeek,previousTop:info.loadGuard.sourceTop,
+   nominalTop:info.loadGuard.nominalTop,adjustedTop:info.topLoad
+  }:null};
 }
 function renderAscSpartanImportPreview(){
  if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
@@ -1465,7 +1508,9 @@ function renderAscSpartanImportPreview(){
  const main=prescription.sets.map((x,i)=>(i===0?'Main '+(i+1):'Set '+(i+1))+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
  const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
  const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+adaptive.length+' EXERCISES</span>'+adaptive.map(x=>'<div>'+x.name+' · '+x.sets+' × '+x.min+'–'+x.max+' · '+x.rir+' RIR</div>').join(''):'';
- panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong><span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+support;
+ const guardInfo=prescribed(prescription.exercise,prescription.week);
+ const bridgeNote=guardInfo.loadGuard?'<div class="tiny" role="status" style="margin:9px 0;color:var(--red2)">'+loadGuardSummary(guardInfo)+'</div>':'';
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong>'+bridgeNote+'<span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+support;
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;
@@ -1700,8 +1745,9 @@ function renderWorkout(){
  const existing=activeCycleLogs().find(x=>x.lift===lift&&x.week===week);
  $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
  <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
+ ${info.loadGuard?'<p class="tiny" role="status" style="margin:12px 0;color:var(--red2)">'+loadGuardSummary(info)+'</p>':''}
  <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${p.topPct}% of TM · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${p.backPct}% of TM</div>`:''}</div>
- <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM. Adjust warm-ups to readiness; they are not working sets.</div>`;
+ <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM${info.loadGuard?' (capped below adjusted main load)':''}. Adjust warm-ups to readiness; they are not working sets.</div>`;
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
 }
 const RPE_GAUGE="<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4.2 17a9 9 0 1 1 15.6 0\"/><path d=\"M12 14.5 16.5 8\"/><circle cx=\"12\" cy=\"14.5\" r=\"1.5\"/></svg>";
@@ -1770,14 +1816,23 @@ function renderCycle(){
  renderCycleLoads();
 }
 function renderCycleLoads(){
- const lift=$('cycleLift').value;
+ const lift=$('cycleLift').value,logs=activeCycleLogs().filter(log=>log.lift===lift);
+ let adjustmentNote='';
  const rows=PLAN.map(p=>{
-  const x=prescribed(lift,p.week);
+  const x=prescribed(lift,p.week),saved=logs.find(log=>Number(log.week)===p.week);
+  if(x.loadGuard&&p.week===currentWeekFor(lift))adjustmentNote=loadGuardSummary(x);
+  const actual=saved&&Number(saved.topWeight)>0?
+   '<div class="tiny" style="margin-top:4px">Recorded: '+kg(saved.topWeight)+'</div>':'';
+  const bridged=x.loadGuard?
+   '<div class="tiny" style="margin-top:4px;color:var(--red2)">'+
+   (x.loadGuard.projected?'PROVISIONAL BRIDGE':'PERFORMANCE BRIDGE')+'</div>':'';
   return '<tr><td>W'+p.week+'</td><td>'+kg(tm(lift))+'</td><td>'+
-   kg(x.topLoad)+' · '+(p.deload?'3×5':'1×'+p.topReps)+'</td><td>'+
+   kg(x.topLoad)+' · '+(p.deload?'3×5':'1×'+p.topReps)+actual+bridged+'</td><td>'+
    (x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps)+'</td></tr>';
  }).join('');
- $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+ $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr><tbody>'+rows+'</tbody></table></div>'+
+  (adjustmentNote?'<p class="tiny" role="status" style="margin-top:10px">'+adjustmentNote+'</p>':'')+
+  '<p class="tiny" style="margin-top:8px">Past records are shown as logged. Editing your 1RM or TM updates the template, not a completed workout. Future targets may be bridged from actual completed loads to avoid a sudden jump.</p>';
 }
 function renderProgress(){
  const sets=state.logs.flatMap(l=>l.sets),volume=sets.reduce((a,s)=>a+s.weight*s.reps,0),bestW=Math.max(0,...sets.map(s=>s.weight)),bestE=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));

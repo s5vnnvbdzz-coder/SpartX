@@ -33,6 +33,14 @@ assert.ok(['Bench Press','Overhead Press'].every(lift=>
 assert.ok(['Bench Press','Overhead Press'].every(lift=>
  !api.LIB[lift].some(ex=>ex.name==='Triceps Pushdown')),
  'Do not reintroduce ambiguous triceps pushdown names');
+const isoRear=api.LIB['Bench Press'].find(e=>e.name==='Iso Rear Delt Fly');
+assert.ok(isoRear,'Bench programme now prescribes Iso Rear Delt Fly');
+assert.equal(isoRear.sets,3,'Iso rear-delt prescription retains three sets');
+assert.equal(isoRear.min,12,'Iso rear-delt reps start at twelve');
+assert.equal(isoRear.max,20,'Iso rear-delt reps max at twenty');
+assert.ok(!api.LIB['Bench Press'].some(e=>e.name==='Rear Delt Fly'),'Old programme selection retired');
+assert.ok(api.plan('Bench Press',2).some(e=>e.name==='Iso Rear Delt Fly'),'Active week uses new exercise');
+assert.ok(api.plan('Bench Press',6).every(e=>e.name!=='Iso Rear Delt Fly'),'Week six stays deload');
 const deadlift=api.plan('Deadlift',2);
 assert.ok(deadlift.length>=2);
 assert.ok(deadlift.every(e=>e.sets===3),'Deadlift support defaults to three sets in a standard week');

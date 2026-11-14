@@ -27,8 +27,8 @@ for(const name of variants){
 }
 assert(info.exerciseMuscles('Single-Arm Cable Rear Delt Fly').secondary.includes('core'),
  'Single-arm stabilization includes core');
-assert.deepEqual(info.exerciseMuscles('Cable Rear Delt Fly (Single)').primary,[],
- 'Unknown variants do not invent muscle metadata');
+assert.deepEqual(info.exerciseMuscles('Cable Rear Delt Fly (Single)').primary,['shoulders'],
+ 'Single-arm cable nickname resolves correctly');
 assert.deepEqual(info.exerciseMuscles('cable rear delt fly single').primary,['shoulders'],
  'Single-arm search alias resolves correctly');
 assert.deepEqual(info.exerciseMuscles('iso lateral rear delt fly').primary,['shoulders'],

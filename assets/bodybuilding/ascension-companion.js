@@ -14,7 +14,7 @@
       {name:'Seated Leg Curl',sets:2,min:10,max:15,rir:3,rest:90}
     ],
     'Bench Press':[
-      {name:'Chest-Supported Row',sets:2,min:8,max:12,rir:3,rest:120},
+      {name:'Iso-Lateral Row',sets:2,min:8,max:12,rir:3,rest:120},
       {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:90}
     ],
     'Deadlift':[
@@ -36,7 +36,7 @@
     ],
     'Bench Press':[
       {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:120},
-      {name:'Chest-Supported Row',sets:2,min:8,max:12,rir:3,rest:120},
+      {name:'Iso-Lateral Row',sets:2,min:8,max:12,rir:3,rest:120},
       {name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}
     ],
     'Deadlift':[

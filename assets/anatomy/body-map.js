@@ -32,7 +32,7 @@ function renderOne(view,gender,primary,secondary){
     (gender==='male'?(side==='left'?index===1:index===2):index===1);
    const key=latSegment?'lats':part.slug;
    const cls=prim.has(key)?'sx-muscle-primary':sec.has(key)?'sx-muscle-secondary':'sx-muscle-neutral';
-   return '<path class="sx-anatomy-region '+cls+'" d="'+d+'"/>';
+   return '<path class="sx-anatomy-region '+cls+'" data-region="'+key+'" d="'+d+'"/>';
   })).join('');
  }).join('');
  return '<div class="sx-anatomy-view"><svg xmlns="http://www.w3.org/2000/svg" viewBox="'+wrapper.viewBox+'" role="img" aria-label="'+(view==='front'?'Anterior':'Posterior')+' anatomical muscles"><title>'+(view==='front'?'Front':'Back')+' anatomy</title>'+silhouette+regions+'</svg></div>';

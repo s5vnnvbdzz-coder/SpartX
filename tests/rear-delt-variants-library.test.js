@@ -21,7 +21,7 @@ for(const name of variants){
  assert.equal(info.exerciseNames.filter(n=>n===name).length,1,'Unique exercise: '+name);
  assert(categories.Shoulders.includes(name),'Shoulders tab includes '+name);
  assert.deepEqual(info.exerciseMuscles(name).primary,['shoulders'],'Primary rear deltoids: '+name);
- assert(info.exerciseMuscles(name).secondary.includes('back'),'Secondary back: '+name);
+ assert(info.exerciseMuscles(name).secondary.includes('upper_back'),'Secondary upper-back: '+name);
  assert(info.exerciseMuscles(name).secondary.includes('traps'),'Secondary traps: '+name);
  assert(info.exerciseSearchAliases[name],'Search aliases: '+name);
 }

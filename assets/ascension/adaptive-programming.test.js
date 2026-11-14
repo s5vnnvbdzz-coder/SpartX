@@ -26,6 +26,13 @@ api.save({enabled:true,days:4,focus:'strength'});
 assert.equal(api.enabled(id),true);
 assert.equal(localStorage.getItem('ascensionx_strength_v1'),before,'Existing strength programme is never overwritten');
 assert.equal(api.read(id).days,4);
+assert.ok(['Bench Press','Overhead Press'].every(lift=>
+ api.LIB[lift].some(ex=>ex.name==='Triceps Pushdown (Bar)'&&
+ ex.sets===3&&ex.min===10&&ex.max===15)),
+ 'Bench and overhead support default to bar triceps pushdowns with three sets');
+assert.ok(['Bench Press','Overhead Press'].every(lift=>
+ !api.LIB[lift].some(ex=>ex.name==='Triceps Pushdown')),
+ 'Do not reintroduce ambiguous triceps pushdown names');
 const deadlift=api.plan('Deadlift',2);
 assert.ok(deadlift.length>=2);
 assert.ok(deadlift.every(e=>e.sets===3),'Deadlift support defaults to three sets in a standard week');

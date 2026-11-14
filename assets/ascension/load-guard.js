@@ -33,7 +33,8 @@
     const working=(ex.sets||[]).filter(set=>set?.type==='Working Set');
     if(working.length!==link.plannedSets.length||!working.length||
       !working.every((set,i)=>set.done===true&&valid(set.weight)&&
-        Number(set.reps)>=Number(link.plannedSets[i].reps)))continue;
+        Number(set.reps)>=Number(link.plannedSets[i].reps)&&
+        Number(set.weight)>=Number(link.plannedSets[i].weight)-0.01))continue;
     const other=working.slice(1).map(set=>value(set.weight)).filter(valid);
     matches.push({week:Number(link.week),top:value(working[0].weight),
       back:other.length?Math.min(...other):null,from:'SpartanX',

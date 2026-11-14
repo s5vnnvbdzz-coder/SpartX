@@ -1,5 +1,5 @@
 /* node tests/rear-delt-variants-library.test.js
- * Check three distinct rear-delt entries and the designated AscensionX Iso variant.
+ * Check distinct rear-delt entries and the designated AscensionX Reverse Fly.
  */
 'use strict';
 const assert=require('node:assert/strict');
@@ -16,7 +16,7 @@ const begin=html.indexOf('const categories={',end);
 const finish=html.indexOf('let sessionStarted=',begin);
 assert(begin>=0&&finish>begin,'Library categories available');
 const categories=new Function(html.slice(begin,finish)+'\nreturn categories;')();
-const variants=['Cable Rear Delt Fly','Single-Arm Cable Rear Delt Fly','Iso Rear Delt Fly'];
+const variants=['Cable Rear Delt Fly','Single-Arm Cable Rear Delt Fly','Iso Rear Delt Fly','Rear Delt Reverse Fly'];
 for(const name of variants){
  assert.equal(info.exerciseNames.filter(n=>n===name).length,1,'Unique exercise: '+name);
  assert(categories.Shoulders.includes(name),'Shoulders tab includes '+name);
@@ -35,12 +35,13 @@ assert.deepEqual(info.exerciseMuscles('iso lateral rear delt fly').primary,['sho
  'Iso-lateral search alias resolves correctly');
 assert(info.exerciseNames.includes('Rear Delt Fly')&&info.exerciseNames.includes('Reverse Pec Deck'),
  'Existing exercises remain available');
-assert(adaptive.includes("name:'Iso Rear Delt Fly'"),
- 'The active AscensionX programme selects Iso Rear Delt Fly');
-assert(!adaptive.includes("name:'Rear Delt Fly'"),
- 'The original rear-delt movement is no longer prescribed by AscensionX');
-assert(!variants.slice(0,2).some(x=>adaptive.includes("name:'"+x+"'")),
- 'The two cable variants stay optional rather than programmed');
+assert(adaptive.includes("name:'Rear Delt Reverse Fly'"),
+ 'The AscensionX programme selects Rear Delt Reverse Fly');
+assert(!adaptive.includes("name:'Rear Delt Fly'")&&
+ !adaptive.includes("name:'Iso Rear Delt Fly'"),
+ 'The earlier programme selections have been retired');
+assert(!variants.slice(0,3).some(x=>adaptive.includes("name:'"+x+"'")),
+ 'The iso and both cable variants stay optional rather than programmed');
 assert(builder.includes("typeof exerciseNames!=='undefined'&&Array.isArray(exerciseNames)"),
  'Programme builder can use updated shared catalogue');
-console.log('PASS: Three rear-delt variations in the library; Iso is the current AscensionX programme choice.');
+console.log('PASS: Rear Delt Reverse Fly is programmed and all four rear-delt library options remain selectable.');

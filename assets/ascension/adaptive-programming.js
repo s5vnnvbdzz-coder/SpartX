@@ -9,48 +9,48 @@
  const DAYS={3:['MON','WED','SAT'],4:['MON','TUE','THU','SAT'],5:['MON','TUE','THU','SAT','SUN']};
  const LIB={
   'Back Squat':[
-   {name:'Leg Extension',sets:2,min:10,max:15,rir:3,rest:90,muscles:'quadriceps',cost:1},
-   {name:'Seated Leg Curl',sets:2,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
-   {name:'Standing Calf Raise',sets:2,min:10,max:20,rir:3,rest:75,muscles:'calves',cost:1},
-   {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1}
+   {name:'Leg Extension',sets:3,min:10,max:15,rir:3,rest:90,muscles:'quadriceps',cost:1},
+   {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
+   {name:'Standing Calf Raise',sets:3,min:10,max:20,rir:3,rest:75,muscles:'calves',cost:1},
+   {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1}
   ],
   'Bench Press':[
    {name:'Chest-Supported Row',sets:3,min:8,max:12,rir:3,rest:120,muscles:'upper back',cost:1},
-   {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
-   {name:'Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75,muscles:'shoulder stabilisers',cost:1},
-   {name:'Lat Pulldown',sets:2,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1}
+   {name:'Triceps Pushdown',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Rear Delt Fly',sets:3,min:12,max:20,rir:3,rest:75,muscles:'shoulder stabilisers',cost:1},
+   {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1}
   ],
   'Deadlift':[
-   {name:'Lat Pulldown',sets:2,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
-   {name:'Seated Leg Curl',sets:2,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
-   {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
-   {name:'Seated Calf Raise',sets:2,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}
+   {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
+   {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
+   {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
+   {name:'Seated Calf Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}
   ],
   'Overhead Press':[
-   {name:'Dumbbell Row',sets:2,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:2,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
-   {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
-   {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+   {name:'Dumbbell Row',sets:3,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
+   {name:'Lateral Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
+   {name:'Triceps Pushdown',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
   ]
  };
  const FOURTH={
   strength:[
-   {name:'Machine Chest Press',sets:2,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
-   {name:'Chest-Supported Row',sets:2,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:2,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
-   {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+   {name:'Machine Chest Press',sets:3,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
+   {name:'Chest-Supported Row',sets:3,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
+   {name:'Lateral Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
+   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
   ],
   balanced:[
-   {name:'Machine Chest Press',sets:2,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
+   {name:'Machine Chest Press',sets:3,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
    {name:'Chest-Supported Row',sets:3,min:8,max:12,rir:2,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:2,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
-   {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
+   {name:'Lateral Raise',sets:3,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
+   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
   ],
   hypertrophy:[
    {name:'Machine Chest Press',sets:3,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
    {name:'Seated Cable Row',sets:3,min:10,max:15,rir:2,rest:105,muscles:'upper back',cost:1},
    {name:'Lateral Raise',sets:3,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
-   {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
+   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
   ]
  };
  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -136,7 +136,7 @@
   let sets=Math.round((item.sets+added)*factor);
   if(week===5)sets=Math.min(sets,1);
   if(week===6)sets=0;
-  if(main==='Deadlift')sets=Math.min(sets,week>=4?1:2);
+  if(main==='Deadlift')sets=Math.min(sets,week>=4?1:3);
   if(sets<1)return null;
   const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
   const ex={...item,sets,rir,sourceLift:main,week};
@@ -149,7 +149,7 @@
   const prefs=read(c.id,storage),focus=prefs.focus,main=lift;
   if(!prefs.enabled)return [];
   const candidates=LIB[main]||[];
-  const cap=main==='Deadlift'?4:focus==='strength'?7:9;
+  const cap=main==='Deadlift'?6:focus==='strength'?9:12;
   let count=0;
   const selected=[];
   for(const item of candidates){

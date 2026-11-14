@@ -23,7 +23,7 @@
     ],
     'Overhead Press':[
       {name:'Lateral Raise',sets:2,min:12,max:20,rir:3,rest:75},
-      {name:'Iso Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}
+      {name:'Rear Delt Reverse Fly',sets:2,min:12,max:20,rir:3,rest:75}
     ]
   };
   // Coach-style sessions: the main lift and all its warm-up/ramp sets are
@@ -37,7 +37,7 @@
     'Bench Press':[
       {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:120},
       {name:'Iso-Lateral Row',sets:2,min:8,max:12,rir:3,rest:120},
-      {name:'Iso Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75}
+      {name:'Rear Delt Reverse Fly',sets:2,min:12,max:20,rir:3,rest:75}
     ],
     'Deadlift':[
       {name:'Lying Leg Curl',sets:2,min:10,max:15,rir:3,rest:90},
@@ -176,7 +176,7 @@
     const balanced=[
       {name:'Machine Chest Press',sets:2,min:10,max:15,rir:3,rest:90},
       {name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
-      {name:'Iso Rear Delt Fly',sets:2,min:12,max:20,rir:3,rest:75},
+      {name:'Rear Delt Reverse Fly',sets:2,min:12,max:20,rir:3,rest:75},
       {name:'Standing Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}
     ];
     let items=lastDay?low:balanced;

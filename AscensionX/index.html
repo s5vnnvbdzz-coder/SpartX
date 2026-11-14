@@ -1286,13 +1286,15 @@ function closeEmbeddedAscensionFromHeader(){
 const ASC_WARMUP_PCTS=[40,55,65,75],ASC_WARMUP_REPS=[5,3,2,1];
 // Keep every suggested warm-up BELOW the prescribed main set, including deload.
 function ascWarmupPlan(lift,week){
- const p=PLAN[week-1],trainingMax=tm(lift),main=prescribed(lift,week).topLoad;
+ const p=PLAN[week-1],trainingMax=tm(lift),info=prescribed(lift,week),main=info.topLoad;
  const percentages=p.deload?[25,35,45,55]:p.topPct<=75?[30,40,50,60]:ASC_WARMUP_PCTS;
  const step=Number(state.profile.rounding)||2.5;
- // Never warm up above the effective main load when a recovery bridge
- // has reduced that load below the normal TM-percentage prescription.
+ // A bridged working set must not be preceded by a near-maximal warm-up
+ // that is effectively as heavy as the adjusted main load.
+ const bridgeCaps=[.55,.7,.8,.9];
  return percentages.map((pct,i)=>({
-  pct,weight:Math.max(step,Math.min(roundTo(trainingMax*pct/100),main-(4-i)*step)),
+  pct,weight:Math.max(step,Math.min(roundTo(trainingMax*pct/100),
+   info.loadGuard?roundTo(main*bridgeCaps[i],step):main-(4-i)*step)),
   reps:ASC_WARMUP_REPS[i]
  }));
 }
@@ -1746,7 +1748,7 @@ function renderWorkout(){
  $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
  <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
  ${info.loadGuard?'<p class="tiny" role="status" style="margin:12px 0;color:var(--red2)">'+loadGuardSummary(info)+'</p>':''}
- <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${p.topPct}% of TM · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${p.backPct}% of TM</div>`:''}</div>
+ <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${info.loadGuard?'recovery bridge (standard '+p.topPct+'% TM)':p.topPct+'% of TM'} · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${info.loadGuard?'Recovery bridge (standard '+p.backPct+'% TM)':p.backPct+'% of TM'}</div>`:''}</div>
  <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM${info.loadGuard?' (capped below adjusted main load)':''}. Adjust warm-ups to readiness; they are not working sets.</div>`;
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
 }
@@ -1830,7 +1832,7 @@ function renderCycleLoads(){
    kg(x.topLoad)+' · '+(p.deload?'3×5':'1×'+p.topReps)+actual+bridged+'</td><td>'+
    (x.backLoad===null?'—':kg(x.backLoad)+' · '+p.backSets+'×'+p.backReps)+'</td></tr>';
  }).join('');
- $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr><tbody>'+rows+'</tbody></table></div>'+
+ $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
   (adjustmentNote?'<p class="tiny" role="status" style="margin-top:10px">'+adjustmentNote+'</p>':'')+
   '<p class="tiny" style="margin-top:8px">Past records are shown as logged. Editing your 1RM or TM updates the template, not a completed workout. Future targets may be bridged from actual completed loads to avoid a sudden jump.</p>';
 }

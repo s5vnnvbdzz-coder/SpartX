@@ -22,8 +22,8 @@ assert.equal(data.exerciseNames.filter(x=>x===name).length,1,'Exactly one exerci
 assert(categories.Back.includes(name),'Available in Back tab');
 assert(!categories.Chest?.includes(name),'Not a chest exercise');
 const muscles=data.exerciseMuscles(name);
-assert.deepEqual(muscles.primary,['back'],'Primary back muscles');
-for(const muscle of ['biceps','shoulders','traps','forearms'])
+assert.deepEqual(muscles.primary,['upper_back'],'Primary upper-back muscles');
+for(const muscle of ['lats','biceps','shoulders','traps','forearms'])
  assert(muscles.secondary.includes(muscle),'Secondary '+muscle);
 for(const alias of ['Hammer Strength Iso-Lateral Row','Life Fitness Iso-Lateral Row','Hammer Strength Row'])
  assert.deepEqual(data.exerciseMuscles(alias),muscles,'Brand alias '+alias);

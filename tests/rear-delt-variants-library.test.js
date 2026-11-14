@@ -1,5 +1,5 @@
 /* node tests/rear-delt-variants-library.test.js
- * Check three distinct rear-delt entries and no automatic AscensionX substitutions.
+ * Check three distinct rear-delt entries and the designated AscensionX Iso variant.
  */
 'use strict';
 const assert=require('node:assert/strict');
@@ -35,9 +35,12 @@ assert.deepEqual(info.exerciseMuscles('iso lateral rear delt fly').primary,['sho
  'Iso-lateral search alias resolves correctly');
 assert(info.exerciseNames.includes('Rear Delt Fly')&&info.exerciseNames.includes('Reverse Pec Deck'),
  'Existing exercises remain available');
-assert(adaptive.includes("name:'Rear Delt Fly'"),'Current adaptive plan remains unchanged');
-assert(!variants.some(x=>adaptive.includes("name:'"+x+"'")),
- 'Adding exercise library options should not reprogramme active AscensionX sessions');
+assert(adaptive.includes("name:'Iso Rear Delt Fly'"),
+ 'The active AscensionX programme selects Iso Rear Delt Fly');
+assert(!adaptive.includes("name:'Rear Delt Fly'"),
+ 'The original rear-delt movement is no longer prescribed by AscensionX');
+assert(!variants.slice(0,2).some(x=>adaptive.includes("name:'"+x+"'")),
+ 'The two cable variants stay optional rather than programmed');
 assert(builder.includes("typeof exerciseNames!=='undefined'&&Array.isArray(exerciseNames)"),
  'Programme builder can use updated shared catalogue');
-console.log('PASS: All three rear-delt variations available with shoulder muscle role and searchable aliases.');
+console.log('PASS: Three rear-delt variations in the library; Iso is the current AscensionX programme choice.');

@@ -16,7 +16,7 @@
   ],
   'Bench Press':[
    {name:'Iso-Lateral Row',sets:3,min:8,max:12,rir:3,rest:120,muscles:'upper back',cost:1},
-   {name:'Triceps Pushdown',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Triceps Pushdown (Bar)',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
    {name:'Rear Delt Fly',sets:3,min:12,max:20,rir:3,rest:75,muscles:'shoulder stabilisers',cost:1},
    {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1}
   ],
@@ -29,7 +29,7 @@
   'Overhead Press':[
    {name:'Dumbbell Row',sets:3,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
    {name:'Lateral Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
-   {name:'Triceps Pushdown',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Triceps Pushdown (Bar)',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
    {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
   ]
  };

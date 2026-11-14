@@ -15,7 +15,7 @@
     ],
     'Bench Press':[
       {name:'Iso-Lateral Row',sets:2,min:8,max:12,rir:3,rest:120},
-      {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:90}
+      {name:'Triceps Pushdown (Bar)',sets:2,min:10,max:15,rir:3,rest:90}
     ],
     'Deadlift':[
       {name:'Lat Pulldown',sets:2,min:8,max:12,rir:3,rest:120},
@@ -47,7 +47,7 @@
     'Overhead Press':[
       {name:'Incline Dumbbell Press',sets:2,min:8,max:12,rir:3,rest:120},
       {name:'Dumbbell Row',sets:2,min:8,max:12,rir:3,rest:120},
-      {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Triceps Pushdown (Bar)',sets:2,min:10,max:15,rir:3,rest:75},
       {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75}
     ]
   };
@@ -160,7 +160,7 @@
         {name:'Dumbbell Row',sets:2,min:8,max:12,rir:3,rest:120},
         {name:'Machine Chest Press',sets:2,min:10,max:15,rir:3,rest:90},
         {name:'Lat Pulldown',sets:2,min:10,max:15,rir:3,rest:90},
-        {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+        {name:'Triceps Pushdown (Bar)',sets:2,min:10,max:15,rir:3,rest:75},
         {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75}
       ];
       return upper.map(item=>({...item,sets:week===4?1:item.sets}));
@@ -169,7 +169,7 @@
     // and spinal loading. Heavy compound work belongs to AscensionX.
     const low=[
       {name:'Cable Curl',sets:2,min:10,max:15,rir:3,rest:75},
-      {name:'Triceps Pushdown',sets:2,min:10,max:15,rir:3,rest:75},
+      {name:'Triceps Pushdown (Bar)',sets:2,min:10,max:15,rir:3,rest:75},
       {name:'Pallof Press',sets:2,min:10,max:15,rir:3,rest:75},
       {name:'Seated Calf Raise',sets:2,min:12,max:20,rir:3,rest:75}
     ];

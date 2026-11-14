@@ -64,6 +64,11 @@ assert.equal(fallback.topLoad,165,'Completed SpartanX workout is a valid fallbac
 session.exercises[0].sets[0].done=false;
 assert.equal(reconcile({...values,logs:[],sessions:[session]}).topLoad,180,
  'An incomplete unsynchronised workout cannot affect progression');
+session.exercises[0].sets[0].done=true;
+session.exercises[0].sets[0].weight=155;
+assert.equal(reconcile({...values,logs:[],sessions:[session]}).topLoad,180,
+ 'A deliberately underloaded set cannot falsely qualify as a completed prescription');
+session.exercises[0].sets[0].weight=160;
 const html=fs.readFileSync('AscensionX/index.html','utf8');
 assert(html.includes('SXAscensionLoadGuard?.reconcile('),'Single shared prescription function applies bridge');
 assert(html.includes("const x=prescribed(lift,p.week)"),'View Cycle uses the shared prescription');
@@ -71,4 +76,13 @@ assert(html.includes('const week=currentWeekFor(lift),info=prescribed(lift,week)
  'SpartanX import uses exactly the same prescription');
 assert(html.includes('spartanHistoryForLoadGuard'),'On-device completed workouts provide safety fallback');
 assert(html.includes('loadGuardSummary('),'Preview explains why load is adjusted');
+assert(html.includes('recoveryBridge:info.loadGuard?{'),
+ 'SpartanX import receives its recovery-bridge context');
+assert(html.includes('loadGuard?roundTo(main*bridgeCaps[i],step)'),
+ 'Bridged warmups use submaximal percentages of the actual main load');
+const host=fs.readFileSync('index.html','utf8');
+assert(host.includes('importedTm:Number(d.tm)||null'),
+ 'SpartanX stores the training max used when a workout was imported');
+assert(host.includes('Number(set.weight)>=Number(link.plannedSets[i].weight)-0.01'),
+ 'Completion requires the actual loaded weights, not only correct repetitions');
 console.log('PASS: Exact 160-to-180 deadlift discrepancy is bridged safely and displayed consistently, with immutable history.');

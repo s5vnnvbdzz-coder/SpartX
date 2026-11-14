@@ -48,20 +48,22 @@ assert.equal(api.read(id).focus,'hypertrophy');
 assert.ok(api.schedule().slots[3].exercises.some(ex=>ex.name==='Machine Chest Press'));
 const history={sessions:[{
  date:'2026-11-09T08:00:00Z',
- exercises:[{name:'Chest-Supported Row',sxStrengthSizeCompanion:{cycleId:id,week:2},
+ exercises:[{name:'Iso-Lateral Row',sxStrengthSizeCompanion:{cycleId:id,week:2},
   sets:[{weight:'40',reps:'12',rpe:'6',type:'Working Set',done:true},
         {weight:'40',reps:'12',rpe:'6',type:'Working Set',done:true}]}]
 }]};
 localStorage.setItem('spartx_db',JSON.stringify(history));
 api.save({focus:'strength'});
-assert.ok(api.plan('Bench Press',3).find(e=>e.name==='Chest-Supported Row').suggestedKg>40,
+assert.ok(api.plan('Bench Press',2).some(e=>e.name==='Iso-Lateral Row'),'Bench accessory uses Iso-Lateral Row');
+assert.ok(api.schedule().slots.some(slot=>slot.kind==='support'&&slot.exercises.some(e=>e.name==='Iso-Lateral Row')),'Support day uses Iso-Lateral Row');
+assert.ok(api.plan('Bench Press',3).find(e=>e.name==='Iso-Lateral Row').suggestedKg>40,
  'Advances controlled completed accessory sets only');
 const noAdvance={sessions:[{date:'2026-11-09T09:00:00Z',exercises:[{
- name:'Chest-Supported Row',sxStrengthSizeCompanion:{cycleId:id,week:2},
+ name:'Iso-Lateral Row',sxStrengthSizeCompanion:{cycleId:id,week:2},
  sets:[{weight:'40',reps:'12',rpe:'',type:'Working Set',done:false}]
 }]}]};
 localStorage.setItem('spartx_db',JSON.stringify(noAdvance));
-assert.equal(api.plan('Bench Press',3).find(e=>e.name==='Chest-Supported Row').suggestedKg,null,
+assert.equal(api.plan('Bench Press',3).find(e=>e.name==='Iso-Lateral Row').suggestedKg,null,
  'Incomplete sets never justify progression');
 localStorage.setItem('ascensionx_strength_v1',cycle(['Back Squat','Bench Press','Deadlift','Overhead Press']));
 api.save({days:3});

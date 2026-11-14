@@ -3765,7 +3765,7 @@ function import531IntoWorkout(d){
  }
  const imported={name:d.exercise,rest:120,notes:'Imported from '+source+' · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')'+(d.source==='AscensionX'?' · Target RPE '+d.targetRpe:''),sets:[...warmups.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Warm-up',done:false})),...d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))]};
  if(source==='AscensionX'){
-  imported.ascensionLink={cycleId:d.cycleId,cycleTitle:String(d.cycleTitle||d.cycleName||'').trim().slice(0,75),lift:d.exercise,week:Number(d.week),plannedSets:d.sets.map(x=>({weight:Number(x.weight),reps:Number(x.reps)})),targetRpe:Number(d.targetRpe)||null};
+  imported.ascensionLink={cycleId:d.cycleId,cycleTitle:String(d.cycleTitle||d.cycleName||'').trim().slice(0,75),lift:d.exercise,week:Number(d.week),plannedSets:d.sets.map(x=>({weight:Number(x.weight),reps:Number(x.reps)})),targetRpe:Number(d.targetRpe)||null,importedTm:Number(d.tm)||null,recoveryBridge:d.recoveryBridge||null};
  }
  work.unshift(imported);
  if(source==='AscensionX')ensureAscensionStrengthSizeCompanions(d);
@@ -4176,7 +4176,7 @@ function queueAscensionWorkoutCompletion(savedSession){
   const original=work.find(item=>item.ascensionLink===link);
   const prescribedRows=original?.sets.filter(set=>set.type==='Working Set').slice(0,link.plannedSets.length)||[];
   const setsComplete=working.length===link.plannedSets.length&&prescribedRows.length===link.plannedSets.length&&
-   prescribedRows.every((set,i)=>set.done===true&&Number(set.weight)>0&&Number(set.reps)>=Number(link.plannedSets[i].reps));
+   prescribedRows.every((set,i)=>set.done===true&&Number(set.weight)>=Number(link.plannedSets[i].weight)-0.01&&Number(set.reps)>=Number(link.plannedSets[i].reps));
   packets.push({
    id:'sx:'+String(savedSession.id)+':'+index,sourceSessionId:String(savedSession.id),
    date:savedSession.date,cycleId:link.cycleId,lift:link.lift,week:link.week,

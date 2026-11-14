@@ -184,7 +184,7 @@ test('active AscensionX pushdown rename keeps tracked sets and excludes manual r
  assert.equal(R.renameActiveAscensionPushdowns([{...snapshots[0]}],
   {activeCycle:()=>({id:'different',lifts:['Bench Press']})}),0,'Do not rename another cycle');
 });
-test('active AscensionX programme migrates unfinished Rear Delt Fly to Iso Rear Delt Fly',()=>{
+test('active AscensionX programme migrates unfinished Rear Delt Fly to Rear Delt Reverse Fly',()=>{
  const link={cycleId:'current',lift:'Bench Press',week:2,adaptive:true,
   targetRir:4,repsMin:12,repsMax:20,plannedSets:3};
  const exercise={name:'Rear Delt Fly',notes:'AscensionX Adaptive Programming · Bench Press · Week 2 · 12–20 reps',
@@ -195,15 +195,34 @@ test('active AscensionX programme migrates unfinished Rear Delt Fly to Iso Rear 
  const source=JSON.parse(JSON.stringify(exercise));
  const adaptive={activeCycle:()=>({id:'current',lifts:['Bench Press']}),
   enabled:()=>true,plan:(lift,week)=>lift==='Bench Press'&&week===2?
-   [{name:'Iso Rear Delt Fly',sets:3,min:12,max:20,rir:4}]:[]};
+   [{name:'Rear Delt Reverse Fly',sets:3,min:12,max:20,rir:4}]:[]};
  assert.equal(R.renameActiveAscensionRearDelts([exercise],adaptive),1);
- assert.equal(exercise.name,'Iso Rear Delt Fly');
+ assert.equal(exercise.name,'Rear Delt Reverse Fly');
  assert.deepEqual(exercise.sets,source.sets,'Preserve all active weights/reps/RPE/set count');
  assert.equal(exercise.notes,source.notes,'Preserve AscensionX notes');
  assert.deepEqual(exercise.sxStrengthSizeCompanion,link,'Preserve programme provenance');
  assert.equal(exercise.rest,75,'Preserve rest prescription');
  assert.equal(R.renameActiveAscensionRearDelts([exercise],adaptive),0,
   'Do not rename twice on reload');
+});
+test('already-migrated Iso Rear Delt Fly upgrades to the final programme exercise',()=>{
+ const link={cycleId:'current',lift:'Bench Press',week:2,plannedSets:3,repsMin:12,repsMax:20};
+ const iso={name:'Iso Rear Delt Fly',replacementOf:'Rear Delt Fly',
+  sxStrengthSizeCompanion:link,rest:75,notes:'Custom notes',
+  sets:[{weight:'20',reps:'15',rpe:'7',done:false,type:'Working Set'},
+   {weight:'',reps:'12',rpe:'',done:false,type:'Working Set'}]};
+ const before=JSON.parse(JSON.stringify(iso));
+ const adaptive={activeCycle:()=>({id:'current',lifts:['Bench Press']}),
+  enabled:()=>true,plan:()=>[{name:'Rear Delt Reverse Fly',sets:3,min:12,max:20}]};
+ assert.equal(R.renameActiveAscensionRearDelts([iso],adaptive),1);
+ assert.equal(iso.name,'Rear Delt Reverse Fly');
+ assert.deepEqual(iso.sets,before.sets,'Keep entered weights and reps from existing draft');
+ assert.equal(iso.notes,before.notes);
+ assert.deepEqual(iso.sxStrengthSizeCompanion,link);
+ assert.equal(R.renameActiveAscensionRearDelts([iso],adaptive),0,'Safe if reloaded twice');
+ const completed={...before,sets:[{weight:'20',reps:'15',rpe:'7',done:true,type:'Working Set'}]};
+ assert.equal(R.renameActiveAscensionRearDelts([completed],adaptive),0,
+  'Already performed Iso Rear Delt Fly remains recorded under its real movement name');
 });
 test('programme change does not relabel completed movements or independent workouts',()=>{
  const base={name:'Rear Delt Fly',rest:75,sxStrengthSizeCompanion:{
@@ -219,7 +238,7 @@ test('programme change does not relabel completed movements or independent worko
  const list=[complete,unlinked,otherCycle,userReplaced,mainLift,bodybuilder];
  const before=JSON.stringify(list);
  const adaptive={activeCycle:()=>({id:'current',lifts:['Bench Press']}),
-  enabled:()=>true,plan:()=>[{name:'Iso Rear Delt Fly',sets:3}]};
+  enabled:()=>true,plan:()=>[{name:'Rear Delt Reverse Fly',sets:3}]};
  assert.equal(R.renameActiveAscensionRearDelts(list,adaptive),0);
  assert.equal(JSON.stringify(list),before,
   'Completed sets, historical links, independent and manually substituted work stay untouched');

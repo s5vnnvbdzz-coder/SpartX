@@ -10,6 +10,10 @@
  const oldAdaptiveRow='Chest-Supported Row',newAdaptiveRow='Iso-Lateral Row';
  const isAdaptiveRowSwap=(exercise,nextName)=>!!(exercise?.sxStrengthSizeCompanion||exercise?.sxPowerbuildingSupport)&&
   norm(exercise?.name)===norm(oldAdaptiveRow)&&norm(nextName)===norm(newAdaptiveRow);
+ const pushdownNames=new Set(['Triceps Pushdown','Triceps Pushdown (Bar)','Triceps Pushdown (Rope)'].map(norm));
+ const isAdaptivePushdownSwap=(exercise,nextName)=>
+  !!(exercise?.sxStrengthSizeCompanion||exercise?.sxPowerbuildingSupport)&&
+  pushdownNames.has(norm(exercise?.name))&&pushdownNames.has(norm(nextName));
  function hasRecordedData(exercise){
   return (exercise?.sets||[]).some(s=>s.done===true||
    ['weight','reps','rpe','durationSeconds','distanceKm','floors','steps','calories']
@@ -21,7 +25,7 @@
   const isCardio=!!cardio?.isCardio?.(nextName);
   const wasCardio=!!cardio?.isCardio?.(exercise.name);
   const oldSets=Array.isArray(exercise.sets)?exercise.sets:[];
-  const keepAdaptivePrescription=!isCardio&&isAdaptiveRowSwap(exercise,nextName);
+  const keepAdaptivePrescription=!isCardio&&(isAdaptiveRowSwap(exercise,nextName)||isAdaptivePushdownSwap(exercise,nextName));
   // Preserve the planned number/type of sets for strength-to-strength swaps,
   // but never carry recorded performance over to the new movement.
   const sets=isCardio?[cardio.blank()]:wasCardio?
@@ -120,5 +124,28 @@
   }
   return changed;
  }
- global.SpartanXExerciseReplacement=Object.freeze({prepare,hasRecordedData,repairActiveIsoLateralRows});
+ // Update only active AscensionX-linked generic pushdowns to the specific
+ // bar attachment. Preserve every set and programme link by renaming in place.
+ // Historical sessions and unlinked/manual movements remain unchanged.
+ function renameActiveAscensionPushdowns(work,adaptive){
+  if(!Array.isArray(work))return 0;
+  let cycle=null;
+  try{cycle=adaptive?.activeCycle?.()}catch(_){}
+  if(!cycle?.id)return 0;
+  let changed=0;
+  for(const exercise of work){
+   if(!exercise||norm(exercise.name)!==norm('Triceps Pushdown')||
+      clean(exercise.replacementOf)||exercise.ascensionLink)continue;
+   const linked=exercise.sxStrengthSizeCompanion||exercise.sxPowerbuildingSupport;
+   const week=Number(linked?.week);
+   if(!linked||linked.cycleId!==cycle.id||!Number.isInteger(week)||week<1||week>6)continue;
+   if(exercise.sxStrengthSizeCompanion){
+    if(!Array.isArray(cycle.lifts)||!cycle.lifts.includes(linked.lift))continue;
+   }else if(!clean(linked.day))continue;
+   exercise.name='Triceps Pushdown (Bar)';
+   changed++;
+  }
+  return changed;
+ }
+ global.SpartanXExerciseReplacement=Object.freeze({prepare,hasRecordedData,repairActiveIsoLateralRows,renameActiveAscensionPushdowns});
 })(window);

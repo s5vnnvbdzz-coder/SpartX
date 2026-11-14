@@ -33,14 +33,18 @@ assert.ok(['Bench Press','Overhead Press'].every(lift=>
 assert.ok(['Bench Press','Overhead Press'].every(lift=>
  !api.LIB[lift].some(ex=>ex.name==='Triceps Pushdown')),
  'Do not reintroduce ambiguous triceps pushdown names');
-const isoRear=api.LIB['Bench Press'].find(e=>e.name==='Iso Rear Delt Fly');
-assert.ok(isoRear,'Bench programme now prescribes Iso Rear Delt Fly');
-assert.equal(isoRear.sets,3,'Iso rear-delt prescription retains three sets');
-assert.equal(isoRear.min,12,'Iso rear-delt reps start at twelve');
-assert.equal(isoRear.max,20,'Iso rear-delt reps max at twenty');
-assert.ok(!api.LIB['Bench Press'].some(e=>e.name==='Rear Delt Fly'),'Old programme selection retired');
-assert.ok(api.plan('Bench Press',2).some(e=>e.name==='Iso Rear Delt Fly'),'Active week uses new exercise');
-assert.ok(api.plan('Bench Press',6).every(e=>e.name!=='Iso Rear Delt Fly'),'Week six stays deload');
+const rearDelt=api.LIB['Bench Press'].find(e=>e.name==='Rear Delt Reverse Fly');
+assert.ok(rearDelt,'Bench programme prescribes Rear Delt Reverse Fly');
+assert.equal(rearDelt.sets,3,'Reverse fly prescription retains three sets');
+assert.equal(rearDelt.min,12,'Reverse fly reps start at twelve');
+assert.equal(rearDelt.max,20,'Reverse fly reps max at twenty');
+assert.ok(!api.LIB['Bench Press'].some(e=>
+ ['Rear Delt Fly','Iso Rear Delt Fly'].includes(e.name)),
+ 'Older rear-delt variants are no longer prescribed');
+assert.ok(api.plan('Bench Press',2).some(e=>e.name==='Rear Delt Reverse Fly'),
+ 'Active week uses new exercise');
+assert.ok(api.plan('Bench Press',6).every(e=>e.name!=='Rear Delt Reverse Fly'),
+ 'Week six stays deload');
 const deadlift=api.plan('Deadlift',2);
 assert.ok(deadlift.length>=2);
 assert.ok(deadlift.every(e=>e.sets===3),'Deadlift support defaults to three sets in a standard week');

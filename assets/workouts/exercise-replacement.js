@@ -147,5 +147,41 @@
   }
   return changed;
  }
- global.SpartanXExerciseReplacement=Object.freeze({prepare,hasRecordedData,repairActiveIsoLateralRows,renameActiveAscensionPushdowns});
+ // Apply the current cycle's rear-delt PROGRAMME change to an active
+ // imported AscensionX supporting exercise. The completed-set guard prevents
+ // changing a logged different movement into an Iso Rear Delt Fly.
+ function renameActiveAscensionRearDelts(work,adaptive){
+  if(!Array.isArray(work))return 0;
+  let cycle=null;
+  try{cycle=adaptive?.activeCycle?.()}catch(_){}
+  if(!cycle?.id||!Array.isArray(cycle.lifts))return 0;
+  let changed=0;
+  for(const exercise of work){
+   if(!exercise||norm(exercise.name)!==norm('Rear Delt Fly')||
+      clean(exercise.replacementOf)||exercise.ascensionLink||exercise.bodybuildingLink)continue;
+   const link=exercise.sxStrengthSizeCompanion;
+   const week=Number(link?.week);
+   if(!link||link.cycleId!==cycle.id||!cycle.lifts.includes(link.lift)||
+      !Number.isInteger(week)||week<1||week>6)continue;
+   // Programme change applies only if this is truly the planned accessory
+   // for the lift/week, and adaptive support remains enabled.
+   let prescription=null;
+   try{
+    if(!adaptive?.enabled?.(cycle.id))continue;
+    prescription=adaptive.plan(link.lift,week).find(p=>norm(p.name)===norm('Iso Rear Delt Fly'));
+   }catch(_){continue}
+   if(!prescription)continue;
+   // Never relabel performed Rear Delt Fly sets as a different machine.
+   if((exercise.sets||[]).some(set=>set?.done===true))continue;
+   exercise.name='Iso Rear Delt Fly';
+   // Existing prescribed/entered sets, rest, notes and links stay intact.
+   // Loads for the new machine are NOT inferred from prior rear-delt history.
+   changed++;
+  }
+  return changed;
+ }
+ global.SpartanXExerciseReplacement=Object.freeze({
+  prepare,hasRecordedData,repairActiveIsoLateralRows,
+  renameActiveAscensionPushdowns,renameActiveAscensionRearDelts
+ });
 })(window);

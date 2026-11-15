@@ -37,7 +37,10 @@ body[data-sx-theme] :is(
  .kpi,.workload-hero,.muscle-card,
  .sx-cycle-setup-section,.asc-programme-panel,.sx-adaptive-details,
  .sx-cycle-view-overview,.sx-overview-lift-card,
- .sx-overview-supporting-training,.sx-bb-card,.sx-bb-panel
+ .sx-overview-supporting-training,.sx-bb-card,.sx-bb-panel,
+ .plate-setting,.plate-diagram-wrap,.cycle-detail,
+ .rest-panel,.sx-body-map-panel,.sx-calendar-day-details,
+ .set-type-sheet-panel,.workout-feed-card--profile
 ){
  background:var(--sx-card-gradient)!important;
  background-color:var(--panel)!important;

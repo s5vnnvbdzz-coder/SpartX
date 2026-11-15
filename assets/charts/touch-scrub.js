@@ -7,7 +7,7 @@
  const chartSelectors=[
   '.performance-chart','.history-chart-wrap','#exerciseHistoryCharts',
   '.sx-exercise-chart','.sx-session-trend-chart','#trainingRadar',
-  '.chart-wrap','.chart-container','.chart-frame','.chart-surface',
+  '#performanceChart','#overviewStrengthChart','.large-chart','.chart-wrap','.chart-container','.chart-frame','.chart-surface',
   '.sx-intel-chart','.trend-chart','.chart-area','.chart','.performance-chart-wrap'
  ].join(',');
  let active=null;
@@ -31,7 +31,8 @@
    node.querySelector('title')?.textContent?.trim()||'Data point';
  }
  function containerFor(svg){
-  return svg.closest(chartSelectors)||svg.parentElement;
+  const match=svg.closest(chartSelectors);
+  return match===svg?svg.parentElement:match||svg.parentElement;
  }
  function clear(){
   if(!active)return;
@@ -53,7 +54,7 @@
   tooltip.textContent=labelFor(node);
   tooltip.hidden=false;
   tooltip.style.left=Math.max(48,Math.min(r.width-48,b.left+b.width/2-r.left))+'px';
-  tooltip.style.top=Math.max(18,b.top-r.top-11)+'px';
+  tooltip.style.top=Math.max(42,b.top-r.top-11)+'px';
  }
  function start(event){
   if(event.button!=null&&event.button!==0)return;

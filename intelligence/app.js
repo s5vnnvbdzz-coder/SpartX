@@ -227,9 +227,11 @@
     }).join('');
     const first=new Date(records[0].date),last=new Date(records.at(-1).date);
     const label=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const dots=records.slice(-1).map((r,i)=>'<circle cx="'+xx(records.length-1)+'" cy="'+yy(r.max)+'" r="5.5" fill="#f4cd37" stroke="#181a1d" stroke-width="3"/>').join('');
-    const grid='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Estimated one rep max, from '+format(min,1)+' to '+format(max,1)+' kilograms"><defs><linearGradient id="'+(large?'strengthFillLarge':'strengthFillSmall')+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f4cd37" stop-opacity=".23"/><stop offset="100%" stop-color="#f4cd37" stop-opacity="0"/></linearGradient></defs>'+guides+
-    '<path d="'+fill+'" fill="url(#'+(large?'strengthFillLarge':'strengthFillSmall')+')"/><path d="'+path+'" fill="none" stroke="#f4cd37" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+
+    const dots=records.map((r,i)=>'<circle cx="'+xx(i).toFixed(1)+'" cy="'+yy(r.max).toFixed(1)+
+      '" r="'+(i===records.length-1?'5.5':'3.2')+'" fill="var(--lime,#f4cd37)" stroke="var(--panel,#181a1d)" stroke-width="2">'+
+      '<title>'+label(new Date(r.date))+' · '+format(r.max,1)+' kg estimated 1RM</title></circle>').join('');
+    const grid='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Estimated one rep max, from '+format(min,1)+' to '+format(max,1)+' kilograms"><defs><linearGradient id="'+(large?'strengthFillLarge':'strengthFillSmall')+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lime,#f4cd37)" stop-opacity=".23"/><stop offset="100%" stop-color="var(--lime,#f4cd37)" stop-opacity="0"/></linearGradient></defs>'+guides+
+    '<path d="'+fill+'" fill="url(#'+(large?'strengthFillLarge':'strengthFillSmall')+')"/><path d="'+path+'" fill="none" stroke="var(--lime,#f4cd37)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+
     '<text x="'+padLeft+'" y="'+(height-9)+'" fill="#898e96" font-size="10">'+label(first)+'</text><text x="'+(width-padRight)+'" y="'+(height-9)+'" fill="#898e96" font-size="10" text-anchor="end">'+label(last)+'</text></svg>';
     return grid;
   }

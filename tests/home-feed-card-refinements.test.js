@@ -16,7 +16,7 @@ const doc={hidden:true,addEventListener:(name,handler)=>{listeners[name]=handler
 const pr={squat:150,bench:100,deadlift:160};
 const helper=new Function('document','getCompoundBest','kg','Math',
  html.slice(start,end)+'\nreturn {text:sxCompoundSpotlightText,rotate:sxRotateCompoundSpotlight,index:()=>sxCompoundSpotlightIndex};')
- (doc,k=>pr[k],v=>v+' kg',{random:()=>0});
+ (doc,k=>pr[k],v=>v+' kg',{random:()=>0,floor:Math.floor});
 assert.equal(helper.text(),'SQUAT · 150 kg','Initial spotlight selects one compound');
 assert.equal(helper.index(),0);
 assert(typeof listeners.visibilitychange==='function','App foreground is observed');

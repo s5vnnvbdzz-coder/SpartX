@@ -41,8 +41,12 @@ for(const property of ['background:transparent!important','border:0!important',
 }
 assert(css.includes('button[data-sx-social-jump]'),'Style applies only to social buttons');
 assert(css.includes('#workoutFeed'),'Avoid removing containers in other social views');
-assert.equal((html.match(/class="secondary small feed-view-button feed-expand"/g)||[]).length,2,
- 'The expander shares exactly the View Workout button styling in both feed modes');
+assert.equal((html.match(/class="secondary small feed-view-button" data-feed-toggle/g)||[]).length,2,
+ 'Both expansion buttons use the exact rounded View Workout button classes');
+assert.equal((html.match(/class="secondary small feed-view-button" data-feed-view/g)||[]).length,2,
+ 'Both View Workout buttons have identical classes');
+assert(!html.includes('class="secondary small feed-view-button feed-expand"'),
+ 'Legacy .feed-expand border-radius:0 no longer applies');
 assert(html.includes("button.setAttribute('aria-expanded',String(!expanded))"),
  'The expanded state is updated for assistive technology');
 assert(html.includes("extra.children.length===1?'EXERCISE':'EXERCISES'"),

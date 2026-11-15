@@ -1,0 +1,119 @@
+/* SpartanX Unified Surface System v340
+   Identical top-right → bottom-left card direction throughout main pages,
+   secondary pages, AscensionX, Tools and Intelligence. Hue follows the
+   shared palette; card containers keep a consistent theme-tinted surface.
+*/
+body{
+ --sx-card-border:color-mix(in srgb,var(--lime) 12%,var(--line));
+ --sx-card-gradient:linear-gradient(225deg,
+  color-mix(in srgb,var(--lime) 6%,var(--panel2)) 0%,
+  var(--panel) 43%,
+  color-mix(in srgb,var(--bg) 24%,var(--panel)) 100%);
+ --sx-card-shadow:inset 0 1px 0 color-mix(in srgb,var(--txt) 5%,transparent),
+  0 8px 22px color-mix(in srgb,#000 20%,transparent);
+}
+body[data-sx-theme="light"],body.spartanx-light{
+ --sx-card-border:color-mix(in srgb,var(--line) 92%,var(--lime));
+ --sx-card-shadow:inset 0 1px 0 #ffffffb9,0 5px 18px #1b263010;
+}
+body[data-sx-theme="sx-obsidian-white"],body.sx-obsidian-white{
+ --sx-card-border:#303137;
+ --sx-card-gradient:linear-gradient(225deg,#202126 0%,#111215 41%,#090a0c 100%);
+ --sx-card-shadow:inset 0 1px 0 #ffffff0c,0 9px 24px #0008;
+}
+body[data-sx-theme="sx-cyberpunk"],body.sx-cyberpunk{
+ --sx-card-border:#30454b;
+ --sx-card-gradient:linear-gradient(225deg,#19272d 0%,#111a20 46%,#0a1117 100%);
+ --sx-card-shadow:inset 0 1px 0 #9fcacf0c,0 8px 23px #0008;
+}
+body :is(
+ .card,.exercise-card,.detail-panel,.custom-exercise-box,
+ .profile-identity,.sx-gamer-card,.session-clock-card,
+ .history-chart-card,.performance-card,.stat,.library-record,
+ .history-chart-wrap,.muscle-breakdown-item,
+ .dashboard-card,.goal-card,.metric-card,.insight-card,
+ .programme-card,.week-card,.week-card-content,
+ .hero,.hero-card,.progress-card,.panel,.chart-card,
+ .kpi,.workload-hero,.muscle-card,
+ .sx-cycle-setup-section,.asc-programme-panel,.sx-adaptive-details,
+ .sx-cycle-view-overview,.sx-overview-lift-card,
+ .sx-overview-supporting-training,.sx-bb-card,.sx-bb-panel
+){
+ background:var(--sx-card-gradient)!important;
+ background-color:var(--panel)!important;
+ border-color:var(--sx-card-border)!important;
+ box-shadow:var(--sx-card-shadow);
+}
+/* Nested sections are the same surface family rather than unrelated
+   charcoal / tinted container boxes. Keep distinct controls and charts. */
+body :is(.card,.exercise-card,.panel,.detail-panel) :is(
+ .stat,.metric-card,.week-card,.kpi,.library-record,.muscle-breakdown-item
+){background:var(--sx-card-gradient)!important;border-color:var(--sx-card-border)!important;}
+body :is(.card,.exercise-card,.detail-panel,.panel) :is(
+ input:not([type="checkbox"]):not([type="radio"]),
+ textarea,select
+){border-color:var(--line)}
+/* Consistent depth and radius even when a legacy theme declares its own
+   multi-direction wash. Do not alter exercise completion indicators. */
+body :is(.card,.exercise-card,.detail-panel,.programme-card,.panel){
+ border-radius:16px;
+}
+body :is(.sx-energy-start-card,.sx-social-home,.profile-identity){
+ background:var(--sx-card-gradient)!important;
+ border-color:var(--sx-card-border)!important;
+}
+/* Keep the mobile dock at the true screen bottom. Reduce unused vertical
+   padding without reducing the four touch targets below 44 CSS pixels. */
+@media(max-width:780px){
+ body:has(>#trackerNav){padding-bottom:calc(59px + env(safe-area-inset-bottom,0px))!important}
+ body #trackerNav{
+  inset:auto 0 0 0!important;
+  padding:3px 5px calc(2px + env(safe-area-inset-bottom,0px))!important;
+  gap:3px!important;
+  min-height:0!important;
+ }
+ body #trackerNav button{
+  min-height:44px!important;
+  height:44px!important;
+  padding:3px 2px!important;
+  margin:0 1px!important;
+  gap:1px!important;
+  border-radius:9px!important;
+ }
+ body #trackerNav button .sx-nav-icon{width:21px!important;min-height:20px!important;height:20px!important}
+ body #trackerNav button .sx-nav-svg{height:19px!important;width:19px!important}
+ body #trackerNav button span{font-size:8px!important;line-height:1.1!important;letter-spacing:.28px!important}
+ body .minimized-session,body .sx-minimized-session{
+  bottom:calc(57px + env(safe-area-inset-bottom,0px))!important;
+ }
+ body.sx-theme-child>nav[aria-label="Main navigation"]:not([hidden]){
+  padding:3px 6px calc(3px + env(safe-area-inset-bottom,0px))!important;
+  gap:4px!important;
+ }
+ body.sx-theme-child>nav[aria-label="Main navigation"] button{
+  min-height:44px!important;padding:3px 2px!important;
+  margin:0 1px!important;gap:2px!important;font-size:8px!important;
+ }
+ body.sx-theme-child>nav[aria-label="Main navigation"] .sx-nav-svg{
+  width:19px!important;height:19px!important;
+ }
+}
+/* Interactive SVG charts receive their own unobtrusive tooltip, not an
+   opaque card overlay that obscures the plot or scrolls the page. */
+.sx-chart-scrub-target{position:relative;touch-action:pan-y}
+.sx-chart-scrub-target svg{touch-action:pan-y}
+.sx-chart-scrub-tooltip{
+ position:absolute;z-index:9;pointer-events:none;
+ max-width:min(235px,85%);min-width:90px;
+ padding:7px 9px;border:1px solid var(--sx-card-border,var(--line));
+ border-radius:9px;background:var(--panel);color:var(--txt);
+ box-shadow:0 5px 18px #0008;font:600 11px/1.4 system-ui,sans-serif;
+ white-space:normal;overflow-wrap:anywhere;
+ transform:translate(-50%,-100%);
+}
+.sx-chart-scrub-tooltip[hidden]{display:none!important}
+.sx-chart-scrub-active{stroke:var(--lime)!important;stroke-width:3!important;filter:drop-shadow(0 0 4px var(--lime));}
+.sx-chart-scrub-line{stroke:var(--lime);stroke-width:1;stroke-dasharray:3 4;opacity:.6;pointer-events:none}
+@media(prefers-reduced-motion:reduce){
+ .sx-chart-scrub-active{filter:none!important}
+}

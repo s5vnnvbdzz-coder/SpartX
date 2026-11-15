@@ -51,5 +51,5 @@ assert(html.includes("button.setAttribute('aria-expanded',String(!expanded))"),
  'The expanded state is updated for assistive technology');
 assert(html.includes("extra.children.length===1?'EXERCISE':'EXERCISES'"),
  'Singular exercise label is grammatical');
-assert(html.includes('feed-card-refinements.css?v=341'),'Dedicated feed styles are loaded');
+assert(html.includes('feed-card-refinements.css?v=342'),'Dedicated feed styles are loaded');
 console.log('PASS: PR rotates squat / bench / deadlift on app foreground; social links and CTA parity retained.');

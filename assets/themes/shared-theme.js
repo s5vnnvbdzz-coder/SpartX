@@ -1,4 +1,4 @@
-/* SpartanX Shared Theme Bridge v329
+/* SpartanX Shared Theme Bridge v340
  * One palette contract for Tracker, Settings, AscensionX, Intelligence,
  * and embedded 5/3/1 / Tools. No polling or data migration.
  */
@@ -22,6 +22,7 @@
   'premium-olympus':['#090c14','#111824','#1a2534','#a68043','#fff9ed','#c1bba9','#ffd376'],
   'sx-black-yellow':['#050505','#111113','#202024','#40371e','#f4f1e7','#beb7a3','#f4cd37'],
   'sx-obsidian-white':['#030303','#0b0b0b','#171717','#333333','#f0f0f0','#999999','#dfdfdf'],
+  'sx-cyberpunk':['#080d12','#111a20','#1b2930','#30434b','#e8f3f3','#98aeb4','#82c5cd'],
   'cosmic-nebula':['#070919','#12162c','#202644','#6367a0','#f2f5ff','#afb9d8','#8bdcff'],
  };
  const accepted=Object.keys(palette);

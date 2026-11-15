@@ -1,9 +1,9 @@
-/* SpartanX Obsidian White · TEST
-   Monster-derived effects with pure black surfaces and quiet white accents.
-   Intentionally opt-in: existing Monster/premium themes remain unchanged. */
+/* SpartanX Obsidian White · REFINED v340
+   Deep graphite surfaces, precise silver outlines and one shared diagonal
+   gradient across primary cards and secondary pages. */
 body.sx-obsidian-white{
- --bg:#030303;--panel:#0b0b0b;--panel2:#171717;
- --line:#333333;--txt:#f0f0f0;--muted:#999999;--lime:#dfdfdf;
+ --bg:#050506;--panel:#101114;--panel2:#1a1c21;
+ --line:#35383f;--txt:#f1f3f5;--muted:#a3a6ad;--lime:#d9dee4;
  background:radial-gradient(ellipse at 92% 0%,#ffffff0b,transparent 46%),
             linear-gradient(155deg,#030303,#080808 45%,#000000)!important;
  background-attachment:fixed!important;
@@ -22,12 +22,12 @@ body.sx-obsidian-white .exercise-card,
 body.sx-obsidian-white .detail-panel,
 body.sx-obsidian-white .sx-gamer-card,
 body.sx-obsidian-white .stat{
- background:linear-gradient(220deg,#191919 0%,#111111 23%,#090909 68%,#050505 100%)!important;
- border-color:#343434!important;
+ background:var(--sx-card-gradient,linear-gradient(225deg,#202126,#111215 43%,#090a0c))!important;
+ border-color:var(--sx-card-border,#343434)!important;
  box-shadow:inset 0 1px 0 #ffffff09,0 6px 24px #00000048;
 }
 body.sx-obsidian-white .sx-energy-start-card{
- background:linear-gradient(145deg,#1c1c1c,#0b0b0b 54%,#050505)!important;
+ background:var(--sx-card-gradient,linear-gradient(225deg,#202126,#111215 43%,#090a0c))!important;
 }
 body.sx-obsidian-white button:not(#trackerNav button):not(.danger),
 body.sx-obsidian-white .back-button{
@@ -69,10 +69,10 @@ body.sx-obsidian-white #trackerNav button.active{
 }
 @keyframes sxObsidianIconPulse{
  0%,100%{filter:drop-shadow(0 0 1px #ffffff20)}
- 50%{filter:drop-shadow(0 0 5px #ffffff99)}
+ 50%{filter:drop-shadow(0 0 4px #ffffff5c)}
 }
 body.sx-obsidian-white #trackerNav button .sx-nav-icon{
- animation:sxObsidianIconPulse 2.6s ease-in-out infinite;
+ animation:sxObsidianIconPulse 3.4s ease-in-out infinite;
 }
 body.sx-obsidian-white #trackerNav button.active .sx-nav-icon{animation-duration:2s}
 /* Dark cards with fine moving silver edge; no neon wash. */

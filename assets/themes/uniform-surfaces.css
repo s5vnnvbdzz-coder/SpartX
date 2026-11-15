@@ -109,6 +109,13 @@ body[data-sx-theme] #editProfileOverlay.sx-profile-secondary .detail-panel>.sx-e
 }
 /* Interactive SVG charts receive their own unobtrusive tooltip, not an
    opaque card overlay that obscures the plot or scrolls the page. */
+/* Apply gesture policy before the first touch. Horizontal movement scrubs
+   values; vertical movement still scrolls the page normally. */
+:is(.performance-chart,.history-chart-wrap,#exerciseHistoryCharts,
+ #trainingRadar,.chart-wrap,.large-chart,#performanceChart,
+ .sx-session-trend-chart,.chart-container,.chart-frame,.trend-chart) svg{
+ touch-action:pan-y;cursor:crosshair;
+}
 .sx-chart-scrub-target{position:relative;touch-action:pan-y}
 .sx-chart-scrub-target svg{touch-action:pan-y}
 .sx-chart-scrub-tooltip{

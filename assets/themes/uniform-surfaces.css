@@ -26,7 +26,7 @@ body[data-sx-theme="sx-cyberpunk"],body.sx-cyberpunk{
  --sx-card-gradient:linear-gradient(225deg,#19272d 0%,#111a20 46%,#0a1117 100%);
  --sx-card-shadow:inset 0 1px 0 #9fcacf0c,0 8px 23px #0008;
 }
-body :is(
+body[data-sx-theme] :is(
  .card,.exercise-card,.detail-panel,.custom-exercise-box,
  .profile-identity,.sx-gamer-card,.session-clock-card,
  .history-chart-card,.performance-card,.stat,.library-record,
@@ -46,21 +46,30 @@ body :is(
 }
 /* Nested sections are the same surface family rather than unrelated
    charcoal / tinted container boxes. Keep distinct controls and charts. */
-body :is(.card,.exercise-card,.panel,.detail-panel) :is(
+body[data-sx-theme] :is(.card,.exercise-card,.panel,.detail-panel) :is(
  .stat,.metric-card,.week-card,.kpi,.library-record,.muscle-breakdown-item
 ){background:var(--sx-card-gradient)!important;border-color:var(--sx-card-border)!important;}
-body :is(.card,.exercise-card,.detail-panel,.panel) :is(
+body[data-sx-theme] :is(.card,.exercise-card,.detail-panel,.panel) :is(
  input:not([type="checkbox"]):not([type="radio"]),
  textarea,select
 ){border-color:var(--line)}
 /* Consistent depth and radius even when a legacy theme declares its own
    multi-direction wash. Do not alter exercise completion indicators. */
-body :is(.card,.exercise-card,.detail-panel,.programme-card,.panel){
+body[data-sx-theme] :is(.card,.exercise-card,.detail-panel,.programme-card,.panel){
  border-radius:16px;
 }
-body :is(.sx-energy-start-card,.sx-social-home,.profile-identity){
+body[data-sx-theme] :is(.sx-energy-start-card,.sx-social-home,.profile-identity){
  background:var(--sx-card-gradient)!important;
  border-color:var(--sx-card-border)!important;
+}
+/* Inner cards on the existing profile settings / edit-profile secondary pages
+   used a special reverse gradient. Standardise those too. */
+body[data-sx-theme] #profileSettingsOverlay.sx-profile-secondary .detail-panel>section:not(#sxSettingsSubpage),
+body[data-sx-theme] #editProfileOverlay.sx-profile-secondary .detail-panel>.sx-edit-profile-group{
+ background:var(--sx-card-gradient)!important;
+ background-color:var(--panel)!important;
+ border-color:var(--sx-card-border)!important;
+ box-shadow:var(--sx-card-shadow)!important;
 }
 /* Keep the mobile dock at the true screen bottom. Reduce unused vertical
    padding without reducing the four touch targets below 44 CSS pixels. */

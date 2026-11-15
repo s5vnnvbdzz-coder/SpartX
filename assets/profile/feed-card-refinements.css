@@ -1,0 +1,43 @@
+/* SpartanX Home feed profile-card refinements · v341.
+ * Keep Followers / Following as functioning buttons while removing the
+ * visual containers on the gaming-style profile card ONLY.
+ */
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics{
+ display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+ margin-top:8px;
+}
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump]{
+ appearance:none;
+ background:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ min-width:0!important;
+ min-height:44px!important;
+ padding:6px 4px!important;
+ display:inline-flex;flex-direction:row;align-items:center;justify-content:center;
+ gap:5px;
+ font-size:12px!important;font-weight:700!important;
+ color:var(--txt)!important;
+ -webkit-text-fill-color:var(--txt)!important;
+ text-shadow:none!important;
+}
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump] strong{
+ color:var(--lime)!important;
+ -webkit-text-fill-color:var(--lime)!important;
+ font-size:17px!important;line-height:1.15;font-weight:850!important;
+ font-variant-numeric:tabular-nums;
+}
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump]:focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:2px;border-radius:4px!important;
+}
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump]:active{
+ opacity:.74;
+}
+/* Match the existing View Workout CTA exactly, including its size,
+ * background, typography and spacing. The same classes are used in HTML. */
+body #workoutFeed .feed-expand.feed-view-button{
+ display:block;width:100%;margin:10px 0 0;
+ text-transform:uppercase;
+}

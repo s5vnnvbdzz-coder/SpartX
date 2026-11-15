@@ -34,17 +34,55 @@
   const match=svg.closest(chartSelectors);
   return match===svg?svg.parentElement:match||svg.parentElement;
  }
+ // Use chart axes when present so the guide spans the PLOT rather than
+ // cutting across dates and labels below the graph.
+ function plotBounds(svg){
+  const view=svg.viewBox?.baseVal;
+  const top=view?.y||0,height=view?.height||svg.getBoundingClientRect().height||200;
+  const lines=Array.from(svg.querySelectorAll('line')).map(line=>({
+   x1:Number(line.getAttribute('x1')),x2:Number(line.getAttribute('x2')),
+   y1:Number(line.getAttribute('y1')),y2:Number(line.getAttribute('y2'))
+  })).filter(l=>[l.x1,l.x2,l.y1,l.y2].every(Number.isFinite));
+  const axes=lines.filter(l=>Math.abs(l.x1-l.x2)<.75&&Math.abs(l.y2-l.y1)>height*.35)
+   .sort((a,b)=>Math.abs(b.y2-b.y1)-Math.abs(a.y2-a.y1));
+  if(axes.length)return {top:Math.min(axes[0].y1,axes[0].y2),bottom:Math.max(axes[0].y1,axes[0].y2)};
+  const grid=lines.filter(l=>Math.abs(l.y1-l.y2)<.75&&Math.abs(l.x2-l.x1)>(view?.width||200)*.25)
+   .map(l=>l.y1);
+  if(grid.length>1){
+   const min=Math.min(...grid),max=Math.max(...grid);
+   if(max-min>height*.35)return {top:min,bottom:max};
+  }
+  return {top:top+Math.max(3,height*.04),bottom:top+height-Math.max(10,height*.14)};
+ }
+ function pointX(svg,node){
+  const b=node.getBoundingClientRect(),clientX=b.left+b.width/2,clientY=b.top+b.height/2;
+  // Screen-to-SVG conversion keeps the guide centred in scaled iPhone charts.
+  try{
+   const point=svg.createSVGPoint?.(),matrix=svg.getScreenCTM?.();
+   if(point&&matrix){
+    point.x=clientX;point.y=clientY;
+    const local=point.matrixTransform(matrix.inverse());
+    if(Number.isFinite(local.x))return local.x;
+   }
+  }catch(_){}
+  const rect=svg.getBoundingClientRect(),view=svg.viewBox?.baseVal;
+  return (view?.x||0)+(clientX-rect.left)*(view?.width||rect.width)/Math.max(1,rect.width);
+ }
  function clear(){
   if(!active)return;
   active.highlight?.classList.remove('sx-chart-scrub-active');
+  active.guide?.remove();
   if(active.tooltip)active.tooltip.hidden=true;
   if(active.root)active.root.classList.remove('sx-chart-is-scrubbing');
   active=null;
  }
  function update(clientX){
   if(!active)return;
-  const {points,root,tooltip}=active,node=nearest(points,clientX);
+  const {points,root,tooltip,svg,guide}=active,node=nearest(points,clientX);
   if(!node)return;
+  const x=pointX(svg,node);
+  guide.setAttribute('x1',String(x));
+  guide.setAttribute('x2',String(x));
   if(active.highlight!==node){
    active.highlight?.classList.remove('sx-chart-scrub-active');
    node.classList.add('sx-chart-scrub-active');
@@ -74,7 +112,15 @@
    root.appendChild(tooltip);
   }
   root.classList.add('sx-chart-scrub-target','sx-chart-is-scrubbing');
-  active={pointerId:event.pointerId,svg,root,tooltip,points,highlight:null};
+  const guide=document.createElementNS('http://www.w3.org/2000/svg','line');
+  const bounds=plotBounds(svg);
+  guide.setAttribute('class','sx-chart-scrub-line');
+  guide.setAttribute('aria-hidden','true');
+  guide.setAttribute('y1',String(bounds.top));
+  guide.setAttribute('y2',String(bounds.bottom));
+  guide.style.pointerEvents='none';
+  svg.appendChild(guide);
+  active={pointerId:event.pointerId,svg,root,tooltip,points,guide,highlight:null};
   try{svg.setPointerCapture?.(event.pointerId)}catch(_){}
   update(event.clientX);
  }

@@ -35,9 +35,5 @@ body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-j
 body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump]:active{
  opacity:.74;
 }
-/* Match the existing View Workout CTA exactly, including its size,
- * background, typography and spacing. The same classes are used in HTML. */
-body #workoutFeed .feed-expand.feed-view-button{
- display:block;width:100%;margin:10px 0 0;
- text-transform:uppercase;
-}
+/* Expansion and View Workout share identical button classes and styles.
+ * Avoid .feed-expand's legacy border-radius:0 and transparent background. */

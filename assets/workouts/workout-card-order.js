@@ -24,7 +24,7 @@
  nodes.forEach(({el})=>stack.appendChild(el));
  const bar=document.createElement('div');
  bar.id='sxWorkoutOrderBar';bar.hidden=true;bar.setAttribute('role','group');bar.setAttribute('aria-label','Rearrange Workout cards');
- bar.innerHTML='<span>Hold and drag a card handle to rearrange the order.</span>'+
+ bar.innerHTML='<span>Drag a card by its handle. Swipe elsewhere to scroll.</span>'+
   '<button type="button" id="sxWorkoutOrderCancel">CANCEL</button>'+
   '<button type="button" id="sxWorkoutOrderSave">SAVE</button>';
  stack.before(bar);
@@ -70,12 +70,20 @@
   for(const item of saved.values())stack.appendChild(item);
  }
  try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(Array.isArray(saved))restore(saved)}catch(_){}
- let original=null,dragged=null,pointer=null;
+ let original=null,dragged=null,pointer=null,dragY=0,scrollFrame=0;
+ const scrollOnEdge=()=>{
+  if(!dragged){scrollFrame=0;return;}
+  const edge=95,height=window.innerHeight;
+  const direction=dragY<edge?-1:dragY>height-edge?1:0;
+  if(direction)window.scrollBy({top:direction*Math.max(3,Math.min(16,(direction<0?edge-dragY:dragY-(height-edge))*.18)),behavior:'instant'});
+  scrollFrame=requestAnimationFrame(scrollOnEdge);
+ };
  function setMode(enabled){
   workout.classList.toggle('sx-workout-ordering',enabled);bar.hidden=!enabled;toggle.setAttribute('aria-pressed',String(enabled));
   toggle.setAttribute('aria-label',enabled?'Rearranging Workout cards':'Rearrange Workout cards');
  }
  function finishDrag(){
+  if(scrollFrame){cancelAnimationFrame(scrollFrame);scrollFrame=0;}
   if(dragged)dragged.classList.remove('sx-workout-dragging');
   if(pointer!==null)try{if(stack.hasPointerCapture(pointer))stack.releasePointerCapture(pointer)}catch(_){}
   dragged=null;pointer=null;
@@ -86,12 +94,13 @@
  stack.addEventListener('pointerdown',e=>{
   if(!workout.classList.contains('sx-workout-ordering')||dragged||e.button!==0)return;
   const handle=e.target.closest('[data-workout-drag]');if(!handle)return;
-  e.preventDefault();dragged=handle.closest('.sx-workout-sort-item');pointer=e.pointerId;
+  e.preventDefault();dragged=handle.closest('.sx-workout-sort-item');pointer=e.pointerId;dragY=e.clientY;
   dragged.classList.add('sx-workout-dragging');try{stack.setPointerCapture(pointer)}catch(_){}
+  if(!scrollFrame)scrollFrame=requestAnimationFrame(scrollOnEdge);
  });
  stack.addEventListener('pointermove',e=>{
   if(!dragged||pointer!==e.pointerId)return;
-  e.preventDefault();
+  e.preventDefault();dragY=e.clientY;
   const other=items().find(el=>el!==dragged&&e.clientY<el.getBoundingClientRect().top+el.getBoundingClientRect().height/2);
   if(other)stack.insertBefore(dragged,other);else stack.appendChild(dragged);
  });

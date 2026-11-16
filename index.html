@@ -2371,7 +2371,8 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 <div id="workoutSavedOverlay" class="hidden" role="presentation"><div class="workout-saved-dialog" role="dialog" aria-modal="true" aria-labelledby="workoutSavedTitle"><div class="workout-saved-icon">✓</div><div class="eyebrow">SPARTANX · TRAINING LOG</div><h2 id="workoutSavedTitle">Workout saved!</h2><p id="workoutSavedMessage">Your session has been added to your training history.</p><button type="button" id="workoutSavedClose">CONTINUE</button></div></div>
 <div id="rankUnlockedOverlay" class="hidden" role="presentation"><div class="rank-unlocked-dialog" role="dialog" aria-modal="true" aria-labelledby="rankUnlockedTitle"><div class="eyebrow">SPARTANX · RANK ACHIEVED</div><img id="rankUnlockedBadge" class="rank-unlocked-art" src="./ranks/mortal.svg" alt="New rank badge"><h2 id="rankUnlockedTitle">Rank unlocked!</h2><p id="rankUnlockedMessage"></p><button id="rankUnlockedClose" type="button">CLAIM YOUR RANK</button></div></div>
 <script src="./assets/anatomy/body-map.js?v=337"></script>
-<script src="./assets/exercises/repdb-thumbnails.js"></script>
+<script src="./assets/exercises/repdb-thumbnails.js?v=355"></script>
+<link rel="stylesheet" href="./assets/exercises/exercise-library-recent.css?v=355">
 <style>
 /* Blackout Yellow: full dark palette, restrained gold-yellow details. */
 body.sx-black-yellow{
@@ -3492,10 +3493,12 @@ document.addEventListener('click',event=>{
  if(!anchor)return;
  saveDraft();
  try{
-  sessionStorage.setItem(SX_INTELLIGENCE_RETURN_KEY,JSON.stringify({
-   screen:document.querySelector('main > .screen.active')?.id||'home',
-   at:Date.now()
-  }));
+  const source=document.querySelector('main > .screen.active')?.id||'workout';
+  sessionStorage.setItem(SX_INTELLIGENCE_RETURN_KEY,JSON.stringify({screen:source,at:Date.now()}));
+  sessionStorage.setItem('sx_intelligence_launch_source_v1',source);
+  const destination=new URL(anchor.getAttribute('href'),location.href);
+  destination.searchParams.set('from',source);
+  anchor.href=destination.toString();
  }catch(_){}
  // The rest has not been cancelled. The deadline is still in the draft;
  // the bar simply disappears with the SpartanX page while Intelligence opens.
@@ -4077,6 +4080,53 @@ function openLibrary(replaceAt=null){
  resetLibraryScroll();
  requestAnimationFrame(resetLibraryScroll);
 }
+/* Rank saved completed sets, not exercise names or mere session appearances.
+   The counts refresh from the current saved workout history on every render,
+   so an eleventh Squat set immediately moves Squat above a ten-set Bench. */
+function sxExerciseUsage(){
+ const stats=new Map();
+ for(const [index,session] of (db.sessions||[]).entries()){
+  const when=Date.parse(session.date||session.completedAt||'')||index+1;
+  for(const entry of session.exercises||[]){
+   const name=String(window.SpartanXCardio?.canonical(entry.name)||entry.name||'').trim().toLocaleLowerCase();
+   if(!name)continue;
+   let count=0;
+   for(const set of entry.sets||[]){
+    if(set?.done===false||!isValidTrackedSet(set,entry.name||''))continue;
+    count++;
+   }
+   if(!count)continue;
+   const data=stats.get(name)||{sets:0,last:0};
+   data.sets+=count;data.last=Math.max(data.last,when);
+   stats.set(name,data);
+  }
+ }
+ return stats;
+}
+function sxExerciseUsageData(popularity,name){
+ return popularity.get(String(window.SpartanXCardio?.canonical(name)||name||'').trim().toLocaleLowerCase())||{sets:0,last:0};
+}
+function sxExerciseOrderedList(names,popularity,render){
+ const recent=[],other=[];
+ for(const name of names)(sxExerciseUsageData(popularity,name).sets>0?recent:other).push(name);
+ recent.sort((a,b)=>{
+  const aa=sxExerciseUsageData(popularity,a),bb=sxExerciseUsageData(popularity,b);
+  return bb.sets-aa.sets||bb.last-aa.last||a.localeCompare(b);
+ });
+ other.sort((a,b)=>a.localeCompare(b));
+ return (recent.length?'<div class="sx-exercise-section-label">Recent Exercises</div>'+recent.map(render).join(''):'')+
+ (other.length?'<div class="sx-exercise-section-label">All Exercises</div>'+other.map(render).join(''):'');
+}
+function sxExerciseThumb(name){
+ const image=window.spartanExerciseImage?.(name)||window.spartanExerciseImageFallback||'./assets/exercises/exercise-placeholder.svg';
+ return '<img class="sx-library-exercise-thumb" src="'+esc(image)+'" alt="" loading="lazy" decoding="async">';
+}
+function sxExerciseThumbFallback(e){
+ const img=e.target;
+ if(!(img instanceof HTMLImageElement)||!img.matches('.sx-library-exercise-thumb')||img.dataset.sxFallbackApplied)return;
+ img.dataset.sxFallbackApplied='true';
+ img.src=window.spartanExerciseImageFallback||'./assets/exercises/exercise-placeholder.svg';
+}
 function renderLibrary(){
  const cats=['All',...Object.keys(categories)];
  $('libraryCategories').innerHTML=cats.map(cat=>'<button type="button" class="secondary small '+(libraryCategory===cat?'selected':'')+'" data-library-category="'+esc(cat)+'">'+esc(cat)+'</button>').join('');
@@ -4086,15 +4136,20 @@ function renderLibrary(){
   return (libraryCategory==='All'||categories[libraryCategory]?.includes(name))&&
    (name.toLocaleLowerCase().includes(q)||(exerciseSearchAliases[name]||'').includes(q)||[...muscles.primary,...muscles.secondary].some(m=>m.includes(q)||(MUSCLE_LABELS[m]||'').toLocaleLowerCase().includes(q)));
  });
- $('libraryList').innerHTML=names.map(name=>{
+ const popularity=sxExerciseUsage();
+ $('libraryList').innerHTML=sxExerciseOrderedList(names,popularity,name=>{
   const muscles=exerciseMuscles(name);
+  const sets=sxExerciseUsageData(popularity,name).sets;
   return '<div class="library-item"><button type="button" class="library-pick" data-add-exercise="'+esc(name)+'">'+
+   sxExerciseThumb(name)+'<span class="sx-library-details">'+
    '<span class="library-item-name">'+esc(name)+'</span>'+
    '<span class="library-item-meta">'+(window.SpartanXCardio?.isCardio(name)?'Cardio · '+window.SpartanXCardio.metricName(name,preferences.distance)+', time':'Primary: '+esc(muscleNames(muscles.primary)||'Not classified'))+'</span>'+
    (window.SpartanXCardio?.isCardio(name)?'':'<span class="library-item-meta">Secondary: '+esc(muscleNames(muscles.secondary)||'None listed')+'</span>')+
-   '</button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(name)+'" aria-label="Information and personal records for '+esc(name)+'">🏆</button></div>';
- }).join('')||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';
+   (sets?'<span class="library-item-meta">'+sets+' logged sets</span>':'')+
+   '</span></button><button type="button" class="pr-icon library-info-button" data-pr-exercise="'+esc(name)+'" aria-label="Information and personal records for '+esc(name)+'">🏆</button></div>';
+ })||'<p class="muted tiny">No exercises found. Try another search or add a custom exercise.</p>';
 }
+
 window.chooseLibraryCategory=cat=>{libraryCategory=cat;renderLibrary()};
 window.replaceExercise=i=>{
  if(!sessionActive||libraryMode==='routine'||!Number.isInteger(i)||!work[i])return;
@@ -4213,6 +4268,8 @@ window.addEventListener('pageshow',scheduleSessionSummaryFloat,{passive:true});
 new MutationObserver(scheduleSessionSummaryFloat).observe($('activeWorkout'),{attributes:true,attributeFilter:['class']});
 scheduleSessionSummaryFloat();
 $('librarySearch').addEventListener('input',renderLibrary);
+$('libraryList').addEventListener('error',sxExerciseThumbFallback,true);
+$('exerciseStatsList').addEventListener('error',sxExerciseThumbFallback,true);
 let statsCategory='All';
 function renderExerciseStats(){
  const cats=['All',...Object.keys(categories)];
@@ -4223,14 +4280,17 @@ function renderExerciseStats(){
   return (statsCategory==='All'||categories[statsCategory]?.includes(name))&&
   (name.toLocaleLowerCase().includes(q)||(exerciseSearchAliases[name]||'').includes(q)||[...muscles.primary,...muscles.secondary].some(m=>m.includes(q)||(MUSCLE_LABELS[m]||'').toLowerCase().includes(q)));
  });
- $('exerciseStatsList').innerHTML=names.map(name=>{
+ const popularity=sxExerciseUsage();
+ $('exerciseStatsList').innerHTML=sxExerciseOrderedList(names,popularity,name=>{
   const muscles=exerciseMuscles(name);
-  return '<div class="library-item"><div style="flex:1;min-width:0"><div class="library-item-name">'+esc(name)+'</div>'+
+  const sets=sxExerciseUsageData(popularity,name).sets;
+  return '<div class="library-item"><div class="sx-library-stats-row">'+
+  sxExerciseThumb(name)+'<div class="sx-library-details"><div class="library-item-name">'+esc(name)+'</div>'+
   '<div class="library-item-meta">'+(window.SpartanXCardio?.isCardio(name)?'Cardio · '+window.SpartanXCardio.metricName(name,preferences.distance)+', time':'Primary: '+esc(muscleNames(muscles.primary)))+'</div>'+
   (window.SpartanXCardio?.isCardio(name)?'':'<div class="library-item-meta">Secondary: '+esc(muscleNames(muscles.secondary)||'None listed')+'</div>')+
-  '<div class="library-item-meta">'+exerciseHistoryData(name).length+' logged sessions</div></div>'+
-  '<button type="button" class="pr-icon" data-open-exercise-stats="'+esc(name)+'">VIEW STATS</button></div>';
- }).join('')||'<p class="muted tiny">No matching exercises found.</p>';
+  '<div class="sx-exercise-set-count">'+sets+' logged sets</div></div></div>'+
+  '<button type="button" data-open-exercise-stats="'+esc(name)+'" aria-label="Stats for '+esc(name)+'">STATS</button></div>';
+ })||'<p class="muted tiny">No matching exercises found.</p>';
 }
 $('openExerciseStats').onclick=()=>{statsCategory='All';$('exerciseStatsSearch').value='';renderExerciseStats();switchScreen('exerciseStatsScreen');};$('closeExerciseStats').onclick=()=>returnToScreen('profile');$('exerciseStatsSearch').addEventListener('input',renderExerciseStats);$('exerciseStatsCategories').addEventListener('click',e=>{const b=e.target.closest('[data-stats-category]');if(b){statsCategory=b.dataset.statsCategory;renderExerciseStats();}});$('exerciseStatsList').addEventListener('click',e=>{const b=e.target.closest('[data-open-exercise-stats]');if(b){exerciseHistoryReturn='exerciseStatsScreen';renderExerciseHistory(b.dataset.openExerciseStats);switchScreen('exerciseHistoryScreen');}});
 $('openMuscleDiagram').onclick=()=>$('muscleOverlay').classList.remove('hidden');$('closeMuscleDiagram').onclick=()=>$('muscleOverlay').classList.add('hidden');$('closePr').onclick=()=>$('prOverlay').classList.add('hidden');const customExerciseDialog=$('customExerciseDialog');
@@ -4382,16 +4442,19 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
   const raw=sessionStorage.getItem(SX_INTELLIGENCE_RETURN_KEY);
   if(raw){const parsed=JSON.parse(raw);if(parsed?.at&&Date.now()-parsed.at<3600000)context=parsed}
  }catch(_){}
- const fromIntelligence=new URLSearchParams(location.search).get('sxReturn')==='intelligence';
+ const query=new URLSearchParams(location.search);
+ const fromIntelligence=query.get('sxReturn')==='intelligence';
+ const sourceHint=query.get('sxFrom');
+ const source=fromIntelligence&&['home','workout','activeWorkout','profile','tools'].includes(sourceHint)?sourceHint:null;
  if(!fromIntelligence&&!context)return;
  try{sessionStorage.removeItem(SX_INTELLIGENCE_RETURN_KEY)}catch(_){}
+ const original=source||context?.screen||(sessionActive?'activeWorkout':'workout');
  if(sessionActive&&editingSessionId===null){
-  const original=typeof context?.screen==='string'?context.screen:'activeWorkout';
-  const target=activeRestExercise!==null?'activeWorkout':
-    document.getElementById(original)?.classList.contains('screen')?original:'activeWorkout';
+  const target=source|| (activeRestExercise!==null?'activeWorkout':
+    document.getElementById(original)?.classList.contains('screen')?original:'activeWorkout');
   switchScreen(target,{instant:true});
- }else if(context?.screen&&document.getElementById(context.screen)?.classList.contains('screen')){
-  switchScreen(context.screen,{instant:true});
+ }else if(document.getElementById(original)?.classList.contains('screen')){
+  switchScreen(original,{instant:true});
  }
  if(fromIntelligence){
   try{history.replaceState(null,'',location.pathname+location.hash)}catch(_){}
@@ -4621,7 +4684,7 @@ document.addEventListener('keydown',e=>{
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=352',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=326"></script>
-<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=352"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=317"></script>
+<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=355"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=317"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -5005,7 +5068,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 })();
 </script>
 <script src="./assets/workouts/531-cycle-flow.js?v=317"></script>
-<script src="./assets/workouts/workout-card-order.js?v=317"></script>
+<script src="./assets/workouts/workout-card-order.js?v=355"></script>
 <script id="sx-programme-setup-actions">
 (()=>{
  document.getElementById("sxHeaderAscensionX")?.addEventListener("click",()=>{

@@ -77,7 +77,12 @@ function imageElement(name,extraClass=''){
 function decorateLibrary(){
  const host=el('libraryList');if(!host)return;
  host.querySelectorAll('.library-pick[data-add-exercise]').forEach(button=>{
-  if(button.classList.contains('sx-illustrated-library-pick'))return;
+  // The current Exercise Library already renders its own thumbnail. Do not
+  // add a second RepDB image when the All/category button calls this wrapper.
+  // Search-input rendering also uses the native thumbnail, so both paths
+  // must result in exactly one image per exercise.
+  if(button.classList.contains('sx-illustrated-library-pick')||
+     button.querySelector('img.sx-library-exercise-thumb, img.sx-exercise-thumb'))return;
   const name=button.dataset.addExercise;
   const copy=document.createElement('span');copy.className='sx-library-copy';
   while(button.firstChild)copy.appendChild(button.firstChild);
@@ -112,7 +117,9 @@ function decorateFeed(){
 function decorateExerciseStats(){
  const host=el('exerciseStatsList');if(!host)return;
  host.querySelectorAll('.library-item').forEach(row=>{
-  if(row.querySelector('img.sx-exercise-thumb'))return;
+  // Profile > Exercises now contains a native thumbnail as well. Keep it
+  // instead of prepending another image on initial render or filter change.
+  if(row.querySelector('img.sx-exercise-thumb, img.sx-library-exercise-thumb'))return;
   const name=row.querySelector('.library-item-name')?.textContent;
   if(!name)return;
   const art=imageElement(name);art.style.cssText='width:52px;height:52px;margin-right:9px';

@@ -172,4 +172,82 @@ assert.ok(ascHtml.includes("if(returnToSpartanX){\n  try{window.parent.postMessa
  'Only Workout Manage Cycle exits all the way back to SpartanX');
 
 
+// Regression: the fourth training day must be selected AFTER Deadlift and
+// BEFORE Squat of the following week, without changing main-lift week counters.
+const week2Completed=['Back Squat','Bench Press','Deadlift'].map(lift=>({
+ lift,cycleId:id,week:2,setsComplete:true,date:'2026-11-12T10:00:00.000Z'
+}));
+const nextWeekCycle=JSON.stringify({
+ cycle:{created:id,exercises:['Back Squat','Bench Press','Deadlift'],
+  weeks:{'Back Squat':3,'Bench Press':3,Deadlift:3},currentWeek:3},
+ logs:week2Completed
+});
+const next=boot({'ascensionx_strength_v1':nextWeekCycle});
+next.api.save({enabled:true,days:4,focus:'strength'});
+const fourth=next.api.pendingSupportDay();
+assert.equal(fourth?.kind,'support');
+assert.equal(fourth?.week,2,'Day 4 belongs to the just-finished Week 2');
+assert.equal(fourth?.index,3,'Day 4 follows three main strength sessions');
+assert.equal(fourth?.day,'SAT');
+assert.equal(next.api.schedule().week,2,'Support prescription must not jump to Week 3');
+assert.deepEqual(Array.from(next.api.schedule().slots.slice(0,3).map(x=>x.week)),[3,3,3],
+ 'Main lift prescriptions stay at Week 3');
+const allSupport=next.api.schedule().slots[3].exercises.map(ex=>({
+ name:ex.name,
+ sxPowerbuildingSupport:{cycleId:id,week:2,day:'SAT'},
+ sets:Array.from({length:ex.sets},()=>({weight:35,reps:12,done:true}))
+}));
+const incompleteSupport=allSupport.map((ex,i)=>({
+ ...ex,sets:i===0?ex.sets.slice(0,1):ex.sets
+}));
+next.localStorage.setItem('spartx_db',JSON.stringify({
+ sessions:[{date:'2026-11-13T11:00:00.000Z',exercises:incompleteSupport}]
+}));
+assert.equal(next.api.pendingSupportDay()?.week,2,
+ 'A partially saved support session must remain next');
+next.localStorage.setItem('spartx_db',JSON.stringify({
+ sessions:[{date:'2026-11-13T11:00:00.000Z',exercises:allSupport}]
+}));
+assert.equal(next.api.pendingSupportDay(),null,'Once Day 4 is completed, advance to next Squat');
+assert.equal(next.api.schedule().week,3,
+ 'Only after logging Day 4 should the support prescription reflect Week 3');
+assert.equal(next.localStorage.getItem('ascensionx_strength_v1'),nextWeekCycle,
+ 'Day selection must not rewrite or advance the actual cycle');
+next.localStorage.setItem('spartx_db',JSON.stringify({
+ sessions:[{date:'2026-11-13T11:00:00.000Z',exercises:allSupport.map(ex=>({
+  ...ex,sxPowerbuildingSupport:{...ex.sxPowerbuildingSupport,cycleId:'old-cycle'}
+ }))}]
+}));
+assert.equal(next.api.pendingSupportDay()?.week,2,'Prior-cycle support must not count');
+next.api.save({days:3});
+assert.equal(next.api.pendingSupportDay(),null,'Three-day programmes have no fourth support day');
+next.api.save({days:4,enabled:false});
+assert.equal(next.api.pendingSupportDay(),null,'Disabled Adaptive Programming has no support day');
+const allFour=boot({'ascensionx_strength_v1':JSON.stringify({
+ cycle:{created:id,exercises:['Back Squat','Bench Press','Deadlift','Overhead Press'],
+  weeks:{'Back Squat':3,'Bench Press':3,Deadlift:3,'Overhead Press':3},currentWeek:3},
+ logs:[...week2Completed,{lift:'Overhead Press',cycleId:id,week:2,setsComplete:true}]
+})});
+allFour.api.save({enabled:true,days:4});
+assert.equal(allFour.api.pendingSupportDay(),null,
+ 'Four actual compound lifts must not create an imaginary fifth training day');
+const week5Done=boot({'ascensionx_strength_v1':JSON.stringify({
+ cycle:{created:id,exercises:['Back Squat','Bench Press','Deadlift'],
+  weeks:{'Back Squat':6,'Bench Press':6,Deadlift:6},currentWeek:6},
+ logs:week2Completed.map(log=>({...log,week:5}))
+})});
+week5Done.api.save({enabled:true,days:4});
+assert.equal(week5Done.api.pendingSupportDay()?.week,5,
+ 'The final loading-week support day is still available before Week 6 deload');
+assert.ok(week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===1),
+ 'Week 5 support uses tapered one-set assistance');
+
+const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
+assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
+ quickAccess.includes("lift:'__ADAPTIVE_SUPPORT__'"),
+ 'Workout Continue must select the fourth day in preference to the next Squat');
+assert.ok(ascHtml.includes("pendingSupport=adaptive?.pendingSupportDay?.()")&&
+ ascHtml.includes("pendingSupport&&support?'__ADAPTIVE_SUPPORT__'"),
+ 'Both AscensionX Continue entry points must preselect Day 4');
+
 console.log('AscensionX adaptive programming: tests passed');

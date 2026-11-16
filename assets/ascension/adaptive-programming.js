@@ -132,8 +132,11 @@
  }
  function dose(item,week,focus,main,cycleId,storage){
   const factor=[0,1,1,1,.75,.45,0][week]||0;
-  const added=focus==='hypertrophy'&&main!=='Deadlift'?1:0;
-  let sets=Math.round((item.sets+added)*factor);
+  const isSupportDay=main==='Support';
+  const added=focus==='hypertrophy'&&!isSupportDay&&main!=='Deadlift'?1:0;
+  // Day 4 support uses three working sets in standard weeks (1-3).
+  // Week 4/5 taper and Week 6 recovery remain deliberately lower.
+  let sets=isSupportDay&&week<=3?3:Math.round((item.sets+added)*factor);
   if(week===5)sets=Math.min(sets,1);
   if(week===6)sets=0;
   if(main==='Deadlift')sets=Math.min(sets,week>=4?1:3);

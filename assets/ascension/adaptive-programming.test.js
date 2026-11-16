@@ -61,6 +61,23 @@ assert.equal(schedule.slots.filter(x=>x.kind==='support').length,1);
 assert.ok(schedule.slots[3].exercises.length>0);
 assert.ok(schedule.slots[3].exercises.every(ex=>ex.sets===3),'Standard supporting day defaults to three sets');
 assert.ok(api.plan('Bench Press',4).every(ex=>ex.sets<3),'Taper week may reduce accessory sets');
+// Day 4 has exactly three sets in standard weeks regardless of training focus.
+for(const focus of ['strength','balanced','hypertrophy']){
+ api.save({focus});
+ const day4=api.schedule().slots[3];
+ assert.equal(day4.kind,'support');
+ assert.ok(day4.exercises.length>0&&day4.exercises.every(ex=>ex.sets===3),
+  'Day 4 '+focus+' work must use three working sets');
+}
+api.save({focus:'strength'});
+for(const [week,expected] of [[4,2],[5,1],[6,0]]){
+ const tapered=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
+ tapered.api.save({enabled:true,focus:'strength',days:4});
+ const fourth=tapered.api.schedule().slots[3];
+ if(week===6)assert.equal(fourth.exercises.length,0,'No Week 6 accessory session');
+ else assert.ok(fourth.exercises.every(ex=>ex.sets===expected),
+  'Week '+week+' support work must taper to '+expected+' sets');
+}
 assert.equal(schedule.slots[3].day,'SAT');
 api.save({focus:'hypertrophy'});
 assert.equal(api.read(id).focus,'hypertrophy');

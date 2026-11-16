@@ -95,3 +95,76 @@ body #measuresOverlay.sx-measures-page :is(.sx-measure-latest-button,.sx-measure
  outline-offset:3px!important;
  border-radius:4px!important;
 }
+
+/* Measures text actions must defeat every theme's global button surface,
+   including theme-specific !important backgrounds/borders. Keep the entire
+   label tappable; don't turn the links into inert plain spans. */
+html body #measuresOverlay.sx-measures-page .sx-measure-overview-head{
+ background:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ padding:0!important;
+}
+html body #measuresOverlay.sx-measures-page #sxMeasureLatestOpen,
+html body #measuresOverlay.sx-measures-page #sxMeasureRangeOpen{
+ -webkit-appearance:none!important;
+ appearance:none!important;
+ background:none!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-width:0!important;
+ border-style:none!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ outline-offset:3px;
+ filter:none!important;
+ text-shadow:none!important;
+ min-height:44px!important;
+}
+html body #measuresOverlay.sx-measures-page #sxMeasureLatestOpen{
+ display:inline-flex!important;
+ padding:0!important;
+ margin:0!important;
+ align-items:baseline!important;
+ gap:7px!important;
+ text-align:left!important;
+ color:var(--txt)!important;
+}
+html body #measuresOverlay.sx-measures-page #sxMeasureRangeOpen{
+ display:inline-flex!important;
+ padding:0 0 0 5px!important;
+ margin:0!important;
+ align-items:center!important;
+ justify-content:flex-end!important;
+ gap:7px!important;
+ color:var(--lime)!important;
+}
+html body #measuresOverlay.sx-measures-page #sxMeasureLatestOpen:focus-visible,
+html body #measuresOverlay.sx-measures-page #sxMeasureRangeOpen:focus-visible{
+ outline:2px solid var(--lime)!important;
+ border-radius:3px!important;
+}
+html body #measuresOverlay.sx-measures-page #sxMeasureLatestOpen::before,
+html body #measuresOverlay.sx-measures-page #sxMeasureLatestOpen::after,
+html body #measuresOverlay.sx-measures-page #sxMeasureRangeOpen::before,
+html body #measuresOverlay.sx-measures-page #sxMeasureRangeOpen::after{
+ content:none!important;
+ display:none!important;
+}
+/* Transparent click-outside layer keeps the Measurements chart, weight
+   reading and range text clearly visible behind the slide-up picker. */
+html body #sxMeasureRangeSheet.sx-measure-sheet{
+ background:transparent!important;
+ background-image:none!important;
+}
+html body #sxMeasureRangeSheet #sxMeasureRangeScrim{
+ background:transparent!important;
+ background-image:none!important;
+ opacity:0!important;
+ box-shadow:none!important;
+ border:0!important;
+ pointer-events:auto!important;
+}

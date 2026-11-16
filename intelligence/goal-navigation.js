@@ -20,6 +20,9 @@
   const MAIN=/\/(?:index\.html)?$/.test(window.location.pathname);
   const params=new URLSearchParams(window.location.search);
   const explicit=params.get('goal');
+  const incomingFrom=params.get('from');
+  const launchFrom=['workout','home','profile','tools','activeWorkout'].includes(incomingFrom)?incomingFrom:null;
+  const sourceSuffix=launchFrom?'&from='+encodeURIComponent(launchFrom):'';
   const requestedSection=validSection(params.get('tab'))||savedSection()||'overview';
   let stored='powerlifting';
   try{const value=window.localStorage.getItem(STORAGE_KEY);if(KNOWN.includes(value))stored=value}catch(_){}
@@ -27,11 +30,11 @@
   // Without an explicit choice, open the athlete's most recently selected goal.
   const goal=KNOWN.includes(explicit)?explicit:(MAIN?stored:(stored==='powerlifting'?'bodybuilding':stored));
   if(MAIN && goal!=='powerlifting'){
-    window.location.replace('./goals.html?goal='+encodeURIComponent(goal)+'&tab='+encodeURIComponent(requestedSection));
+    window.location.replace('./goals.html?goal='+encodeURIComponent(goal)+'&tab='+encodeURIComponent(requestedSection)+sourceSuffix);
     return;
   }
   if(!MAIN && goal==='powerlifting'){
-    window.location.replace('./?goal=powerlifting&tab='+encodeURIComponent(requestedSection));
+    window.location.replace('./?goal=powerlifting&tab='+encodeURIComponent(requestedSection)+sourceSuffix);
     return;
   }
   try{window.localStorage.setItem(STORAGE_KEY,goal)}catch(_){}
@@ -52,7 +55,7 @@
       window.localStorage.setItem(STORAGE_KEY,value);
       window.localStorage.setItem(SECTION_KEY,section);
     }catch(_){}
-    const destination='?goal='+encodeURIComponent(value)+'&tab='+encodeURIComponent(section);
+    const destination='?goal='+encodeURIComponent(value)+'&tab='+encodeURIComponent(section)+sourceSuffix;
     if(MAIN){
       if(value!=='powerlifting')window.location.assign('./goals.html'+destination);
       return;

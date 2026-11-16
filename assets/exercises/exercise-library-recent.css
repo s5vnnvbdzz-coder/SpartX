@@ -1,0 +1,62 @@
+/* SpartanX v355 · Exercise-library thumbnails, set-count ranking, text-only stats. */
+#exerciseLibraryScreen .sx-exercise-section-label,
+#exerciseStatsScreen .sx-exercise-section-label{
+ padding:16px 2px 8px;
+ color:var(--muted);
+ font-size:10px;
+ font-weight:800;
+ letter-spacing:1.4px;
+ text-transform:uppercase;
+}
+#exerciseLibraryScreen .sx-exercise-section-label:first-child,
+#exerciseStatsScreen .sx-exercise-section-label:first-child{
+ padding-top:12px;
+}
+#exerciseLibraryScreen .library-pick{
+ flex-direction:row!important;
+ align-items:center!important;
+ gap:12px!important;
+ min-width:0;
+ text-align:left!important;
+}
+#exerciseLibraryScreen .sx-library-details,
+#exerciseStatsScreen .sx-library-details{min-width:0;flex:1}
+#exerciseLibraryScreen .sx-library-exercise-thumb,
+#exerciseStatsScreen .sx-library-exercise-thumb{
+ display:block;
+ width:54px;height:54px;
+ min-width:54px;flex:0 0 54px;
+ border-radius:9px;
+ border:1px solid var(--line);
+ background:var(--panel2);
+ object-fit:cover;
+}
+#exerciseStatsScreen .sx-library-stats-row{
+ display:flex;align-items:center;gap:11px;flex:1;min-width:0;
+}
+#exerciseStatsScreen button[data-open-exercise-stats],
+#exerciseStatsScreen button[data-open-exercise-stats]:hover,
+#exerciseStatsScreen button[data-open-exercise-stats]:active{
+ appearance:none!important;-webkit-appearance:none!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ padding:9px 0 9px 9px!important;
+ min-width:55px!important;min-height:44px!important;
+ background:none!important;background-color:transparent!important;background-image:none!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ color:var(--lime)!important;
+ font-size:11px!important;font-weight:850!important;letter-spacing:.5px!important;
+ text-decoration:none!important;text-shadow:none!important;
+}
+#exerciseStatsScreen button[data-open-exercise-stats]:focus-visible{
+ outline:2px solid var(--lime)!important;outline-offset:3px;
+ border-radius:3px!important;
+}
+#exerciseStatsScreen .sx-exercise-set-count{
+ color:var(--muted);font-size:10px;margin-top:5px;
+}
+@media(max-width:400px){
+ #exerciseLibraryScreen .sx-library-exercise-thumb,
+ #exerciseStatsScreen .sx-library-exercise-thumb{
+  width:47px;height:47px;min-width:47px;flex-basis:47px;
+ }
+}

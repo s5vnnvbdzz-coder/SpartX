@@ -2028,7 +2028,7 @@ function init(){
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=98').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=99').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.
@@ -2039,6 +2039,6 @@ if(window.parent!==window&&ascOpenedFromSpartanX()){
 }
 init();
 </script>
-<script src="../assets/ascension/adaptive-programming.js?v=357"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=358"></script>
 </body>
 </html>

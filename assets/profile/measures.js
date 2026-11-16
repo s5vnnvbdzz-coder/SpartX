@@ -1,4 +1,4 @@
-/* SpartanX Measures · v327
+/* SpartanX Measures · v328
  * Two real screens, local dated history, native mobile input and optional
  * separately stored progress photos. Never deletes existing workout data.
  */
@@ -132,9 +132,25 @@ const fieldHost=$('sxMeasureFields');
 fieldHost.innerHTML=fields.map(([key,label,unit,max])=>`
  <label class="sx-measure-row" for="sxMeasureField_${key}">
   <span>${label}<small>${unit==='%'?'Percentage':unit==='kg'?'Kilograms':'Centimetres'}</small></span>
-  <input id="sxMeasureField_${key}" type="number" inputmode="decimal" min="0" max="${max}"
-   step="0.1" placeholder="—" autocomplete="off" data-measure-field="${key}" aria-label="${label} in ${unit}">
+  <input id="sxMeasureField_${key}" type="text" inputmode="decimal"
+   placeholder="—" autocomplete="off" data-measure-field="${key}" aria-label="${label} in ${unit}">
  </label>`).join('');
+/* Text + decimal keyboard allows select() on iOS: number inputs cannot
+   reliably select their full value. Existing range validation remains in commit(). */
+fieldHost.addEventListener('focusin',event=>{
+ const input=event.target;
+ if(!input.matches?.('input[data-measure-field]')||!input.value)return;
+ const original=input.value;
+ input.select();
+ // iOS may restore its insertion point as the keyboard appears.
+ requestAnimationFrame(()=>{
+  if(document.activeElement===input&&input.value===original)input.select();
+ });
+});
+fieldHost.addEventListener('click',event=>{
+ const input=event.target;
+ if(input.matches?.('input[data-measure-field]')&&input.value)input.select();
+});
 $('sxMeasureMetric').innerHTML=fields.map(([key,label,unit])=>
  '<option value="'+key+'">'+escapeText(label)+' ('+unit+')</option>').join('');
 let range=3,metric='bodyweight',editingId=null,saving=false,pendingPhoto=null,removePhoto=false,previewUrl=null;

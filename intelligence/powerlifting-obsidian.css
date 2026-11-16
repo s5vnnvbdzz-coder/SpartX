@@ -1,0 +1,119 @@
+/* Spartan Intelligence · AscensionX powerlifting Obsidian · build 354
+   Deliberately scoped to the Powerlifting Intelligence view, not SpartanX,
+   standalone AscensionX, Bodybuilding, or Weight Loss. */
+html:has(body.sx-intel-obsidian){background:#000!important;color-scheme:dark}
+body.sx-intel-obsidian{
+ --bg:#000000;--surface:#0a0b0e;--surface2:#121417;--surface3:#1c1e22;
+ --stroke:#303238;--gold:#e3e7ed;--goldSoft:#bfc5ce;--goldPale:#f5f6f8;
+ --txt:#f1f3f6;--muted:#a3a8b1;--muted2:#878e97;--shadow:0 7px 28px #0009;
+ --panel:#0d0e10;--panel2:#17191c;--line:#303238;--lime:#e3e7ed;
+ background:#000!important;background-image:none!important;color:#f1f3f6;
+ color-scheme:dark;
+}
+body.sx-intel-obsidian :is(.app-shell,.main-shell,.main-content){background:transparent!important}
+body.sx-intel-obsidian :is(.sidebar,.topbar,.bottom-nav){
+ background:#070809f7!important;
+ background-image:none!important;
+ border-color:#303238!important;
+ box-shadow:none!important;
+}
+body.sx-intel-obsidian :is(.panel,.hero-card,.kpi,.sx-goal-picker,.goal-panel,.workload-hero,
+ .intelligence-intro,.sx-decision-card,.sx-decision-lift,.sx-live-section,.sx-overview-ascension-panel){
+ background:linear-gradient(225deg,#191b1e 0%,#0c0d0f 45%,#070708 100%)!important;
+ border-color:#32353a!important;
+ box-shadow:inset 0 1px 0 #ffffff09,0 5px 22px #000a!important;
+}
+body.sx-intel-obsidian :is(.sidebar .nav-item.active,.bottom-nav button.active){
+ color:#f1f3f6!important;
+ background:#202328!important;
+ border-color:#454950!important;
+ box-shadow:none!important;
+}
+body.sx-intel-obsidian :is(.eyebrow,.accent,.brand .accent,.sidebar-label,.brand-symbol,
+ .status-dot,.micro-tag,.spark-icon,.nav-item.active,.legend-dot){
+ color:#e3e7ed!important;
+ text-shadow:none!important;
+}
+body.sx-intel-obsidian .brand-symbol{
+ background:linear-gradient(135deg,#f1f3f6,#8e969f)!important;
+ color:#000!important;filter:none!important;
+}
+body.sx-intel-obsidian :is(.mode-pill,.demo-banner,.micro-tag){
+ background:#16181b!important;
+ border-color:#393c42!important;
+ color:#cbd0d8!important;box-shadow:none!important;
+}
+body.sx-intel-obsidian :is(select,.compact-select,input,.icon-button){
+ background-color:#111316!important;
+ border-color:#373b42!important;
+ color:#f1f3f6!important;
+}
+body.sx-intel-obsidian :is(.primary-button,.goal-form button){
+ background:#dadfe6!important;color:#070809!important;
+ border-color:#e8ebef!important;box-shadow:none!important;
+}
+body.sx-intel-obsidian :is(.text-button,.sx-return-app,.sx-back-link){
+ color:#e3e7ed!important;
+}
+body.sx-intel-obsidian .hero-card:before{
+ background:linear-gradient(90deg,#aab0b8,transparent)!important;
+}
+body.sx-intel-obsidian .hero-x{
+ -webkit-text-stroke-color:#858b9555!important;
+ text-shadow:none!important;
+}
+body.sx-intel-obsidian :is(.goal-progress>div,.goal-progress #goalBar,
+ .sx-cycle-view-progress>i){
+ background:linear-gradient(90deg,#59616e,#e3e7ed)!important;
+}
+body.sx-intel-obsidian .sx-overview-lift-priority{
+ margin-top:19px;margin-bottom:11px;
+}
+body.sx-intel-obsidian .sx-overview-lift-priority p{max-width:660px;line-height:1.5}
+body.sx-intel-obsidian #sxOverviewAscensionInsights{margin-top:0}
+/* Detailed metrics and repeated context remain reachable, not duplicated
+   across the landing view. Native <details> keeps accessibility and state. */
+body.sx-intel-obsidian .sx-intel-compact-details{
+ margin:14px 0;
+ padding:0;
+ border:1px solid #303238;
+ border-radius:13px;
+ background:#090a0c;
+ min-width:0;
+ width:100%;
+ box-sizing:border-box;
+}
+body.sx-intel-obsidian .sx-intel-compact-details>summary{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:15px 16px;
+ cursor:pointer;list-style:none;
+ color:#e2e6ed;font-size:12px;font-weight:850;letter-spacing:.3px;
+}
+body.sx-intel-obsidian .sx-intel-compact-details>summary::-webkit-details-marker{display:none}
+body.sx-intel-obsidian .sx-intel-compact-details>summary:after{
+ content:'⌄';color:#b6bec7;font-size:17px;
+}
+body.sx-intel-obsidian .sx-intel-compact-details[open]>summary:after{content:'⌃'}
+body.sx-intel-obsidian .sx-intel-compact-details>summary:focus-visible{
+ outline:2px solid #e3e7ed;outline-offset:3px;border-radius:10px;
+}
+body.sx-intel-obsidian .sx-intel-compact-details>.sx-intel-deep-body{
+ padding:0 14px 15px;min-width:0;
+}
+body.sx-intel-obsidian .sx-intel-compact-details .section-top{margin:10px 0}
+body.sx-intel-obsidian .sx-intel-compact-details :is(.panel,.kpi){
+ min-width:0;box-sizing:border-box;
+}
+body.sx-intel-obsidian #overviewPage .sx-intel-compact-details .kpi-grid{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+}
+body.sx-intel-obsidian #overviewPage .sx-intel-compact-details .consistency-panel{
+ width:100%;max-width:100%;
+}
+@media(max-width:530px){
+ body.sx-intel-obsidian .sx-intel-compact-details>.sx-intel-deep-body{padding:0 10px 12px}
+ body.sx-intel-obsidian #overviewPage .sx-intel-compact-details .kpi-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+ }
+}

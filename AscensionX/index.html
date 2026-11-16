@@ -623,6 +623,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <script defer src="../assets/themes/shared-theme.js?v=340"></script>
 <link rel="stylesheet" href="../assets/ui/page-navigation.css?v=318">
 <link rel="stylesheet" href="../assets/themes/uniform-surfaces.css?v=340">
+<link rel="stylesheet" href="./obsidian-clean.css?v=350">
 <script defer src="../assets/charts/touch-scrub.js?v=340"></script>
 
 </head>
@@ -718,12 +719,14 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <main>
 <section id="home" class="screen active">
  <div class="eyebrow">TRAINING HQ</div><h1>Ascension dashboard</h1><p class="muted tiny" id="todayDate"></p>
- <div class="grid">
-  <div class="stat"><span>Active cycle</span><strong id="dashCycle">—</strong></div>
-  <div class="stat"><span>Current week</span><strong id="dashWeek">—</strong></div>
-  <div class="stat"><span>Sessions logged</span><strong id="dashSessions">0</strong></div>
-  <div class="stat"><span>Best estimated 1RM</span><strong id="dashE1rm">—</strong></div>
- </div>
+ <div hidden aria-hidden="true"><span id="dashCycle">—</span><span id="dashWeek">—</span></div>
+ <details class="asc-dashboard-metrics" id="ascDashboardMetrics">
+  <summary>Training snapshot</summary>
+  <div class="grid">
+   <div class="stat"><span>Sessions logged</span><strong id="dashSessions">0</strong></div>
+   <div class="stat"><span>Best estimated 1RM</span><strong id="dashE1rm">—</strong></div>
+  </div>
+ </details>
  <div class="hero" id="homeHero">
   <div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div>
   <div class="tiny">Build a six-week strength cycle, record your work and let performance guide the next step.</div>
@@ -756,9 +759,11 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
  <div class="eyebrow">THE SIX-WEEK ROADMAP</div><h2>Cycle Overview</h2>
  <div class="card"><div class="row between"><h2 style="margin:0">Weekly prescriptions</h2><span class="pill">PER EXERCISE</span></div><div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>Top set</th><th>Back-off sets</th><th>Focus</th></tr></thead><tbody id="cycleTable"></tbody></table></div></div>
  <div class="card"><h2>Lift-specific loading</h2><div class="fields"><div class="field"><label>Select lift</label><select id="cycleLift" onchange="renderCycleLoads()"><option>Back Squat</option><option>Bench Press</option><option>Deadlift</option><option>Overhead Press</option></select></div></div><div id="cycleLoads"></div></div>
+ <details class="asc-cycle-reference"><summary>Method &amp; progression rules</summary>
  <div class="card"><h2>Progression rules</h2><div class="listitem"><div><strong>Progress</strong><div class="tiny">All prescribed work completed, sound technique, RPE within target.</div></div><span class="pill good">+ TM</span></div><div class="listitem"><div><strong>Hold</strong><div class="tiny">Completed, but effort overshot or recovery was poor.</div></div><span class="pill warn">Repeat</span></div><div class="listitem"><div><strong>Reduce</strong><div class="tiny">Missed reps or technique breakdown; review load and recovery.</div></div><span class="pill">− TM</span></div></div>
-</div>
  <div class="card"><h2>Method principles</h2><div class="listitem"><span>01 · Progressive intensity</span><span class="tiny">↑ load</span></div><div class="listitem"><span>02 · Descending reps</span><span class="tiny">↓ reps</span></div><div class="listitem"><span>03 · Managed volume</span><span class="tiny">↓ sets</span></div><div class="listitem"><span>04 · Performance-led progression</span><span class="tiny">Earn it</span></div></div>
+ </details>
+</div>
 </section>
 
 <section id="workout" class="screen">
@@ -840,7 +845,7 @@ const PLAN=[
  {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
 ];
 let state=load();
-function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1])),accessories:{}},logs:[],metrics:[],draft:null,theme:'dark',prestige:{level:0,xpOffset:0}}}
+function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1])),accessories:{}},logs:[],metrics:[],draft:null,theme:'obsidian',prestige:{level:0,xpOffset:0}}}
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!Array.isArray(x.cycle.exercises))x.cycle.exercises=LIFTS.slice();if(!x.cycle.weeks)x.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(x.cycle.currentWeek)||1]));if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!x.profile.unit)x.profile.unit='kg';if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];if(!x.prestige)x.prestige={level:0,xpOffset:0};return x}}catch(e){}return defaults()}
 function persist(shouldRender=true){try{localStorage.setItem(KEY,JSON.stringify(state));if(shouldRender)renderAll();return true}catch(e){toast('Could not save data. Export a backup and free browser storage.');return false}}
 function toast(s){const t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
@@ -849,7 +854,7 @@ function unit(){return state.profile.unit==='lbs'?'lbs':'kg'}
 function toDisplay(n){return Number(n)*(unit()==='lbs'?2.2046226218:1)}
 function fromDisplay(n){return Number(n)/(unit()==='lbs'?2.2046226218:1)}
 function kg(n){return Number(toDisplay(n)).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit()}
-const ASC_THEMES=[['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['bronze','Bronze'],['gold','Gold'],['athena','Athena Blue'],['energy-zero','Energy Zero · TRIAL']];
+const ASC_THEMES=[['obsidian','Obsidian Black'],['dark','Dark'],['light','Light'],['spartan','Spartan Red'],['bronze','Bronze'],['gold','Gold'],['athena','Athena Blue'],['energy-zero','Energy Zero · TRIAL']];
 const ASC_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
 const ASC_RANK_NUMERALS=['I','II','III','IV','V','VIII'];
 function ascRankLabel(level){return ASC_RANKS[level]+' - Rank '+ASC_RANK_NUMERALS[level];}
@@ -1203,6 +1208,11 @@ function toggleCycleDetails(){
  if(view){
   view.setAttribute('aria-expanded',String(opening));
   view.textContent=opening?'HIDE FULL CYCLE':'VIEW FULL CYCLE';
+ }
+ const heroView=$('ascHeroViewCycle');
+ if(heroView){
+  heroView.setAttribute('aria-expanded',String(opening));
+  heroView.textContent=opening?'Hide cycle details':'View cycle details';
  }
  if(opening)renderCycle();
 }
@@ -1726,7 +1736,15 @@ function renderDashboard(){
   $('cycleExpandButton')?.setAttribute('aria-expanded','false');
   if(buildView){buildView.textContent='VIEW FULL CYCLE';buildView.setAttribute('aria-expanded','false')}
  }
- $('homeHero').innerHTML=state.cycle.created?`<div class="row between"><div class="mutedline">EXERCISE-SPECIFIC CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div><div class="big">${active.length} <span style="color:var(--red2)">LIFTS</span></div><div class="tiny">${active.map(l=>l+': W'+currentWeekFor(l)).join(' · ')}</div><div class="home-hero-actions"><button onclick="continueAscensionTraining()">Continue training</button><button class="secondary" onclick="showScreen('cycle')">Edit programme</button>${nextCycleReady?'<button type="button" onclick="openCycleReview()">REVIEW & START NEXT CYCLE</button>':''}</div>`:`<div class="mutedline">YOUR NEXT STEP</div><div class="big">Start your ascent.</div><div class="tiny">Choose the compound lifts you want in your six-week cycle.</div>`;
+ const hero=$('homeHero');
+ hero.hidden=!activeCreated;
+ hero.innerHTML=activeCreated?`<div class="row between"><div class="mutedline">YOUR ACTIVE CYCLE</div><button type="button" class="cycle-info-button" aria-label="End-of-cycle review information" title="End-of-cycle review" onclick="openCycleReview()">i</button></div>
+ <div class="asc-hero-cycle-heading">Six-week strength cycle</div>
+ <div class="asc-hero-progress-meta"><span>Overall progress</span><strong>${pct}%</strong></div>
+ <div class="progress asc-hero-progress"><i style="width:${pct}%"></i></div>
+ <div class="asc-hero-lifts">${active.map(l=>'<span class="asc-hero-lift">'+l+' <b>W'+currentWeekFor(l)+'/6</b></span>').join('')}</div>
+ <div class="home-hero-actions"><button type="button" onclick="continueAscensionTraining()">CONTINUE TRAINING</button><button type="button" class="secondary" id="ascHeroViewCycle" onclick="toggleCycleDetails()" aria-controls="cycleDetails" aria-expanded="${!$('cycleDetails').hidden}">${$('cycleDetails').hidden?'View cycle details':'Hide cycle details'}</button><button type="button" class="secondary" onclick="openCycleEditor()">Manage cycle</button>${nextCycleReady?'<button type="button" onclick="openCycleReview()">REVIEW & START NEXT CYCLE</button>':''}</div>`:'';
+
 }
 function setWeek(w){const lift=$('liftSelect').value;state.cycle.weeks=state.cycle.weeks||{};state.cycle.weeks[lift]=w;state.cycle.currentWeek=w;persist();showScreen('workout');$('workWeek').value=w;renderWorkout()}
 let restTimerDeadline=0,restTimerInterval=null;

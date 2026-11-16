@@ -172,9 +172,9 @@ body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference>.card{
 }
 body.sx-ascension-embedded #home #ascBuildCycleEntry{margin-top:14px}
 @media(max-width:440px){
- #home #homeHero{padding:16px}
- #home #homeHero .home-hero-actions button{flex-basis:100%}
- #home .asc-dashboard-metrics .stat strong{font-size:19px}
+ body.sx-ascension-embedded #home #homeHero{padding:16px}
+ body.sx-ascension-embedded #home #homeHero .home-hero-actions button{flex-basis:100%}
+ body.sx-ascension-embedded #home .asc-dashboard-metrics .stat strong{font-size:19px}
 }
 @media(prefers-reduced-motion:reduce){
  body.sx-ascension-embedded :is(.progress,.rank-progress)>i{transition:none!important}

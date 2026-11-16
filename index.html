@@ -1052,6 +1052,19 @@ body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)) > header{
  width:100%;box-sizing:border-box;z-index:12!important;
  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
 }
+/* Home: keep the header in normal document flow. On iOS a fixed header
+   plus a measured spacer can leave the top of Home inaccessible after hash
+   restoration or a PWA resume. Sticky looks identical while scrolling but
+   never covers the first heading at scroll position zero. */
+body.sx-home-header-layout > header,
+body:has(> main > #home.screen.active) > header{
+ position:sticky!important;top:0!important;
+}
+body.sx-home-header-layout > #sxMainHeaderSpacer,
+body:has(> main > #home.screen.active) > #sxMainHeaderSpacer{
+ display:none!important;
+}
+#home{scroll-margin-top:var(--sx-header-live-height)}
 /* Calendar modal retains a scrolling title. Its overlay stays above the
    global main-page header; the main app navigation remains hidden. */
 body.sx-workout-calendar-open #workoutCalendarOverlay{z-index:25}
@@ -4564,6 +4577,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   const active=document.querySelector('main > .screen.active');
   const mainTab=!!active&&['home','workout','tools','profile'].includes(active.id);
   document.body.classList.toggle('sx-main-header-layout',mainTab);
+  document.body.classList.toggle('sx-home-header-layout',mainTab&&active.id==='home');
   const headHeight=Math.ceil(header.getBoundingClientRect().height);
   const navHeight=Math.ceil(nav?.getBoundingClientRect().height||0);
   if(headHeight>0)document.documentElement.style.setProperty('--sx-header-live-height',headHeight+'px');

@@ -623,7 +623,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <script defer src="../assets/themes/shared-theme.js?v=340"></script>
 <link rel="stylesheet" href="../assets/ui/page-navigation.css?v=318">
 <link rel="stylesheet" href="../assets/themes/uniform-surfaces.css?v=340">
-<link rel="stylesheet" href="./obsidian-clean.css?v=352">
+<link rel="stylesheet" href="./obsidian-clean.css?v=355">
 <script defer src="../assets/charts/touch-scrub.js?v=340"></script>
 
 </head>
@@ -2023,7 +2023,7 @@ function init(){
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=96').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=97').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.

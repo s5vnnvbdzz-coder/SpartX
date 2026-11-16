@@ -180,3 +180,63 @@ body[data-theme="obsidian"] :is(.seg,.set-control .set-value){
 @media(prefers-reduced-motion:reduce){
  body[data-theme="obsidian"] :is(.progress,.rank-progress)>i{transition:none!important}
 }
+
+/* Workout: one authoritative prescribed main load, then back-off work.
+   Warm-ups and training-max context are available on demand, not repeated
+   beside the live set logger. Recovery-bridge warnings stay visible. */
+#workout #workoutPrescription .asc-workout-prescription-head{
+ margin:0 0 14px;
+}
+#workout #workoutPrescription .asc-workout-main-target{
+ padding:15px 16px;
+ border:1px solid var(--line);
+ border-radius:14px;
+ background:color-mix(in srgb,var(--panel2) 42%,var(--panel));
+}
+#workout #workoutPrescription .asc-workout-main-load{
+ display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;
+ margin:8px 0;
+ font-size:clamp(25px,6.8vw,35px);
+ font-weight:900;letter-spacing:-.9px;line-height:1.2;
+ color:var(--text);
+}
+#workout #workoutPrescription .asc-workout-main-load span{
+ font-size:clamp(15px,4vw,19px);letter-spacing:0;
+ color:var(--red2);font-weight:800;
+}
+#workout #workoutPrescription .asc-workout-backoff{
+ display:flex;justify-content:space-between;align-items:baseline;
+ flex-wrap:wrap;gap:6px 12px;
+ margin-top:14px;padding-top:12px;border-top:1px solid var(--line);
+}
+#workout #workoutPrescription .asc-workout-backoff span{
+ font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:800;
+}
+#workout #workoutPrescription .asc-workout-backoff strong{
+ font-size:15px;color:var(--text);
+}
+#workout #workoutPrescription .asc-workout-guard{
+ margin:12px 0;color:var(--red2);font-weight:700;
+}
+#workout #workoutPrescription .asc-workout-guidance{
+ margin:12px 0 0;
+ border-top:1px solid var(--line);
+ padding-top:8px;
+}
+#workout #workoutPrescription .asc-workout-guidance>summary{
+ cursor:pointer;
+ min-height:40px;
+ display:flex;align-items:center;
+ color:var(--muted);
+ font-size:12px;font-weight:750;
+}
+#workout #workoutPrescription .asc-workout-guidance>summary:focus-visible{
+ outline:2px solid var(--red2);outline-offset:2px;
+}
+#workout #workoutPrescription .asc-workout-guidance .tiny{
+ margin:7px 0;line-height:1.55;
+}
+body[data-theme="obsidian"] #workout #workoutPrescription .asc-workout-main-target{
+ background:linear-gradient(225deg,#181a1d,#0b0c0e)!important;
+ border-color:#303238!important;
+}

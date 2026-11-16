@@ -52,7 +52,14 @@ function readCycle(){
  });
  // Completed cycles are not active quick-access programmes.
  if(items.every(x=>x.done))return null;
- const upNext=items.filter(x=>!x.done).sort((a,b)=>a.week-b.week||LIFTS.indexOf(a.lift)-LIFTS.indexOf(b.lift))[0];
+ const primaryNext=items.filter(x=>!x.done).sort((a,b)=>a.week-b.week||
+  lifts.indexOf(a.lift)-lifts.indexOf(b.lift))[0];
+ // Once all three main lifts complete a week, choose the pending fourth
+ // Adaptive Support day before starting the following week's Squats.
+ const support=window.SXAscensionAdaptive?.pendingSupportDay?.();
+ const upNext=support?.kind==='support'?
+  {kind:'support',lift:'__ADAPTIVE_SUPPORT__',week:support.week,
+   day:support.day,title:support.title}:primaryNext;
  const percent=Math.min(100,Math.max(0,Math.round(items.reduce((sum,x)=>sum+x.completed,0)/(items.length*6)*100)));
  return {created:cycle.created,title:String(cycle.title||cycle.name||'AscensionX').trim().slice(0,80)||'AscensionX',items,upNext,percent};
 }
@@ -68,7 +75,7 @@ function refresh(){
  const empty=byId('sxAscensionEmpty');if(empty)empty.hidden=true;
  byId('sxAscensionTitle').textContent=cycle.title;
  byId('sxAscensionSummary').textContent='AscensionX · Powerlifting · Week '+upNext.week+' of 6';
- byId('sxAscensionNext').textContent='NEXT: '+upNext.lift+' · Week '+upNext.week;
+ byId('sxAscensionNext').textContent=upNext.kind==='support'?'NEXT: '+upNext.title+' · Week '+upNext.week:'NEXT: '+upNext.lift+' · Week '+upNext.week;
  byId('sxAscensionPercent').textContent=percent+'%';
  byId('sxAscensionProgressFill').style.width=percent+'%';
  byId('sxAscensionProgress').setAttribute('aria-valuenow',String(percent));
@@ -107,6 +114,8 @@ byId('sxAscensionManage').addEventListener('click',()=>{
 window.addEventListener('spartx:ascensionCycleUpdated',refresh);
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY||e.key===null)refresh()});
 window.addEventListener('pageshow',refresh);
+// Adaptive Programming loads after this card. Refresh once the full page loads.
+window.addEventListener('load',refresh);
 window.addEventListener('focus',refresh);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 byId('trackerNav')?.addEventListener('click',()=>requestAnimationFrame(refresh));

@@ -60,3 +60,50 @@
   width:47px;height:47px;min-width:47px;flex-basis:47px;
  }
 }
+
+/* v356 · STATS is a text link, never a themed button/card.
+   The #trackerNav exception used by certain themes contributes an ID to
+   :not(), so the earlier selector did not reliably win on iPhone. */
+html body[class] #exerciseStatsScreen .library-item > button[data-open-exercise-stats],
+html body[class] #exerciseStatsScreen .library-item > button[data-open-exercise-stats]:hover,
+html body[class] #exerciseStatsScreen .library-item > button[data-open-exercise-stats]:active{
+ -webkit-appearance:none!important;
+ appearance:none!important;
+ display:inline-flex!important;
+ flex:0 0 auto!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:auto!important;
+ min-width:0!important;
+ max-width:none!important;
+ min-height:44px!important;
+ padding:8px 0 8px 8px!important;
+ margin:0!important;
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-width:0!important;
+ border-style:none!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ outline:none!important;
+ filter:none!important;
+ text-decoration:none!important;
+ text-shadow:none!important;
+ color:var(--lime)!important;
+ font-size:11px!important;
+ font-weight:850!important;
+ letter-spacing:.5px!important;
+ line-height:1.25!important;
+ -webkit-tap-highlight-color:transparent;
+}
+html body[class] #exerciseStatsScreen .library-item > button[data-open-exercise-stats]::before,
+html body[class] #exerciseStatsScreen .library-item > button[data-open-exercise-stats]::after{
+ content:none!important;
+ display:none!important;
+}
+html body[class] #exerciseStatsScreen .library-item > button[data-open-exercise-stats]:focus-visible{
+ outline:2px solid var(--lime)!important;
+ outline-offset:3px!important;
+}

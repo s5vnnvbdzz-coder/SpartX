@@ -165,26 +165,83 @@
   return selected;
  }
  function weekFor(c,lift){return clamp(Number(c.weeks?.[lift]||c.currentWeek||1),1,6)}
+ function supportExercises(c,prefs,index,week,storage){
+  if(week>=6)return [];
+  const supportIndex=index-c.lifts.length;
+  const base=FOURTH[prefs.focus]||FOURTH.strength;
+  let exercises=base.map(item=>dose(item,week,prefs.focus,'Support',c.id,storage)).filter(Boolean);
+  if(supportIndex>0)exercises=exercises.filter(item=>/calf|curl|pallof|delt/i.test(item.name));
+  return exercises;
+ }
+ function supportTitle(c,index){
+  return index===c.lifts.length?'Day '+(index+1)+' · Supporting strength & size':
+   'Day '+(index+1)+' · Low-fatigue support';
+ }
+ function completedSupportDay(c,day,week,expected,storage){
+  // Only saved, completed exercises for this exact cycle/week/day count.
+  // Partial support workouts must not make the next suggested day disappear.
+  try{
+   const raw=storage.getItem('spartx_db');
+   if(!raw||raw.length>12000000)return false;
+   const sessions=JSON.parse(raw)?.sessions;
+   if(!Array.isArray(sessions))return false;
+   return sessions.some(session=>{
+    const exercises=(session?.exercises||[]).filter(ex=>{
+     const link=ex?.sxPowerbuildingSupport;
+     return link?.cycleId===c.id&&Number(link.week)===week&&link.day===day;
+    });
+    return expected.length>0&&expected.every(target=>exercises.some(ex=>
+     norm(ex.name)===norm(target.name)&&
+     (ex.sets||[]).filter(set=>set?.done!==false&&
+      Number.isFinite(Number(set.weight))&&Number(set.weight)>=0&&
+      Number.isInteger(Number(set.reps))&&Number(set.reps)>0).length>=target.sets));
+   });
+  }catch(_){return false}
+ }
+ function pendingSupportDay(cycleArg,storage=global.localStorage){
+  const c=cycleArg||activeCycle(storage);
+  if(!c||!c.lifts?.length)return null;
+  const prefs=read(c.id,storage),days=DAYS[prefs.days]||[];
+  if(!prefs.enabled||prefs.days<=c.lifts.length||prefs.days<c.lifts.length)return null;
+  const start=Date.parse(c.id);
+  const logs=Array.isArray(c.logs)?c.logs:[];
+  // The 4th day belongs to the week JUST completed by all main lifts.
+  // The next main lift's week counter has already advanced by this point.
+  let completedWeek=0;
+  for(let week=5;week>=1;week--){
+   if(c.lifts.every(lift=>logs.some(log=>
+    log?.lift===lift&&Number(log.week)===week&&log.setsComplete===true&&
+    (log.cycleId?log.cycleId===c.id:
+     Number.isFinite(Date.parse(log.date))&&Date.parse(log.date)>=start)))){
+    completedWeek=week;break;
+   }
+  }
+  if(!completedWeek||c.lifts.some(lift=>weekFor(c,lift)<=completedWeek))return null;
+  for(let index=c.lifts.length;index<days.length;index++){
+   const day=days[index];
+   const exercises=supportExercises(c,prefs,index,completedWeek,storage);
+   if(!exercises.length)continue;
+   if(!completedSupportDay(c,day,completedWeek,exercises,storage))
+    return {day,index,kind:'support',week:completedWeek,
+     title:supportTitle(c,index),exercises};
+  }
+  return null;
+ }
  function schedule(cycleArg,storage=global.localStorage){
   const c=cycleArg||activeCycle(storage);
   if(!c)return {valid:false,message:'No active AscensionX cycle.',slots:[]};
   const prefs=read(c.id,storage),count=prefs.days;
   if(count<c.lifts.length)return {valid:false,message:'Choose at least as many days as selected compound lifts.',slots:[]};
-  const week=Math.max(...c.lifts.map(l=>weekFor(c,l)));
+  const pending=pendingSupportDay(c,storage);
+  // Support gets its *own* completed week; compound prescriptions keep
+  // their independently advancing current weeks.
+  const week=pending?.week||Math.max(...c.lifts.map(l=>weekFor(c,l)));
   const slots=DAYS[count].map((day,index)=>{
    const lift=c.lifts[index];
    if(lift)return {day,kind:'ascension',lift,week:weekFor(c,lift),
     title:lift+' · AscensionX · Week '+weekFor(c,lift),exercises:plan(lift,weekFor(c,lift),{},storage)};
-   const supportIndex=index-c.lifts.length;
-   const base=(FOURTH[prefs.focus]||FOURTH.strength);
-   const isFourth=!(supportIndex>0);
-   let exercises=[];
-   if(week<6){
-    exercises=base.map(item=>dose(item,week,prefs.focus,'Support',c.id,storage)).filter(Boolean);
-    if(!isFourth)exercises=exercises.filter(item=>/calf|curl|pallof|delt/i.test(item.name));
-   }
-   return {day,kind:'support',title:isFourth?'Day '+(index+1)+' · Supporting strength & size':'Day '+(index+1)+' · Low-fatigue support',
-    week,lift:null,exercises};
+   return {day,kind:'support',title:supportTitle(c,index),
+    week,lift:null,exercises:supportExercises(c,prefs,index,week,storage)};
   });
   return {valid:true,message:'Suggested layout, not guaranteed recovery. Main sets stay owned by AscensionX; reschedule around sleep, soreness and performance.',week,slots};
  }
@@ -367,7 +424,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,pendingSupportDay,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

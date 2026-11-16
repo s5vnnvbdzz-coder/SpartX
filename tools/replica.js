@@ -160,6 +160,33 @@ ascensionStyle.textContent+="\n/* Dedicated Workout programme pages. No popup ch
 shadow.appendChild(ascensionStyle);
 ascensionPortal.appendChild(ascensionStyle.cloneNode(true));
 
+/* Obsidian chrome applies to the real SpartanX-managed iframe wrapper,
+   not just CSS inside AscensionX itself. The import-only overlay remains
+   transparent so the underlying active workout is still visible. */
+const sxAscensionObsidianChrome=document.createElement('style');
+sxAscensionObsidianChrome.textContent=`
+ #ascensionXOverlay:not(.sx-ascension-import-only){
+  --bg:#000000!important;--panel:#08090b!important;--panel2:#15171a!important;
+  --line:#303238!important;--txt:#f2f4f7!important;--muted:#a0a4ae!important;
+  --lime:#e4e8ef!important;
+  background:#000000!important;background-image:none!important;
+  color:#f2f4f7!important;
+ }
+ #ascensionXOverlay:not(.sx-ascension-import-only) .sx-ascension-window,
+ #ascensionXOverlay:not(.sx-ascension-import-only) #ascensionXEmbedFrame{
+  background:#000000!important;background-image:none!important;
+ }
+ #ascensionXOverlay:not(.sx-ascension-import-only) .ascensionx-embedded-toolbar{
+  background:#090a0c!important;border-color:#303238!important;
+ }
+ #ascensionXOverlay.sx-ascension-import-only,
+ #ascensionXOverlay.sx-ascension-import-only .sx-ascension-window,
+ #ascensionXOverlay.sx-ascension-import-only #ascensionXEmbedFrame{
+  background:transparent!important;background-image:none!important;
+ }
+`;
+ascensionPortal.appendChild(sxAscensionObsidianChrome);
+
 const ascensionRootStyle=document.createElement('style');
 ascensionRootStyle.textContent='body.sx-ascensionx-open #trackerNav, body.sx-ascensionx-open .minimized-session{display:none!important}';
 document.head.appendChild(ascensionRootStyle);
@@ -220,7 +247,7 @@ function openSXAscWorkout(lift){
  sxAscNative.querySelector('#sxAscCancel').focus({preventScroll:true});
  if(ascensionEmbedReadyForShortcut)requestSXAscPreview(sxAscRequestedLift);
  else if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=317';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=352';
  return true;
 }
 function closeSXAscWorkout(success=false){
@@ -355,7 +382,7 @@ function openEmbeddedAscensionX(){
  syncEmbeddedAscensionTheme();
  // Load only on first open; reopening preserves the full AscensionX session.
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank'){
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=317';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=352';
  }
  // The wrapper toolbar is hidden; focus the labelled dialog instead.
  ascensionOverlay.focus({preventScroll:true});
@@ -499,7 +526,7 @@ window.addEventListener('message',e=>{
 // Preload the original app to prevent a blank iframe on first launch.
 window.addEventListener('load',()=>{
  if(ascensionEmbedFrame.getAttribute('src')==='about:blank')
-  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=317';
+  ascensionEmbedFrame.src='./AscensionX/index.html?from=spartanx&v=352';
 },{once:true});
 
 // The child stays mounted after leaving its overlay. Notify it immediately

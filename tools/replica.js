@@ -575,18 +575,49 @@ window.addEventListener('spartx:ascensionLinkedSessionSaved',()=>{
  });
 })();
 
- // Reorder tools by dragging the highlighted card itself.
+ // Reorder Tools using dedicated handles so ordinary touch scrolling still works.
  (function setupToolReordering(){
   const main=shadow.querySelector('main'),toggle=$('reorderMenuButton'),bar=$('reorderMenuBar');
   if(!main||!toggle||!bar)return;
   const getCards=()=>Array.from(main.children).filter(el=>el.classList&&el.classList.contains('card'));
   const keyFor=(card,index)=>card.id||card.getAttribute('aria-labelledby')||('tool-card-'+index);
-  let originalOrder=[],activeCard=null,pointerId=null;
+  const sortCSS=document.createElement('style');
+  sortCSS.textContent=`
+   .reorder-mode .card.reorder-enabled{touch-action:pan-y!important;user-select:auto!important}
+   .reorder-mode .card.reorder-enabled *{user-select:auto!important;-webkit-user-select:auto!important}
+   .sx-tool-drag{display:none!important}
+   .reorder-mode .sx-tool-drag{
+    display:flex!important;align-items:center;gap:9px;
+    width:100%;min-height:42px;margin:0 0 12px;padding:7px 11px;
+    color:var(--txt);background:var(--panel2);border:1px dashed var(--lime);
+    border-radius:10px;font-size:12px;font-weight:850;text-align:left;
+    touch-action:none!important;cursor:grab;user-select:none!important;-webkit-user-select:none!important;
+   }
+   .reorder-mode .sx-tool-drag:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+   .reorder-mode .sx-tool-drag b{font-size:21px;color:var(--lime)}
+  `;
+  shadow.appendChild(sortCSS);
+  getCards().forEach((card,index)=>{
+   const handle=document.createElement('button');
+   handle.type='button';handle.className='sx-tool-drag';
+   handle.setAttribute('data-tool-drag',keyFor(card,index));
+   handle.setAttribute('aria-label','Hold and drag to move '+(card.querySelector('h2')?.textContent?.trim()||'tool'));
+   handle.innerHTML='<b aria-hidden="true">⠿</b><span>Hold and drag to rearrange</span>';
+   card.insertBefore(handle,card.firstChild);
+  });
+  let originalOrder=[],activeCard=null,pointerId=null,dragY=0,autoScrollFrame=0;
+  const autoScroll=()=>{
+   if(!activeCard){autoScrollFrame=0;return;}
+   const edge=95,height=window.innerHeight;
+   const direction=dragY<edge?-1:dragY>height-edge?1:0;
+   if(direction)window.scrollBy({top:direction*Math.max(3,Math.min(16,(direction<0?edge-dragY:dragY-(height-edge))*.18)),behavior:'instant'});
+   autoScrollFrame=requestAnimationFrame(autoScroll);
+  };
   const currentOrder=()=>getCards().map((card,index)=>keyFor(card,index));
   function setMode(on){
    main.classList.toggle('reorder-mode',on);bar.classList.toggle('active',on);toggle.hidden=on;
    getCards().forEach(card=>card.classList.toggle('reorder-enabled',on));
-   bar.querySelector('.reorder-message').textContent=on?'Press and drag any highlighted card to change its position.':'';
+   bar.querySelector('.reorder-message').textContent=on?'Drag a card by its handle. Swipe elsewhere to scroll.':'';
   }
   function restoreOrder(order){
    const cards=getCards(),map=new Map(cards.map((card,index)=>[keyFor(card,index),card]));
@@ -602,6 +633,7 @@ window.addEventListener('spartx:ascensionLinkedSessionSaved',()=>{
    setMode(false);
   });
   function finishDrag(){
+   if(autoScrollFrame){cancelAnimationFrame(autoScrollFrame);autoScrollFrame=0;}
    if(!activeCard)return;
    activeCard.classList.remove('reorder-active');
    try{if(main.hasPointerCapture(pointerId))main.releasePointerCapture(pointerId);}catch(e){}
@@ -611,18 +643,20 @@ window.addEventListener('spartx:ascensionLinkedSessionSaved',()=>{
   // pointermove events flowing while cards are reinserted in the DOM.
   main.addEventListener('pointerdown',e=>{
    if(!main.classList.contains('reorder-mode')||activeCard)return;
-   const card=e.target instanceof Element?e.target.closest('.card'):null;
-   if(!card||card.parentElement!==main||e.target.closest('button,a,input,select,textarea,label'))return;
+   const handle=e.target instanceof Element?e.target.closest('[data-tool-drag]'):null;
+   const card=handle?.closest('.card');
+   if(!handle||!card||card.parentElement!==main)return;
    if(e.pointerType==='mouse'&&e.button!==0)return;
    e.preventDefault();
-   if(window.getSelection)window.getSelection().removeAllRanges();
-   activeCard=card;pointerId=e.pointerId;
+   activeCard=card;pointerId=e.pointerId;dragY=e.clientY;
    card.classList.add('reorder-active');
    try{main.setPointerCapture(pointerId);}catch(err){}
+   if(!autoScrollFrame)autoScrollFrame=requestAnimationFrame(autoScroll);
   },true);
   main.addEventListener('pointermove',e=>{
    if(!activeCard||e.pointerId!==pointerId)return;
    e.preventDefault();
+   dragY=e.clientY;
    const cards=getCards().filter(card=>card!==activeCard);
    let before=null;
    for(const card of cards){

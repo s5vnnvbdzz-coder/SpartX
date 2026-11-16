@@ -348,9 +348,13 @@
    const days=DAYS[previewDays]||DAYS[4];
    const lastWeek=current?Math.max(1,...selected.map(lift=>
     clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6))):1;
+   // Keep the editor preview in sync with the actual pending Day 4:
+   // a completed Week 2 Deadlift must not preview Week 3 support.
+   const pending=current&&pref.enabled&&!incompatible?pendingSupportDay(current)?.week:null;
+   const supportWeek=pending||lastWeek;
    for(const [index,day] of days.entries()){
     const lift=selected[index]||null,week=lift&&current?
-     clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6):lastWeek;
+     clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6):supportWeek;
     const box=document.createElement('div');
     box.className='sx-adaptive-preview-day';
     const heading=document.createElement('strong');

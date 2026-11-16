@@ -1045,7 +1045,7 @@ function updateCycleStrengthPreview(){
  const lift=cycleStrengthLift(),input=$('cycleStrengthOneRm'),output=$('cycleStrengthTm');
  if(!input||!output)return;
  const raw=input.value.trim(),rm=Number(raw),valid=raw!==''&&Number.isFinite(rm)&&rm>0;
- output.textContent=valid?kg(roundTo(fromDisplay(rm)*state.profile.tmPct/100)):'—';
+ output.textContent=valid?kg(tm(lift)):'—';
  $('cycleStrengthFeedback').textContent=valid?'Saved automatically · '+lift+' weights are up to date.':'Enter a positive 1RM. Your last saved value is kept.';
  $('cycleStrengthFeedback').dataset.error=String(!valid);
 }
@@ -1065,24 +1065,32 @@ function selectCycleStrengthLift(lift){
 function saveCycleStrengthOneRm(){
  const input=$('cycleStrengthOneRm'),raw=input.value.trim(),value=Number(raw),lift=cycleStrengthLift();
  if(raw===''||!Number.isFinite(value)||value<=0){updateCycleStrengthPreview();return}
- const previous=state.profile.max[lift];
+ const previous=state.profile.max[lift],priorTms={...(state.cycle.trainingMaxes||{})};
  state.profile.max[lift]=fromDisplay(value);
- if(!persist(false)){state.profile.max[lift]=previous;return}
+ if(Math.abs(previous-state.profile.max[lift])>0.001&&state.cycle.trainingMaxes)delete state.cycle.trainingMaxes[lift];
+ if(!persist(false)){state.profile.max[lift]=previous;state.cycle.trainingMaxes=priorTms;return}
  updateCycleStrengthPreview();updateCycleStrengthList();renderCycleLoads();renderProfile();
 }
 function saveCycleStrengthPercent(){
  const percentage=Number($('cycleStrengthPercent').value);
  if(![90,92.5,95].includes(percentage))return;
- const previous=state.profile.tmPct;
+ const previous=state.profile.tmPct,priorTms={...(state.cycle.trainingMaxes||{})};
  state.profile.tmPct=percentage;
- if(!persist(false)){state.profile.tmPct=previous;return}
+ if(previous!==percentage&&state.cycle.trainingMaxes)state.cycle.trainingMaxes={};
+ if(!persist(false)){state.profile.tmPct=previous;state.cycle.trainingMaxes=priorTms;return}
  updateCycleStrengthPreview();updateCycleStrengthList();renderCycleLoads();renderProfile();
 }
 function saveProfile(){
  const vals={'Back Squat':$('maxSquat').value,'Bench Press':$('maxBench').value,'Deadlift':$('maxDeadlift').value,'Overhead Press':$('maxOHP').value};
  if(Object.values(vals).some(v=>!Number.isFinite(+v)||+v<=0)){toast('Enter a valid 1RM for all four lifts');return}
- state.profile.max=Object.fromEntries(Object.entries(vals).map(([k,v])=>[k,fromDisplay(+v)]));
+ const oldMax={...state.profile.max},oldPct=state.profile.tmPct;
+ const updated=Object.fromEntries(Object.entries(vals).map(([k,v])=>[k,fromDisplay(+v)]));
+ state.profile.max=updated;
  state.profile.tmPct=+$('profileTm').value;state.profile.rounding=+$('rounding').value;
+ if(state.cycle.trainingMaxes){
+  if(state.profile.tmPct!==oldPct)state.cycle.trainingMaxes={};
+  else for(const lift of LIFTS)if(Math.abs((updated[lift]||0)-(oldMax[lift]||0))>0.001)delete state.cycle.trainingMaxes[lift];
+ }
  persist();toast('Profile saved');
 }
 // Archived workouts remain available after a programme is deleted.

@@ -1775,11 +1775,19 @@ function renderWorkout(){
 
  const lift=$('liftSelect').value,week=+$('workWeek').value||currentWeekFor(lift),info=prescribed(lift,week),p=info.p;
  const existing=activeCycleLogs().find(x=>x.lift===lift&&x.week===week);
- $('workoutPrescription').innerHTML=`<div class="row between"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
- <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
- ${info.loadGuard?'<p class="tiny" role="status" style="margin:12px 0;color:var(--red2)">'+loadGuardSummary(info)+'</p>':''}
- <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${info.loadGuard?'recovery bridge (standard '+p.topPct+'% TM)':p.topPct+'% of TM'} · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${info.loadGuard?'Recovery bridge (standard '+p.backPct+'% TM)':p.backPct+'% of TM'}</div>`:''}</div>
- <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM${info.loadGuard?' (capped below adjusted main load)':''}. Adjust warm-ups to readiness; they are not working sets.</div>`;
+ $('workoutPrescription').innerHTML=`<div class="row between asc-workout-prescription-head"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
+ <div class="asc-workout-main-target">
+  <div class="mutedline">${p.deload?'LIGHT TECHNIQUE WORK':'MAIN SET TARGET'}</div>
+  <div class="asc-workout-main-load">${kg(info.topLoad)} <span>× ${p.topReps} reps${p.deload?' · 3 sets':''}</span></div>
+  <div class="tiny">Target RPE ${p.rpe} · ${info.loadGuard?'Recovery-adjusted loading':p.topPct+'% training max'}</div>
+  ${!p.deload?`<div class="asc-workout-backoff"><span>BACK-OFF</span><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong></div>`:''}
+ </div>
+ ${info.loadGuard?'<p class="tiny asc-workout-guard" role="status">'+loadGuardSummary(info)+'</p>':''}
+ <details class="asc-workout-guidance"><summary>Training max &amp; warm-up guidance</summary>
+  <div class="tiny"><strong>Training max:</strong> ${kg(tm(lift))}</div>
+  <div class="tiny"><strong>Warm-up:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM${info.loadGuard?' (capped below adjusted main load)':''}.</div>
+  <div class="tiny">Warm-ups are not working sets. Adjust to readiness.</div>
+ </details>`;
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);
 }
 const RPE_GAUGE="<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4.2 17a9 9 0 1 1 15.6 0\"/><path d=\"M12 14.5 16.5 8\"/><circle cx=\"12\" cy=\"14.5\" r=\"1.5\"/></svg>";

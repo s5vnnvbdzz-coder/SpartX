@@ -1855,7 +1855,71 @@ function renderProgress(){
  $('historyList').innerHTML=vals.length?vals.slice().reverse().map(l=>`<div class="listitem"><div><strong>${l.lift} · Week ${l.week}</strong><div class="tiny">${new Date(l.date).toLocaleDateString()} · ${l.sets.length} sets · ${Math.round(toDisplay(l.volume)).toLocaleString()} ${unit()} volume</div></div><span class="pill ${l.success?'good':'warn'}">${l.success?'TARGET HIT':'REVIEW'}</span></div>`).join(''):'No sessions recorded yet.';
 
 }
-function renderCycleReview(){const selected=selectedLifts(),logs=activeCycleLogs(),finished=selected.filter(l=>logs.some(x=>x.lift===l&&x.week===6&&x.setsComplete===true));const completed=finished.length;const sessions=logs.length;$('cycleReview').innerHTML=`<strong>${sessions} sessions logged.</strong><p>${completed?completed+' of '+selected.length+' selected lifts have completed Week 6.':'Complete Week 6 for your selected exercises to finish the cycle.'}</p><p>Review rep completion, RPE, technique and recovery before adjusting your Training Max.</p><p><strong>Progress:</strong> Increase upper-body loads by approximately 2.5 kg and lower-body loads by 2.5–5 kg when all targets were achieved comfortably.</p><p><strong>Hold:</strong> Repeat the current load if effort was higher than planned or recovery was poor.</p><p><strong>Reduce:</strong> Consider lowering loads by 2.5–5% after repeated missed work or technique breakdown.</p>`}
+function cycleProgressionReview(){
+ return window.SXAscensionProgression?.review?.(state.cycle,state.logs,PLAN)||{ready:false,lifts:[],finished:0,total:0};
+}
+function renderCycleReview(){
+ const review=cycleProgressionReview(),api=window.SXAscensionProgression;
+ const ready=review.ready;
+ $('ascApproveNextCycle').hidden=!ready;
+ const headline=ready?'All selected lifts completed Week 6. Review the proposed TM changes before starting the next cycle.':
+  'Complete Week 6 for all selected lifts before beginning the next cycle ('+review.finished+' / '+review.total+' completed).';
+ const cards=review.lifts.map((item,index)=>{
+  const current=tm(item.lift),options=api.choices(item.lift,current,state.profile.rounding);
+  const chosen=item.delta===null?(options.find(o=>o.delta<0)?.delta??0):item.delta;
+  const optionHtml=options.map(x=>'<option value="'+x.delta+'"'+(x.delta===chosen?' selected':'')+'>'+
+   x.label+' · next TM '+kg(roundTo(current+x.delta))+'</option>').join('');
+  return '<section class="listitem" style="display:block;margin:10px 0;padding:13px">'+
+   '<div class="row between" style="align-items:center"><strong>'+item.lift+'</strong><span class="pill '+(item.done6?'good':'warn')+'">'+
+   (item.done6?'W6 DONE':'W6 PENDING')+'</span></div>'+
+   '<div class="tiny" style="margin:8px 0">Current TM: <strong>'+kg(current)+
+   '</strong> · Weeks 1–5 completed: '+item.completed+'/5 · RPE records: '+item.knownRpe+'/5</div>'+
+   '<p class="tiny" style="margin:6px 0 10px">'+item.reason+'</p>'+
+   '<label class="tiny" for="ascNextTm'+index+'">NEXT-CYCLE TRAINING MAX</label>'+
+   '<select id="ascNextTm'+index+'" data-asc-next-tm="'+item.lift+'"'+(ready?'':' disabled')+'>'+optionHtml+'</select>'+
+   '</section>';
+ }).join('');
+ $('cycleReview').innerHTML='<strong>'+headline+'</strong>'+
+  '<p style="margin:9px 0">Each lift is assessed independently. Standard increases: +5 kg for squat and deadlift; +2.5 kg for bench and overhead press. High RPE or missed targets can reduce or stop the increase.</p>'+
+  cards+
+  '<p class="tiny" style="margin:10px 0">Your approval is required. Existing workouts and original entered 1RM values remain unchanged. Consider technique, recovery and readiness before continuing.</p>';
+}
+function approveAscensionNextCycle(){
+ const api=window.SXAscensionProgression,review=cycleProgressionReview();
+ if(!api||!review.ready||review.cycleId!==state.cycle.created){toast('Complete and review the current six-week cycle first');renderCycleReview();return}
+ const oldCycle=state.cycle,oldDraft=state.draft,oldId=oldCycle.created;
+ const previousAdaptive=window.SXAscensionAdaptive?.read?.(oldId);
+ const nextTms={},summary=[];
+ for(const item of review.lifts){
+  const picker=[...document.querySelectorAll('[data-asc-next-tm]')].find(x=>x.dataset.ascNextTm===item.lift);
+  const delta=Number(picker?.value),current=tm(item.lift);
+  if(!picker||!api.choices(item.lift,current,state.profile.rounding).some(x=>x.delta===delta)){
+   toast('Check your proposed training max changes');return
+  }
+  const next=roundTo(current+delta);
+  if(!(next>0)){toast('Invalid next-cycle training max');return}
+  nextTms[item.lift]=next;
+  summary.push(item.lift+' '+(delta>=0?'+':'')+delta+' kg');
+ }
+ const newId=new Date(Math.max(Date.now(),(Date.parse(oldId)||0)+1)).toISOString();
+ state.cycle={...oldCycle,created:newId,currentWeek:1,
+  cycleNumber:Math.max(1,Number(oldCycle.cycleNumber)||1)+1,
+  previousCycleId:oldId,
+  exercises:review.lifts.map(x=>x.lift),
+  weeks:Object.fromEntries(review.lifts.map(x=>[x.lift,1])),
+  trainingMaxes:nextTms};
+ state.draft=null;
+ if(!persist(false)){state.cycle=oldCycle;state.draft=oldDraft;return}
+ // Keep Adaptive Programming active across approved cycles without changing history.
+ if(previousAdaptive?.enabled){
+  try{window.SXAscensionAdaptive?.save?.({enabled:true,focus:previousAdaptive.focus,days:previousAdaptive.days})}catch(_){}
+ }
+ closeCycleReview();
+ $('workWeek').value=1;
+ renderAll();
+ toast('New cycle approved · '+summary.join(' · '));
+ try{window.parent.postMessage({type:'spartx:ascensionCycleUpdated'},location.origin)}catch(_){}
+}
 function renderAll(){applyAscTheme();renderAscRank();renderDashboard();renderProfile();renderCycle();renderProgress();renderMetrics();renderWorkout()}
 function metricValue(v,unit){return v===null||v===undefined||v===""?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:1})+unit}
 function saveMetrics(){

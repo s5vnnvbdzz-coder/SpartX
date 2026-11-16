@@ -304,7 +304,8 @@ body.sx-ascension-embedded #home .asc-dashboard-metrics .grid>.stat:nth-child(-n
 body.sx-ascension-embedded #home .asc-dashboard-metrics>summary{list-style:none}
 body.sx-ascension-embedded #home .asc-dashboard-metrics>summary::-webkit-details-marker{display:none}
 body.sx-ascension-embedded #home .asc-dashboard-metrics>summary:focus-visible{outline:2px solid var(--red2);outline-offset:3px}
-body.sx-ascension-embedded.sx-ascension-view-cycle #homeHero{display:block!important}
+/* SpartanX View Cycle deliberately hides the hero because the complete
+   programme is already presented in that view. Do not repeat it. */
 /* Keep detailed weekly weights visible; principles are optional background. */
 body.sx-ascension-embedded #cycleDetails .asc-cycle-reference{margin:12px 0}
 body.sx-ascension-embedded #cycleDetails .asc-cycle-reference>.card{margin:0 10px 10px!important}
@@ -319,4 +320,15 @@ body.sx-ascension-embedded #sxCycleViewContent>.sx-cycle-view-overview>.sx-cycle
 /* Manage Cycle uses a single dominant editor, not a nested boxed card. */
 body.sx-ascension-embedded #cycleEditorBackdrop #cycleBuilderCard{
  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+
+/* Quick-import mode must be a transparent iframe so the SpartanX workout
+   under the import sheet remains visible and tappable after closing. */
+html:has(body.sx-ascension-embedded.sx-spartan-import-only){
+ background:transparent!important;background-image:none!important;
+}
+body.sx-ascension-embedded.sx-spartan-import-only,
+body.sx-ascension-embedded.sx-spartan-import-only[data-spartx-parent-theme]{
+ background:transparent!important;background-color:transparent!important;
+ background-image:none!important;
 }

@@ -623,7 +623,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <script defer src="../assets/themes/shared-theme.js?v=340"></script>
 <link rel="stylesheet" href="../assets/ui/page-navigation.css?v=318">
 <link rel="stylesheet" href="../assets/themes/uniform-surfaces.css?v=340">
-<link rel="stylesheet" href="./obsidian-clean.css?v=351">
+<link rel="stylesheet" href="./obsidian-clean.css?v=352">
 <script defer src="../assets/charts/touch-scrub.js?v=340"></script>
 
 </head>
@@ -871,7 +871,18 @@ function prepareEmbeddedAscensionOverview(){
   disclosure.appendChild(grid);
  }
  const cycle=$('cycleDetails');
- if(cycle&&!cycle.querySelector('.asc-cycle-reference')){
+ if(cycle&&!cycle.querySelector('.asc-prescription-reference')){
+  const prescription=[...cycle.querySelectorAll(':scope > .card')].find(node=>
+    node.querySelector('h2')?.textContent?.trim()==='Weekly prescriptions');
+  if(prescription){
+   const reference=document.createElement('details');
+   reference.className='asc-cycle-reference asc-prescription-reference';
+   reference.innerHTML='<summary>Weekly prescription reference</summary>';
+   prescription.before(reference);
+   reference.appendChild(prescription);
+  }
+ }
+ if(cycle&&!cycle.querySelector('.asc-cycle-reference:not(.asc-prescription-reference)')){
   const rules=[...cycle.querySelectorAll(':scope > .card')].find(node=>node.querySelector('h2')?.textContent?.trim()==='Progression rules');
   const method=[...home.querySelectorAll(':scope > .card')].find(node=>node.querySelector('h2')?.textContent?.trim()==='Method principles');
   if(rules||method){
@@ -2012,9 +2023,15 @@ function init(){
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=95').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=96').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
+/* Apply the iframe's Obsidian appearance before the parent handshake paints.
+   This is presentation-only; import permissions still require the verified
+   same-origin spartx:ascensionEmbedReady message. */
+if(window.parent!==window&&ascOpenedFromSpartanX()){
+ document.body.classList.add('sx-ascension-embedded');
+}
 init();
 </script>
 <script src="../assets/ascension/adaptive-programming.js?v=345"></script>

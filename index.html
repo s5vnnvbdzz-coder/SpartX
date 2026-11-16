@@ -1052,19 +1052,23 @@ body:has(> main > .screen.active:is(#home,#workout,#tools,#profile)) > header{
  width:100%;box-sizing:border-box;z-index:12!important;
  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
 }
-/* Home: keep the header in normal document flow. On iOS a fixed header
-   plus a measured spacer can leave the top of Home inaccessible after hash
-   restoration or a PWA resume. Sticky looks identical while scrolling but
-   never covers the first heading at scroll position zero. */
+/* Home keeps the header fixed. Put the exact live header clearance in
+   main's own top padding, so the first content row cannot slip behind it
+   even if iPhone Safari restores the #home fragment or a PWA scroll state.
+   No separate Home spacer means there cannot be two competing offsets. */
 body.sx-home-header-layout > header,
 body:has(> main > #home.screen.active) > header{
- position:sticky!important;top:0!important;
+ position:fixed!important;top:0!important;
 }
 body.sx-home-header-layout > #sxMainHeaderSpacer,
 body:has(> main > #home.screen.active) > #sxMainHeaderSpacer{
  display:none!important;
 }
-#home{scroll-margin-top:var(--sx-header-live-height)}
+body.sx-home-header-layout > main,
+body:has(> main > #home.screen.active) > main{
+ padding-top:calc(16px + var(--sx-header-live-height))!important;
+}
+#home{scroll-margin-top:calc(16px + var(--sx-header-live-height))}
 /* Calendar modal retains a scrolling title. Its overlay stays above the
    global main-page header; the main app navigation remains hidden. */
 body.sx-workout-calendar-open #workoutCalendarOverlay{z-index:25}

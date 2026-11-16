@@ -1,7 +1,6 @@
-/* AscensionX Obsidian Black · v350
-   Dedicated near-pure-black AscensionX style, with cool silver contrast.
-   Respects the active SpartanX parent theme unless it maps to Obsidian. */
-body[data-theme="obsidian"]{
+/* AscensionX inside SpartanX · embedded-only Obsidian Black v351.
+   Standalone appearance and layout remain unchanged. */
+body.sx-ascension-embedded{
  --bg:#000000;--panel:#090a0c;--panel2:#121417;--panel3:#1a1d21;
  --line:#2a2d32;--text:#f2f4f7;--muted:#a0a4ae;
  --red:#c8cdd5;--red2:#e4e8ef;--redDeep:#56606e;
@@ -9,99 +8,99 @@ body[data-theme="obsidian"]{
  background:#000!important;
  color-scheme:dark;
 }
-body[data-theme="obsidian"] header,
-body[data-theme="obsidian"] nav{
+body.sx-ascension-embedded header,
+body.sx-ascension-embedded nav{
  background:#050506f7!important;
  border-color:#292b30!important;
  box-shadow:none!important;
 }
-body[data-theme="obsidian"] :is(.card,.hero,.stat,.settings-modal,.cycle-editor-dialog,.cycle-confirm-dialog,.set-popup,.week-card,.workout-panel){
+body.sx-ascension-embedded :is(.card,.hero,.stat,.settings-modal,.cycle-editor-dialog,.cycle-confirm-dialog,.set-popup,.week-card,.workout-panel){
  background:linear-gradient(225deg,#151619 0%,#0b0c0e 44%,#070708 100%)!important;
  border:1px solid #303238!important;
  box-shadow:inset 0 1px 0 #ffffff09,0 6px 24px #0007!important;
 }
-body[data-theme="obsidian"] .hero{
+body.sx-ascension-embedded .hero{
  background:linear-gradient(225deg,#181a1d 0%,#0b0c0e 50%,#050506 100%)!important;
 }
-body[data-theme="obsidian"] .hero::after{color:#ffffff07!important}
-body[data-theme="obsidian"] .stat{
+body.sx-ascension-embedded .hero::after{color:#ffffff07!important}
+body.sx-ascension-embedded .stat{
  background:linear-gradient(225deg,#16171a,#090a0b)!important;
  border-color:#2a2c30!important;
 }
-body[data-theme="obsidian"] :is(.eyebrow,.brand span,nav button.active,.asc-hero-lift b){
+body.sx-ascension-embedded :is(.eyebrow,.brand span,nav button.active,.asc-hero-lift b){
  color:#e7e9ed!important;
 }
-body[data-theme="obsidian"] button:not(.secondary):not(.ghost):not(.danger):not(.iconbtn):not(.weektile):not(nav button):not(.theme-choices button){
+body.sx-ascension-embedded button:not(.secondary):not(.ghost):not(.danger):not(.iconbtn):not(.weektile):not(nav button):not(.theme-choices button){
  background:#dde1e7!important;
  color:#0a0b0d!important;
  border:1px solid #e9ebef!important;
  box-shadow:none!important;
 }
-body[data-theme="obsidian"] button.secondary,
-body[data-theme="obsidian"] .theme-choices button{
+body.sx-ascension-embedded button.secondary,
+body.sx-ascension-embedded .theme-choices button{
  background:#17191c!important;
  border:1px solid #35383e!important;
  color:#e4e7ec!important;
  box-shadow:none!important;
 }
-body[data-theme="obsidian"] :is(button.secondary, .theme-choices button).selected{
+body.sx-ascension-embedded :is(button.secondary, .theme-choices button).selected{
  border-color:#d3d7de!important;
 }
-body[data-theme="obsidian"] input,
-body[data-theme="obsidian"] select,
-body[data-theme="obsidian"] textarea{
+body.sx-ascension-embedded input,
+body.sx-ascension-embedded select,
+body.sx-ascension-embedded textarea{
  background:#090a0c!important;
  border-color:#373a40!important;
  color:var(--text)!important;
 }
-body[data-theme="obsidian"] :is(input,select,textarea):focus{
+body.sx-ascension-embedded :is(input,select,textarea):focus{
  border-color:#cdd1d8!important;
 }
-body[data-theme="obsidian"] :is(.progress,.rank-progress){
+body.sx-ascension-embedded :is(.progress,.rank-progress){
  background:#22252a!important;
 }
-body[data-theme="obsidian"] :is(.progress,.rank-progress)>i{
+body.sx-ascension-embedded :is(.progress,.rank-progress)>i{
  background:linear-gradient(90deg,#525a64,#e5e9ef)!important;
  box-shadow:0 0 8px #ffffff18;
 }
-body[data-theme="obsidian"] .weektile{
+body.sx-ascension-embedded .weektile{
  background:#101114!important;
  border-color:#32353b!important;
  box-shadow:none!important;
  color:#e6e8ec!important;
 }
-body[data-theme="obsidian"] .weektile.current{
+body.sx-ascension-embedded .weektile.current{
  border-color:#d9dde4!important;
  box-shadow:inset 0 0 0 1px #9fa5b0!important;
 }
-body[data-theme="obsidian"] .weektile.done{
+body.sx-ascension-embedded .weektile.done{
  background:#181b1e!important;
  border-color:#4d5159!important;
 }
-body[data-theme="obsidian"] .pill.red{
+body.sx-ascension-embedded .pill.red{
  background:#1a1d21!important;
  border-color:#666b74!important;
  color:#e2e5eb!important;
 }
-body[data-theme="obsidian"] .bar{
+body.sx-ascension-embedded .bar{
  background:linear-gradient(180deg,#e4e7ec,#626b76)!important;
 }
-body[data-theme="obsidian"] :is(.cycle-editor-actions,.settings-modal .modal-head){
+body.sx-ascension-embedded :is(.cycle-editor-actions,.settings-modal .modal-head){
  background:#0c0d0f!important;
 }
-body[data-theme="obsidian"] :is(.seg,.set-control .set-value){
+body.sx-ascension-embedded :is(.seg,.set-control .set-value){
  background:#0b0c0e!important;border-color:#363941!important;
 }
 
 /* Simplify every AscensionX dashboard, regardless of chosen theme.
    Lifetime numbers are still accessible, but no longer duplicate the
    active-cycle hero or the Profile training summary by default. */
-#home .asc-dashboard-metrics{
+body.sx-ascension-embedded #home .asc-dashboard-metrics{
  margin:12px 0 14px;
  border:0;
  background:transparent;
 }
-#home .asc-dashboard-metrics>summary{
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary{
  display:inline-flex;align-items:center;gap:7px;
  min-height:42px;
  color:var(--muted);
@@ -109,134 +108,215 @@ body[data-theme="obsidian"] :is(.seg,.set-control .set-value){
  font-size:12px;font-weight:750;
  list-style:none;
 }
-#home .asc-dashboard-metrics>summary::-webkit-details-marker{display:none}
-#home .asc-dashboard-metrics>summary::before{content:'+';font-size:17px;color:var(--red2)}
-#home .asc-dashboard-metrics[open]>summary::before{content:'−'}
-#home .asc-dashboard-metrics>summary:focus-visible{outline:2px solid var(--red2);outline-offset:4px}
-#home .asc-dashboard-metrics .grid{margin:4px 0 12px}
-#home .asc-dashboard-metrics .stat{padding:12px}
-#home #homeHero[hidden]{display:none!important}
-#home #homeHero{margin-top:12px}
-#home #homeHero .asc-hero-cycle-heading{
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary::-webkit-details-marker{display:none}
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary::before{content:'+';font-size:17px;color:var(--red2)}
+body.sx-ascension-embedded #home .asc-dashboard-metrics[open]>summary::before{content:'−'}
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary:focus-visible{outline:2px solid var(--red2);outline-offset:4px}
+body.sx-ascension-embedded #home .asc-dashboard-metrics .grid{margin:4px 0 12px}
+body.sx-ascension-embedded #home .asc-dashboard-metrics .stat{padding:12px}
+body.sx-ascension-embedded #home #homeHero[hidden]{display:none!important}
+body.sx-ascension-embedded #home #homeHero{margin-top:12px}
+body.sx-ascension-embedded #home #homeHero .asc-hero-cycle-heading{
  font-size:clamp(22px,5.8vw,30px);
  font-weight:900;letter-spacing:-.8px;
  margin:9px 0 12px;
 }
-#home #homeHero .asc-hero-progress-meta{
+body.sx-ascension-embedded #home #homeHero .asc-hero-progress-meta{
  display:flex;align-items:center;justify-content:space-between;
  gap:8px;font-size:11px;font-weight:750;color:var(--muted);
 }
-#home #homeHero .asc-hero-progress-meta strong{color:var(--text);font-size:13px}
-#home #homeHero .asc-hero-progress{margin:8px 0 13px;height:6px}
-#home #homeHero .asc-hero-lifts{
+body.sx-ascension-embedded #home #homeHero .asc-hero-progress-meta strong{color:var(--text);font-size:13px}
+body.sx-ascension-embedded #home #homeHero .asc-hero-progress{margin:8px 0 13px;height:6px}
+body.sx-ascension-embedded #home #homeHero .asc-hero-lifts{
  display:flex;flex-wrap:wrap;gap:6px 12px;
  padding:2px 0 4px;
 }
-#home #homeHero .asc-hero-lift{
+body.sx-ascension-embedded #home #homeHero .asc-hero-lift{
  display:inline-flex;align-items:center;gap:5px;
  font-size:12px;color:var(--muted);
 }
-#home #homeHero .asc-hero-lift b{color:var(--red2)}
-#home #homeHero .home-hero-actions{
+body.sx-ascension-embedded #home #homeHero .asc-hero-lift b{color:var(--red2)}
+body.sx-ascension-embedded #home #homeHero .home-hero-actions{
  margin-top:17px;gap:8px;
 }
-#home #homeHero .home-hero-actions button{
+body.sx-ascension-embedded #home #homeHero .home-hero-actions button{
  flex:1 1 150px;
  min-height:44px;
 }
-#home #cycleDetails{
+body.sx-ascension-embedded #home #cycleDetails{
  margin:17px 0 0;
 }
-#home #cycleDetails>.eyebrow{margin-bottom:5px}
-#home #cycleDetails .asc-cycle-reference{
+body.sx-ascension-embedded #home #cycleDetails>.eyebrow{margin-bottom:5px}
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference{
  margin:14px 0;
  padding:0;
  border:1px solid var(--line);
  border-radius:13px;
  background:var(--panel);
 }
-#home #cycleDetails .asc-cycle-reference>summary{
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference>summary{
  padding:15px;cursor:pointer;
  color:var(--text);font-weight:800;
  list-style:none;
 }
-#home #cycleDetails .asc-cycle-reference>summary::after{
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference>summary::after{
  content:'⌄';float:right;color:var(--muted);
 }
-#home #cycleDetails .asc-cycle-reference[open]>summary::after{content:'⌃'}
-#home #cycleDetails .asc-cycle-reference>summary::-webkit-details-marker{display:none}
-#home #cycleDetails .asc-cycle-reference>summary:focus-visible{
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference[open]>summary::after{content:'⌃'}
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference>summary::-webkit-details-marker{display:none}
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference>summary:focus-visible{
  outline:2px solid var(--red2);outline-offset:2px;
 }
-#home #cycleDetails .asc-cycle-reference>.card{
+body.sx-ascension-embedded #home #cycleDetails .asc-cycle-reference>.card{
  margin:0 12px 12px;
 }
-#home #ascBuildCycleEntry{margin-top:14px}
+body.sx-ascension-embedded #home #ascBuildCycleEntry{margin-top:14px}
 @media(max-width:440px){
  #home #homeHero{padding:16px}
  #home #homeHero .home-hero-actions button{flex-basis:100%}
  #home .asc-dashboard-metrics .stat strong{font-size:19px}
 }
 @media(prefers-reduced-motion:reduce){
- body[data-theme="obsidian"] :is(.progress,.rank-progress)>i{transition:none!important}
+ body.sx-ascension-embedded :is(.progress,.rank-progress)>i{transition:none!important}
 }
 
 /* Workout: one authoritative prescribed main load, then back-off work.
    Warm-ups and training-max context are available on demand, not repeated
    beside the live set logger. Recovery-bridge warnings stay visible. */
-#workout #workoutPrescription .asc-workout-prescription-head{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-prescription-head{
  margin:0 0 14px;
 }
-#workout #workoutPrescription .asc-workout-main-target{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-main-target{
  padding:15px 16px;
  border:1px solid var(--line);
  border-radius:14px;
  background:color-mix(in srgb,var(--panel2) 42%,var(--panel));
 }
-#workout #workoutPrescription .asc-workout-main-load{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-main-load{
  display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;
  margin:8px 0;
  font-size:clamp(25px,6.8vw,35px);
  font-weight:900;letter-spacing:-.9px;line-height:1.2;
  color:var(--text);
 }
-#workout #workoutPrescription .asc-workout-main-load span{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-main-load span{
  font-size:clamp(15px,4vw,19px);letter-spacing:0;
  color:var(--red2);font-weight:800;
 }
-#workout #workoutPrescription .asc-workout-backoff{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-backoff{
  display:flex;justify-content:space-between;align-items:baseline;
  flex-wrap:wrap;gap:6px 12px;
  margin-top:14px;padding-top:12px;border-top:1px solid var(--line);
 }
-#workout #workoutPrescription .asc-workout-backoff span{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-backoff span{
  font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:800;
 }
-#workout #workoutPrescription .asc-workout-backoff strong{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-backoff strong{
  font-size:15px;color:var(--text);
 }
-#workout #workoutPrescription .asc-workout-guard{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-guard{
  margin:12px 0;color:var(--red2);font-weight:700;
 }
-#workout #workoutPrescription .asc-workout-guidance{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-guidance{
  margin:12px 0 0;
  border-top:1px solid var(--line);
  padding-top:8px;
 }
-#workout #workoutPrescription .asc-workout-guidance>summary{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-guidance>summary{
  cursor:pointer;
  min-height:40px;
  display:flex;align-items:center;
  color:var(--muted);
  font-size:12px;font-weight:750;
 }
-#workout #workoutPrescription .asc-workout-guidance>summary:focus-visible{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-guidance>summary:focus-visible{
  outline:2px solid var(--red2);outline-offset:2px;
 }
-#workout #workoutPrescription .asc-workout-guidance .tiny{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-guidance .tiny{
  margin:7px 0;line-height:1.55;
 }
-body[data-theme="obsidian"] #workout #workoutPrescription .asc-workout-main-target{
+body.sx-ascension-embedded #workout #workoutPrescription .asc-workout-main-target{
  background:linear-gradient(225deg,#181a1d,#0b0c0e)!important;
  border-color:#303238!important;
+}
+
+/* Embedded parent palette can be Cosmic, Pantheon, or Light; Obsidian wins
+   only inside the AscensionX frame. Keep shared data and controls intact. */
+html:has(body.sx-ascension-embedded){background:#000!important;}
+body.sx-ascension-embedded[data-spartx-parent-theme]{
+ --bg:#000000!important;--panel:#090a0c!important;--panel2:#121417!important;
+ --panel3:#1a1d21!important;--line:#303238!important;
+ --text:#f2f4f7!important;--muted:#a0a4ae!important;
+ --red:#c8cdd5!important;--red2:#e4e8ef!important;--redDeep:#56606e!important;
+ --sx-parent-bg:#000!important;--sx-parent-panel:#0a0b0d!important;
+ --sx-parent-panel2:#16181b!important;--sx-parent-line:#303238!important;
+ --sx-parent-text:#f2f4f7!important;--sx-parent-muted:#a0a4ae!important;
+ --sx-parent-accent:#e4e8ef!important;
+ background:#000!important;background-image:none!important;
+ color:#f2f4f7!important;color-scheme:dark!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] :is(
+ .card,.hero,.stat,.settings-modal,.cycle-editor-dialog,.cycle-confirm-dialog,
+ .set-popup,.week-card,.workout-panel,.asc-cycle-reference,.asc-workout-main-target
+){
+ background:linear-gradient(225deg,#151619,#090a0c 55%,#050506)!important;
+ border-color:#2d3036!important;
+ box-shadow:inset 0 1px 0 #ffffff08,0 6px 22px #0008!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] :is(
+ header,nav[aria-label="Main navigation"],.cycle-editor-header,.cycle-editor-actions,
+ #sxCycleViewDialog .sx-cycle-view-head,#sxCycleViewDialog .sx-cycle-view-foot
+){
+ background:#08090b!important;color:#f2f4f7!important;
+ border-color:#303238!important;box-shadow:none!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] :is(
+ input,select,textarea,.set-control .set-value
+){
+ background:#090a0c!important;color:#f2f4f7!important;
+ border-color:#383a41!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] :is(.brand span,.eyebrow){
+ color:#e5e8ee!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] :is(.progress>i,.rank-progress>i){
+ background:linear-gradient(90deg,#58616d,#e5e9ef)!important;
+ box-shadow:none!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] #sxCycleViewDialog,
+body.sx-ascension-embedded[data-spartx-parent-theme] #cycleEditorBackdrop,
+body.sx-ascension-embedded[data-spartx-parent-theme] #sxCycleViewBackdrop,
+body.sx-ascension-embedded[data-spartx-parent-theme] #sxCycleViewDialog .sx-cycle-view-scroll,
+body.sx-ascension-embedded[data-spartx-parent-theme] #cycleEditorBackdrop .cycle-editor-body{
+ background:#000!important;background-image:none!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] #sxCycleViewDialog :is(
+ .sx-cycle-view-overview,.sx-cycle-view-scroll #cycleDetails>.card
+){
+ background:#0b0c0e!important;border-color:#2d3036!important;box-shadow:none!important;
+}
+body.sx-ascension-embedded[data-spartx-parent-theme] #sxCycleViewDialog #sxCycleViewSave{
+ background:#dfe3e9!important;color:#090a0b!important;border-color:#e8ebef!important;
+}
+/* One compact active cycle instead of 4 repeated top-row KPIs. */
+body.sx-ascension-embedded #homeHero .big{font-size:clamp(23px,6vw,30px)}
+body.sx-ascension-embedded #home .asc-dashboard-metrics .grid>.stat:nth-child(-n+2){display:none!important}
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary{list-style:none}
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary::-webkit-details-marker{display:none}
+body.sx-ascension-embedded #home .asc-dashboard-metrics>summary:focus-visible{outline:2px solid var(--red2);outline-offset:3px}
+body.sx-ascension-embedded.sx-ascension-view-cycle #homeHero{display:block!important}
+/* Keep detailed weekly weights visible; principles are optional background. */
+body.sx-ascension-embedded #cycleDetails .asc-cycle-reference{margin:12px 0}
+body.sx-ascension-embedded #cycleDetails .asc-cycle-reference>.card{margin:0 10px 10px!important}
+body.sx-ascension-embedded #sxCycleViewContent .sx-cycle-view-muted:last-child{
+ font-size:12px!important;color:#c4c8cf!important;
+}
+/* Remove the extra repeated line of selected lifts in View Cycle; each
+   lift's active week is already part of the progress summary. */
+body.sx-ascension-embedded #sxCycleViewContent>.sx-cycle-view-overview>.sx-cycle-view-muted:first-of-type{
+ display:none!important;
+}
+/* Manage Cycle uses a single dominant editor, not a nested boxed card. */
+body.sx-ascension-embedded #cycleEditorBackdrop #cycleBuilderCard{
+ background:transparent!important;border:0!important;box-shadow:none!important;
 }

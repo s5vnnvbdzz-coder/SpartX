@@ -1,0 +1,182 @@
+/* AscensionX Obsidian Black · v350
+   Dedicated near-pure-black AscensionX style, with cool silver contrast.
+   Respects the active SpartanX parent theme unless it maps to Obsidian. */
+body[data-theme="obsidian"]{
+ --bg:#000000;--panel:#090a0c;--panel2:#121417;--panel3:#1a1d21;
+ --line:#2a2d32;--text:#f2f4f7;--muted:#a0a4ae;
+ --red:#c8cdd5;--red2:#e4e8ef;--redDeep:#56606e;
+ --green:#b2d8c3;--amber:#d5bb89;
+ background:#000!important;
+ color-scheme:dark;
+}
+body[data-theme="obsidian"] header,
+body[data-theme="obsidian"] nav{
+ background:#050506f7!important;
+ border-color:#292b30!important;
+ box-shadow:none!important;
+}
+body[data-theme="obsidian"] :is(.card,.hero,.stat,.settings-modal,.cycle-editor-dialog,.cycle-confirm-dialog,.set-popup,.week-card,.workout-panel){
+ background:linear-gradient(225deg,#151619 0%,#0b0c0e 44%,#070708 100%)!important;
+ border:1px solid #303238!important;
+ box-shadow:inset 0 1px 0 #ffffff09,0 6px 24px #0007!important;
+}
+body[data-theme="obsidian"] .hero{
+ background:linear-gradient(225deg,#181a1d 0%,#0b0c0e 50%,#050506 100%)!important;
+}
+body[data-theme="obsidian"] .hero::after{color:#ffffff07!important}
+body[data-theme="obsidian"] .stat{
+ background:linear-gradient(225deg,#16171a,#090a0b)!important;
+ border-color:#2a2c30!important;
+}
+body[data-theme="obsidian"] :is(.eyebrow,.brand span,nav button.active,.asc-hero-lift b){
+ color:#e7e9ed!important;
+}
+body[data-theme="obsidian"] button:not(.secondary):not(.ghost):not(.danger):not(.iconbtn):not(.weektile):not(nav button):not(.theme-choices button){
+ background:#dde1e7!important;
+ color:#0a0b0d!important;
+ border:1px solid #e9ebef!important;
+ box-shadow:none!important;
+}
+body[data-theme="obsidian"] button.secondary,
+body[data-theme="obsidian"] .theme-choices button{
+ background:#17191c!important;
+ border:1px solid #35383e!important;
+ color:#e4e7ec!important;
+ box-shadow:none!important;
+}
+body[data-theme="obsidian"] :is(button.secondary, .theme-choices button).selected{
+ border-color:#d3d7de!important;
+}
+body[data-theme="obsidian"] input,
+body[data-theme="obsidian"] select,
+body[data-theme="obsidian"] textarea{
+ background:#090a0c!important;
+ border-color:#373a40!important;
+ color:var(--text)!important;
+}
+body[data-theme="obsidian"] :is(input,select,textarea):focus{
+ border-color:#cdd1d8!important;
+}
+body[data-theme="obsidian"] :is(.progress,.rank-progress){
+ background:#22252a!important;
+}
+body[data-theme="obsidian"] :is(.progress,.rank-progress)>i{
+ background:linear-gradient(90deg,#525a64,#e5e9ef)!important;
+ box-shadow:0 0 8px #ffffff18;
+}
+body[data-theme="obsidian"] .weektile{
+ background:#101114!important;
+ border-color:#32353b!important;
+ box-shadow:none!important;
+ color:#e6e8ec!important;
+}
+body[data-theme="obsidian"] .weektile.current{
+ border-color:#d9dde4!important;
+ box-shadow:inset 0 0 0 1px #9fa5b0!important;
+}
+body[data-theme="obsidian"] .weektile.done{
+ background:#181b1e!important;
+ border-color:#4d5159!important;
+}
+body[data-theme="obsidian"] .pill.red{
+ background:#1a1d21!important;
+ border-color:#666b74!important;
+ color:#e2e5eb!important;
+}
+body[data-theme="obsidian"] .bar{
+ background:linear-gradient(180deg,#e4e7ec,#626b76)!important;
+}
+body[data-theme="obsidian"] :is(.cycle-editor-actions,.settings-modal .modal-head){
+ background:#0c0d0f!important;
+}
+body[data-theme="obsidian"] :is(.seg,.set-control .set-value){
+ background:#0b0c0e!important;border-color:#363941!important;
+}
+
+/* Simplify every AscensionX dashboard, regardless of chosen theme.
+   Lifetime numbers are still accessible, but no longer duplicate the
+   active-cycle hero or the Profile training summary by default. */
+#home .asc-dashboard-metrics{
+ margin:12px 0 14px;
+ border:0;
+ background:transparent;
+}
+#home .asc-dashboard-metrics>summary{
+ display:inline-flex;align-items:center;gap:7px;
+ min-height:42px;
+ color:var(--muted);
+ cursor:pointer;
+ font-size:12px;font-weight:750;
+ list-style:none;
+}
+#home .asc-dashboard-metrics>summary::-webkit-details-marker{display:none}
+#home .asc-dashboard-metrics>summary::before{content:'+';font-size:17px;color:var(--red2)}
+#home .asc-dashboard-metrics[open]>summary::before{content:'−'}
+#home .asc-dashboard-metrics>summary:focus-visible{outline:2px solid var(--red2);outline-offset:4px}
+#home .asc-dashboard-metrics .grid{margin:4px 0 12px}
+#home .asc-dashboard-metrics .stat{padding:12px}
+#home #homeHero[hidden]{display:none!important}
+#home #homeHero{margin-top:12px}
+#home #homeHero .asc-hero-cycle-heading{
+ font-size:clamp(22px,5.8vw,30px);
+ font-weight:900;letter-spacing:-.8px;
+ margin:9px 0 12px;
+}
+#home #homeHero .asc-hero-progress-meta{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:8px;font-size:11px;font-weight:750;color:var(--muted);
+}
+#home #homeHero .asc-hero-progress-meta strong{color:var(--text);font-size:13px}
+#home #homeHero .asc-hero-progress{margin:8px 0 13px;height:6px}
+#home #homeHero .asc-hero-lifts{
+ display:flex;flex-wrap:wrap;gap:6px 12px;
+ padding:2px 0 4px;
+}
+#home #homeHero .asc-hero-lift{
+ display:inline-flex;align-items:center;gap:5px;
+ font-size:12px;color:var(--muted);
+}
+#home #homeHero .asc-hero-lift b{color:var(--red2)}
+#home #homeHero .home-hero-actions{
+ margin-top:17px;gap:8px;
+}
+#home #homeHero .home-hero-actions button{
+ flex:1 1 150px;
+ min-height:44px;
+}
+#home #cycleDetails{
+ margin:17px 0 0;
+}
+#home #cycleDetails>.eyebrow{margin-bottom:5px}
+#home #cycleDetails .asc-cycle-reference{
+ margin:14px 0;
+ padding:0;
+ border:1px solid var(--line);
+ border-radius:13px;
+ background:var(--panel);
+}
+#home #cycleDetails .asc-cycle-reference>summary{
+ padding:15px;cursor:pointer;
+ color:var(--text);font-weight:800;
+ list-style:none;
+}
+#home #cycleDetails .asc-cycle-reference>summary::after{
+ content:'⌄';float:right;color:var(--muted);
+}
+#home #cycleDetails .asc-cycle-reference[open]>summary::after{content:'⌃'}
+#home #cycleDetails .asc-cycle-reference>summary::-webkit-details-marker{display:none}
+#home #cycleDetails .asc-cycle-reference>summary:focus-visible{
+ outline:2px solid var(--red2);outline-offset:2px;
+}
+#home #cycleDetails .asc-cycle-reference>.card{
+ margin:0 12px 12px;
+}
+#home #ascBuildCycleEntry{margin-top:14px}
+@media(max-width:440px){
+ #home #homeHero{padding:16px}
+ #home #homeHero .home-hero-actions button{flex-basis:100%}
+ #home .asc-dashboard-metrics .stat strong{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){
+ body[data-theme="obsidian"] :is(.progress,.rank-progress)>i{transition:none!important}
+}

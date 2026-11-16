@@ -1393,8 +1393,10 @@ window.addEventListener('message',e=>{
   const support=window.SXAscensionAdaptive?.enabled(state.cycle.created)?
     window.SXAscensionAdaptive.schedule()?.slots?.find(x=>x.kind==='support'&&x.exercises.length):null;
   const choice=e.data.lift;
+  const pendingSupport=window.SXAscensionAdaptive?.pendingSupportDay?.();
   const preferred=choice==='__ADAPTIVE_SUPPORT__'&&support?choice:
-    typeof choice==='string'&&lifts.includes(choice)?choice:lifts[0];
+    typeof choice==='string'&&lifts.includes(choice)?choice:
+    pendingSupport&&support?'__ADAPTIVE_SUPPORT__':lifts[0];
   const picker=$('ascSpartanImportLift'),panel=$('ascSpartanImportPreview');
   if(!preferred||!picker||!panel){
    window.parent.postMessage({type:'spartx:ascensionHostPreview',ready:false,message:'No active AscensionX cycle was found on this device.'},location.origin);
@@ -1496,15 +1498,18 @@ function continueAscensionTraining(){
  const choices=selectedLifts();
  if(!choices.length){showScreen('workout');return}
  const picker=$('ascSpartanImportLift');
- const preferred=choices.includes($('liftSelect').value)?$('liftSelect').value:choices[0];
+ // Support is a distinct training day, not a reset to Squat week +1.
+ const adaptive=window.SXAscensionAdaptive;
+ const pendingSupport=adaptive?.pendingSupportDay?.();
+ const preferred=pendingSupport?'__ADAPTIVE_SUPPORT__':
+  choices.includes($('liftSelect').value)?$('liftSelect').value:choices[0];
  picker.innerHTML=choices.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
  // The adaptive fourth day uses the same Continue → Load workflow, but does not advance the primary lifts.
- const adaptive=window.SXAscensionAdaptive;
  if(adaptive?.enabled(state.cycle.created)){
   const support=adaptive.schedule()?.slots?.find(slot=>slot.kind==='support'&&slot.exercises.length);
   if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+' · '+support.day+'</option>');
  }
- picker.value=preferred;
+ picker.value=[...picker.options].some(option=>option.value===preferred)?preferred:choices[0];
  renderAscSpartanImportPreview();
  $('ascSpartanImportBackdrop').classList.add('open');
  $('ascSpartanImportBackdrop').setAttribute('aria-hidden','false');

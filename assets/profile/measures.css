@@ -1,4 +1,4 @@
-/* SpartanX Measures · full-screen secondary page · Build 326 */
+/* SpartanX Measures · full-screen secondary page · Build 330 */
 :root{--sx-measure-surface:var(--panel,#171a1e);--sx-measure-line:var(--line,#343b44)}
 body:has(#measuresOverlay.screen.active)>header,
 body:has(#sxMeasureLogPage.screen.active)>header,
@@ -215,8 +215,11 @@ body .sx-measure-range-trigger{
  display:flex!important;align-items:flex-end!important;justify-content:center!important;
  width:100vw;height:auto!important;margin:0;padding:0;overflow:hidden;
  overscroll-behavior:contain;
+ touch-action:none;
 }
-body.sx-measure-sheet-open{overflow:hidden!important}
+/* The full-screen picker already intercepts input. Avoid toggling body
+   overflow on iOS; that can reset the visible Measures scroll position. */
+body.sx-measure-sheet-open{overscroll-behavior-y:contain}
 .sx-measure-sheet-scrim{
  position:absolute;inset:0;display:block;width:100%;height:100%;
  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;

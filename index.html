@@ -1998,6 +1998,61 @@ body #editProfileOverlay.sx-profile-secondary .sx-edit-profile-group h3{
 <link rel="stylesheet" href="./assets/anatomy/muscle-role.css?v=326">
 <link rel="stylesheet" href="./assets/profile/measures.css?v=330">
 <link rel="stylesheet" href="./assets/profile/profile-dashboard-headers.css?v=330">
+<style id="sx-calendar-session-title-unboxed-v349">
+/* Selected Calendar day: show a plain tappable workout title, not a
+   button/card container. Scope this to the selected-day workout list only. */
+html body #calendarDayDetails.sx-calendar-day-details{
+ background:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+}
+html body #calendarDayDetails.sx-calendar-day-details .sx-calendar-workout-row{
+ padding:8px 0!important;
+ margin:0!important;
+ background:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+}
+html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout-link,
+html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout-link:hover,
+html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout-link:active{
+ -webkit-appearance:none!important;
+ appearance:none!important;
+ display:inline-flex!important;
+ width:auto!important;
+ min-width:0!important;
+ max-width:100%!important;
+ min-height:32px!important;
+ margin:0!important;
+ padding:0!important;
+ background:none!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-width:0!important;
+ border-style:none!important;
+ border-radius:0!important;
+ outline-offset:3px;
+ box-shadow:none!important;
+ filter:none!important;
+ color:var(--lime)!important;
+ font-weight:850!important;
+ text-align:left!important;
+ text-decoration:none!important;
+}
+html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout-link:focus-visible{
+ outline:2px solid var(--lime)!important;
+}
+html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout-link::before,
+html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout-link::after{
+ content:none!important;
+ display:none!important;
+}
+</style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
 <link rel="stylesheet" href="./assets/themes/uniform-surfaces.css?v=340">
 <script defer src="./assets/charts/touch-scrub.js?v=344"></script>

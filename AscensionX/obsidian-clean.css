@@ -352,3 +352,35 @@ body.sx-ascension-embedded #sxCycleViewDialog .sx-cycle-view-scroll
  background:#111317!important;
  border-color:#303238!important;
 }
+
+/* v353 · An inner card is width:100% by default. When given horizontal
+   margins this exceeded its <details> parent. Keep both reference groups
+   fully contained on narrow iPhone screens without clipping their tables. */
+body.sx-ascension-embedded #cycleDetails .asc-cycle-reference{
+ box-sizing:border-box!important;
+ display:block!important;
+ width:100%!important;
+ min-width:0!important;
+ max-width:100%!important;
+ padding:0!important;
+ overflow-wrap:anywhere;
+}
+body.sx-ascension-embedded #cycleDetails .asc-cycle-reference>.card,
+body.sx-ascension-embedded #sxCycleViewDialog .sx-cycle-view-scroll #cycleDetails .asc-cycle-reference>.card{
+ display:block!important;
+ box-sizing:border-box!important;
+ width:calc(100% - 20px)!important;
+ max-width:calc(100% - 20px)!important;
+ min-width:0!important;
+ margin:0 10px 10px!important;
+ padding:13px!important;
+ border-radius:11px!important;
+}
+body.sx-ascension-embedded #cycleDetails .asc-cycle-reference .settable{
+ width:100%!important;
+}
+body.sx-ascension-embedded #cycleDetails .asc-cycle-reference [style*="overflow-x:auto"]{
+ max-width:100%!important;
+ overflow-x:auto!important;
+ -webkit-overflow-scrolling:touch;
+}

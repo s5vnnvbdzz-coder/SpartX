@@ -4385,6 +4385,9 @@ function commitFinishSession(){
  });
  if(activeCycle){if(typeof window.spartanx531RecordCompleted==='function')window.spartanx531RecordCompleted(activeCycle,db.sessions[0]);else markCycleWeekCompleted(activeCycle.id,activeCycle.week);activeCycle=null;}
  persist();queueAscensionWorkoutCompletion(db.sessions[0]);
+ // A completed fourth support day is stored in SpartanX history, not
+ // AscensionX's compound lift log. Refresh Next immediately after Save.
+ window.dispatchEvent(new CustomEvent('spartx:ascensionCycleUpdated'));
  if(bodybuildingLink){
   window.dispatchEvent(new CustomEvent('spartx:bodybuildingSessionSaved',{
    detail:{sessionId:db.sessions[0].id,programmeId:bodybuildingLink.programmeId,

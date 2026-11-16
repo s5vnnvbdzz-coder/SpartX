@@ -163,7 +163,7 @@
         {name:'Triceps Pushdown (Bar)',sets:2,min:10,max:15,rir:3,rest:75},
         {name:'Dumbbell Curl',sets:2,min:10,max:15,rir:3,rest:75}
       ];
-      return upper.map(item=>({...item,sets:week===4?1:item.sets}));
+      return upper.map(item=>({...item,sets:week===4?1:3}));
     }
     // Keep the day immediately before the next week light on lower-body
     // and spinal loading. Heavy compound work belongs to AscensionX.
@@ -190,7 +190,7 @@
       const curl={name:'Seated Leg Curl',sets:2,min:10,max:15,rir:3,rest:90};
       items=[...items.slice(0,items.length-1),curl];
     }
-    return items.map(item=>({...item,sets:week===4?1:item.sets}));
+    return items.map(item=>({...item,sets:week===4?1:(trainingDays===4?3:item.sets)}));
   }
   function schedule(days,storage=global.localStorage){
     const active=cycle(storage),prefs=preference(storage);

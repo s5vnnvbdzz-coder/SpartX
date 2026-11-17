@@ -11,17 +11,20 @@
   'Back Squat':[
    {name:'Leg Extension',sets:3,min:10,max:15,rir:3,rest:90,muscles:'quadriceps',cost:1},
    {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
+   {name:'45° Back Extension',sets:3,min:10,max:15,rir:2,rest:90,muscles:'glutes and spinal erectors',cost:1,cue:'Controlled hip hinge and neutral spine; avoid hyperextension.'},
    {name:'Standing Calf Raise',sets:3,min:10,max:20,rir:3,rest:75,muscles:'calves',cost:1},
    {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1}
   ],
   'Bench Press':[
    {name:'Iso-Lateral Row',sets:3,min:8,max:12,rir:3,rest:120,muscles:'upper back',cost:1},
    {name:'Triceps Pushdown (Bar)',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Hanging Knee Raise',sets:3,min:10,max:15,rir:2,rest:90,muscles:'abdominals and hip flexors',cost:1,cue:'Lift the pelvis without swinging.'},
    {name:'Rear Delt Reverse Fly',sets:3,min:12,max:20,rir:3,rest:75,muscles:'shoulder stabilisers',cost:1},
    {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1}
   ],
   'Deadlift':[
    {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
+   {name:'Romanian Deadlift',sets:2,min:8,max:10,rir:2,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'Moderate hip hinge loading after deadlifts; stop before form deteriorates.'},
    {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
    {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
    {name:'Seated Calf Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}
@@ -33,6 +36,8 @@
    {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
   ]
  };
+ // Coach-prescribed accessories are reserved before optional movements fill a day.
+ const PINNED={'Back Squat':'45° Back Extension','Bench Press':'Hanging Knee Raise','Deadlift':'Romanian Deadlift'};
  const FOURTH={
   strength:[
    {name:'Machine Chest Press',sets:3,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
@@ -131,6 +136,8 @@
    reason:'Retain load and progress repetitions before increasing weight.'};
  }
  function dose(item,week,focus,main,cycleId,storage){
+  // Moderate RDLs stop before the final heavy and assessment weeks.
+  if(item.name==='Romanian Deadlift'&&week>=5)return null;
   const factor=[0,1,1,1,.75,.45,0][week]||0;
   const isSupportDay=main==='Support';
   const added=focus==='hypertrophy'&&!isSupportDay&&main!=='Deadlift'?1:0;
@@ -144,7 +151,7 @@
   const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
   const ex={...item,sets,rir,sourceLift:main,week};
   const rec=recommend(ex,cycleId,week,storage);
-  return {...ex,...rec,reason:rec.reason+' Supports '+item.muscles+' without additional heavy spinal loading.'};
+  return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')};
  }
  function plan(lift,week,opts={},storage=global.localStorage){
   const c=activeCycle(storage),w=Number(week);
@@ -153,14 +160,20 @@
   if(!prefs.enabled)return [];
   const candidates=LIB[main]||[];
   const cap=main==='Deadlift'?6:focus==='strength'?9:12;
-  let count=0;
+  // Cap exercise slots as well as sets, so taper weeks genuinely reduce work.
+  const maxExercises=main==='Deadlift'?2:focus==='balanced'?4:3;
+  const prescribed=candidates.map(item=>dose(item,w,focus,main,c.id,storage)).filter(Boolean);
+  const pinnedName=PINNED[main];
+  const pinnedSets=prescribed.find(ex=>ex.name===pinnedName)?.sets||0;
+  let count=0,pinnedSelected=false;
   const selected=[];
-  for(const item of candidates){
-   const ex=dose(item,w,focus,main,c.id,storage);
-   if(!ex||count+ex.sets>cap)continue;
-   // Avoid repetitive isolated work when most energy should be reserved for the main lift.
-   if(main==='Deadlift'&&selected.length>=2&&w>=3)break;
+  for(const ex of prescribed){
+   if(selected.length>=maxExercises)break;
+   const isPinned=ex.name===pinnedName;
+   const reserve=!isPinned&&!pinnedSelected?pinnedSets:0;
+   if(count+ex.sets+reserve>cap)continue;
    selected.push(ex);count+=ex.sets;
+   if(isPinned)pinnedSelected=true;
   }
   return selected;
  }

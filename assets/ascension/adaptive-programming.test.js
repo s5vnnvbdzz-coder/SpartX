@@ -250,4 +250,43 @@ assert.ok(ascHtml.includes("pendingSupport=adaptive?.pendingSupportDay?.()")&&
  ascHtml.includes("pendingSupport&&support?'__ADAPTIVE_SUPPORT__'"),
  'Both AscensionX Continue entry points must preselect Day 4');
 
+// Day 4 import uses the real AscensionX iframe mounted in SpartanX's
+// open Shadow DOM. A document-level getElementById lookup silently misses it.
+const shadowSource={sent:[],postMessage(message,origin){this.sent.push({message,origin})}};
+const realFrame={contentWindow:shadowSource};
+const frameHost={shadowRoot:{getElementById:name=>name==='ascensionXEmbedFrame'?realFrame:null}};
+const routed={};
+const accepted=[],responses=[];
+const frameWindow={
+ localStorage:storage({'ascensionx_strength_v1':nextWeekCycle}),
+ location:{origin:'https://example.test'},
+ document:{
+  readyState:'loading',
+  getElementById:name=>name==='sxAscensionPortalHost'?frameHost:null,
+  addEventListener(){}
+ },
+ addEventListener:(type,fn)=>{routed[type]=fn},
+ CustomEvent:class {constructor(type,opts){this.type=type;this.detail=opts.detail}},
+ dispatchEvent:event=>responses.push(event),
+ SpartanXStartPowerbuildingSupportSession:payload=>{accepted.push(payload);return true}
+};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'adaptive-programming.js'),'utf8'),{window:frameWindow});
+frameWindow.SXAscensionAdaptive.save({enabled:true,days:4,focus:'strength'});
+const realSlot=frameWindow.SXAscensionAdaptive.schedule().slots[3];
+const validMessage={data:{type:'spartx:ascensionAdaptiveSupport',requestId:'day4-1',
+ payload:{cycleId:id,week:2,day:realSlot.day,name:realSlot.title}},
+ origin:frameWindow.location.origin,source:shadowSource};
+routed.message({...validMessage,origin:'https://attacker.test'});
+routed.message({...validMessage,source:{}});
+assert.equal(accepted.length,0,'Only the actual same-origin iframe can start Day 4');
+routed.message(validMessage);
+assert.equal(accepted.length,1,'Day 4 request reaches the SpartanX workout loader');
+assert.equal(accepted[0].week,2,'Support import uses the completed week, not the next squat week');
+assert.equal(accepted[0].exercises.length,realSlot.exercises.length);
+assert.equal(shadowSource.sent[0].message.type,'spartx:ascensionImportResult');
+assert.equal(shadowSource.sent[0].message.success,true);
+assert.equal(shadowSource.sent[0].message.requestId,'day4-1');
+assert.equal(responses[0].type,'spartx:ascensionAdaptiveSupportResult');
+assert.equal(responses[0].detail.success,true);
+
 console.log('AscensionX adaptive programming: tests passed');

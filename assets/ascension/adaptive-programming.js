@@ -407,7 +407,12 @@
  // Only the host can create the support workout; no historical workout is ever modified.
  global.addEventListener('message',event=>{
   if(event?.data?.type!=='spartx:ascensionAdaptiveSupport')return;
-  const frame=global.document?.getElementById('ascensionXEmbedFrame');
+  // SpartanX mounts the AscensionX iframe inside an *open shadow root*
+  // (#sxAscensionPortalHost). document.getElementById cannot see it there.
+  // Resolve the actual frame before checking the trusted message source.
+  const host=global.document?.getElementById('sxAscensionPortalHost');
+  const frame=host?.shadowRoot?.getElementById('ascensionXEmbedFrame')||
+   global.document?.getElementById('ascensionXEmbedFrame');
   if(!frame||event.origin!==global.location.origin||event.source!==frame.contentWindow)return;
   const payload=event.data.payload||{},c=activeCycle();
   let success=false,message='Unable to load the selected adaptive training day.';

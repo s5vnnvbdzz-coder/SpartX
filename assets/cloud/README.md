@@ -19,7 +19,7 @@ The code intentionally excludes profile photos, birth date, following/followers,
 
 ## Operating it
 
-Open SpartanX **Profile → Settings → Cloud training backup** (or AscensionX **Settings**).
+Open SpartanX **Profile → Settings → Cloud training backup**. This reads both workout history and the embedded AscensionX data stored in the same browser/PWA origin. There is no need to open or export from standalone AscensionX.
 
 - Request a login code by email and enter it in the same app.
 - Tap **Back up training** to upload the training-only records currently present in that browser/PWA context.

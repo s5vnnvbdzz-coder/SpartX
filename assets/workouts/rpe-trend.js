@@ -7,7 +7,15 @@
  const GREEN=['#5ebf84','#3eaf72','#229a5a','#087d46'];
  const RED=['#d98279','#dd655e','#da464c','#bb1d32'];
  const neutral='#9ca3af';
- const normalizedName=name=>String(name||'').trim().replace(/\s+/g,' ').toLowerCase();
+ const normalizedName=name=>{
+  const raw=String(name||'').trim().replace(/\s+/g,' ').toLowerCase();
+  // Only equivalent labels for the same lift, not different implements or variants.
+  if(raw==='barbell bench press')return 'bench press';
+  if(raw==='squat'||raw==='barbell back squat'||raw==='barbell squat')return 'back squat';
+  if(raw==='conventional deadlift'||raw==='barbell deadlift')return 'deadlift';
+  if(raw==='military press'||raw==='barbell overhead press'||raw==='ohp')return 'overhead press';
+  return raw;
+ };
  const validRpe=value=>{
   if(value===null||value===undefined||String(value).trim()==='')return null;
   const rpe=Number(value);
@@ -42,11 +50,15 @@
   }
   return index;
  }
- function compare(exercise,set,history,cycleLoaded){
+ function reference(exercise,set,history,cycleLoaded){
   if(!cycleLoaded||warmup(set)||!(history instanceof Map))return null;
-  const match=key(exercise,set?.weight,set?.reps),current=validRpe(set?.rpe);
-  if(!match||current===null)return null;
-  const previous=history.get(match);
+  const match=key(exercise,set?.weight,set?.reps);
+  return match?history.get(match)||null:null;
+ }
+ function compare(exercise,set,history,cycleLoaded){
+  const current=validRpe(set?.rpe);
+  if(current===null)return null;
+  const previous=reference(exercise,set,history,cycleLoaded);
   if(!previous)return null;
   const delta=Math.round((current-previous.rpe)*100)/100;
   const direction=delta>0?'harder':delta<0?'easier':'same';
@@ -57,5 +69,5 @@
   const label='RPE '+current+' vs previous '+previous.rpe+' at '+Number(set.weight).toFixed(1)+' kg × '+Number(set.reps)+' — '+change;
   return {direction,delta,color,current,previous:previous.rpe,label};
  }
- global.SpartanXRpeTrend=Object.freeze({historyIndex,compare});
+ global.SpartanXRpeTrend=Object.freeze({historyIndex,reference,compare});
 })(window);

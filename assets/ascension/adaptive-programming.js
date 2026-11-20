@@ -24,7 +24,7 @@
   ],
   'Deadlift':[
    {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
-   {name:'Romanian Deadlift',sets:2,min:8,max:10,rir:2,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'Moderate hip hinge loading after deadlifts; stop before form deteriorates.'},
+   {name:'Romanian Deadlift',sets:3,min:8,max:10,rir:3,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'Keep weight moderate and controlled after deadlifts; stop before form deteriorates.'},
    {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
    {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
    {name:'Seated Calf Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}

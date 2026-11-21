@@ -2055,6 +2055,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 </style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
 <link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=372">
+<link rel="stylesheet" href="./assets/profile/feed-gaming-card-compact.css?v=373">
 <link rel="stylesheet" href="./assets/themes/uniform-surfaces.css?v=340">
 <script defer src="./assets/charts/touch-scrub.js?v=344"></script>
 
@@ -2548,7 +2549,7 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const country=SPARTANX_COUNTRIES.find(item=>item.code===countryCode);
  const countryName=country?.name||countryCode;
  const flagImage=countryCode==='GB'?'./ranks/flags/gb.svg':'https://flagcdn.com/w40/'+countryCode.toLowerCase()+'.png';
- const flag=countryCode?'<span class="sx-rank-flag" role="img" aria-label="'+esc(countryName)+' flag" title="'+esc(countryName)+'"><img class="sx-country-flag-image" src="'+flagImage+'" width="34" height="23" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-country-code="'+countryCode+'"></span>':'';
+ const flag=countryCode?'<span class="sx-rank-flag sx-portrait-country-flag" role="img" aria-label="'+esc(countryName)+' flag" title="'+esc(countryName)+'"><img class="sx-country-flag-image" src="'+flagImage+'" width="34" height="23" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-country-code="'+countryCode+'"></span>':'';
  const bestText=sxCompoundSpotlightText();
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';
  const prestige=state.prestige;
@@ -2557,7 +2558,7 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const crest=prestige?'<svg class="sx-prestige-laurel" viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19 7 15 5 19M9 13l-4-5-2 4M9 8l2-6 3 4M28 19l5-4 2 4M31 13l4-5 2 4M31 8l-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>':'';
  const rankFile=rank.file.replace(/\.svg$/i,'');
  const frameFile=p.standard==='female'?'female-frame-'+rankFile.replace(/^female-/,'')+'.svg':'male-profile-'+rankFile+'.svg';
- return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><button type="button" class="sx-gamer-prestige sx-prestige-trigger" data-open-prestige-showcase aria-label="View prestige showcase · Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+(prestigeTier?'<small class="sx-prestige-tier-name">'+prestigeTier.name+'</small>':'')+'</button></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
+ return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div>'+flag+'</div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><button type="button" class="sx-gamer-prestige sx-prestige-trigger" data-open-prestige-showcase aria-label="View prestige showcase · Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+(prestigeTier?'<small class="sx-prestige-tier-name">'+prestigeTier.name+'</small>':'')+'</button></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b></div><div class="sx-gamer-line sx-best-pr-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
 }
 
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='toggleProfileCards'){localStorage.setItem(PROFILE_CARD_PREF,String(e.target.checked));renderWorkoutFeed()}});

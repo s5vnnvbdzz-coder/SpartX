@@ -1,4 +1,4 @@
-/* SpartanX gaming workout-feed profile: compact header v373.
+/* SpartanX gaming workout-feed profile: compact header v374.
  * Rank and compound PR sit directly below the athlete's name.
  * Prestige stays tappable in the top-right but no longer occupies an
  * oversized row. The country flag sits beneath the tier portrait frame.
@@ -19,17 +19,20 @@ body #workoutFeed .sx-gamer-card.sx-with-session-log > .sx-gamer-info{
  min-height:173px!important;
  padding-bottom:6px!important;
 }
+/* Restore three short dividers: name / rank / compound PR / social.
+ * Keep them in the text column so they never run through Prestige. */
 body #workoutFeed .sx-gamer-card .sx-gamer-top{
  display:block!important;
+ width:calc(100% - 73px)!important;
  border:0!important;
- border-bottom:0!important;
- padding:0!important;
- margin:0 0 7px!important;
+ border-bottom:1px solid color-mix(in srgb,var(--line) 72%,var(--txt) 28%)!important;
+ padding:0 0 7px!important;
+ margin:0 0 6px!important;
  min-height:22px!important;
 }
 body #workoutFeed .sx-gamer-card .sx-gamer-top > strong{
  display:block!important;
- width:calc(100% - 72px)!important;
+ width:100%!important;
  min-width:0!important;
  line-height:1.2!important;
  overflow-wrap:anywhere;
@@ -55,14 +58,14 @@ body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-rank-line{
  gap:3px!important;
  width:calc(100% - 73px)!important;
  min-height:0!important;
- padding:3px 0!important;
+ padding:3px 0 6px!important;
  margin:0!important;
  border:0!important;
- border-bottom:0!important;
+ border-bottom:1px solid color-mix(in srgb,var(--line) 72%,var(--txt) 28%)!important;
  line-height:1.25!important;
 }
 body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line{
- margin-top:8px!important;
+ margin-top:5px!important;
 }
 body #workoutFeed .sx-gamer-card .sx-gamer-line small,
 body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-rank-line small{
@@ -90,12 +93,12 @@ body #workoutFeed .sx-gamer-card .sx-gamer-line > [data-sx-compound-pr]{
 body #workoutFeed .sx-gamer-card .sx-feed-social-metrics{
  display:flex!important;
  flex-wrap:nowrap!important;
- justify-content:space-between!important;
+ justify-content:flex-start!important;
  align-items:center!important;
  width:100%!important;
  min-width:0!important;
- gap:6px!important;
- margin:10px 0 0!important;
+ gap:16px!important;
+ margin:5px 0 0!important;
  padding:0!important;
  border:0!important;
 }
@@ -104,10 +107,13 @@ body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-j
  flex:0 1 auto!important;
  padding:4px 1px!important;
  white-space:nowrap;
- font-size:11px!important;
+ gap:3px!important;
+ font-size:12px!important;
 }
 body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump] strong{
- font-size:16px!important;
+ font-size:12px!important;
+ font-weight:700!important;
+ line-height:inherit!important;
 }
 /* Preserve the large rank framing, but show the real country flag centred
  * immediately below it rather than beside the rank line. */
@@ -151,8 +157,8 @@ body #workoutFeed .sx-gamer-card .sx-session-log>summary{
  body #workoutFeed .sx-gamer-card.sx-with-session-log > .sx-gamer-info{
   min-height:150px!important;
  }
- body #workoutFeed .sx-gamer-card .sx-gamer-top > strong{
-  width:calc(100% - 67px)!important;
+ body #workoutFeed .sx-gamer-card .sx-gamer-top{
+  width:calc(100% - 70px)!important;
  }
  body #workoutFeed .sx-gamer-card .sx-gamer-line,
  body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-rank-line{
@@ -173,10 +179,14 @@ body #workoutFeed .sx-gamer-card .sx-session-log>summary{
  body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-rank-line{
   width:calc(100% - 61px)!important;
  }
- body #workoutFeed .sx-gamer-card .sx-feed-social-metrics{
-  gap:3px!important;
+ body #workoutFeed .sx-gamer-card .sx-gamer-top{
+  width:calc(100% - 61px)!important;
  }
- body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump]{
+ body #workoutFeed .sx-gamer-card .sx-feed-social-metrics{
+  gap:8px!important;
+ }
+ body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump],
+ body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump] strong{
   font-size:10px!important;
  }
 }

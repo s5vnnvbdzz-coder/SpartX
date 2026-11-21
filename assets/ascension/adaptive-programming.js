@@ -325,7 +325,7 @@
    if(!exercises.length)continue;
    if(!completedSupportDay(c,day,completedWeek,exercises,storage))
     return {day,index,kind:'support',week:completedWeek,
-     title:supportTitle(c,index),exercises};
+     title:supportTitle(c,index,prefs.focus),exercises};
   }
   return null;
  }
@@ -342,10 +342,41 @@
    const lift=c.lifts[index];
    if(lift)return {day,kind:'ascension',lift,week:weekFor(c,lift),
     title:lift+' · AscensionX · Week '+weekFor(c,lift),exercises:plan(lift,weekFor(c,lift),{},storage)};
-   return {day,kind:'support',title:supportTitle(c,index),
+   return {day,kind:'support',title:supportTitle(c,index,prefs.focus),
     week,lift:null,exercises:supportExercises(c,prefs,index,week,storage)};
   });
   return {valid:true,message:'Suggested layout, not guaranteed recovery. Main sets stay owned by AscensionX; reschedule around sleep, soreness and performance.',week,slots};
+ }
+ // This is the SAME planner used by the new-cycle editor. Previously it
+ // rendered LIB[lift].slice(0,3) and FOURTH[..].slice(...), so changing
+ // priority only changed a label, and day five repeated day four.
+ function previewSchedule(selectedLifts,settings={},cycleArg=null,storage=global.localStorage){
+  const lifts=(Array.isArray(selectedLifts)?selectedLifts:[]).filter(x=>LIFTS.includes(x));
+  const focus=FOCUS_LIFTS[settings.focus]?settings.focus:'strength';
+  const count=Math.round(Number(settings.days)||4);
+  if(!DAYS[count]||count<lifts.length)return {valid:false,slots:[],
+   message:'Choose at least as many days as selected compound lifts.'};
+  const match=!!cycleArg&&lifts.length===cycleArg.lifts.length&&
+   lifts.every(lift=>cycleArg.lifts.includes(lift));
+  const lastWeek=match?Math.max(1,...lifts.map(lift=>weekFor(cycleArg,lift))):1;
+  const prefs={...settings,focus,days:count};
+  const pending=match&&settings.enabled?pendingSupportDay(cycleArg,storage)?.week:null;
+  const supportWeek=pending||lastWeek;
+  const holder={id:match?cycleArg.id:null,lifts};
+  const slots=DAYS[count].map((day,index)=>{
+   const lift=lifts[index];
+   if(lift){
+    const week=match?weekFor(cycleArg,lift):1;
+    return {day,kind:'ascension',lift,week,title:lift+' · Week '+week,
+     exercises:match&&settings.enabled?plan(lift,week,{},storage):
+      buildLiftPlan(lift,week,focus,null,storage)};
+   }
+   const week=supportWeek;
+   return {day,kind:'support',lift:null,week,
+    title:supportTitle(holder,index,focus),
+    exercises:supportExercises(holder,prefs,index,week,storage)};
+  });
+  return {valid:true,focus,week:supportWeek,slots};
  }
  // A new cycle has no stable ID yet: keep the builder's choices in memory
  // and commit them ONLY after the athlete confirms creating that cycle.
@@ -447,35 +478,28 @@
    note.textContent=waiting?'Illustrative Week 1 preview · prescriptions become cycle-specific after creation.':
     'Preview reflects your saved main-lift weeks; supporting sets do not advance AscensionX progression.';
    preview.appendChild(note);
-   const days=DAYS[previewDays]||DAYS[4];
-   const lastWeek=current?Math.max(1,...selected.map(lift=>
-    clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6))):1;
-   // Keep the editor preview in sync with the actual pending Day 4:
-   // a completed Week 2 Deadlift must not preview Week 3 support.
-   const pending=current&&pref.enabled&&!incompatible?pendingSupportDay(current)?.week:null;
-   const supportWeek=pending||lastWeek;
-   for(const [index,day] of days.entries()){
-    const lift=selected[index]||null,week=lift&&current?
-     clamp(Number(current.weeks?.[lift]||current.currentWeek||1),1,6):supportWeek;
+   const previewSettings={...pref,days:previewDays};
+   const built=previewSchedule(selected,previewSettings,current&&!incompatible?current:null);
+   if(!built.valid){
+    const error=document.createElement('p');
+    error.textContent=built.message;preview.appendChild(error);return;
+   }
+   const focusInfo=document.createElement('p');
+   focusInfo.className='sx-adaptive-preview-note';
+   focusInfo.textContent=FOCUS_EXPLANATIONS[pref.focus]||FOCUS_EXPLANATIONS.strength;
+   preview.appendChild(focusInfo);
+   for(const slot of built.slots){
     const box=document.createElement('div');
     box.className='sx-adaptive-preview-day';
     const heading=document.createElement('strong');
-    heading.textContent=day+' · '+(lift?lift+' · Week '+week:'Low-fatigue support');
+    heading.textContent=slot.day+' · '+slot.title;
     box.appendChild(heading);
-    let exercises=[];
-    if(lift){
-     if(current&&current.lifts.includes(lift)&&pref.enabled&&!incompatible&&
-      selected.length===current.lifts.length&&selected.every(l=>current.lifts.includes(l)))
-      exercises=plan(lift,week);
-     else if(week<6)exercises=(LIB[lift]||[]).slice(0,lift==='Deadlift'?2:3);
-    }else if(lastWeek<6){
-     exercises=(FOURTH[pref.focus]||FOURTH.strength).slice(0,index===selected.length?3:2);
-    }
     const details=document.createElement('div');
-    details.textContent=exercises.length?
-     exercises.map(ex=>ex.name+' · '+ex.sets+' × '+ex.min+'–'+ex.max).join(' · '):
+    details.textContent=slot.exercises.length?
+     slot.exercises.map(ex=>ex.name+' · '+ex.sets+' × '+ex.min+'–'+ex.max).join(' · '):
      'No additional assistance prescribed';
-    box.appendChild(details);preview.appendChild(box);
+    box.appendChild(details);
+    preview.appendChild(box);
    }
    const recovery=document.createElement('p');
    recovery.className='sx-adaptive-preview-note';
@@ -535,7 +559,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,activeCycle,read,enabled,save,plan,schedule,pendingSupportDay,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

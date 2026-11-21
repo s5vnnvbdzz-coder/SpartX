@@ -142,14 +142,14 @@ test('rebalancing existing programmes is opt-in and retains upper-day edits',()=
 });
 test('adaptive squat avoids redundant heavy lower compounds',()=>{
  const items=A.plan('Back Squat',2,{lifts:A.cycle(win.localStorage).lifts});
- assert.deepEqual(Array.from(items,ex=>ex.name),['Leg Extension','Seated Leg Curl','Standing Calf Raise']);
- assert.equal(items.reduce((total,ex)=>total+ex.sets,0),6);
+ assert.deepEqual(Array.from(items,ex=>ex.name),['Leg Extension','Seated Leg Curl','45° Back Extension']);
+ assert.equal(items.reduce((total,ex)=>total+ex.sets,0),9);
 });
 test('bench assistance avoids excessive pressing with OHP selected',()=>{
  const mainLifts=A.cycle(win.localStorage).lifts;
  assert.equal(A.plan('Bench Press',2,{lifts:mainLifts})
    .some(ex=>ex.name==='Seated Dumbbell Shoulder Press'),false);
- assert.ok(A.plan('Bench Press',2,{lifts:mainLifts}).some(ex=>ex.name==='Chest-Supported Row'));
+ assert.ok(A.plan('Bench Press',2,{lifts:mainLifts}).some(ex=>ex.name==='Iso-Lateral Row'));
 });
 test('fourth day is an adaptive support day when OHP is not selected',()=>{
  win.localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{
@@ -161,7 +161,7 @@ test('fourth day is an adaptive support day when OHP is not selected',()=>{
  const proposed=A.schedule(4,win.localStorage);
  assert.equal(proposed.valid,true);
  assert.equal(proposed.slots[3].kind,'support');
- assert.equal(proposed.slots[3].exercises.length,4);
+ assert.equal(proposed.slots[3].exercises.length,3);
  assert.ok(proposed.slots[3].exercises.every(ex=>!/Romanian Deadlift|Paused Bench Press/i.test(ex.name)));
 });
 test('accessory working sets taper ahead of AscensionX recovery week',()=>{

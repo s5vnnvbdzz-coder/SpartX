@@ -1,0 +1,48 @@
+name: SpartanX Adaptive Intelligence
+
+on:
+  push:
+    paths:
+      - 'assets/bodybuilding/adaptive-intelligence.js'
+      - 'intelligence/app.js'
+      - 'intelligence/bridge.js'
+      - 'intelligence/live.js'
+      - 'intelligence/index.html'
+      - 'tests/adaptive-intelligence.test.js'
+      - '.github/workflows/adaptive-intelligence-checks.yml'
+  pull_request:
+    paths:
+      - 'assets/bodybuilding/adaptive-intelligence.js'
+      - 'intelligence/app.js'
+      - 'intelligence/bridge.js'
+      - 'intelligence/live.js'
+      - 'intelligence/index.html'
+      - 'tests/adaptive-intelligence.test.js'
+      - '.github/workflows/adaptive-intelligence-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adaptive-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check adaptive module syntax
+        run: |
+          node --check assets/bodybuilding/adaptive-intelligence.js
+          node --check intelligence/app.js
+          node --check intelligence/bridge.js
+          node --check intelligence/live.js
+          node --check tests/adaptive-intelligence.test.js
+      - name: Run athlete learning and RPE safety checks
+        run: node tests/adaptive-intelligence.test.js
+      - name: Re-run existing Intelligence regressions
+        run: |
+          node intelligence/live.test.js
+          node tests/adaptive-decision-engine.test.js
+          node tests/adaptive-decision-policy.test.js

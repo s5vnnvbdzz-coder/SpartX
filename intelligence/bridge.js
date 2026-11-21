@@ -71,7 +71,10 @@
           const rpe=rawRpe!=null&&Number.isFinite(rawRpe)&&rawRpe>=6&&rawRpe<=10?rawRpe:null;
           return [{weight,reps,rpe,type:String(set.type||'Working Set').slice(0,40),index:index+1,done:true}];
         });
-        return sets.length?[{name,originalName,sets,programmed:!!ex.ascensionLink||/cycle|5\/3\/1|ascensionx/i.test(String(ex.notes||''))}]:[];
+        const prescribedRpe=ex?.ascensionLink?.targetRpe??ex?.targetRpe;
+         const targetRpe=prescribedRpe!==''&&prescribedRpe!=null&&Number.isFinite(Number(prescribedRpe))&&
+          Number(prescribedRpe)>=6&&Number(prescribedRpe)<=10?Number(prescribedRpe):null;
+         return sets.length?[{name,originalName,sets,targetRpe,programmed:!!ex.ascensionLink||/cycle|5\/3\/1|ascensionx/i.test(String(ex.notes||''))}]:[];
       });
       const completed=exercises.reduce((n,ex)=>n+ex.sets.length,0);
       const elapsed=Math.max(0,Math.min(7*86400,Number(draft.elapsed)||0));

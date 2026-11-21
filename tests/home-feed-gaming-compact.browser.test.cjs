@@ -33,15 +33,26 @@ async function run(){
     const social=card.querySelector('.sx-feed-social-metrics');
     const emblem=card.querySelector('.sx-gamer-emblem.sx-portrait-frame-slot');
     const flag=card.querySelector('.sx-portrait-country-flag');
+    const top=card.querySelector('.sx-gamer-top');
     const rank=card.querySelector('.sx-rank-line');
     const pr=card.querySelector('.sx-best-pr-line');
     const session=card.querySelector('.sx-session-log');
+    const followers=social?.querySelector('[data-sx-social-jump="followers"]');
+    const following=social?.querySelector('[data-sx-social-jump="following"]');
+    const border=el=>getComputedStyle(el).borderBottomWidth;
+    const font=el=>Number.parseFloat(getComputedStyle(el).fontSize);
     return {
      card:rect(card),name:rect(card.querySelector('.sx-gamer-top>strong')),
      rank:rect(rank),pr:rect(pr),
      prestige:rect(card.querySelector('.sx-gamer-prestige')),
      emblem:rect(emblem),flag:rect(flag),
      social:rect(social),session:rect(session),
+     followers:rect(followers),following:rect(following),
+     followerLabelSize:font(followers),followerNumberSize:font(followers?.querySelector('strong')),
+     followingLabelSize:font(following),followingNumberSize:font(following?.querySelector('strong')),
+     separators:[top,rank,pr].map(border),
+     separatorWidths:[top,rank,pr].map(el=>rect(el)?.w),
+     socialAlignment:getComputedStyle(social).justifyContent,
      flagWithinEmblem:emblem?.contains(flag),
      flagInRank:rank?.contains(flag),
      flagLoaded:!!flag?.querySelector('img[src*="ranks/flags/gb.svg"]'),
@@ -54,6 +65,16 @@ async function run(){
    });
    assert(m.flagLoaded&&m.flagWithinEmblem&&!m.flagInRank,'Country flag belongs beneath portrait, not rank line: '+width);
    assert.equal(m.socialLinks,2,'Follower and Following buttons survive reflow');
+   assert(m.separators.every(width=>width==='1px'),
+    'Name, rank and PR each have their own separator line: '+JSON.stringify(m));
+   assert(m.separatorWidths.every(width=>width>40),
+    'Separator rules remain visible on small screens: '+JSON.stringify(m));
+   assert.equal(m.socialAlignment,'flex-start','Followers/Following group near each other');
+   assert(Math.abs(m.followerLabelSize-m.followerNumberSize)<.2
+    && Math.abs(m.followingLabelSize-m.followingNumberSize)<.2,
+    'Follower and Following numbers are exactly the same size as their labels: '+JSON.stringify(m));
+   assert(m.following.x-m.followers.right<=22 && m.following.x-m.followers.right>=0,
+    'Social metrics are grouped close together without overlapping: '+JSON.stringify(m));
    assert(m.prestigeAction,'Prestige Showcase button remains interactive');
    assert.equal(m.sessionTitle,'Bench Press - Week 4','Saved workout remains unchanged');
    assert.equal(m.lineDirection,'column','Rank stacks directly beneath name');
@@ -71,7 +92,7 @@ async function run(){
     await card.screenshot({path:'gaming-profile-compact-390.png'});
    }
   }
-  console.log('PASS: compact profile card, rank/PR relocation, flag below frame, 4 viewport widths');
+  console.log('PASS: compact card, three dividers, matching social typography and close spacing at 4 widths');
   if(errors.length)console.log('Browser warnings:',errors.slice(0,5));
  }catch(e){
   try{await page.screenshot({path:'gaming-profile-compact-failure.png'})}catch(_){}

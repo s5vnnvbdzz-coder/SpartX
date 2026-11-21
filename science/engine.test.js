@@ -103,6 +103,7 @@ test('inputs do not get mutated by generation or audit',()=>{
  assert.equal(JSON.stringify(p),snapshot);
 });
 test('old Science Lab URL redirects into the existing Spartan Intelligence',()=>{
+ const fs=require('node:fs'),path=require('node:path');
  const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
  assert.match(html,/location\.replace\('\.\.\/intelligence\/'\)/);
  assert.match(html,/now belongs to/);

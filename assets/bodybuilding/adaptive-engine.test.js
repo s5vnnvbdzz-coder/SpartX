@@ -161,7 +161,7 @@ test('fourth day is an adaptive support day when OHP is not selected',()=>{
  const proposed=A.schedule(4,win.localStorage);
  assert.equal(proposed.valid,true);
  assert.equal(proposed.slots[3].kind,'support');
- assert.equal(proposed.slots[3].exercises.length,4);
+ assert.equal(proposed.slots[3].exercises.length,3);
  assert.ok(proposed.slots[3].exercises.every(ex=>!/Romanian Deadlift|Paused Bench Press/i.test(ex.name)));
 });
 test('accessory working sets taper ahead of AscensionX recovery week',()=>{

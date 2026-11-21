@@ -194,7 +194,9 @@
  function dose(item,week,focus,main,cycleId,storage){
   // Moderate RDLs stop before the final heavy and assessment weeks.
   if(item.name==='Romanian Deadlift'&&week>=5)return null;
-  const factor=[0,1,1,1,.75,.45,0][week]||0;
+  // Keep useful low-fatigue accessories during heavy weeks. Week 6 is the
+  // deliberate no-assistance recovery week; Week 5 isn't a blanket one-set week.
+  const factor=[0,1,1,1,.80,.67,0][week]||0;
   const isSupportDay=main==='Support';
   const added=focus==='hypertrophy'&&!isSupportDay&&main!=='Deadlift'?1:0;
   const V=global.SXVolumeIntelligence;
@@ -220,9 +222,12 @@
    global.SXAscensionCycleIntelligence?.adjustment?.(cycleId,item.name,storage)||0:0;
   const adjustedBaseline=clamp(baseline+approvedDelta,1,4);
   let sets=isSupportDay&&week<=3?adjustedBaseline:Math.round(adjustedBaseline*factor);
-  if(week===5)sets=Math.min(sets,1);
+  if(week===5&&item.cost<=1)sets=Math.max(2,Math.min(sets,2));
+  // More demanding accessories receive a steeper taper than low-fatigue
+  // rows, calves, core and isolation movements.
+  if(week>=4&&item.cost>=2)sets=Math.min(sets,1);
+  if(main==='Deadlift')sets=Math.min(sets,week>=4?2:3);
   if(week===6)sets=0;
-  if(main==='Deadlift')sets=Math.min(sets,week>=4?1:3);
   if(sets<1)return null;
   const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
   const ex={...item,sets,rir,sourceLift:main,week};
@@ -342,7 +347,9 @@
   const pending=pendingSupportDay(c,storage);
   // Support gets its *own* completed week; compound prescriptions keep
   // their independently advancing current weeks.
-  const week=pending?.week||Math.max(...c.lifts.map(l=>weekFor(c,l)));
+  // The latest lift must not force a premature Week 5 taper on support
+  // when another lift is still at Week 4 (or earlier).
+  const week=pending?.week||Math.min(...c.lifts.map(l=>weekFor(c,l)));
   const slots=DAYS[count].map((day,index)=>{
    const lift=c.lifts[index];
    if(lift)return {day,kind:'ascension',lift,week:weekFor(c,lift),
@@ -363,7 +370,7 @@
    message:'Choose at least as many days as selected compound lifts.'};
   const match=!!cycleArg&&lifts.length===cycleArg.lifts.length&&
    lifts.every(lift=>cycleArg.lifts.includes(lift));
-  const lastWeek=cycleArg?Math.max(1,...lifts.map(lift=>
+  const lastWeek=cycleArg?Math.min(...lifts.map(lift=>
    cycleArg.lifts.includes(lift)?weekFor(cycleArg,lift):1)):1;
   const prefs={...settings,focus,days:count};
   const pending=match&&settings.enabled?pendingSupportDay(cycleArg,storage)?.week:null;

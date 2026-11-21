@@ -4,9 +4,11 @@ on:
     branches:
       - main
       - 'feature/intelligence-*'
+      - 'fix/ascension-*'
     paths:
       - 'assets/science/**'
       - 'assets/ascension/adaptive-programming.js'
+      - 'assets/ascension/adaptive-priority.test.js'
       - 'assets/workouts/531-cycle-flow.js'
       - 'assets/bodybuilding/**'
       - 'intelligence/**'
@@ -16,6 +18,7 @@ on:
     paths:
       - 'assets/science/**'
       - 'assets/ascension/adaptive-programming.js'
+      - 'assets/ascension/adaptive-priority.test.js'
       - 'assets/workouts/531-cycle-flow.js'
       - 'assets/bodybuilding/**'
       - 'intelligence/**'
@@ -37,9 +40,12 @@ jobs:
           node --check assets/science/volume-intelligence.js
           node --check intelligence/scientific-panel.js
           node --check assets/ascension/adaptive-programming.js
+          node --check assets/ascension/adaptive-priority.test.js
           node --check assets/workouts/531-cycle-flow.js
           node --check assets/bodybuilding/programme-model.js
           node --check assets/bodybuilding/programme-builder.js
+      - name: AscensionX priority and 5-day scheduling regressions
+        run: node assets/ascension/adaptive-priority.test.js
       - name: Scientific programme generation regression
         run: node science/engine.test.js
       - name: Unified working set and source integration regression

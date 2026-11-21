@@ -416,7 +416,9 @@
           input('TARGET RIR','rir',ex.rir,i,j,0,5,1)+
           input('START KG','startingKg',ex.startingKg,i,j,0,1000,0.5)+
           input('REST SEC','restSeconds',ex.restSeconds,i,j,30,600,15)+
-          '</div></div>').join('')+
+          '</div>'+(ex.sxVolumeReason?
+            '<p class="sx-bb-help">SPARTAN INTELLIGENCE · '+esc(ex.sxVolumeReason)+'</p>':'')+
+          '</div>').join('')+
         '<button type="button" class="sx-bb-add" data-bb-action="add" data-day="'+i+'" '+(day.exercises.length>=20?'disabled':'')+'>＋ ADD EXERCISE</button></div></article>').join('');
   }
   function render(){

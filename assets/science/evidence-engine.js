@@ -184,7 +184,17 @@ function audit(plan){
 function generate(input={}){
  const p=profileOptions(input);
  const dayPlan=TEMPLATES[p.goal][p.days];
- const sessions=dayPlan.map((day,index)=>planSession(day,p,index));
+ // All Phase 2 generation paths share the same working-set allocator.
+ const initial=dayPlan.map((day,index)=>planSession(day,p,index));
+ const evaluated=root.SXVolumeIntelligence?.rebalancePlan?.({sessions:initial},{
+   goal:p.goal,experience:p.experience,priority:p.priority
+ });
+ const sessions=(evaluated?.sessions||initial).map(day=>{
+   const exercises=day.exercises.map(e=>({...e,
+     estimatedMinutes:Math.ceil(e.sets*(e.restSeconds/60+0.8))
+   }));
+   return {...day,exercises,estimatedMinutes:exercises.reduce((n,e)=>n+e.estimatedMinutes,0)};
+ });
  const plan={version:VERSION,id:'sx-science-'+[p.goal,p.days,p.experience,p.minutes,p.priority].join('-').toLowerCase().replace(/[^a-z0-9-]/g,''),
   preview:true,readOnly:true,profile:p,weeks:p.weeks,sessions,exposure:exposure(sessions),
   methodology:['Load and rep targets are starting points, not fixed scientific optima.',

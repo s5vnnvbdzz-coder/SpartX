@@ -7,6 +7,7 @@ on:
     paths:
       - 'assets/science/**'
       - 'assets/ascension/adaptive-programming.js'
+      - 'assets/workouts/531-cycle-flow.js'
       - 'assets/bodybuilding/**'
       - 'intelligence/**'
       - 'science/**'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'assets/science/**'
       - 'assets/ascension/adaptive-programming.js'
+      - 'assets/workouts/531-cycle-flow.js'
       - 'assets/bodybuilding/**'
       - 'intelligence/**'
       - 'science/**'
@@ -35,6 +37,7 @@ jobs:
           node --check assets/science/volume-intelligence.js
           node --check intelligence/scientific-panel.js
           node --check assets/ascension/adaptive-programming.js
+          node --check assets/workouts/531-cycle-flow.js
           node --check assets/bodybuilding/programme-model.js
           node --check assets/bodybuilding/programme-builder.js
       - name: Scientific programme generation regression

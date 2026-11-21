@@ -185,8 +185,51 @@
   }
   return changed;
  }
+ // Align ONLY untouched active, imported AscensionX support rows with a new
+ // prescription after the athlete updates the app. Saved sessions, individual
+ // edited sets and completed exercises are never rewritten.
+ function refreshUntouchedAdaptiveSets(work,adaptive){
+  if(!Array.isArray(work)||!adaptive?.activeCycle||!adaptive?.enabled)return 0;
+  let cycle=null;
+  try{cycle=adaptive.activeCycle()}catch(_){return 0}
+  if(!cycle?.id||!adaptive.enabled(cycle.id))return 0;
+  let changed=0;
+  for(const ex of work){
+   if(!ex||ex.ascensionLink||ex.bodybuildingLink||clean(ex.replacementOf))continue;
+   const link=ex.sxStrengthSizeCompanion||ex.sxPowerbuildingSupport;
+   const week=Number(link?.week),prior=Number(link?.plannedSets);
+   const sets=ex.sets;
+   if(!link||link.cycleId!==cycle.id||!Number.isInteger(week)||
+      week<1||week>6||!Array.isArray(sets)||!sets.length||
+      !Number.isInteger(prior)||prior<1||sets.length!==prior)continue;
+   // A prefilled load or changed reps could represent an athlete decision:
+   // preserve every such row, including unsaved work and replacement rows.
+   const initialReps=Number(link.repsMin);
+   if(!Number.isInteger(initialReps)||initialReps<1||!sets.every(s=>
+     s&&s.done===false&&String(s.type||'Working Set')==='Working Set'&&
+     !filled(s.weight)&&!filled(s.rpe)&&Number(s.reps)===initialReps))continue;
+   let planned=null;
+   try{
+    if(ex.sxStrengthSizeCompanion&&cycle.lifts.includes(link.lift)){
+     planned=adaptive.plan(link.lift,week).find(p=>norm(p.name)===norm(ex.name))||null;
+    }else if(ex.sxPowerbuildingSupport){
+     const slot=adaptive.schedule(cycle)?.slots?.find(s=>
+      s.kind==='support'&&s.day===link.day&&Number(s.week)===week);
+     planned=slot?.exercises.find(p=>norm(p.name)===norm(ex.name))||null;
+    }
+   }catch(_){continue}
+   const desired=Number(planned?.sets);
+   if(!Number.isInteger(desired)||desired<=prior||desired>4)continue;
+   for(let i=prior;i<desired;i++)sets.push({
+    weight:'',reps:String(initialReps),rpe:'',type:'Working Set',done:false
+   });
+   link.plannedSets=desired;changed++;
+  }
+  return changed;
+ }
  global.SpartanXExerciseReplacement=Object.freeze({
   prepare,hasRecordedData,repairActiveIsoLateralRows,
-  renameActiveAscensionPushdowns,renameActiveAscensionRearDelts
+  renameActiveAscensionPushdowns,renameActiveAscensionRearDelts,
+  refreshUntouchedAdaptiveSets
  });
 })(window);

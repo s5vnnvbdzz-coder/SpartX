@@ -477,6 +477,19 @@ window.addEventListener('message',e=>{
   if(ascensionOverlay.classList.contains('sx-ascension-manage-only'))ascensionOverlay.classList.add('sx-ascension-manage-visible');
   return;
  }
+ if(e.data?.type==='spartx:ascensionCycleCreated'){
+  // The message must originate from our own same-origin AscensionX iframe.
+  // The cycle was already saved by AscensionX: this just closes the builder,
+  // navigates to Workout and refreshes its existing Continue session card.
+  if(typeof e.data.cycleId==='string'&&Number.isFinite(Date.parse(e.data.cycleId))){
+   closeEmbeddedAscensionX();
+   if(typeof window.spartanxNavigateScreen==='function')
+    window.spartanxNavigateScreen('workout',{instant:true});
+   window.spartanxRefreshAscensionQuickAccess?.();
+   requestAnimationFrame(()=>window.scrollTo(0,0));
+  }
+  return;
+ }
  if(e.data?.type==='spartx:ascensionManageExit'){
   if(ascensionOverlay.classList.contains('sx-ascension-manage-only'))closeEmbeddedAscensionX();
   return;

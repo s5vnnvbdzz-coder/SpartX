@@ -53,7 +53,15 @@ async function main(){
   await desktop.locator('#sxBBDays').selectOption('5');
   assert.equal(await desktop.locator('#sxBBEditorDays > .sx-bb-edit-day').count(),5,
    'Changing days must still rebuild the training split');
+  assert.equal(await desktop.locator('#sxBBEditorDays > details[open]').count(),1,
+   'Only the first training day should open initially, matching compact AscensionX review');
   await desktop.screenshot({path:'bodybuilding-builder-desktop.png',fullPage:false});
+  await desktop.locator('#sxBBEditorDays > details[data-bb-editor-day="1"] > summary').click();
+  assert.equal(await desktop.locator('#sxBBEditorDays > details[data-bb-editor-day="1"]').getAttribute('open'),'',
+   'Other training days remain independently expandable');
+  await desktop.locator('[data-bb-day-name="1"]').fill('Updated Lower Session');
+  assert.match(await desktop.locator('details[data-bb-editor-day="1"] .sx-bb-day-title').innerText(),
+   /Updated Lower Session/,'Editable day names update the compact heading');
   console.log('PASS desktop layout and controls');
 
   mobile=await openBuilder(browser,{width:390,height:844});

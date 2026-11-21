@@ -534,3 +534,38 @@ body:has(>main>#sxBodybuildingBuilder.screen.active)>main{
  }
  #sxBodybuildingBuilder .sx-bb-sectionhead h2{font-size:20px}
 }
+
+
+/* Collapsible editing days: same quiet, sectioned interaction as AscensionX
+   without removing the editable exercise prescriptions underneath. */
+#sxBodybuildingBuilder .sx-bb-edit-day>.sx-bb-edit-summary{
+ display:flex;gap:13px;align-items:center;justify-content:flex-start;
+ min-height:52px;padding:0 2px;list-style:none;
+}
+#sxBodybuildingBuilder .sx-bb-edit-summary .sx-bb-day-index{
+ flex:0 0 auto;min-width:46px;font-size:11px;
+ color:var(--muted);font-weight:850;
+}
+#sxBodybuildingBuilder .sx-bb-edit-summary .sx-bb-day-title{
+ display:block;flex:1;min-width:0;
+ color:var(--txt);font-size:16px;font-weight:800;line-height:1.35;
+ overflow-wrap:anywhere;
+}
+#sxBodybuildingBuilder .sx-bb-edit-summary .sx-bb-day-title small{
+ display:block;margin-top:5px;
+ color:var(--muted);font-size:11px;font-weight:600;
+}
+#sxBodybuildingBuilder .sx-bb-edit-summary:after{
+ content:'⌄';color:var(--txt);font-size:21px;
+}
+#sxBodybuildingBuilder .sx-bb-edit-day[open]>.sx-bb-edit-summary:after{content:'⌃'}
+#sxBodybuildingBuilder .sx-bb-edit-day>.sx-bb-day-body{
+ margin-top:11px;padding-top:16px;
+}
+#sxBodybuildingBuilder .sx-bb-day-name-label{
+ display:block;max-width:100%;margin:0 0 16px;
+ font-size:12px;font-weight:800;letter-spacing:.3px;
+}
+#sxBodybuildingBuilder .sx-bb-day-name-label input{
+ max-width:100%;margin-top:5px;
+}

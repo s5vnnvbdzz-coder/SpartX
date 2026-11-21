@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'assets/themes/**'
+      - 'assets/profile/feed-gaming-card-compact.css'
+      - 'tests/home-feed-gaming-compact.browser.test.cjs'
       - 'index.html'
       - 'social.js'
       - 'assets/social/athlete-home-browser.test.cjs'
@@ -32,6 +34,7 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-theme-server.log 2>&1 &
           node assets/themes/theme-browser.test.cjs
           node assets/social/athlete-home-browser.test.cjs
+          node tests/home-feed-gaming-compact.browser.test.cjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -44,4 +47,6 @@ jobs:
             athlete-home-mobile.png
             athlete-search-mobile.png
             athlete-search-failure.png
+            gaming-profile-compact-390.png
+            gaming-profile-compact-failure.png
           if-no-files-found: ignore

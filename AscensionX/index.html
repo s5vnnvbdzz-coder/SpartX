@@ -1211,15 +1211,15 @@ function confirmCycleStart(){
  const {chosen,existing}=pendingCycleSelection;
  discardCycleConfirmation();
  applyCycleSelection(chosen,existing);
- closeCycleEditor();
- if(!existing){
-  // A newly created cycle should be started from SpartanX Workout, not
-  // leave the athlete on AscensionX's separate dashboard.
-  if(ascensionEmbeddedBySpartanX&&window.parent!==window){
-   try{window.parent.postMessage({type:'spartx:ascensionCycleCreated',
-    cycleId:state.cycle.created},location.origin)}catch(_){}
-  }else showScreen('workout');
+ // Dispatch before closing: the editor can also emit ManageExit, and the
+ // parent needs the creation event before the embedded overlay closes.
+ const returnToSpartanX=!existing&&ascensionEmbeddedBySpartanX&&window.parent!==window;
+ if(returnToSpartanX){
+  try{window.parent.postMessage({type:'spartx:ascensionCycleCreated',
+   cycleId:state.cycle.created},location.origin)}catch(_){}
  }
+ closeCycleEditor();
+ if(!existing&&!returnToSpartanX)showScreen('workout');
 }
 function applyCycleSelection(chosen,existing){
  const weeks={...(state.cycle.weeks||{})};

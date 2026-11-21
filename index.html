@@ -2054,7 +2054,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 }
 </style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
-<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=370">
+<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=371">
 <link rel="stylesheet" href="./assets/themes/uniform-surfaces.css?v=340">
 <script defer src="./assets/charts/touch-scrub.js?v=344"></script>
 
@@ -2455,7 +2455,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/exercises/exercise-logging-guide.js?v=303"></script>
-<script src="./assets/ranks/xp-engine.js?v=370"></script>
+<script src="./assets/ranks/xp-engine.js?v=371"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -2553,10 +2553,11 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';
  const prestige=state.prestige;
  const prestigeBand=window.SpartanXXP.prestigeBand(prestige);
+ const prestigeTier=window.SpartanXXP.prestigeTier(prestige);
  const crest=prestige?'<svg class="sx-prestige-laurel" viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19 7 15 5 19M9 13l-4-5-2 4M9 8l2-6 3 4M28 19l5-4 2 4M31 13l4-5 2 4M31 8l-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>':'';
  const rankFile=rank.file.replace(/\.svg$/i,'');
  const frameFile=p.standard==='female'?'female-frame-'+rankFile.replace(/^female-/,'')+'.svg':'male-profile-'+rankFile+'.svg';
- return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><span class="sx-gamer-prestige" aria-label="Prestige '+prestige+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b></span></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
+ return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><span class="sx-gamer-prestige" aria-label="Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+(prestigeTier?'<small class="sx-prestige-tier-name">'+prestigeTier.name+'</small>':'')+'</span></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
 }
 
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='toggleProfileCards'){localStorage.setItem(PROFILE_CARD_PREF,String(e.target.checked));renderWorkoutFeed()}});
@@ -2935,7 +2936,11 @@ function renderSpartanProgress(){
  const prestigeMark=$('rankPrestigeMark');
  if(prestigeMark){
   prestigeMark.hidden=state.prestige===0;
-  prestigeMark.textContent=state.prestige?'✦ PRESTIGE '+String(state.prestige).padStart(2,'0')+' · LIFETIME BADGES KEPT':'';
+  const tier=window.SpartanXXP.prestigeTier(state.prestige);
+  const next=window.SpartanXXP.LAUREL_TIERS.find(t=>t.start>state.prestige);
+  prestigeMark.textContent=state.prestige?
+   '✦ PRESTIGE '+String(state.prestige).padStart(2,'0')+' · '+tier.name.toUpperCase()+
+   ' LAUREL'+(next?' · NEXT P'+next.start:' · HIGHEST INSIGNIA'):'';
   prestigeMark.dataset.sxPrestigeBand=window.SpartanXXP.prestigeBand(state.prestige);
  }
  $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankExperienceTrack')?.setAttribute('aria-valuenow',String(Math.round(state.progress*100)));$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=(state.prestige?'Prestige '+state.prestige+' · ':'')+spartanxRankLabel(state.current.name,state.index);

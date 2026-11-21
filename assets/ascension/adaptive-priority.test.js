@@ -100,6 +100,17 @@ check('scheduling and editor preview do not alter existing AscensionX main cycle
  A.schedule(null,storage);
  assert.equal(storage.getItem('ascensionx_strength_v1'),before);
 });
+check('editing existing cycle lift choices preserves individual weeks in preview',()=>{
+ const {A,storage}=boot(['Back Squat','Bench Press','Deadlift'],3);
+ A.save({enabled:true,focus:'balanced',days:5},storage);
+ const selected=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+ const plan=A.previewSchedule(selected,{enabled:true,focus:'balanced',days:5},A.activeCycle(storage),storage);
+ assert.equal(plan.slots[0].week,3);
+ assert.equal(plan.slots[1].week,3);
+ assert.equal(plan.slots[2].week,3);
+ assert.equal(plan.slots[3].week,1);
+ assert.equal(plan.slots[4].kind,'support');
+});
 check('recovery in Week 6 still removes all optional accessory work',()=>{
  const {A,storage}=boot(['Back Squat','Bench Press','Deadlift'],6);
  A.save({enabled:true,focus:'hypertrophy',days:5},storage);

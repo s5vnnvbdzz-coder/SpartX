@@ -62,7 +62,7 @@
  function display(source){
   const root=ensureOverlay(),model=source||currentModel();
   if(!root||!model)return false;
-  previousFocus=global.document.activeElement;
+  if(root.hidden)previousFocus=global.document.activeElement;
   root.hidden=false;
   root.dataset.sxPrestigeBand=model.tier;
   root.classList.remove('is-celebration');

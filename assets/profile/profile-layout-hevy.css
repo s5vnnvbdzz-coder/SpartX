@@ -65,12 +65,74 @@ body:has(#profile.screen.active)>header,body:has(#profile.screen.active)>#sxMain
 #profile #performanceTabs button.selected{background:var(--lime)!important;color:#0a130b!important;border-color:var(--lime)!important;box-shadow:0 0 12px var(--sx-p-glow)!important}
 #profile .sx-profile-dashboard-kicker{margin:0 0 5px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:1.5px}
 #profile .sx-profile-dashboard-title{font-size:21px;letter-spacing:-.5px;margin:0 0 16px;font-weight:820}
-#profile .sx-profile-dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 38px}
-#profile .sx-profile-dashboard-grid button{position:relative;overflow:hidden;display:flex;align-items:flex-start;justify-content:space-between;flex-direction:column;gap:15px;min-height:102px;min-width:0;margin:0;padding:16px 14px!important;background:linear-gradient(135deg,var(--panel2),var(--panel) 88%)!important;border:1px solid color-mix(in srgb,var(--line) 75%,var(--txt) 12%)!important;border-radius:16px!important;box-shadow:inset 0 1px 0 #ffffff10!important;text-align:left;color:var(--txt)!important;font-weight:800!important;font-size:14px!important}
-#profile .sx-profile-dashboard-grid button::after{content:'';position:absolute;right:-26px;top:-30px;width:67px;height:67px;border:1px solid color-mix(in srgb,var(--lime) 24%,transparent);border-radius:50%;opacity:.24}
-#profile .sx-profile-dashboard-grid .sx-profile-dashboard-icon{display:grid;place-items:center;width:28px;height:28px;min-width:28px;color:var(--lime)}
-#profile .sx-profile-dashboard-grid .sx-profile-dashboard-icon svg{width:27px;height:27px;stroke:currentColor;stroke-width:1.8;fill:none}
-#profile .sx-profile-dashboard-grid .sx-profile-dashboard-label{font-size:14px}
+/* The Profile dashboard is a compact 2×2 set of tap targets: centred,
+ * vertically stacked SVG + title in each tile, in every SpartanX theme. */
+#profile .sx-profile-dashboard-grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:9px;
+ margin:0 0 26px;
+}
+#profile .sx-profile-dashboard-grid button{
+ position:relative;
+ overflow:hidden;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:7px!important;
+ min-height:80px!important;
+ min-width:0;
+ margin:0;
+ padding:11px 9px!important;
+ background:linear-gradient(135deg,var(--panel2),var(--panel) 88%)!important;
+ border:1px solid color-mix(in srgb,var(--line) 75%,var(--txt) 12%)!important;
+ border-radius:14px!important;
+ box-shadow:inset 0 1px 0 #ffffff10!important;
+ text-align:center!important;
+ color:var(--txt)!important;
+ font-weight:800!important;
+ font-size:13px!important;
+}
+#profile .sx-profile-dashboard-grid button::after{
+ content:'';
+ position:absolute;
+ right:-26px;
+ top:-30px;
+ width:67px;
+ height:67px;
+ border:1px solid color-mix(in srgb,var(--lime) 24%,transparent);
+ border-radius:50%;
+ opacity:.24;
+ pointer-events:none;
+}
+#profile .sx-profile-dashboard-grid .sx-profile-dashboard-icon{
+ display:grid;
+ place-items:center;
+ width:25px;
+ height:25px;
+ min-width:25px;
+ flex:0 0 25px;
+ margin:0 auto;
+ color:var(--lime);
+}
+#profile .sx-profile-dashboard-grid .sx-profile-dashboard-icon svg{
+ display:block;
+ width:24px;
+ height:24px;
+ stroke:currentColor;
+ stroke-width:1.8;
+ fill:none;
+}
+#profile .sx-profile-dashboard-grid .sx-profile-dashboard-label{
+ display:block;
+ max-width:100%;
+ font-size:13px!important;
+ font-weight:800;
+ line-height:1.2;
+ text-align:center!important;
+ white-space:normal;
+}
 #profile .sx-profile-history-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
 #profile .sx-profile-history-heading h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px}
 #profile .sx-profile-history-count{font-size:11px;color:var(--muted)}
@@ -95,7 +157,7 @@ body:has(#profile.screen.active)>header,body:has(#profile.screen.active)>#sxMain
 #profile .sx-profile-details-content{padding-top:10px}
 #profile .sx-profile-more-title{display:none}
 body.sx-jade #profile .sx-profile-xp-panel,body.sx-jade #profile .sx-profile-history-card,body.sx-jade #profile .sx-profile-dashboard-grid button{border-color:#baff7370!important;box-shadow:inset 0 1px 0 #eaffc021,0 0 12px #aaff3733!important}
-@media(max-width:390px){#profile .sx-profile-layout-top{padding-inline:15px}#profile .profile-top{grid-template-columns:86px minmax(0,1fr);gap:11px}#profile .sx-profile-avatar-wrap{width:86px;height:86px}#profile #profileAvatar{width:85px;height:85px;min-width:85px}#profile .sx-profile-numbers{gap:6px}#profile .profile-workouts,#profile .sx-profile-social-metrics button{font-size:10px!important}#profile .sx-profile-chart-bars{gap:5px}#profile .sx-profile-dashboard-grid button{min-height:94px;padding:13px!important}}
+@media(max-width:390px){#profile .sx-profile-layout-top{padding-inline:15px}#profile .profile-top{grid-template-columns:86px minmax(0,1fr);gap:11px}#profile .sx-profile-avatar-wrap{width:86px;height:86px}#profile #profileAvatar{width:85px;height:85px;min-width:85px}#profile .sx-profile-numbers{gap:6px}#profile .profile-workouts,#profile .sx-profile-social-metrics button{font-size:10px!important}#profile .sx-profile-chart-bars{gap:5px}#profile .sx-profile-dashboard-grid button{min-height:76px!important;padding:9px 7px!important}}
 @media(prefers-reduced-motion:reduce){#profile .sx-profile-chart-bars button{transition:none}}
 
 

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>SpartanX | Scientific Training Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#050607;--surface:#111417;--surface2:#191d21;--line:#2a3035;--txt:#f3f6f6;--muted:#a7b2b8;--accent:#d9f25a;--safe:#8cd7b9;--warn:#ffca75}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}a{color:var(--accent)}button,input,select{font:inherit}button,select,input{min-height:44px}select,input{background:var(--surface2);color:var(--txt);border:1px solid var(--line);border-radius:11px;padding:9px 12px;width:100%}button{border:0;border-radius:11px;background:var(--accent);color:#070900;font-weight:800;padding:11px 15px;cursor:pointer}button.secondary{background:#252b2c;color:var(--txt);border:1px solid var(--line)}button:hover{filter:brightness(1.07)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shell{max-width:1100px;margin:auto;padding:24px 18px 80px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}.brand{font-weight:900;letter-spacing:1px}.brand span{color:var(--accent)}.back{border:1px solid var(--line);border-radius:10px;padding:9px 13px;text-decoration:none;color:var(--txt)}.eyebrow{font-size:11px;letter-spacing:1.7px;color:var(--accent);font-weight:800;text-transform:uppercase}h1{font-size:clamp(29px,5vw,43px);line-height:1.13;margin:6px 0 10px}h2{font-size:20px;margin:0 0 8px}h3{font-size:16px;margin:0}.muted,small{color:var(--muted)}.sub{max-width:730px;color:var(--muted);margin:0 0 20px}.notice{border:1px solid #495244;background:#151a13;border-radius:12px;padding:12px 15px;color:#d6e8cb;margin:16px 0}
+.layout{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:20px;align-items:start}.panel{background:linear-gradient(125deg,#181c1f,#101213);border:1px solid var(--line);border-radius:17px;padding:19px;margin-bottom:16px}.field{margin:12px 0}.field label,.label{display:block;font-size:12px;color:#cbd1d3;font-weight:700;margin-bottom:5px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.equipment{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0 15px}.equipment label{display:flex;align-items:center;gap:9px;font-size:13px;border-radius:10px;padding:7px 8px;background:var(--surface2)}.equipment input{width:17px;min-height:17px;accent-color:var(--accent);margin:0}.actions{display:flex;gap:9px;flex-wrap:wrap}.actions>*{flex:1}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:15px}.kpi{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px}.kpi strong{display:block;font-size:24px;line-height:1.1}.kpi small{font-size:11px}.pill{display:inline-block;border-radius:999px;background:#23332b;color:var(--safe);font-size:11px;font-weight:800;letter-spacing:.4px;padding:4px 10px}.pill.warn{background:#382a1c;color:var(--warn)}.day{border:1px solid var(--line);border-radius:13px;margin:10px 0;background:#121517;overflow:hidden}summary{cursor:pointer;padding:12px 15px;display:flex;gap:12px;justify-content:space-between;align-items:center;font-weight:800;list-style:none}summary::-webkit-details-marker{display:none}summary:after{content:"+";font-size:21px;color:var(--accent)}details[open]>summary:after{content:"−"}.day-content{padding:0 13px 13px}.exercise{border-top:1px solid var(--line);padding:12px 2px}.ex-top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.ex-top strong{font-size:14px}.ex-top em{color:var(--accent);font-size:12px;font-style:normal;white-space:nowrap}.ex-meta{font-size:12px;color:var(--muted);margin-top:4px}.ex-why{font-size:12px;color:#c9d5d5;margin-top:6px}.audit{margin:8px 0 0;padding-left:21px}.audit li{margin:6px 0;color:#e5d1ad}.metrics{width:100%;border-collapse:collapse;font-size:13px}.metrics th,.metrics td{padding:7px 5px;text-align:left;border-bottom:1px solid var(--line)}.metrics th{color:var(--muted);font-weight:600}.foot{color:var(--muted);font-size:12px;margin-top:20px}.source{margin:10px 0;padding-bottom:10px;border-bottom:1px solid var(--line)}.source strong{display:block;font-size:13px}.source a{word-break:break-word;font-size:12px}.source p{margin:4px 0;color:var(--muted);font-size:12px}
+@media(max-width:750px){.layout{grid-template-columns:1fr}.shell{padding:15px 12px 90px}.panel{padding:15px}.top{margin-bottom:20px}.back{font-size:12px}.kpi{padding:11px}.kpi strong{font-size:20px}.field-row{grid-template-columns:1fr 1fr}}
+</style>
+<script src="../assets/science/evidence-engine.js?v=1" defer></script>
+</head>
+<body>
+<div class="shell">
+<header class="top"><div class="brand">SPARTAN<span>X</span> <span class="muted">/ SCIENCE LAB</span></div><a class="back" href="../?sxReturn=intelligence&amp;sxFrom=workout">← SpartanX</a></header>
+<div class="eyebrow">Phase 2 • Preview v0.1</div>
+<h1>Scientific Training Intelligence</h1>
+<p class="sub">Generate and audit a goal-specific training week. Every decision is an explainable starting prescription, not a claim that one universal programme is optimal.</p>
+<div class="notice"><strong>Safe preview:</strong> this lab does not change SpartanX history, active workouts, AscensionX, 5/3/1 cycles or training maxes. Generated plans are not yet linked to workout logging.</div>
+<div class="layout">
+<aside>
+<form id="generator" class="panel">
+<h2>Athlete profile</h2>
+<div class="field"><label for="goal">Training objective</label><select id="goal"><option value="bodybuilding">Bodybuilding — hypertrophy</option><option value="powerlifting">Powerlifting — S/B/D strength</option><option value="powerbuilding">Powerbuilding — both</option></select></div>
+<div class="field-row"><div class="field"><label for="days">Training days / week</label><select id="days"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div><div class="field"><label for="minutes">Minutes / session</label><select id="minutes"><option>45</option><option selected>70</option><option>90</option><option>105</option></select></div></div>
+<div class="field-row"><div class="field"><label for="experience">Experience</label><select id="experience"><option value="beginner">Beginner</option><option value="intermediate" selected>Intermediate</option><option value="advanced">Advanced</option></select></div><div class="field"><label for="weeks">Programme horizon</label><select id="weeks"><option>4</option><option>6</option><option selected>8</option><option>12</option></select></div></div>
+<div class="field"><label for="priority">Muscle priority</label><select id="priority"><option selected>Balanced</option><option>Chest</option><option>Back</option><option>Shoulders</option><option>Quads</option><option>Hamstrings</option><option>Glutes</option><option>Calves</option><option>Biceps</option><option>Triceps</option><option>Core</option></select></div>
+<div class="label">Available equipment</div>
+<div class="equipment" id="equipment"><label><input type="checkbox" value="barbell" checked> Barbell</label><label><input type="checkbox" value="dumbbell" checked> Dumbbells</label><label><input type="checkbox" value="machine" checked> Machines</label><label><input type="checkbox" value="cable" checked> Cables</label><label><input type="checkbox" value="bodyweight" checked> Bodyweight</label></div>
+<div class="actions"><button type="submit">Generate &amp; audit</button><button type="button" id="export" class="secondary" disabled>Export JSON</button></div>
+<p class="foot">The engine cannot assess technique, pain, sleep, nutrition or injury risk from these inputs. Programme length is a review horizon, not an automatic deload schedule.</p>
+</form>
+<div class="panel"><h3>Research basis</h3><div id="sources"></div></div>
+</aside>
+<main>
+<section class="panel" aria-live="polite" id="results"><p class="muted">Preparing the first programme preview...</p></section>
+<section class="panel" id="volumepanel" hidden><h2>Weekly muscle exposure</h2><p class="muted">Direct working sets + 0.5 for indirect contributing sets. Useful bookkeeping, not a physiological dose guarantee.</p><div style="overflow:auto"><table class="metrics"><thead><tr><th>Muscle</th><th>Direct</th><th>Indirect</th><th>Total</th><th>Days</th></tr></thead><tbody id="volumes"></tbody></table></div></section>
+<section class="panel" id="auditpanel" hidden><h2>Programme audit</h2><p id="auditstatus"></p><ul id="warnings" class="audit"></ul></section>
+</main>
+</div>
+<p class="foot">SpartanX Scientific Engine v0.1 • Evidence-informed pilot • Individual response, recovery and professional judgement take priority over fixed formulas.</p>
+</div>
+<script>
+window.addEventListener('DOMContentLoaded',function(){
+  'use strict';
+  var engine=window.SXScientificEngine;
+  var form=document.getElementById('generator'),result=document.getElementById('results'),volume=document.getElementById('volumepanel'),audit=document.getElementById('auditpanel'),current=null;
+  function node(tag,cls,value){var e=document.createElement(tag);if(cls)e.className=cls;if(value!=null)e.textContent=String(value);return e;}
+  function section(parent,tag,cls,text){var e=node(tag,cls,text);parent.appendChild(e);return e;}
+  if(!engine){result.textContent='The scientific engine could not load. Check the connection and refresh.';return;}
+  engine.EVIDENCE.forEach(function(item){
+    var d=section(document.getElementById('sources'),'div','source');section(d,'strong','',item.title);
+    var a=node('a','',item.level+' · Original research');a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';d.appendChild(a);
+    section(d,'p','',item.use);
+  });
+  function settings(){return {goal:document.getElementById('goal').value,days:Number(document.getElementById('days').value),minutes:Number(document.getElementById('minutes').value),experience:document.getElementById('experience').value,weeks:Number(document.getElementById('weeks').value),priority:document.getElementById('priority').value,equipment:Array.from(document.querySelectorAll('#equipment input:checked')).map(function(x){return x.value;})};}
+  function kpi(parent,value,label){var d=section(parent,'div','kpi');section(d,'strong','',value);section(d,'small','',label);}
+  function render(){
+    current=engine.generate(settings());result.replaceChildren();
+    var ready=current.audit.passed;
+    var status=section(result,'span','pill'+(ready?'':' warn'),ready?'VALID STRUCTURE':'NEEDS REVIEW');
+    status.setAttribute('role','status');
+    section(result,'h2','',current.profile.goal==='powerlifting'?'Strength-specific week':current.profile.goal==='powerbuilding'?'Powerbuilding week':'Hypertrophy-focused week');
+    var k=section(result,'div','kpis');
+    kpi(k,current.sessions.length,'Sessions / week');
+    kpi(k,current.weeks,'Review horizon (weeks)');
+    kpi(k,current.sessions.reduce(function(n,d){return n+d.exercises.reduce(function(a,x){return a+x.sets;},0);},0),'Total working sets');
+    section(result,'p','muted','Review each session before training. Main lifts come first; accessory work is selected for muscle coverage and manageable loading overlap.');
+    current.sessions.forEach(function(day,i){
+      var details=section(result,'details','day');if(i===0)details.open=true;
+      var summary=section(details,'summary','');section(summary,'span','',day.order+'. '+day.name);
+      section(summary,'small','',day.estimatedMinutes+' min est.');var body=section(details,'div','day-content');
+      day.exercises.forEach(function(ex){
+        var d=section(body,'div','exercise'),top=section(d,'div','ex-top');
+        section(top,'strong','',ex.name);section(top,'em','',ex.sets+' × '+ex.repsMin+'–'+ex.repsMax);
+        section(d,'div','ex-meta','RIR '+ex.rir+' • Rest '+Math.round(ex.restSeconds/60*10)/10+' min • '+ex.primary+' • '+ex.equipment);
+        section(d,'div','ex-why',ex.reason);
+      });
+      if(!day.exercises.length)section(body,'p','muted','No exercises could be allocated with the selected equipment.');
+    });
+    var tbody=document.getElementById('volumes');tbody.replaceChildren();
+    engine.MUSCLES.forEach(function(m){var v=current.exposure[m],tr=section(tbody,'tr','');[m,v.direct,v.indirect,v.effective,v.days].forEach(function(x){section(tr,'td','',x);});});
+    volume.hidden=false;audit.hidden=false;
+    document.getElementById('auditstatus').textContent=ready?'No hard structural errors detected. This is not a clinical or professional validation.':'The engine found structural problems. Do not treat this as a complete programme.';
+    var list=document.getElementById('warnings');list.replaceChildren();
+    current.audit.errors.forEach(function(e){section(list,'li','', 'ERROR: '+e);});
+    current.audit.warnings.forEach(function(w){section(list,'li','',w);});
+    if(!list.children.length)section(list,'li','','No rule-based warnings for these inputs.');
+    document.getElementById('export').disabled=!ready;
+  }
+  form.addEventListener('submit',function(event){event.preventDefault();render();});
+  document.getElementById('export').addEventListener('click',function(){
+    if(!current||!current.audit.passed)return;
+    var blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'});
+    var link=document.createElement('a');var url=URL.createObjectURL(blob);
+    link.href=url;link.download='SpartanX_Science_Preview_'+current.profile.goal+'.json';
+    document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  });
+  render();
+});
+</script>
+</body>
+</html>

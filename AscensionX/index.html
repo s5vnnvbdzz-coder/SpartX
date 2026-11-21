@@ -1212,7 +1212,14 @@ function confirmCycleStart(){
  discardCycleConfirmation();
  applyCycleSelection(chosen,existing);
  closeCycleEditor();
- if(!existing)showScreen('workout');
+ if(!existing){
+  // A newly created cycle should be started from SpartanX Workout, not
+  // leave the athlete on AscensionX's separate dashboard.
+  if(ascensionEmbeddedBySpartanX&&window.parent!==window){
+   try{window.parent.postMessage({type:'spartx:ascensionCycleCreated',
+    cycleId:state.cycle.created},location.origin)}catch(_){}
+  }else showScreen('workout');
+ }
 }
 function applyCycleSelection(chosen,existing){
  const weeks={...(state.cycle.weeks||{})};

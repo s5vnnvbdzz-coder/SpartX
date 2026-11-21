@@ -358,7 +358,8 @@
    message:'Choose at least as many days as selected compound lifts.'};
   const match=!!cycleArg&&lifts.length===cycleArg.lifts.length&&
    lifts.every(lift=>cycleArg.lifts.includes(lift));
-  const lastWeek=match?Math.max(1,...lifts.map(lift=>weekFor(cycleArg,lift))):1;
+  const lastWeek=cycleArg?Math.max(1,...lifts.map(lift=>
+   cycleArg.lifts.includes(lift)?weekFor(cycleArg,lift):1)):1;
   const prefs={...settings,focus,days:count};
   const pending=match&&settings.enabled?pendingSupportDay(cycleArg,storage)?.week:null;
   const supportWeek=pending||lastWeek;
@@ -366,10 +367,11 @@
   const slots=DAYS[count].map((day,index)=>{
    const lift=lifts[index];
    if(lift){
-    const week=match?weekFor(cycleArg,lift):1;
+    const inCycle=!!cycleArg&&cycleArg.lifts.includes(lift);
+    const week=inCycle?weekFor(cycleArg,lift):1;
     return {day,kind:'ascension',lift,week,title:lift+' · Week '+week,
      exercises:match&&settings.enabled?plan(lift,week,{},storage):
-      buildLiftPlan(lift,week,focus,null,storage)};
+      buildLiftPlan(lift,week,focus,inCycle?cycleArg.id:null,storage)};
    }
    const week=supportWeek;
    return {day,kind:'support',lift:null,week,

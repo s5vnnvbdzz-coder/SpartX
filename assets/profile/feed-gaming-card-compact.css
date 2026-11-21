@@ -1,4 +1,4 @@
-/* SpartanX gaming workout-feed profile: compact header v374.
+/* SpartanX gaming workout-feed profile: compact header v375.
  * Rank and compound PR sit directly below the athlete's name.
  * Prestige stays tappable in the top-right but no longer occupies an
  * oversized row. The country flag sits beneath the tier portrait frame.
@@ -188,5 +188,36 @@ body #workoutFeed .sx-gamer-card .sx-session-log>summary{
  body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump],
  body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump] strong{
   font-size:10px!important;
+ }
+}
+
+/* v375 — Keep every rotating compound PR on one readable line.
+ * The prestige badge sits above the PR value, so the value can use the
+ * otherwise-unused space to its right without lengthening the card.
+ * Divider width stays aligned with Name and Rank.
+ */
+body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-rank-line > b,
+body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line > [data-sx-compound-pr]{
+ font-size:clamp(11px,3vw,13px)!important;
+ font-weight:750!important;
+ line-height:1.28!important;
+ letter-spacing:-.18px!important;
+}
+body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line > [data-sx-compound-pr]{
+ width:max-content!important;
+ max-width:calc(100% + 73px)!important;
+ white-space:nowrap!important;
+ overflow-wrap:normal!important;
+ word-break:normal!important;
+ text-align:left!important;
+}
+@media(max-width:430px){
+ body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line > [data-sx-compound-pr]{
+  max-width:calc(100% + 70px)!important;
+ }
+}
+@media(max-width:355px){
+ body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line > [data-sx-compound-pr]{
+  max-width:calc(100% + 61px)!important;
  }
 }

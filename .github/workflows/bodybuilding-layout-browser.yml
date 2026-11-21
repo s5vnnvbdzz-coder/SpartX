@@ -1,0 +1,46 @@
+name: Strength & Bodybuilding AscensionX-style layout
+on:
+  push:
+    branches:
+      - 'fix/bodybuilding-editor-*'
+    paths:
+      - 'assets/bodybuilding/programme-builder.*'
+      - 'assets/bodybuilding/programme-layout-browser.test.cjs'
+      - 'index.html'
+      - '.github/workflows/bodybuilding-layout-browser.yml'
+  pull_request:
+    paths:
+      - 'assets/bodybuilding/programme-builder.*'
+      - 'assets/bodybuilding/programme-layout-browser.test.cjs'
+      - 'index.html'
+      - '.github/workflows/bodybuilding-layout-browser.yml'
+permissions:
+  contents: read
+jobs:
+  visual-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check builder script syntax
+        run: node --check assets/bodybuilding/programme-builder.js
+      - name: Install headless browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify desktop and mobile layout
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-bb-server.log 2>&1 &
+          node assets/bodybuilding/programme-layout-browser.test.cjs
+      - name: Store screenshots for design review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strength-bodybuilding-builder
+          path: |
+            bodybuilding-builder-desktop.png
+            bodybuilding-builder-mobile.png
+          if-no-files-found: ignore

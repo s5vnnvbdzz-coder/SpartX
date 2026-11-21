@@ -109,7 +109,7 @@
     if(!set||set.done===true||set.type==='Warm-up'||clean(set.reps))continue;
     set.reps=String(min);modified=true;
    }
-   // The standard three-set default applies to the old replacement only if
+   // The current linked prescription applies to the old replacement only if
    // the current linked plan still prescribes it and no set is completed.
    const desired=Number(planned?.sets)||Number(link.plannedSets)||0;
    if(desired>sets.length&&desired<=5&&sets.length>0&&

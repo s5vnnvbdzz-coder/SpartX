@@ -275,6 +275,33 @@ assert(rootHost.includes("if(e.data?.type==='spartx:ascensionCycleCreated')")&&
 assert(rootHost.includes("e.source!==ascensionEmbedFrame.contentWindow"),
  'The embedded creation protocol must reject untrusted windows');
 
+// A completed support workout must not be invalidated by new prescription
+// sizes after an engine update (old Week 5 was one set).
+const oneSetLegacy=['Machine Chest Press','Iso-Lateral Row'].map(name=>({
+ name,sxPowerbuildingSupport:{cycleId:id,week:5,day:'SAT'},
+ sets:[{weight:30,reps:10,done:true,type:'Working Set'}]
+}));
+week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
+ date:'2026-11-20T15:00:00.000Z',exercises:oneSetLegacy
+}]}));
+assert.equal(week5Done.api.pendingSupportDay(),null,
+ 'Previously completed one-set Day 4 must not be scheduled again after volume upgrade');
+// New sessions keep their original prescription metadata, so revised plans
+// also cannot retroactively invalidate completed assistance.
+const originalSupport=['Machine Chest Press','Iso-Lateral Row','Lateral Raise'].map(name=>({
+ name,sxPowerbuildingSupport:{cycleId:id,week:5,day:'SAT',plannedSets:1,plannedExerciseCount:3},
+ sets:[{weight:30,reps:10,done:true,type:'Working Set'}]
+}));
+week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
+ date:'2026-11-20T16:00:00.000Z',exercises:originalSupport
+}]}));
+assert.equal(week5Done.api.pendingSupportDay(),null,
+ 'A completed support workout must use saved original set counts, not future target counts');
+week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
+ date:'2026-11-20T16:00:00.000Z',exercises:originalSupport.slice(0,2)
+}]}));
+assert.equal(week5Done.api.pendingSupportDay()?.week,5,
+ 'A support session missing one of its originally planned exercises remains incomplete');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
  quickAccess.includes("lift:'__ADAPTIVE_SUPPORT__'"),

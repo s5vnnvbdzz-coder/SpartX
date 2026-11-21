@@ -58,6 +58,62 @@
    {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
   ]
  };
+ // A different priority must change the actual exercise prescription,
+ // not merely the select label or RIR text. These are conservative, editable
+ // starting choices; the shared Spartan Intelligence policy doses working sets.
+ const LOOKUP=[...Object.values(LIB).flat(),...Object.values(FOURTH).flat()];
+ const ADDITIONAL={
+  'Incline Dumbbell Press':{name:'Incline Dumbbell Press',sets:3,min:8,max:12,rir:3,rest:120,muscles:'chest',cost:1},
+  'Leg Press':{name:'Leg Press',sets:3,min:10,max:15,rir:3,rest:120,muscles:'quadriceps',cost:2},
+  'Cable Curl':{name:'Cable Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+ };
+ const itemFor=name=>{
+  const found=LOOKUP.find(x=>x.name===name)||ADDITIONAL[name];
+  if(!found)throw Error('Missing adaptive assistance specification: '+name);
+  return {...found};
+ };
+ const pickItems=names=>names.map(itemFor);
+ const FOCUS_LIFTS={
+  // Strength: modest accessories that support the main lifts without another
+  // high-load hinge after deadlifts.
+  strength:{
+   'Back Squat':['Leg Extension','Seated Leg Curl','45° Back Extension','Standing Calf Raise','Pallof Press'],
+   'Bench Press':['Iso-Lateral Row','Triceps Pushdown (Bar)','Hanging Knee Raise','Rear Delt Reverse Fly','Lat Pulldown'],
+   'Deadlift':['Lat Pulldown','Seated Leg Curl','Pallof Press','Seated Calf Raise'],
+   'Overhead Press':['Dumbbell Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl']
+  },
+  balanced:{
+   'Back Squat':['Seated Leg Curl','Leg Extension','Standing Calf Raise','Pallof Press'],
+   'Bench Press':['Iso-Lateral Row','Incline Dumbbell Press','Triceps Pushdown (Bar)','Rear Delt Reverse Fly'],
+   'Deadlift':['Seated Leg Curl','Lat Pulldown','Pallof Press','Seated Calf Raise'],
+   'Overhead Press':['Dumbbell Row','Lateral Raise','Dumbbell Curl','Triceps Pushdown (Bar)']
+  },
+  hypertrophy:{
+   'Back Squat':['Leg Extension','Seated Leg Curl','Standing Calf Raise','Pallof Press'],
+   'Bench Press':['Machine Chest Press','Seated Cable Row','Rear Delt Reverse Fly','Triceps Pushdown (Bar)'],
+   'Deadlift':['Seated Leg Curl','Rear Delt Reverse Fly','Lat Pulldown','Seated Calf Raise'],
+   'Overhead Press':['Lateral Raise','Dumbbell Row','Triceps Pushdown (Bar)','Dumbbell Curl']
+  }
+ };
+ const SUPPORT_ROLES={
+  strength:{
+   upper:['Machine Chest Press','Iso-Lateral Row','Lateral Raise'],
+   recovery:['Pallof Press','Seated Calf Raise','Cable Curl']
+  },
+  balanced:{
+   upper:['Incline Dumbbell Press','Iso-Lateral Row','Rear Delt Reverse Fly'],
+   recovery:['Triceps Pushdown (Bar)','Seated Calf Raise','Pallof Press']
+  },
+  hypertrophy:{
+   upper:['Machine Chest Press','Seated Cable Row','Lateral Raise'],
+   recovery:['Seated Leg Curl','Cable Curl','Seated Calf Raise']
+  }
+ };
+ const FOCUS_EXPLANATIONS={
+  strength:'Prioritises specific squat, bench and deadlift performance; assistance is deliberately restrained.',
+  balanced:'Balances strength practice with upper-body and lower-body hypertrophy at recoverable volume.',
+  hypertrophy:'Prioritises additional muscle stimulus through lower-fatigue accessories while main strength work stays fixed.'
+ };
  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
  function activeCycle(storage=global.localStorage){
@@ -170,42 +226,58 @@
   return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')+
     (advisory?' Spartan Intelligence: '+advisory.reason+' The set allocation is a reviewable heuristic.':'')};
  }
- function plan(lift,week,opts={},storage=global.localStorage){
-  const c=activeCycle(storage),w=Number(week);
-  if(!c||!c.lifts.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
-  const prefs=read(c.id,storage),focus=prefs.focus,main=lift;
-  if(!prefs.enabled)return [];
-  const candidates=LIB[main]||[];
-  const cap=main==='Deadlift'?6:focus==='strength'?9:12;
-  // Cap exercise slots as well as sets, so taper weeks genuinely reduce work.
-  const maxExercises=main==='Deadlift'?2:focus==='balanced'?4:3;
-  const prescribed=candidates.map(item=>dose(item,w,focus,main,c.id,storage)).filter(Boolean);
-  const pinnedName=PINNED[main];
-  const pinnedSets=prescribed.find(ex=>ex.name===pinnedName)?.sets||0;
+ // Single selection function shared by draft preview and live cycle plans.
+ function buildLiftPlan(lift,week,focus,cycleId,storage=global.localStorage){
+  const w=Number(week);
+  if(!LIFTS.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
+  const chosen=FOCUS_LIFTS[focus]||FOCUS_LIFTS.strength;
+  const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift]);
+  const cap=lift==='Deadlift'?(focus==='hypertrophy'?7:6):focus==='strength'?9:12;
+  const maxExercises=lift==='Deadlift'?(focus==='hypertrophy'?3:2):focus==='strength'?3:4;
+  const prescribed=candidates.map(item=>dose(item,w,focus,lift,cycleId,storage)).filter(Boolean);
+  const pinnedName=focus==='strength'?PINNED[lift]:null;
+  // Never force a Romanian Deadlift onto a heavy deadlift day. Prefer curls
+  // and pulling work rather than duplicating another fatiguing hinge.
+  const safePinned=pinnedName==='Romanian Deadlift'?'Seated Leg Curl':pinnedName;
+  const pinnedSets=prescribed.find(ex=>ex.name===safePinned)?.sets||0;
   let count=0,pinnedSelected=false;
   const selected=[];
   for(const ex of prescribed){
    if(selected.length>=maxExercises)break;
-   const isPinned=ex.name===pinnedName;
-   const reserve=!isPinned&&!pinnedSelected?pinnedSets:0;
-   if(count+ex.sets+reserve>cap)continue;
+   const isPinned=ex.name===safePinned;
+   const reserved=!isPinned&&!pinnedSelected?pinnedSets:0;
+   if(count+ex.sets+reserved>cap)continue;
    selected.push(ex);count+=ex.sets;
    if(isPinned)pinnedSelected=true;
   }
   return selected;
  }
- function weekFor(c,lift){return clamp(Number(c.weeks?.[lift]||c.currentWeek||1),1,6)}
- function supportExercises(c,prefs,index,week,storage){
-  if(week>=6)return [];
-  const supportIndex=index-c.lifts.length;
-  const base=FOURTH[prefs.focus]||FOURTH.strength;
-  let exercises=base.map(item=>dose(item,week,prefs.focus,'Support',c.id,storage)).filter(Boolean);
-  if(supportIndex>0)exercises=exercises.filter(item=>/calf|curl|pallof|delt/i.test(item.name));
-  return exercises;
+ function plan(lift,week,opts={},storage=global.localStorage){
+  const c=activeCycle(storage),w=Number(week);
+  if(!c||!c.lifts.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
+  const prefs=read(c.id,storage);
+  if(!prefs.enabled)return [];
+  return buildLiftPlan(lift,w,prefs.focus,c.id,storage);
  }
- function supportTitle(c,index){
-  return index===c.lifts.length?'Day '+(index+1)+' · Supporting strength & size':
-   'Day '+(index+1)+' · Low-fatigue support';
+ function weekFor(c,lift){return clamp(Number(c.weeks?.[lift]||c.currentWeek||1),1,6)}
+ function supportExercises(c,prefs,index,week,storage=global.localStorage){
+  if(week>=6||!c?.lifts)return [];
+  const supportIndex=index-c.lifts.length;
+  if(supportIndex<0)return [];
+  const focus=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
+  const role=supportIndex===0?'upper':'recovery';
+  const candidates=pickItems(focus[role]||[]);
+  return candidates.map(item=>dose(item,week,prefs.focus,'Support',c.id||null,storage))
+   .filter(Boolean).map(item=>role==='recovery'?
+    {...item,sets:Math.min(2,item.sets),reason:item.reason+
+     ' Brief low-fatigue support ahead of the next main-lift week.'}:item);
+ }
+ function supportTitle(c,index,focus='strength'){
+  const extra=index-c.lifts.length;
+  const label=extra>0?'Low-fatigue recovery support':
+   focus==='strength'?'Upper-body strength support':
+   focus==='balanced'?'Balanced upper hypertrophy':'Upper hypertrophy support';
+  return 'Day '+(index+1)+' · '+label;
  }
  function completedSupportDay(c,day,week,expected,storage){
   // Only saved, completed exercises for this exact cycle/week/day count.

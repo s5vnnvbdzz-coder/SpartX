@@ -2054,7 +2054,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 }
 </style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
-<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=371">
+<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=372">
 <link rel="stylesheet" href="./assets/themes/uniform-surfaces.css?v=340">
 <script defer src="./assets/charts/touch-scrub.js?v=344"></script>
 
@@ -2095,7 +2095,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
       <button type="button" class="rank-collapse-toggle" id="rankCollapseToggle" aria-expanded="false" aria-label="Expand Rank Progression" aria-controls="rankCurrentDetails rankProgressLabels rankXpHelp" title="Expand Rank Progression"><span aria-hidden="true" class="rank-collapse-symbol">+</span></button>
     </div>
   </div>
-  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span><span id="rankPrestigeMark" class="sx-rank-prestige-mark" hidden></span></div></div>
+  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span><button id="rankPrestigeMark" type="button" class="sx-rank-prestige-mark" data-open-prestige-showcase aria-label="Open Prestige Showcase" hidden></button></div></div>
   <div class="rank-progress-track" id="rankExperienceTrack" role="progressbar" aria-label="Experience towards next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rankProgressFill"></span></div>
   <div class="row between rank-progress-labels rank-expanded-detail" id="rankProgressLabels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div>
   <div class="rank-tier-strip" id="homeRankTiers"></div>
@@ -2455,7 +2455,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/exercises/exercise-logging-guide.js?v=303"></script>
-<script src="./assets/ranks/xp-engine.js?v=371"></script>
+<script src="./assets/ranks/xp-engine.js?v=372"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -2557,7 +2557,7 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const crest=prestige?'<svg class="sx-prestige-laurel" viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19 7 15 5 19M9 13l-4-5-2 4M9 8l2-6 3 4M28 19l5-4 2 4M31 13l4-5 2 4M31 8l-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>':'';
  const rankFile=rank.file.replace(/\.svg$/i,'');
  const frameFile=p.standard==='female'?'female-frame-'+rankFile.replace(/^female-/,'')+'.svg':'male-profile-'+rankFile+'.svg';
- return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><span class="sx-gamer-prestige" aria-label="Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+(prestigeTier?'<small class="sx-prestige-tier-name">'+prestigeTier.name+'</small>':'')+'</span></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
+ return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><button type="button" class="sx-gamer-prestige sx-prestige-trigger" data-open-prestige-showcase aria-label="View prestige showcase · Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+(prestigeTier?'<small class="sx-prestige-tier-name">'+prestigeTier.name+'</small>':'')+'</button></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
 }
 
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='toggleProfileCards'){localStorage.setItem(PROFILE_CARD_PREF,String(e.target.checked));renderWorkoutFeed()}});
@@ -4496,11 +4496,17 @@ function commitFinishSession(){
  }
  resetSession();stats();renderHomeCycles();switchScreen('home');
  const rankAfter=getWorkoutRank();
- pendingRankCelebration=rankAfter.prestige>rankBefore.prestige?{...rankAfter,prestigeUnlocked:true}:rankAfter.index>rankBefore.index?rankAfter:null;
+ const laurelUnlocked=window.SpartanXXP.laurelUpgrade(rankBefore.prestige,rankAfter.prestige);
+ pendingRankCelebration=rankAfter.prestige>rankBefore.prestige?
+  {...rankAfter,prestigeUnlocked:true,laurelUnlocked:laurelUnlocked?.name||null}:
+  rankAfter.index>rankBefore.index?rankAfter:null;
  showWorkoutSavedDialog(false,Math.max(0,rankAfter.totalXP-rankBefore.totalXP),Math.max(0,rankAfter.bonusXP-rankBefore.bonusXP));
  return db.sessions[0]?.id||null;
 }
 let pendingRankCelebration=null;function closeWorkoutSavedDialog(){ $('workoutSavedOverlay').classList.add('hidden');if(pendingRankCelebration){const state=pendingRankCelebration;pendingRankCelebration=null;showRankUnlockedDialog(state);}}function showRankUnlockedDialog(state){
+ // A NEW laurel is a rare lifetime milestone with its own fullscreen reveal.
+ // Ordinary repeated prestiges continue to use the standard rank dialog.
+ if(state.laurelUnlocked&&window.SpartanXPrestigeShowcase?.celebrate?.(state))return;
  const highest=activeProgressRanks()[5];
  $('rankUnlockedBadge').src='./ranks/'+(state.prestigeUnlocked?highest.file:state.current.file);
  $('rankUnlockedBadge').alt=state.prestigeUnlocked?'Prestige achievement':state.current.name+' rank badge';
@@ -5282,4 +5288,5 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/bodybuilding/decision-policy.js?v=306"></script>
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
 <script src="./assets/bodybuilding/programme-builder.js?v=367"></script>
+<script src="./assets/ranks/prestige-showcase.js?v=372"></script>
 </body></html>

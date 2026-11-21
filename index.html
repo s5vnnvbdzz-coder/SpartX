@@ -3824,7 +3824,8 @@ window.SpartanXStartPowerbuildingSupportSession=function(payload){
   notes:'Powerbuilding support · Week '+schedule.week+' · '+ex.min+'–'+ex.max+
    ' reps · '+ex.rir+' RIR · Target RPE '+(10-ex.rir),
   sxPowerbuildingSupport:{cycleId:cycle.id,week:schedule.week,day:slot.day,
-   repsMin:ex.min,repsMax:ex.max,rir:ex.rir},
+   repsMin:ex.min,repsMax:ex.max,rir:ex.rir,
+   plannedSets:ex.sets,plannedExerciseCount:slot.exercises.length},
   sets:Array.from({length:ex.sets},()=>({
    weight:'',reps:String(ex.min),rpe:'',type:'Working Set',done:false
   }))

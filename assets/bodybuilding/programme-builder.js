@@ -9,6 +9,7 @@
   const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const format=(n)=>Number(n||0).toLocaleString('en-GB');
   let store=M.read(),selectedId=store.activeId,mode=store.programmes.length?'view':'edit',draft=null,dirty=false,pickerDay=null;
+  const expandedBuilderDays=new Set([0]);
   const screen=document.createElement('section');
   screen.id='sxBodybuildingBuilder';screen.className='screen sx-bb-screen';
   screen.setAttribute('aria-label','Strength and Bodybuilding programme builder');
@@ -401,11 +402,13 @@
        'MUSCLE COVERAGE: Chest, back, shoulders, quads, hamstrings, glutes, calves, biceps, triceps and core represented.'):
       '';
     $('sxBBEditorDays').innerHTML=p.sessions.map((day,i)=>
-      '<article class="card sx-bb-day sx-bb-edit-day"><div class="sx-bb-day-heading">'+
-        '<span class="sx-bb-day-index">DAY '+(i+1)+'</span><input maxlength="65" data-bb-day-name="'+i+'" aria-label="Day '+(i+1)+' name" value="'+esc(day.name)+'">'+
-        '<span class="sx-bb-day-count">'+day.exercises.length+' EXERCISES · '+
-          day.exercises.reduce((total,ex)=>total+Number(ex.sets||0),0)+' SETS</span></div>'+
-        '<div class="sx-bb-day-body">'+day.exercises.map((ex,j)=>
+      '<details class="card sx-bb-day sx-bb-edit-day" data-bb-editor-day="'+i+'" '+(expandedBuilderDays.has(i)?'open':'')+'>'+
+        '<summary class="sx-bb-edit-summary"><span class="sx-bb-day-index">DAY '+(i+1)+'</span>'+
+        '<span class="sx-bb-day-title">'+esc(day.name)+'<small>'+day.exercises.length+' EXERCISES · '+
+          day.exercises.reduce((total,ex)=>total+Number(ex.sets||0),0)+' SETS</small></span></summary>'+
+        '<div class="sx-bb-day-body">'+
+        '<label class="sx-bb-day-name-label">DAY NAME<input maxlength="65" data-bb-day-name="'+i+'" aria-label="Day '+(i+1)+' name" value="'+esc(day.name)+'"></label>'+
+        day.exercises.map((ex,j)=>
           '<div class="sx-bb-exercise"><div class="sx-bb-ex-top"><div><strong>'+esc(ex.name)+'</strong><small>PRIMARY: '+esc(muscles(ex.name))+'</small></div>'+
           '<div class="sx-bb-ex-actions">'+
           '<button type="button" data-bb-action="up" data-day="'+i+'" data-ex="'+j+'" aria-label="Move up" '+(j===0?'disabled':'')+'>↑</button>'+
@@ -421,7 +424,7 @@
           '</div>'+(ex.sxVolumeReason?
             '<p class="sx-bb-help">SPARTAN INTELLIGENCE · '+esc(ex.sxVolumeReason)+'</p>':'')+
           '</div>').join('')+
-        '<button type="button" class="sx-bb-add" data-bb-action="add" data-day="'+i+'" '+(day.exercises.length>=20?'disabled':'')+'>＋ ADD EXERCISE</button></div></article>').join('');
+        '<button type="button" class="sx-bb-add" data-bb-action="add" data-day="'+i+'" '+(day.exercises.length>=20?'disabled':'')+'>＋ ADD EXERCISE</button></div></details>').join('');
   }
   function render(){
     selectRender();$('sxBBView').hidden=mode==='edit';$('sxBBEdit').hidden=mode!=='edit';
@@ -523,13 +526,23 @@
     if(!draft)return;
     if(el.dataset.bbField==='name'){draft.name=el.value;dirty=true;return}
     if(el.dataset.bbDayName!==undefined&&draft.sessions[+el.dataset.bbDayName]){
-      draft.sessions[+el.dataset.bbDayName].name=el.value;dirty=true;return;
+      draft.sessions[+el.dataset.bbDayName].name=el.value;
+      const title=el.closest('.sx-bb-edit-day')?.querySelector('.sx-bb-day-title')?.firstChild;
+      if(title)title.nodeValue=el.value;
+      dirty=true;return;
     }
     if(el.dataset.bbExField){
       const ex=draft.sessions[+el.dataset.day]?.exercises[+el.dataset.ex];
       if(ex){ex[el.dataset.bbExField]=Number(el.value);dirty=true}
     }
   });
+  // Preserve expanded training days across routine edits and re-renders.
+  screen.addEventListener('toggle',e=>{
+    const details=e.target;
+    if(!details.matches?.('details[data-bb-editor-day]')||!details.isConnected)return;
+    const day=Number(details.dataset.bbEditorDay);
+    if(details.open)expandedBuilderDays.add(day);else expandedBuilderDays.delete(day);
+  },true);
   screen.addEventListener('change',e=>{
     const el=e.target;
     if(el.id==='sxBBSelect'){

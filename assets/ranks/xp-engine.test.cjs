@@ -89,4 +89,36 @@ assert.equal(xp.calculate([],twoLifts).totalXP,1250,
  'Selected programme lifts determine full-week completion');
 assert.equal(xp.calculate([],state(logs.concat(logs))).totalXP,1700,
  'Duplicate AscensionX records cannot award twice');
-console.log('PASS: 17 SpartanX XP/Prestige scenarios');
+// Badges are permanent achievements, not repeated prestige-cycle rewards.
+assert.equal(xp.badgeHighWater({totalXP:0,index:0,prestige:0}),0);
+assert.equal(xp.badgeHighWater({totalXP:4800,index:4,prestige:0}),4);
+assert.equal(xp.badgeHighWater({totalXP:6000,index:0,prestige:1}),5,
+ 'All six rank badges remain unlocked after prestige');
+assert.equal(xp.badgeHighWater({totalXP:6120,index:0,prestige:1}),5,
+ 'Prestige Rank I still owns the Olympian badge');
+assert.equal(xp.badgeHighWater({totalXP:1500,index:1,prestige:0},4),4,
+ 'Previously earned badges survive later workout-history edits');
+assert.equal(xp.badgeHighWater({totalXP:12100,index:0,prestige:2},5),5,
+ 'Repeated prestiges do not revoke prior rank badges');
+assert.equal(xp.prestigeBand(0),'none');
+assert.equal(xp.prestigeBand(1),'bronze');
+assert.equal(xp.prestigeBand(3),'silver');
+assert.equal(xp.prestigeBand(5),'gold');
+assert.equal(xp.prestigeBand(10),'mythic');
+const root=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
+const profile=fs.readFileSync(path.join(__dirname,'../profile/profile-preview-parity.js'),'utf8');
+const style=fs.readFileSync(path.join(__dirname,'prestige-visuals.css'),'utf8');
+assert(root.includes('unlocked:i<=state.badgeHighWater'),
+ 'Badge gallery uses lifetime ownership rather than current rank');
+assert(root.includes('i<=state.badgeHighWater')&&root.includes('rank>state.badgeHighWater'),
+ 'Feed badge choices remain selectable after prestige');
+assert(root.includes('spartanx_badge_high_water_v1'), 'Lifetime badge high-water persists locally');
+assert(root.includes('sx-prestige-earned')&&root.includes('sx-prestige-laurel'),
+ 'Prestige adds visible insignia without replacing the current rank frame');
+assert(profile.includes('rank.rankProgress')&&profile.includes('rank.rankXP'),
+ 'Profile progress reflects only XP earned within the current rank');
+assert(style.includes('[data-sx-prestige-band="mythic"]'),
+ 'Prestige visual bands progress independently of the current rank');
+assert(!root.includes('spartanx_prestige_month'), 'Prestige is not monthly gated');
+
+console.log('PASS: XP, lifetime badge and prestige display scenarios');

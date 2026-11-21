@@ -2845,7 +2845,7 @@ function stats(){
  $('sets').textContent=all.length;
  const totalVolumeKg=all.reduce((a,s)=>a+(Number(s.weight)||0)*(Number(s.reps)||0),0);
  $('volume').textContent=formatLifetimeVolumeK(totalVolumeKg);
- $('volume').title=kg(totalVolumeKg);
+ $('volume').title=Number(totalVolumeKg).toLocaleString(undefined,{maximumFractionDigits:1})+' kg';
  $('best').textContent=all.length?kg(Math.max(...all.map(s=>s.weight*(1+s.reps/30)))):'—';
  renderProfile();renderSpartanRanks();renderLatestSessionRank();renderWorkoutFeed();renderSpartanProgress();
 }

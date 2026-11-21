@@ -824,6 +824,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <div id="toast" class="toast"></div>
 <script src="../assets/ascension/load-guard.js?v=338"></script>
 <script src="../assets/ascension/cycle-progression.js?v=346"></script>
+<script src="../assets/ascension/cycle-intelligence.js?v=1"></script>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='ascensionx_strength_v1';
@@ -1933,36 +1934,68 @@ function renderProgress(){
 function cycleProgressionReview(){
  return window.SXAscensionProgression?.review?.(state.cycle,state.logs,PLAN)||{ready:false,lifts:[],finished:0,total:0};
 }
+function cycleIntelligenceReview(){
+ let sessions=[];
+ try{
+  const data=JSON.parse(localStorage.getItem('spartx_db')||'{}');
+  if(Array.isArray(data?.sessions))sessions=data.sessions;
+ }catch(_){}
+ return window.SXAscensionCycleIntelligence?.evaluate?.(state.cycle,state.logs,sessions,PLAN)||null;
+}
 function renderCycleReview(){
  const review=cycleProgressionReview(),api=window.SXAscensionProgression;
- const ready=review.ready;
+ const ready=review.ready,analysis=cycleIntelligenceReview();
  $('ascApproveNextCycle').hidden=!ready;
- const headline=ready?'All selected lifts completed Week 6. Review the proposed TM changes before starting the next cycle.':
-  'Complete Week 6 for all selected lifts before beginning the next cycle ('+review.finished+' / '+review.total+' completed).';
+ const safe=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
+ const headline=ready?'Week 6 complete. Review the next training max and assistance changes.':
+  'Next cycle unlocks after every selected lift completes Week 6 ('+review.finished+'/'+review.total+').';
+ const weekly=analysis?.weekly;
+ const weekRows=weekly?.weeks.map(w=>
+  '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #30343e">'+
+  '<span>Week '+w.week+'</span><span>'+w.done+'/'+w.total+' complete'+
+  (w.high?' · '+w.high+' high RPE':'')+'</span></div>').join('')||'';
+ const weeklyPanel=weekly?'<details style="margin:12px 0">'+
+  '<summary style="cursor:pointer;font-weight:750">WEEKLY INTELLIGENCE · '+safe(analysis.summary)+'</summary>'+
+  '<div style="margin-top:9px">'+weekRows+'</div>'+
+  '<p class="tiny" style="margin:8px 0 0">High RPE flags call for review, not automatic programme changes.</p></details>':'';
  const cards=review.lifts.map((item,index)=>{
   const current=tm(item.lift),options=api.choices(item.lift,current,state.profile.rounding);
   const chosen=item.delta===null?(options.find(o=>o.delta<0)?.delta??0):item.delta;
   const optionHtml=options.map(x=>'<option value="'+x.delta+'"'+(x.delta===chosen?' selected':'')+'>'+
-   x.label+' · next TM '+kg(roundTo(current+x.delta))+'</option>').join('');
+   safe(x.label)+' · '+kg(roundTo(current+x.delta))+'</option>').join('');
   return '<section class="listitem" style="display:block;margin:10px 0;padding:13px">'+
-   '<div class="row between" style="align-items:center"><strong>'+item.lift+'</strong><span class="pill '+(item.done6?'good':'warn')+'">'+
+   '<div class="row between" style="align-items:center"><strong>'+safe(item.lift)+'</strong><span class="pill '+(item.done6?'good':'warn')+'">'+
    (item.done6?'W6 DONE':'W6 PENDING')+'</span></div>'+
-   '<div class="tiny" style="margin:8px 0">Current TM: <strong>'+kg(current)+
-   '</strong> · Weeks 1–5 completed: '+item.completed+'/5 · RPE records: '+item.knownRpe+'/5</div>'+
-   '<p class="tiny" style="margin:6px 0 10px">'+item.reason+'</p>'+
-   '<label class="tiny" for="ascNextTm'+index+'">NEXT-CYCLE TRAINING MAX</label>'+
-   '<select id="ascNextTm'+index+'" data-asc-next-tm="'+item.lift+'"'+(ready?'':' disabled')+'>'+optionHtml+'</select>'+
+   '<div class="tiny" style="margin:7px 0">TM '+kg(current)+
+   ' · Loading weeks '+item.completed+'/5 · RPE logs '+item.knownRpe+'/5</div>'+
+   '<p class="tiny" style="margin:5px 0 9px">'+safe(item.reason)+'</p>'+
+   '<label class="tiny" for="ascNextTm'+index+'">NEXT TRAINING MAX</label>'+
+   '<select id="ascNextTm'+index+'" data-asc-next-tm="'+safe(item.lift)+'"'+(ready?'':' disabled')+'>'+optionHtml+'</select>'+
    '</section>';
  }).join('');
+ let assistance='';
+ if(ready&&analysis){
+  const proposals=analysis.suggestions||[];
+  assistance='<h3 style="margin:16px 0 8px">NEXT-CYCLE ASSISTANCE</h3>';
+  assistance+=proposals.length?proposals.map((p,i)=>
+    '<label style="display:flex;align-items:flex-start;gap:10px;margin:8px 0;padding:10px;border:1px solid #30343e;border-radius:10px">'+
+    '<input type="checkbox" data-sx-cycle-adjust="'+i+'" style="width:18px;height:18px;margin-top:2px;flex-shrink:0">'+
+    '<span><strong>'+safe(p.name)+' · -1 set</strong><span style="display:block;font-size:12px;color:var(--muted);margin-top:3px">'+
+    safe(p.reason)+'</span></span></label>').join(''):
+    '<p class="tiny">No accessory set changes recommended from the available logs.</p>';
+  assistance+='<p class="tiny" style="margin:7px 0 0">Optional. Applies only to the next cycle after approval.</p>';
+ }
  $('cycleReview').innerHTML='<strong>'+headline+'</strong>'+
-  '<p style="margin:9px 0">Each lift is assessed independently. Standard increases: +5 kg for squat and deadlift; +2.5 kg for bench and overhead press. High RPE or missed targets can reduce or stop the increase.</p>'+
-  cards+
-  '<p class="tiny" style="margin:10px 0">Your approval is required. Existing workouts and original entered 1RM values remain unchanged. Consider technique, recovery and readiness before continuing.</p>';
+  weeklyPanel+cards+assistance+
+  '<p class="tiny" style="margin:10px 0">Review technique and recovery before approval. Training history stays unchanged.</p>';
 }
 function approveAscensionNextCycle(){
  const api=window.SXAscensionProgression,review=cycleProgressionReview();
  if(!api||!review.ready||review.cycleId!==state.cycle.created){toast('Complete and review the current six-week cycle first');renderCycleReview();return}
- const oldCycle=state.cycle,oldDraft=state.draft,oldId=oldCycle.created;
+ const intelligenceReview=cycleIntelligenceReview();
+ const approvedAssistance=(intelligenceReview?.suggestions||[]).filter((_,i)=>
+  document.querySelector('[data-sx-cycle-adjust="'+i+'"]')?.checked===true);
+  const oldCycle=state.cycle,oldDraft=state.draft,oldId=oldCycle.created;
  const previousAdaptive=window.SXAscensionAdaptive?.read?.(oldId);
  const nextTms={},summary=[];
  for(const item of review.lifts){
@@ -1985,7 +2018,13 @@ function approveAscensionNextCycle(){
   trainingMaxes:nextTms};
  state.draft=null;
  if(!persist(false)){state.cycle=oldCycle;state.draft=oldDraft;return}
- // Keep Adaptive Programming active across approved cycles without changing history.
+ // Save approved accessory dose changes against the NEW cycle ID only.
+ // A storage failure never rewrites the previous programme or logged work.
+ if(approvedAssistance.length&&!window.SXAscensionCycleIntelligence?.saveApproved?.(
+   newId,oldId,approvedAssistance,localStorage)){
+  toast('Cycle started; accessory changes could not be stored.');
+ }
+  // Keep Adaptive Programming active across approved cycles without changing history.
  if(previousAdaptive?.enabled){
   try{window.SXAscensionAdaptive?.save?.({enabled:true,focus:previousAdaptive.focus,days:previousAdaptive.days})}catch(_){}
  }
@@ -2028,7 +2067,7 @@ function init(){
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=100').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=105').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.
@@ -2041,6 +2080,6 @@ init();
 </script>
 <script src="../assets/science/evidence-engine.js?v=2"></script>
 <script src="../assets/science/volume-intelligence.js?v=2"></script>
-<script src="../assets/ascension/adaptive-programming.js?v=365"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=366"></script>
 </body>
 </html>

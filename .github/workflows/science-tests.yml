@@ -4,11 +4,15 @@ on:
     branches:
       - main
       - 'feature/intelligence-*'
+      - 'feature/ascension-*'
       - 'fix/ascension-*'
     paths:
       - 'assets/science/**'
       - 'assets/ascension/adaptive-programming.js'
       - 'assets/ascension/adaptive-priority.test.js'
+      - 'assets/ascension/cycle-intelligence.js'
+      - 'assets/ascension/cycle-intelligence.test.js'
+      - 'AscensionX/index.html'
       - 'assets/workouts/531-cycle-flow.js'
       - 'assets/bodybuilding/**'
       - 'intelligence/**'
@@ -19,6 +23,9 @@ on:
       - 'assets/science/**'
       - 'assets/ascension/adaptive-programming.js'
       - 'assets/ascension/adaptive-priority.test.js'
+      - 'assets/ascension/cycle-intelligence.js'
+      - 'assets/ascension/cycle-intelligence.test.js'
+      - 'AscensionX/index.html'
       - 'assets/workouts/531-cycle-flow.js'
       - 'assets/bodybuilding/**'
       - 'intelligence/**'
@@ -40,10 +47,16 @@ jobs:
           node --check assets/science/volume-intelligence.js
           node --check intelligence/scientific-panel.js
           node --check assets/ascension/adaptive-programming.js
+          node --check assets/ascension/cycle-intelligence.js
+          node --check assets/ascension/cycle-intelligence.test.js
           node --check assets/ascension/adaptive-priority.test.js
           node --check assets/workouts/531-cycle-flow.js
           node --check assets/bodybuilding/programme-model.js
           node --check assets/bodybuilding/programme-builder.js
+      - name: Six-week intelligence and approved next-cycle checks
+        run: node assets/ascension/cycle-intelligence.test.js
+      - name: Existing six-week progression and TM rollover checks
+        run: node assets/ascension/cycle-progression.test.js
       - name: AscensionX priority and 5-day scheduling regressions
         run: node assets/ascension/adaptive-priority.test.js
       - name: Scientific programme generation regression

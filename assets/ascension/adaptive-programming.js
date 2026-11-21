@@ -214,8 +214,12 @@
   // Preserve established prescriptions where the new heuristic is uncertain.
   const evaluated=advisory?.sets||item.sets+added;
   const baseline=Math.round(((item.sets+added)+evaluated)/2);
-  // AscensionX still owns its main lifts and taper/recovery phases.
-  let sets=isSupportDay&&week<=3?baseline:Math.round(baseline*factor);
+  // Only athlete-approved next-cycle accessory changes are applied.
+  // Never edit main-lift loading, current-cycle history or taper weeks.
+  const approvedDelta=week<=3&&cycleId&&activeCycle(storage)?.id===cycleId?
+   global.SXAscensionCycleIntelligence?.adjustment?.(cycleId,item.name,storage)||0:0;
+  const adjustedBaseline=clamp(baseline+approvedDelta,1,4);
+  let sets=isSupportDay&&week<=3?adjustedBaseline:Math.round(adjustedBaseline*factor);
   if(week===5)sets=Math.min(sets,1);
   if(week===6)sets=0;
   if(main==='Deadlift')sets=Math.min(sets,week>=4?1:3);
@@ -224,7 +228,8 @@
   const ex={...item,sets,rir,sourceLift:main,week};
   const rec=recommend(ex,cycleId,week,storage);
   return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')+
-    (advisory?' Spartan Intelligence: '+advisory.reason+' The set allocation is a reviewable heuristic.':'')};
+    (advisory?' Spartan Intelligence: '+advisory.reason+' The set allocation is a reviewable heuristic.':'')+
+    (approvedDelta?' Approved next-cycle set adjustment: '+(approvedDelta>0?'+':'')+approvedDelta+'.':'')};
  }
  // Single selection function shared by draft preview and live cycle plans.
  function buildLiftPlan(lift,week,focus,cycleId,storage=global.localStorage){

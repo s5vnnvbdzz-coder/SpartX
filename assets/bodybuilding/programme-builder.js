@@ -13,10 +13,12 @@
   screen.id='sxBodybuildingBuilder';screen.className='screen sx-bb-screen';
   screen.setAttribute('aria-label','Strength and Bodybuilding programme builder');
   screen.innerHTML=[
-    '<header class="sx-bb-header"><button type="button" class="sx-bb-back" data-bb-action="back">← WORKOUT</button>',
-    '<div><div class="eyebrow">SPARTANX · PROGRESSIVE TRAINING</div><h1>Strength &amp; Bodybuilding</h1></div>',
-    '<span class="sx-bb-pill" id="sxBBModePill">BUILDER</span></header>',
-    '<p class="sx-bb-subtitle">Build programmes independently of your AscensionX and 5/3/1 cycles.</p>',
+    '<header class="sx-bb-header"><div class="sx-bb-heading"><div class="eyebrow">SPARTANX · PROGRAMME</div>',
+    '<h1 id="sxBBPageTitle">Build your programme</h1>',
+    '<p class="sx-bb-header-description">Choose your training goal and configure your weekly programme.</p>',
+    '<span class="sx-bb-pill" id="sxBBModePill">BUILDER</span></div>',
+    '<button type="button" class="sx-bb-back" data-bb-action="back" aria-label="Back to workouts" title="Back to workouts">←</button></header>',
+    '<p class="sx-bb-subtitle">Powered by Spartan Intelligence · Other training cycles remain unchanged.</p>',
     '<div id="sxBBNotice" class="sx-bb-notice" role="status" aria-live="polite" hidden></div>',
     '<section id="sxBBLibrary" class="card sx-bb-library"><div class="sx-bb-library-top">',
     '<label>SAVED PROGRAMMES<select id="sxBBSelect" aria-label="Choose programme"></select></label>',
@@ -424,6 +426,7 @@
   function render(){
     selectRender();$('sxBBView').hidden=mode==='edit';$('sxBBEdit').hidden=mode!=='edit';
     $('sxBBModePill').textContent=mode==='edit'?'EDIT PROGRAMME':'PROGRAMME OVERVIEW';
+    $('sxBBPageTitle').textContent=mode==='edit'?'Build your programme':'Your programme';
     $('sxBBNotice').hidden=true;
     if(mode==='edit')renderEdit();else renderView();
     cardRender();renderCompanion();

@@ -149,7 +149,7 @@ test('bench assistance avoids excessive pressing with OHP selected',()=>{
  const mainLifts=A.cycle(win.localStorage).lifts;
  assert.equal(A.plan('Bench Press',2,{lifts:mainLifts})
    .some(ex=>ex.name==='Seated Dumbbell Shoulder Press'),false);
- assert.ok(A.plan('Bench Press',2,{lifts:mainLifts}).some(ex=>ex.name==='Chest-Supported Row'));
+ assert.ok(A.plan('Bench Press',2,{lifts:mainLifts}).some(ex=>ex.name==='Iso-Lateral Row'));
 });
 test('fourth day is an adaptive support day when OHP is not selected',()=>{
  win.localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{

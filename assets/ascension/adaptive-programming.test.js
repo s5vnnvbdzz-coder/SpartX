@@ -70,7 +70,7 @@ for(const focus of ['strength','balanced','hypertrophy']){
   'Day 4 '+focus+' work must use three working sets');
 }
 api.save({focus:'strength'});
-for(const [week,expected] of [[4,2],[5,1],[6,0]]){
+for(const [week,expected] of [[4,2],[5,2],[6,0]]){
  const tapered=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
  tapered.api.save({enabled:true,focus:'strength',days:4});
  const fourth=tapered.api.schedule().slots[3];
@@ -239,8 +239,41 @@ const week5Done=boot({'ascensionx_strength_v1':JSON.stringify({
 week5Done.api.save({enabled:true,days:4});
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'The final loading-week support day is still available before Week 6 deload');
-assert.ok(week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===1),
- 'Week 5 support uses tapered one-set assistance');
+assert.ok(week5Done.api.schedule().slots[3].exercises.length>=3&&
+ week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===2),
+ 'Week 5 uses three low-fatigue support exercises with two working sets');
+
+// Three lifts can be on different weeks; the fourth day cannot inherit
+// Week 5 just because Squat and Bench are ahead of Deadlift.
+const staggered=JSON.stringify({cycle:{
+ created:id,exercises:['Back Squat','Bench Press','Deadlift'],
+ weeks:{'Back Squat':5,'Bench Press':5,Deadlift:4},currentWeek:5
+},logs:[]});
+const stagger=boot({'ascensionx_strength_v1':staggered});
+stagger.api.save({enabled:true,days:4,focus:'strength'});
+const staggerSchedule=stagger.api.schedule(null,stagger.localStorage);
+assert.deepEqual(Array.from(staggerSchedule.slots.slice(0,3).map(s=>s.week)),[5,5,4],
+ 'Main lift weeks must remain independently tracked');
+assert.equal(staggerSchedule.slots[3].week,4,
+ 'Support day must follow lagging deadlift Week 4 rather than force Week 5');
+assert.ok(staggerSchedule.slots[3].exercises.length>=3,
+ 'Mixed-week Day 4 must retain a useful upper-body support session');
+assert.ok(staggerSchedule.slots[3].exercises.every(e=>e.sets>=2),
+ 'Mixed-week Day 4 cannot collapse to one working set');
+assert.ok(stagger.api.plan('Deadlift',4,{},stagger.localStorage).every(e=>e.sets>=2),
+ 'Week 4 deadlift low-fatigue assistance should retain two sets');
+assert.equal(stagger.localStorage.getItem('ascensionx_strength_v1'),staggered,
+ 'Adjusting assistance must not rewrite the existing cycle');
+const rootHost=fs.readFileSync(path.join(__dirname,'../../tools/replica.js'),'utf8');
+assert(ascHtml.includes("type:'spartx:ascensionCycleCreated'")&&
+ ascHtml.includes("if(!existing&&!returnToSpartanX)showScreen('workout')"),
+ 'Embedded cycle creation must signal SpartanX, standalone can use its native Workout');
+assert(rootHost.includes("if(e.data?.type==='spartx:ascensionCycleCreated')")&&
+ rootHost.includes("window.spartanxNavigateScreen('workout',{instant:true})")&&
+ rootHost.includes('window.spartanxRefreshAscensionQuickAccess?.()'),
+ 'Embedded cycle creation must exit to SpartanX Workout with a refreshed Continue card');
+assert(rootHost.includes("e.source!==ascensionEmbedFrame.contentWindow"),
+ 'The embedded creation protocol must reject untrusted windows');
 
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&

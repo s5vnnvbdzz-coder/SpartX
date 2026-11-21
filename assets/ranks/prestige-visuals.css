@@ -371,3 +371,46 @@ body.sx-prestige-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
  .sx-prestige-unlock-stars,.sx-prestige-celebration-crest{animation:none}
 }
+
+/* Buttons must retain their stage finish under every SpartanX theme. */
+.sx-gamer-card button.sx-gamer-prestige.sx-prestige-trigger{
+ color:var(--sx-prestige-metal,var(--lime))!important;
+ padding:4px 5px!important;
+ margin:0!important;
+ min-height:46px!important;
+ cursor:pointer!important;
+}
+.sx-gamer-card:not(.sx-prestige-earned) button.sx-gamer-prestige.sx-prestige-trigger{
+ border:1px solid var(--line)!important;
+ border-radius:9px!important;
+ background:transparent!important;
+}
+.sx-gamer-card.sx-prestige-earned button.sx-gamer-prestige.sx-prestige-trigger{
+ border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 65%,transparent)!important;
+ border-radius:10px!important;
+ background:linear-gradient(150deg,var(--sx-prestige-shadow),transparent 85%)!important;
+}
+button.sx-rank-prestige-mark,
+button.sx-prestige-inline.sx-prestige-trigger{
+ border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 50%,transparent)!important;
+ border-radius:9px!important;
+ background:var(--sx-prestige-shadow)!important;
+ color:var(--sx-prestige-metal)!important;
+ font-weight:800!important;
+ cursor:pointer!important;
+}
+.sx-prestige-overlay[data-sx-prestige-band="bronze"]{
+ --sx-prestige-metal:#c68d5b;--sx-prestige-shadow:rgba(198,141,91,.28);
+}
+.sx-prestige-overlay[data-sx-prestige-band="silver"]{
+ --sx-prestige-metal:#d7dfea;--sx-prestige-shadow:rgba(215,223,234,.30);
+}
+.sx-prestige-overlay[data-sx-prestige-band="gold"]{
+ --sx-prestige-metal:#e6ba59;--sx-prestige-shadow:rgba(230,186,89,.33);
+}
+.sx-prestige-overlay[data-sx-prestige-band="platinum"]{
+ --sx-prestige-metal:#c8e8ef;--sx-prestige-shadow:rgba(126,196,215,.35);
+}
+.sx-prestige-overlay[data-sx-prestige-band="mythic"]{
+ --sx-prestige-metal:#dac5ff;--sx-prestige-shadow:rgba(189,147,255,.37);
+}

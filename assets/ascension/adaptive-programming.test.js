@@ -28,14 +28,14 @@ assert.equal(localStorage.getItem('ascensionx_strength_v1'),before,'Existing str
 assert.equal(api.read(id).days,4);
 assert.ok(['Bench Press','Overhead Press'].every(lift=>
  api.LIB[lift].some(ex=>ex.name==='Triceps Pushdown (Bar)'&&
- ex.sets===3&&ex.min===10&&ex.max===15)),
- 'Bench and overhead support default to bar triceps pushdowns with three sets');
+ ex.sets===4&&ex.min===10&&ex.max===15)),
+ 'Bench and overhead support default to bar triceps pushdowns with four sets');
 assert.ok(['Bench Press','Overhead Press'].every(lift=>
  !api.LIB[lift].some(ex=>ex.name==='Triceps Pushdown')),
  'Do not reintroduce ambiguous triceps pushdown names');
 const rearDelt=api.LIB['Bench Press'].find(e=>e.name==='Rear Delt Reverse Fly');
 assert.ok(rearDelt,'Bench programme prescribes Rear Delt Reverse Fly');
-assert.equal(rearDelt.sets,3,'Reverse fly prescription retains three sets');
+assert.equal(rearDelt.sets,4,'Reverse fly prescription now uses four sets in standard weeks');
 assert.equal(rearDelt.min,12,'Reverse fly reps start at twelve');
 assert.equal(rearDelt.max,20,'Reverse fly reps max at twenty');
 assert.ok(!api.LIB['Bench Press'].some(e=>
@@ -47,9 +47,9 @@ assert.ok(api.plan('Bench Press',6).every(e=>e.name!=='Rear Delt Reverse Fly'),
  'Week six stays deload');
 const deadlift=api.plan('Deadlift',2);
 assert.ok(deadlift.length>=2);
-assert.ok(deadlift.every(e=>e.sets===3),'Deadlift support defaults to three sets in a standard week');
-for(const main of ['Back Squat','Bench Press'])assert.ok(api.plan(main,2).every(e=>e.sets===3),'Standard '+main+' support starts at three sets');
-assert.ok(deadlift.reduce((n,e)=>n+e.sets,0)<=6,'Deadlift accessories remain conservative');
+assert.ok(deadlift.every(e=>e.sets===4),'Deadlift non-hinge support defaults to four sets in a standard week');
+for(const main of ['Back Squat','Bench Press'])assert.ok(api.plan(main,2).every(e=>e.sets===4),'Standard '+main+' support starts at four sets');
+assert.ok(deadlift.reduce((n,e)=>n+e.sets,0)<=8,'Deadlift accessories remain conservative relative to the full week');
 assert.ok(deadlift.every(e=>!/romanian|rdl|good morning|deadlift|squat/i.test(e.name)),'No heavy hinge/squat after pulling');
 assert.ok(deadlift.every(e=>e.rir>=3));
 assert.equal(api.plan('Deadlift',6).length,0,'Week 6 allows full recovery');
@@ -59,18 +59,18 @@ assert.equal(schedule.slots.length,4);
 assert.equal(schedule.slots.filter(x=>x.kind==='ascension').length,3);
 assert.equal(schedule.slots.filter(x=>x.kind==='support').length,1);
 assert.ok(schedule.slots[3].exercises.length>0);
-assert.ok(schedule.slots[3].exercises.every(ex=>ex.sets===3),'Standard supporting day defaults to three sets');
-assert.ok(api.plan('Bench Press',4).every(ex=>ex.sets<3),'Taper week may reduce accessory sets');
-// Day 4 has exactly three sets in standard weeks regardless of training focus.
+assert.ok(schedule.slots[3].exercises.every(ex=>ex.sets===4),'Standard supporting day defaults to four sets');
+assert.ok(api.plan('Bench Press',4).every(ex=>ex.sets===3),'Taper week may reduce accessory sets');
+// Day 4 has four sets in standard weeks regardless of training focus.
 for(const focus of ['strength','balanced','hypertrophy']){
  api.save({focus});
  const day4=api.schedule().slots[3];
  assert.equal(day4.kind,'support');
- assert.ok(day4.exercises.length>0&&day4.exercises.every(ex=>ex.sets===3),
-  'Day 4 '+focus+' work must use three working sets');
+ assert.ok(day4.exercises.length>0&&day4.exercises.every(ex=>ex.sets===4),
+  'Day 4 '+focus+' work must use four working sets');
 }
 api.save({focus:'strength'});
-for(const [week,expected] of [[4,2],[5,2],[6,0]]){
+for(const [week,expected] of [[4,3],[5,3],[6,0]]){
  const tapered=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
  tapered.api.save({enabled:true,focus:'strength',days:4});
  const fourth=tapered.api.schedule().slots[3];
@@ -240,8 +240,8 @@ week5Done.api.save({enabled:true,days:4});
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'The final loading-week support day is still available before Week 6 deload');
 assert.ok(week5Done.api.schedule().slots[3].exercises.length>=3&&
- week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===2),
- 'Week 5 uses three low-fatigue support exercises with two working sets');
+ week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===3),
+ 'Week 5 retains three low-fatigue support exercises with three working sets');
 
 // Three lifts can be on different weeks; the fourth day cannot inherit
 // Week 5 just because Squat and Bench are ahead of Deadlift.

@@ -121,7 +121,10 @@
     const rir=Math.round(bounded(raw.rir,0,5,2));
     const restSeconds=Math.round(bounded(raw.restSeconds,30,600,120)/15)*15;
     const startingKg=Math.round(bounded(raw.startingKg,0,1000,0)*2)/2;
-    return {id:clean(raw.id,64)||uid(),name,sets,repsMin,repsMax,rir,restSeconds,startingKg,progression:'double'};
+    const rationale=raw.sxVolumePolicy==='0.2.0'?
+      {sxVolumePolicy:'0.2.0',sxVolumeReason:clean(raw.sxVolumeReason,240)}:{};
+    return {id:clean(raw.id,64)||uid(),name,sets,repsMin,repsMax,rir,restSeconds,startingKg,
+      progression:'double',...rationale};
   }
   function normalize(raw){
     if(!raw||typeof raw!=='object')return null;

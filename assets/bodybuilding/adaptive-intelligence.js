@@ -9,7 +9,7 @@
  const finite=v=>v!==''&&v!=null&&Number.isFinite(Number(v))?Number(v):null;
  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
  const effort=s=>{const n=finite(s?.rpe);return n!==null&&n>=6&&n<=10?n:null};
- const working=s=>s?.done===true&&!/^(?:w|b|x|f|warm.?up|back.?off|drop|failure|cardio|excluded)$/i.test(String(s?.type||'working set').trim())&&
+ const working=s=>s?.done===true&&!/^(?:w|x|warm.?up|cardio|excluded)$/i.test(String(s?.type||'working set').trim())&&
   finite(s.weight)!==null&&Number(s.weight)>=0&&Number(s.weight)<=1500&&
   Number.isInteger(finite(s.reps))&&Number(s.reps)>=1&&Number(s.reps)<=30;
  const stamp=s=>Date.parse(s?.savedAt||s?.date||s?.createdAt||'')||0;

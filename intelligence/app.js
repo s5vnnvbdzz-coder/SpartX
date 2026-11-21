@@ -381,6 +381,7 @@
     $('allInsights').innerHTML=E.insights(state.analysis).map(x=>'<article class="insight-card"><span class="insight-kicker '+x.kind+'">'+(x.kind==='positive'?'POSITIVE TREND':x.kind==='caution'?'WORTH REVIEWING':'TRAINING OBSERVATION')+'</span><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.text)+'</p></article>').join('');
     // Keep separate programme-link decisions out of the demo and general
     // strength-estimate pathways. Only matching saved SpartanX links qualify.
+    window.SXScientificPanels?.render?.('sxScientificVolume',{demo:state.source==='demo',experience:'intermediate'});
     window.SXDecisionPanels?.intelligence?.('sxDecisionIntelligence',{mode:state.source});
   }
   function renderAll(){

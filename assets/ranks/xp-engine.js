@@ -140,13 +140,19 @@
  for(const ratio of LAUREL_RATIOS)
   LAUREL_WIDTHS.push(Math.max(1,Math.round(LAUREL_WIDTHS.at(-1)*ratio)));
  let nextStart=1;
- const LAUREL_TIERS=Object.freeze(LAUREL_NAMES.map((name,i)=>{
-  const start=nextStart,span=LAUREL_WIDTHS[i],milestone=start+span-1;
-  nextStart=milestone+1;
-  return Object.freeze({name,start,span,milestone,
-   // The final insignia remains Mythic after its three-prestige milestone.
-   end:i===LAUREL_NAMES.length-1?null:milestone});
- }));
+ const APOTHEOSIS_PRESTIGE=60;
+ const LAUREL_TIERS=Object.freeze([
+  ...LAUREL_NAMES.map((name,i)=>{
+   const start=nextStart,span=LAUREL_WIDTHS[i],milestone=start+span-1;
+   nextStart=milestone+1;
+   return Object.freeze({name,start,span,milestone,
+    // Mythic holds from P41 through P59. Its original third-prestige
+    // milestone remains P43; the sixth tier is a deliberate long-term goal.
+    end:i===LAUREL_NAMES.length-1?APOTHEOSIS_PRESTIGE-1:milestone});
+  }),
+  Object.freeze({name:'apotheosis',start:APOTHEOSIS_PRESTIGE,
+   span:null,milestone:APOTHEOSIS_PRESTIGE,end:null})
+ ]);
  const prestigeTier=value=>{
   const count=Math.max(0,Math.floor(Number(value)||0));
   if(count<1)return null;
@@ -155,9 +161,15 @@
   return null;
  };
  const prestigeBand=value=>prestigeTier(value)?.name||'none';
+ const laurelUpgrade=(previous,next)=>{
+  const before=Math.max(0,Math.floor(Number(previous)||0));
+  const after=Math.max(0,Math.floor(Number(next)||0));
+  const tier=prestigeTier(after);
+  return after>before&&tier&&before<tier.start?tier:null;
+ };
  root.SpartanXXP=Object.freeze({
-  calculate,badgeHighWater,prestigeBand,prestigeTier,LAUREL_TIERS,
-  BASELINE_PRESTIGES_PER_YEAR,PER_RANK,PRESTIGE_XP,
+  calculate,badgeHighWater,prestigeBand,prestigeTier,laurelUpgrade,LAUREL_TIERS,
+  APOTHEOSIS_PRESTIGE,BASELINE_PRESTIGES_PER_YEAR,PER_RANK,PRESTIGE_XP,
   STANDARD_AWARDS,ASCENSION_DAY_XP,ASCENSION_WEEK_BONUS
  });
 })(typeof window!=='undefined'?window:globalThis);

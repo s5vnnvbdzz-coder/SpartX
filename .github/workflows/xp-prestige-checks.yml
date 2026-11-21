@@ -5,6 +5,8 @@ on:
     paths:
       - 'assets/ranks/xp-engine.js'
       - 'assets/ranks/xp-engine.test.cjs'
+      - 'assets/ranks/prestige-showcase.js'
+      - 'assets/ranks/prestige-showcase.test.cjs'
       - 'assets/ranks/prestige-visuals.css'
       - 'assets/profile/profile-preview-parity.js'
       - 'index.html'
@@ -13,6 +15,8 @@ on:
     paths:
       - 'assets/ranks/xp-engine.js'
       - 'assets/ranks/xp-engine.test.cjs'
+      - 'assets/ranks/prestige-showcase.js'
+      - 'assets/ranks/prestige-showcase.test.cjs'
       - 'assets/ranks/prestige-visuals.css'
       - 'assets/profile/profile-preview-parity.js'
       - 'index.html'
@@ -27,7 +31,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate XP engine syntax
-        run: node --check assets/ranks/xp-engine.js
-      - name: Test standard and AscensionX XP rewards
+      - name: Validate XP engine and Prestige Showcase syntax
+        run: |
+          node --check assets/ranks/xp-engine.js
+          node --check assets/ranks/prestige-showcase.js
+      - name: Test rank XP, lifetime insignias and badge permanence
         run: node assets/ranks/xp-engine.test.cjs
+      - name: Test Showcase and laurel unlock celebration
+        run: node assets/ranks/prestige-showcase.test.cjs

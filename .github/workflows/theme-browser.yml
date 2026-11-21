@@ -6,6 +6,8 @@ on:
       - 'assets/profile/feed-gaming-card-compact.css'
       - 'assets/profile/profile-layout-hevy.css'
       - 'tests/profile-dashboard-compact.browser.test.cjs'
+      - 'assets/profile/profile-preview-parity.js'
+      - 'tests/profile-volume-axis.browser.test.cjs'
       - 'tests/home-feed-gaming-compact.browser.test.cjs'
       - 'index.html'
       - 'social.js'
@@ -38,6 +40,7 @@ jobs:
           node assets/social/athlete-home-browser.test.cjs
           node tests/home-feed-gaming-compact.browser.test.cjs
           node tests/profile-dashboard-compact.browser.test.cjs
+          node tests/profile-volume-axis.browser.test.cjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -54,4 +57,6 @@ jobs:
             gaming-profile-compact-failure.png
             profile-dashboard-compact-390.png
             profile-dashboard-compact-failure.png
+            profile-volume-axis-390.png
+            profile-volume-axis-failure.png
           if-no-files-found: ignore

@@ -14,6 +14,13 @@ Inside existing **Intelligence → Insights**, the unified volume panel now read
 
 The output is **read-only**, with conservative assistance suggestions for 5/3/1 and explicit overlap warnings when multiple cycles are detected.
 
+## AscensionX weekly and next-cycle Intelligence (v0.3)
+- **During a six-week cycle:** open the existing AscensionX cycle review to inspect logged main-lift completion and high-RPE flags by week. Current strength loading and workouts are untouched.
+- **After all selected Week 6 lifts are complete:** the existing TM review remains athlete-approved. Intelligence also examines cycle-linked, completed SpartanX accessory sets.
+- **Conservative accessory proposal:** three separately logged sessions with complete high-effort RPE and at least three working sets may justify considering one less accessory set. No rise in volume is inferred solely from easy sessions.
+- The athlete must explicitly **tick** each proposal when approving the next cycle. Approved changes are kept in `sx_ascension_cycle_intelligence_v1` under the new cycle ID; only Weeks 1–3 accessory prescriptions change. Existing main-lift loading, taper weeks and saved history remain intact.
+- Insufficient logged RPE yields **no** proposed set change. RPE alone does not prove under-recovery or a scientifically optimal set count. This is an early, testable step toward individualised progression, not a full expert coaching replacement.
+
 ## Working-set policy
 
 Core implementation: \`assets/science/volume-intelligence.js\`.

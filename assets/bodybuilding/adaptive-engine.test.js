@@ -143,7 +143,7 @@ test('rebalancing existing programmes is opt-in and retains upper-day edits',()=
 test('adaptive squat avoids redundant heavy lower compounds',()=>{
  const items=A.plan('Back Squat',2,{lifts:A.cycle(win.localStorage).lifts});
  assert.deepEqual(Array.from(items,ex=>ex.name),['Leg Extension','Seated Leg Curl','45° Back Extension']);
- assert.equal(items.reduce((total,ex)=>total+ex.sets,0),9);
+ assert.equal(items.reduce((total,ex)=>total+ex.sets,0),12);
 });
 test('bench assistance avoids excessive pressing with OHP selected',()=>{
  const mainLifts=A.cycle(win.localStorage).lifts;

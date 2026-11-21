@@ -128,14 +128,36 @@
    RANKS-1:Number(score?.index)||0;
   return Math.max(0,Math.min(RANKS-1,Math.max(Number(stored)||0,earned)));
  };
- // Prestige is XP-based, never linked to a calendar month or an annual cap.
- // A separate visual band gives the profile a visible milestone beyond P1.
- const prestigeBand=value=>{
+ // A typical consistent three-day AscensionX week earns 1,700 XP:
+ // three completed lift days + a full prescribed-week bonus. At 52 weeks
+ // that is ~14.7 prestiges a year. Use a rounded 15 as the FIRST laurel band.
+ // Do not cap prestige by month or year. Every threshold is a lifetime count.
+ const BASELINE_PRESTIGES_PER_YEAR=Math.round(
+  52*(3*ASCENSION_DAY_XP+ASCENSION_WEEK_BONUS)/PRESTIGE_XP);
+ const LAUREL_NAMES=['bronze','silver','gold','platinum','mythic'];
+ const LAUREL_RATIOS=[.8,.7,.6,.5];
+ const LAUREL_WIDTHS=[BASELINE_PRESTIGES_PER_YEAR];
+ for(const ratio of LAUREL_RATIOS)
+  LAUREL_WIDTHS.push(Math.max(1,Math.round(LAUREL_WIDTHS.at(-1)*ratio)));
+ let nextStart=1;
+ const LAUREL_TIERS=Object.freeze(LAUREL_NAMES.map((name,i)=>{
+  const start=nextStart,span=LAUREL_WIDTHS[i],milestone=start+span-1;
+  nextStart=milestone+1;
+  return Object.freeze({name,start,span,milestone,
+   // The final insignia remains Mythic after its three-prestige milestone.
+   end:i===LAUREL_NAMES.length-1?null:milestone});
+ }));
+ const prestigeTier=value=>{
   const count=Math.max(0,Math.floor(Number(value)||0));
-  return count>=10?'mythic':count>=5?'gold':count>=3?'silver':count>=1?'bronze':'none';
+  if(count<1)return null;
+  for(let i=LAUREL_TIERS.length-1;i>=0;i--)
+   if(count>=LAUREL_TIERS[i].start)return LAUREL_TIERS[i];
+  return null;
  };
+ const prestigeBand=value=>prestigeTier(value)?.name||'none';
  root.SpartanXXP=Object.freeze({
-  calculate,badgeHighWater,prestigeBand,PER_RANK,PRESTIGE_XP,
+  calculate,badgeHighWater,prestigeBand,prestigeTier,LAUREL_TIERS,
+  BASELINE_PRESTIGES_PER_YEAR,PER_RANK,PRESTIGE_XP,
   STANDARD_AWARDS,ASCENSION_DAY_XP,ASCENSION_WEEK_BONUS
  });
 })(typeof window!=='undefined'?window:globalThis);

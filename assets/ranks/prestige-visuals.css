@@ -1,4 +1,4 @@
-/* SpartanX prestige identity v370.
+/* SpartanX prestige identity v371.
  * Prestige is independent of the repeatedly earned six-rank portrait frame.
  * The existing theme still governs the card; metallic detailing is layered.
  */
@@ -19,6 +19,12 @@
 .sx-prestige-inline[data-sx-prestige-band="gold"]{
  --sx-prestige-metal:#e6ba59;
  --sx-prestige-shadow:rgba(230,186,89,.30);
+}
+.sx-gamer-card[data-sx-prestige-band="platinum"],
+.sx-rank-prestige-mark[data-sx-prestige-band="platinum"],
+.sx-prestige-inline[data-sx-prestige-band="platinum"]{
+ --sx-prestige-metal:#c8e8ef;
+ --sx-prestige-shadow:rgba(126,196,215,.32);
 }
 .sx-gamer-card[data-sx-prestige-band="mythic"],
 .sx-rank-prestige-mark[data-sx-prestige-band="mythic"],
@@ -54,6 +60,15 @@
  line-height:1.25;
  letter-spacing:1px;
  color:var(--sx-prestige-metal);
+}
+.sx-gamer-card.sx-prestige-earned .sx-gamer-prestige .sx-prestige-tier-name{
+ display:block;
+ font-size:7px;
+ letter-spacing:.8px;
+ line-height:1.3;
+ color:var(--sx-prestige-metal);
+ font-weight:900;
+ text-transform:uppercase;
 }
 .sx-gamer-card.sx-prestige-earned .sx-gamer-prestige b{
  line-height:1.13;

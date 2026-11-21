@@ -100,11 +100,26 @@ assert.equal(xp.badgeHighWater({totalXP:1500,index:1,prestige:0},4),4,
  'Previously earned badges survive later workout-history edits');
 assert.equal(xp.badgeHighWater({totalXP:12100,index:0,prestige:2},5),5,
  'Repeated prestiges do not revoke prior rank badges');
-assert.equal(xp.prestigeBand(0),'none');
-assert.equal(xp.prestigeBand(1),'bronze');
-assert.equal(xp.prestigeBand(3),'silver');
-assert.equal(xp.prestigeBand(5),'gold');
-assert.equal(xp.prestigeBand(10),'mythic');
+// A full, consistently completed AscensionX week pays 1,700 XP:
+ // 52 weeks * 1,700 XP / 6,000 XP per prestige rounds to 15.
+assert.equal(xp.BASELINE_PRESTIGES_PER_YEAR,15);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.name),
+ ['bronze','silver','gold','platinum','mythic']);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.start),[1,16,28,36,41]);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.span),[15,12,8,5,3]);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.milestone),[15,27,35,40,43]);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.end),[15,27,35,40,null]);
+for(const [prestige,name] of [[0,'none'],[1,'bronze'],[15,'bronze'],
+ [16,'silver'],[27,'silver'],[28,'gold'],[35,'gold'],
+ [36,'platinum'],[40,'platinum'],[41,'mythic'],
+ [43,'mythic'],[100,'mythic']]){
+ assert.equal(xp.prestigeBand(prestige),name,'Laurel stage for P'+prestige);
+}
+assert.equal(xp.prestigeTier(0),null);
+assert.equal(xp.prestigeTier(16).milestone,27);
+assert.equal(xp.prestigeTier(41).milestone,43);
+assert.equal(xp.prestigeTier(44).name,'mythic',
+ 'The fifth laurel remains the final insignia after its three-prestige milestone');
 const root=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
 const profile=fs.readFileSync(path.join(__dirname,'../profile/profile-preview-parity.js'),'utf8');
 const style=fs.readFileSync(path.join(__dirname,'prestige-visuals.css'),'utf8');
@@ -119,6 +134,12 @@ assert(profile.includes('rank.rankProgress')&&profile.includes('rank.rankXP'),
  'Profile progress reflects only XP earned within the current rank');
 assert(style.includes('[data-sx-prestige-band="mythic"]'),
  'Prestige visual bands progress independently of the current rank');
+assert(style.includes('[data-sx-prestige-band="platinum"]'),
+ 'The fourth laurel receives its own visual finish');
+assert(root.includes("const next=window.SpartanXXP.LAUREL_TIERS.find(t=>t.start>state.prestige)"),
+ 'Home profile shows progress towards the next lifetime laurel');
+assert(root.includes("sx-prestige-tier-name"),
+ 'Feed cards show the unlocked laurel stage, not just a number');
 assert(!root.includes('spartanx_prestige_month'), 'Prestige is not monthly gated');
 
 console.log('PASS: XP, lifetime badge and prestige display scenarios');

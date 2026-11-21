@@ -112,6 +112,22 @@ check('Science Lab removed as a separate SpartanX section; unified panel exists'
  assert(asc.includes('../assets/science/volume-intelligence.js'));
  assert(app.includes("SXScientificPanels?.render"));
 });
+check('5/3/1 import offers opt-in assistance without mutating planned strength sets',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../assets/workouts/531-cycle-flow.js'),'utf8');
+ assert(source.includes('function recommendedAssistance'));
+ assert(source.includes('sx531IncludeAssistance'));
+ assert(source.includes("sx531Intelligence:{cycleId:c.id,lift,week:n,optional:true"));
+ assert(source.indexOf("const planned=w.sets.map(")<source.indexOf("if($('sx531IncludeAssistance')?.checked)"));
+ assert(source.indexOf("activeCycle={id:c.id,week:n,lift,plannedSets:planned}")>
+   source.indexOf("if($('sx531IncludeAssistance')?.checked)"));
+});
+check('Bodybuilding goal Intelligence shares the same scientific source and inline panel',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'../intelligence/goals.html'),'utf8');
+ const ui=fs.readFileSync(path.join(__dirname,'../intelligence/goals-ui.js'),'utf8');
+ assert(html.includes('id="sxScientificVolume"'));
+ assert(html.includes('volume-intelligence.js'));
+ assert(ui.includes("SXScientificPanels?.render"));
+});
 check('new scripts and existing inline panel are valid JavaScript',()=>{
  for(const file of ['assets/science/volume-intelligence.js','intelligence/scientific-panel.js','assets/ascension/adaptive-programming.js','assets/bodybuilding/programme-builder.js']){
   new vm.Script(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),{filename:file});

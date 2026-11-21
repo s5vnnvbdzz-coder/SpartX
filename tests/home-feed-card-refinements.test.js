@@ -6,6 +6,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('assets/profile/feed-card-refinements.css','utf8');
+const compact=fs.readFileSync('assets/profile/feed-gaming-card-compact.css','utf8');
 const social=fs.readFileSync('social.js','utf8');
 const start=html.indexOf('// Keep the spotlight stable while Home cards re-render.');
 const end=html.indexOf("function buildGamingProfileCard(",start);
@@ -47,6 +48,20 @@ assert.equal((html.match(/class="secondary small feed-view-button" data-feed-vie
  'Both View Workout buttons have identical classes');
 assert(!html.includes('class="secondary small feed-view-button feed-expand"'),
  'Legacy .feed-expand border-radius:0 no longer applies');
+assert(html.includes('sx-rank-flag sx-portrait-country-flag'),
+ 'The country flag is designated for the portrait frame, not the rank line');
+const cardMarkup=html.slice(html.indexOf('function buildGamingProfileCard('),
+ html.indexOf('document.addEventListener(\'change\',e=>',html.indexOf('function buildGamingProfileCard(')));
+assert(cardMarkup.includes("'+flag+'</div><div class=\"sx-gamer-info\""),
+ 'Flag appears as a sibling of the avatar inside the tier frame');
+assert(!cardMarkup.includes("+'</b>'+flag+"),
+ 'Rank row no longer includes the country flag');
+assert(cardMarkup.includes('sx-best-pr-line'),'Compound PR has a dedicated layout row');
+assert(html.includes('feed-gaming-card-compact.css?v=373'),'Compact mobile layout is versioned');
+assert(compact.includes('position:absolute!important')&&compact.includes('.sx-portrait-country-flag'),
+ 'Country flag has standalone position beneath the frame');
+assert(compact.includes('min-height:150px!important')&&compact.includes('.sx-session-log'),
+ 'Card and saved workout row have intentional compact spacing');
 assert(html.includes("button.setAttribute('aria-expanded',String(!expanded))"),
  'The expanded state is updated for assistive technology');
 assert(html.includes("extra.children.length===1?'EXERCISE':'EXERCISES'"),

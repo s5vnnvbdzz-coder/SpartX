@@ -5240,7 +5240,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/science/evidence-engine.js?v=2"></script>
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=368"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=369"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=345"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){
@@ -5251,7 +5251,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  const restored=helper?.repairActiveIsoLateralRows(work,window.SXAscensionAdaptive)||0;
  const renamed=helper?.renameActiveAscensionPushdowns(work,window.SXAscensionAdaptive)||0;
  const rearDelts=helper?.renameActiveAscensionRearDelts(work,window.SXAscensionAdaptive)||0;
- if(restored||renamed||rearDelts){renderWork();updateMinimizedSession();saveDraft();}
+ const refreshed=helper?.refreshUntouchedAdaptiveSets(work,window.SXAscensionAdaptive)||0;
+ if(restored||renamed||rearDelts||refreshed){renderWork();updateMinimizedSession();saveDraft();}
 })();
 </script>
 <script src="./assets/bodybuilding/programme-model.js?v=5"></script>

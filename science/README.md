@@ -1,42 +1,61 @@
-# SpartanX Scientific Training Intelligence — Phase 2 v0.1
+# Spartan Intelligence — Unified Scientific Programming Engine
 
-**Status: evidence-informed programme laboratory / read-only prototype. Not a validated coaching engine.**
+**Version 0.2.** This is a developing evidence-informed training decision system; it is not a validated personal optimal-programme predictor.
 
-Preview URL when deployed: \`/SpartX/science/\`.
-Source: \`assets/science/evidence-engine.js\`, \`science/index.html\`.
+## Where the engine lives
 
-## What this phase adds
-- Separate **bodybuilding, powerlifting and powerbuilding** 3–6 day planning templates.
-- Choice of goal, experience, weekly training days, session time, equipment, priority and review horizon.
-- Exercise-level **RIR, sets, reps, rest, rationale and source IDs**.
-- **Direct sets + 0.5 × indirect sets** exposure calculation (transparent accounting, not an exact physiological model).
-- Programme audits for exercise coverage, equipment availability, S/B/D specificity, high axial-overlap, training-time limits and large weekly volumes.
-- Read-only **linked-session progression advisory** requiring completed sets, matching programme and exercise IDs and valid effort logs.
-- Exportable JSON previews to examine programme quality without changing live workouts.
+**Spartan Intelligence** is the home of the shared programming policy. The former standalone \`/science/\` laboratory redirects to \`/intelligence/\`. The separate Science Lab Workout card and top-bar link are removed.
 
-## Data safety contract
-Neither the generator nor the preview calls localStorage write APIs or edits \`spartx_db\`, \`spartx_draft_v1\`, \`ascensionx_strength_v1\`, bodybuilder programmes or any 5/3/1 cycle. No cloud sync or account integration is claimed. Export downloads a new local JSON file.
+Inside existing **Intelligence → Insights**, the unified volume panel now reads (when available in the same browser):
+- Active **5/3/1** saved cycles, individual lift/week main work and BBB 5×10 work.
+- Active **AscensionX** lifts and their individual weeks, without assuming the exact number of programmed main working sets.
+- Active **bespoke bodybuilding/strength & size** plan and its authored exercise sets.
+- Last seven days' **saved, checked working sets** from \`spartx_db\`, excluding warmups, unchecked sets and non-resistance sets.
 
-The preview is **not currently available as a workout import**; future integration requires validated mappings, explicit athlete approval, conflict checks, backwards-compatible plan versioning, and preserving active AscensionX cycles.
+The output is **read-only**, with conservative assistance suggestions for 5/3/1 and explicit overlap warnings when multiple cycles are detected.
 
-## Evidence register (auditable source IDs)
-- **ACSM2026** — ACSM position stand (overview of 137 reviews): https://pubmed.ncbi.nlm.nih.gov/41843416/
-- **PELLAND2026** — Volume/frequency dose-response meta-regressions: https://pubmed.ncbi.nlm.nih.gov/41343037/
-- **ROBINSON2024** — Exploratory proximity-to-failure meta-regressions: https://pubmed.ncbi.nlm.nih.gov/38970765/
-- **AUTOREG2025** — Autoregulation network meta-analysis: https://pubmed.ncbi.nlm.nih.gov/40791980/
+## Working-set policy
 
-**Evidence must not be overstated:** no study provides a universally validated numerical stimulus-to-fatigue score for every exercise. Exercise-specific axial-loading classifications and RIR thresholds are transparent engineering/coaching heuristics rather than direct trial outcomes. Actual set targets depend on training history and the individual.
+Core implementation: \`assets/science/volume-intelligence.js\`.
 
-## Next engineering milestones
-1. Connect existing SpartanX exercise taxonomy, validate target muscle annotations and substitutions.
-2. Add robust main-lift intensity prescription using athlete-specific verified 1RMs and existing AscensionX data without double-counting or overwrites.
-3. Link saved workouts to scientific-plan IDs (after safe opt-in) and conduct longitudinal performance testing.
-4. Evaluate performance, recovery, compliance, progression, sex/experience evidence gaps and high-risk athlete scenarios.
-5. Add proper automated fatigue deload proposals with coach/athlete review and evidence of benefit.
-6. Maintain an evidence audit with version and rationale for every rule change.
+1. Count weekly **direct working sets** plus **0.5 × indirect working sets** as a transparent, imperfect exposure proxy.
+2. Determine initial exposure *bands* by goal and athlete experience; these are not precise evidence-validated biological optima.
+3. Protect pre-existing 5/3/1 sets, BBB, and AscensionX **main lift** progression.
+4. Review **accessory sets** with consideration for unfilled weekly exposure, remaining exercise slots, axial fatigue, and recovery weeks. Avoid reflexively adding sets when target muscles already receive substantial exposure.
+5. A programme-builder draft may use 2, 3 or 4 accessory sets (and 1 in designated recovery contexts), rather than a blanket 2-set rule.
+6. Never count warmups as working sets. BBB is not a warmup.
+7. Only a new programme draft or an explicit **Intelligence: Review Working Sets** action changes an editable bespoke plan. The athlete must save the draft.
+8. AscensionX Adaptive Programming evaluates *optional accessory* doses using the shared policy while retaining its existing taper; **the competition lift prescription, stored cycle and workout history are not overwritten**.
 
-## Run regression tests
+For all goal modes, initial set bands are heuristics. The scientific literature supports dose-response with diminishing returns, NOT a single universally optimal count or a validated exercise-level stimulus/fatigue number. Individual performance, recovery and technique are still required to calibrate recommendations.
+
+## Evidence anchors
+
+- ACSM 2026 resistance training position stand — https://pubmed.ncbi.nlm.nih.gov/41843416/
+- Pelland et al. 2026 volume/frequency and fractional working-set dose response — https://pubmed.ncbi.nlm.nih.gov/41343037/
+- Robinson et al. 2024 proximity to failure — https://pubmed.ncbi.nlm.nih.gov/38970765/
+- 2023 network meta-analysis of exercise prescription for strength/hypertrophy — https://pubmed.ncbi.nlm.nih.gov/37414459/
+
+## Implementation files
+
+- \`assets/science/evidence-engine.js\` — Phase 2 reference research and candidate programme rules (internal).
+- \`assets/science/volume-intelligence.js\` — shared weekly exposure and assistance set policy.
+- \`intelligence/scientific-panel.js\` — inline interface inside the existing Intelligence Insights tab.
+- \`assets/bodybuilding/programme-model.js\` — use policy for new editable bespoke drafts.
+- \`assets/bodybuilding/programme-builder.js\` — user-approved reallocation in the existing editor.
+- \`assets/ascension/adaptive-programming.js\` — adaptive accessory-dose consultation; do not change main-lift programming.
+
+## Limitations and next steps
+
+- **5/3/1:** main sets and BBB are accounted for. In the existing 5/3/1 workout-import preview, users may check or uncheck **Include suggested assistance**. Optional accessory sets start unchecked, and the 5/3/1 progression requirements remain tied only to the original main and BBB sets.
+- **AscensionX:** exact upcoming main-lift set counts are owned by AscensionX; internal planning uses a proxy for accessory decisions and must not be described as measured or definitive.
+- **Bespoke:** initial working sets are adaptive to the weekly split, but progressive overload still uses the existing linked-workout engine. Future development must unify historical logs for all goal modes, improve exercise taxonomy, link recovery and performance trends, and add complete weekly programming validation.
+- Storage remains local per browsing context, not synchronised across devices.
+- No Pro gating, billing or coach platform is introduced in this phase.
+
+## Tests
+
 \`\`\`sh
-node --check assets/science/evidence-engine.js
 node science/engine.test.js
+node science/volume-intelligence.test.js
 \`\`\`

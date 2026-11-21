@@ -18,13 +18,16 @@
   <script src="./bridge.js?v=3" defer></script>
   <script src="./live.js?v=2" defer></script>
   <script src="./session-breakdown.js?v=1" defer></script>
-  <script src="../assets/bodybuilding/programme-model.js?v=4" defer></script>
+  <script src="../assets/bodybuilding/programme-model.js?v=5" defer></script>
   <script src="../assets/bodybuilding/adaptive-engine.js?v=301" defer></script>
   <script src="../assets/bodybuilding/ascension-companion.js?v=345" defer></script>
   <script src="../assets/bodybuilding/decision-engine.js?v=305" defer></script>
   <script src="../assets/bodybuilding/decision-policy.js?v=306" defer></script>
+  <script src="../assets/science/evidence-engine.js?v=2" defer></script>
+  <script src="../assets/science/volume-intelligence.js?v=2" defer></script>
+  <script src="./scientific-panel.js?v=1" defer></script>
   <script src="../assets/bodybuilding/decision-panels.js?v=307" defer></script>
-  <script src="./app.js?v=340" defer></script>
+  <script src="./app.js?v=341" defer></script>
   <script src="./return-navigation.js?v=354" defer></script>
   <script src="./goal-navigation.js?v=355" defer></script>
 <link rel="stylesheet" href="../assets/themes/theme-consistency.css?v=316">
@@ -58,7 +61,6 @@
       <div class="mobile-brand"><span class="brand-symbol">X</span><span>SPARTAN<span class="accent">X</span> <small>INTELLIGENCE</small></span></div>
       <div class="topbar-title"><span class="eyebrow">TRAIN SMARTER · PROGRESS FURTHER</span><strong>ATHLETE PERFORMANCE CENTER</strong></div>
       <div class="topbar-actions">
-        <a href="../science/" aria-label="Open Scientific Training Lab" title="Phase 2 Scientific Training Lab" style="color:#d9f25a;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;padding:6px 10px;border:1px solid #35413a;border-radius:10px;font-weight:800;font-size:11px;letter-spacing:.25px">SCIENCE LAB</a>
         <span class="mode-pill" id="modePill">● CHECKING CONNECTION</span>
         <button class="icon-button" id="openSource" type="button" title="Select training data" aria-label="Select training data">⚙</button>
         <a class="sx-return-app sx-page-back" href="../?sxReturn=intelligence&sxFrom=workout" aria-label="Back to SpartanX"><span class="sx-page-back-arrow" aria-hidden="true">←</span></a>
@@ -210,6 +212,7 @@
 
       <section class="page" id="intelligencePage" data-page="intelligence" hidden>
         <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Your next session, informed by your last.</h3><p>Simple, explainable recommendations from completed sets and RPE. Nothing is changed in your training plan.</p></div></div>
+        <article class="panel" id="sxScientificVolume" aria-label="Unified programme workload and science-informed working sets"></article>
         <article class="panel sx-decision-intelligence-host" id="sxDecisionIntelligence" aria-label="AscensionX and Bodybuilding programme decision analysis"></article>
         <div class="section-top"><div><h3>Progression suggestions</h3><p>Review a lift to see why a recommendation was made</p></div></div>
         <div class="recommendation-grid" id="recommendationGrid"></div>

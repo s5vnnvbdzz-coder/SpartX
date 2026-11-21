@@ -2,14 +2,23 @@ name: Scientific Training Engine Tests
 on:
   push:
     branches:
-      - feature/phase2-scientific-engine-v01-20261121
+      - main
+      - 'feature/intelligence-*'
     paths:
       - 'assets/science/**'
+      - 'assets/ascension/adaptive-programming.js'
+      - 'assets/workouts/531-cycle-flow.js'
+      - 'assets/bodybuilding/**'
+      - 'intelligence/**'
       - 'science/**'
       - '.github/workflows/science-tests.yml'
   pull_request:
     paths:
       - 'assets/science/**'
+      - 'assets/ascension/adaptive-programming.js'
+      - 'assets/workouts/531-cycle-flow.js'
+      - 'assets/bodybuilding/**'
+      - 'intelligence/**'
       - 'science/**'
       - '.github/workflows/science-tests.yml'
 permissions:
@@ -22,7 +31,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax check
-        run: node --check assets/science/evidence-engine.js && node --check science/engine.test.js
-      - name: Scientific engine regression checks
+      - name: Syntax check shared modules
+        run: |
+          node --check assets/science/evidence-engine.js
+          node --check assets/science/volume-intelligence.js
+          node --check intelligence/scientific-panel.js
+          node --check assets/ascension/adaptive-programming.js
+          node --check assets/workouts/531-cycle-flow.js
+          node --check assets/bodybuilding/programme-model.js
+          node --check assets/bodybuilding/programme-builder.js
+      - name: Scientific programme generation regression
         run: node science/engine.test.js
+      - name: Unified working set and source integration regression
+        run: node science/volume-intelligence.test.js

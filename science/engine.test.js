@@ -102,13 +102,10 @@ test('inputs do not get mutated by generation or audit',()=>{
  assert.equal(JSON.stringify(options),before);
  assert.equal(JSON.stringify(p),snapshot);
 });
-test('Scientific Lab page contains valid inline JavaScript and a read-only data notice',()=>{
- const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+test('old Science Lab URL redirects into the existing Spartan Intelligence',()=>{
+ const fs=require('node:fs'),path=require('node:path');
  const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
- assert.match(html,/Safe preview:/);
- assert.match(html,/assets\/science\/evidence-engine\.js/);
- const matches=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
- assert(matches.length>0);
- matches.forEach(m=>new vm.Script(m[1],{filename:'science/index.html'}));
+ assert.match(html,/location\.replace\('\.\.\/intelligence\/'\)/);
+ assert.match(html,/now belongs to/);
 });
 console.log('Passed '+passed+' Phase 2 scientific-engine checks.');

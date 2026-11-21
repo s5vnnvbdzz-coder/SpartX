@@ -32,6 +32,8 @@
     '<label>PROGRAMME LENGTH<select id="sxBBWeeks" data-bb-field="weeks"><option value="4">4 weeks</option><option value="6">6 weeks</option><option value="8">8 weeks</option><option value="12">12 weeks</option></select></label></div>',
     '<label>TRAINING PRIORITY<select id="sxBBPriority" data-bb-field="priority"><option value="balanced">Balanced development</option><option value="upper">Upper-body emphasis</option><option value="lower">Lower-body emphasis</option></select></label>',
     '<p class="sx-bb-help">Changing training days rebuilds the exercise split. Changing priority does not overwrite your edited exercises until you choose Rebuild Template.</p>',
+    '<button type="button" class="sx-bb-secondary" data-bb-action="optimise-volume">◈ INTELLIGENCE: REVIEW WORKING SETS</button>'+
+    '<p class="sx-bb-help">Use evidence-informed weekly volume distribution to recommend working sets. This changes only this editable draft; confirm Save to apply.</p>'+
     '<button type="button" class="sx-bb-secondary" data-bb-action="rebuild">↻ REBUILD ALL TRAINING DAYS</button>'+
     '<button type="button" id="sxBBBalanceLegs" class="sx-bb-secondary sx-bb-balance-legs" data-bb-action="balance-legs">BALANCE LEG DAYS ONLY</button>'+
     '<p class="sx-bb-help">The balanced lower-volume template uses 11 working sets per lower day (10 on the second leg day of a 5-day plan). Existing saved programmes are never changed automatically.</p></article>',
@@ -414,7 +416,9 @@
           input('TARGET RIR','rir',ex.rir,i,j,0,5,1)+
           input('START KG','startingKg',ex.startingKg,i,j,0,1000,0.5)+
           input('REST SEC','restSeconds',ex.restSeconds,i,j,30,600,15)+
-          '</div></div>').join('')+
+          '</div>'+(ex.sxVolumeReason?
+            '<p class="sx-bb-help">SPARTAN INTELLIGENCE · '+esc(ex.sxVolumeReason)+'</p>':'')+
+          '</div>').join('')+
         '<button type="button" class="sx-bb-add" data-bb-action="add" data-day="'+i+'" '+(day.exercises.length>=20?'disabled':'')+'>＋ ADD EXERCISE</button></div></article>').join('');
   }
   function render(){
@@ -477,9 +481,25 @@
     if(action==='close-picker')return pickerClose();
     if(action==='add')return pickerOpen(day);
     if(action==='pick')return pickerChoose(el.dataset.exerciseName);
-    if(action==='rebuild'){
+    if(action==='optimise-volume'){
+      if(!draft||!window.SXVolumeIntelligence)return window.alert('Spartan Intelligence is not available. Refresh and try again.');
+      if(!window.confirm('Review and update accessory working sets in this draft using weekly muscle volume? This will not edit saved workouts or active AscensionX/5/3/1 cycles.'))return;
+      draft=window.SXVolumeIntelligence.rebalancePlan(draft,{
+        goal:draft.kind==='hybrid'?'powerbuilding':'bodybuilding',experience:draft.experience,
+        priority:draft.priority==='upper'?'Shoulders':draft.priority==='lower'?'Quads':'Balanced'
+      });
+      dirty=true;renderEdit();
+      $('sxBBNotice').textContent='Working sets reviewed in draft only. Inspect and save to confirm.';
+      $('sxBBNotice').hidden=false;return;
+    }
+        if(action==='rebuild'){
       if(!draft||!window.confirm('Replace ALL training days with the current balanced templates? Any unsaved exercise edits will be lost.'))return;
-      draft.sessions=M.buildDays(draft.days,draft.priority);dirty=true;renderEdit();return;
+      draft.sessions=M.buildDays(draft.days,draft.priority);
+      if(window.SXVolumeIntelligence)draft=window.SXVolumeIntelligence.rebalancePlan(draft,{
+        goal:draft.kind==='hybrid'?'powerbuilding':'bodybuilding',experience:draft.experience,
+        priority:draft.priority==='upper'?'Shoulders':draft.priority==='lower'?'Quads':'Balanced'
+      });
+      dirty=true;renderEdit();return;
     }
     if(action==='balance-legs'){
       if(!draft||![4,5,6].includes(Number(draft.days)))return;
@@ -522,7 +542,12 @@
       if(!window.confirm('Change to '+days+' training days? This rebuilds the current exercise split.')){
         el.value=String(draft.days);return;
       }
-      draft.days=days;draft.sessions=M.buildDays(days,draft.priority);dirty=true;renderEdit();return;
+      draft.days=days;draft.sessions=M.buildDays(days,draft.priority);
+      if(window.SXVolumeIntelligence)draft=window.SXVolumeIntelligence.rebalancePlan(draft,{
+        goal:draft.kind==='hybrid'?'powerbuilding':'bodybuilding',experience:draft.experience,
+        priority:draft.priority==='upper'?'Shoulders':draft.priority==='lower'?'Quads':'Balanced'
+      });
+      dirty=true;renderEdit();return;
     }
     draft[field]=field==='weeks'?Number(el.value):el.value;
     dirty=true;renderEdit();

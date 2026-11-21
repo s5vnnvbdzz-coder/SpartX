@@ -2161,13 +2161,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
    <p class="sx-programme-meta">Dedicated strength and bodybuilding programme engine</p>
    <div class="sx-programme-footer"><span class="sx-programme-next">Ready for integration when the new system is finished.</span><button type="button" class="sx-programme-continue" disabled aria-disabled="true">COMING SOON</button></div>
   </section>
-   <section class="card sx-programme-card" id="sxScienceProgrammeCard" aria-label="Scientific Training Lab preview">
-    <div class="sx-programme-head"><div><div class="sx-programme-kicker">PHASE 2 · EVIDENCE-INFORMED</div><h3 class="sx-programme-title">Scientific Training Lab</h3></div><span class="sx-programme-tag">PREVIEW v0.1</span></div>
-    <p class="sx-programme-meta">Generate bodybuilding, powerlifting and powerbuilding programmes with explainable loading, set-volume audits and recovery considerations.</p>
-    <div class="sx-programme-footer"><span class="sx-programme-next">Read-only preview · Your training data stays untouched.</span>
-      <a href="./science/" class="sx-programme-continue" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">OPEN LAB ›</a>
-    </div>
-   </section>
+
  </div>
 </section>
 <div class="card sx-programme-routines"><div class="row between"><div><div class="eyebrow">YOUR ROUTINES</div><h2 style="margin:5px 0 0">Custom routines</h2></div><span class="tiny" id="homeRoutineCount">0 / 5</span></div><button id="homeCreateRoutine" class="secondary" style="width:100%;margin:12px 0">＋ ADD NEW ROUTINE</button><details id="homeRoutineDetails"><summary id="homeRoutineSummary">View created routines (0)</summary><div id="homeRoutineList" style="margin-top:10px"><p class="muted tiny">No routines created yet.</p></div></details></div><details class="card sx-programme-legacy" id="homeCycleCard" hidden aria-hidden="true"><summary><strong>Manage saved 5/3/1 cycles</strong><span class="tiny muted" id="homeCycleCount">0 SAVED</span></summary><div id="homeCycleList" style="margin-top:10px"><p class="muted tiny">Your saved cycles will appear here.</p></div></details>
@@ -5154,7 +5148,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  };
 })();
 </script>
-<script src="./assets/workouts/531-cycle-flow.js?v=317"></script>
+<script src="./assets/workouts/531-cycle-flow.js?v=318"></script>
 <script src="./assets/workouts/workout-card-order.js?v=355"></script>
 <script id="sx-programme-setup-actions">
 (()=>{
@@ -5242,7 +5236,9 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/workouts/workout-save-review.js?v=262"></script>
 <script src="./assets/profile/profile-social-pages.js?v=322"></script>
 <script src="./assets/profile/profile-account-preferences.js?v=318"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=363"></script>
+<script src="./assets/science/evidence-engine.js?v=2"></script>
+<script src="./assets/science/volume-intelligence.js?v=2"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=364"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=345"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){
@@ -5256,10 +5252,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  if(restored||renamed||rearDelts){renderWork();updateMinimizedSession();saveDraft();}
 })();
 </script>
-<script src="./assets/bodybuilding/programme-model.js?v=4"></script>
+<script src="./assets/bodybuilding/programme-model.js?v=5"></script>
 <script src="./assets/bodybuilding/adaptive-engine.js?v=301"></script>
 <script src="./assets/bodybuilding/decision-engine.js?v=305"></script>
 <script src="./assets/bodybuilding/decision-policy.js?v=306"></script>
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
-<script src="./assets/bodybuilding/programme-builder.js?v=311"></script>
+<script src="./assets/bodybuilding/programme-builder.js?v=312"></script>
 </body></html>

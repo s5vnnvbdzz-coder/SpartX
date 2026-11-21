@@ -141,9 +141,25 @@
   const factor=[0,1,1,1,.75,.45,0][week]||0;
   const isSupportDay=main==='Support';
   const added=focus==='hypertrophy'&&!isSupportDay&&main!=='Deadlift'?1:0;
-  // Day 4 support uses three working sets in standard weeks (1-3).
-  // Week 4/5 taper and Week 6 recovery remain deliberately lower.
-  let sets=isSupportDay&&week<=3?3:Math.round((item.sets+added)*factor);
+  const V=global.SXVolumeIntelligence;
+  const cycle=activeCycle(storage);
+  // Main-lift exposure is an internal planning proxy, not a claim about
+  // AscensionX's real prescription or the athlete's completed working sets.
+  const mainProxy=V&&cycle?V.countExposure((cycle.lifts||[]).map(lift=>({
+    exercises:[{name:lift,sets:3}]
+  }))):null;
+  const info=V?.classify?.(item.name);
+  const existingWeekly=info?mainProxy?.[info.primary]?.effective||0:0;
+  const advisory=V?.recommendWorkingSets?.({
+    name:item.name,goal:focus==='strength'?'powerlifting':focus==='hypertrophy'?'bodybuilding':'powerbuilding',
+    experience:'intermediate',weeklyExposure:existingWeekly,remainingSlots:2,
+    existingSets:item.sets+added,afterHeavyLift:main==='Deadlift'||item.cost>1
+  });
+  // Preserve established prescriptions where the new heuristic is uncertain.
+  const evaluated=advisory?.sets||item.sets+added;
+  const baseline=Math.round(((item.sets+added)+evaluated)/2);
+  // AscensionX still owns its main lifts and taper/recovery phases.
+  let sets=isSupportDay&&week<=3?baseline:Math.round(baseline*factor);
   if(week===5)sets=Math.min(sets,1);
   if(week===6)sets=0;
   if(main==='Deadlift')sets=Math.min(sets,week>=4?1:3);
@@ -151,7 +167,8 @@
   const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
   const ex={...item,sets,rir,sourceLift:main,week};
   const rec=recommend(ex,cycleId,week,storage);
-  return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')};
+  return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')+
+    (advisory?' Spartan Intelligence: '+advisory.reason+' The set allocation is a reviewable heuristic.':'')};
  }
  function plan(lift,week,opts={},storage=global.localStorage){
   const c=activeCycle(storage),w=Number(week);

@@ -213,6 +213,22 @@ if(slot)slot.prepend(card);
 else if(start)start.before(card);
 let cycleId=null,selectedLift=null,returnMenu=false,oldOverflow=null,bypass=false;
 function chosenCycle(){return activeCycles().find(c=>c.id===cycleId)||activeCycles()[0]}
+/* Intelligence assistance is *optional*, requires confirmation in the normal
+   5/3/1 load preview, and never changes main/BBB working-set requirements. */
+function recommendedAssistance(c,lift,n,w){
+ const V=window.SXVolumeIntelligence;
+ if(!V||!c||!w||n%4===0||/deload/i.test(w.name||''))return [];
+ const source=V.analyseSources(localStorage).find(x=>x.type==='531'&&x.id===c.id);
+ if(!source)return [];
+ const volume=V.mainWeekExposure([source]);
+ const activeLift={exercise:lift,week:n,workingSets:(w.sets||[]).length,
+   bbbSets:Number(w.bbb?.sets)||0,deload:false};
+ const candidates=V.adviseFor531({...source,main:[activeLift]},volume,{experience:'intermediate'});
+ return candidates.filter(x=>x.sets>0&&x.name!==lift).map(x=>({...x,
+   repsMin:/pallof|lateral|curl|pushdown/i.test(x.name)?10:8,
+   repsMax:/pallof|lateral|curl|pushdown/i.test(x.name)?15:12,
+   rir:3,rest:/row|pulldown/i.test(x.name)?120:90})).slice(0,3);
+}
 function renderPreview(){
  const all=activeCycles(),c=chosenCycle();
  if(!c){closePreview(false);return}
@@ -243,12 +259,18 @@ function renderPreview(){
  if(w.warmups.length)detail+='<div class="sx531-section">WARM-UP SETS</div>'+w.warmups.map(s=>row(Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('');
  detail+='<div class="sx531-section">WORKING SETS</div>'+w.sets.map((s,i)=>row('Set '+(i+1)+' · '+Math.round(s.pct*100)+'% Training Max',s.weight,s.rep)).join('');
  detail+='</div>';
- const expanded='<details class="sx531-expand"><summary>VIEW WEEKLY VOLUME &amp; DETAILED SETS</summary>'+bars+
+ const support=recommendedAssistance(c,selectedLift,n,w);
+ const supportPanel=support.length?'<details class="sx531-expand" open><summary>SPARTAN INTELLIGENCE · OPTIONAL ASSISTANCE</summary>'+
+  '<p class="sx531-help">Working sets are suggested from weekly muscle exposure; 5/3/1 main work and BBB remain unchanged.</p>'+
+  '<label style="display:flex;align-items:center;gap:9px;font-size:12px;margin:10px 0"><input id="sx531IncludeAssistance" type="checkbox" checked style="width:18px;height:18px;accent-color:var(--lime)"> Include suggested assistance on import</label>'+
+  support.map(x=>'<div class="sx531-plan-group" style="margin:7px 0"><strong>'+safe(x.name)+' · '+x.sets+' × '+x.repsMin+'–'+x.repsMax+'</strong><p>'+safe(x.reason)+'</p></div>').join('')+
+  '<p class="sx531-help">Optional sets start unchecked and do not affect 5/3/1 week completion.</p></details>':'';
+  const expanded='<details class="sx531-expand"><summary>VIEW WEEKLY VOLUME &amp; DETAILED SETS</summary>'+bars+
   '<p class="sx531-legend">Weekly volume estimate (kg × minimum prescribed reps, including warm-ups and BBB where programmed). AMRAP sets may exceed this estimate.</p>'+detail+'</details>';
  $('sx531CycleContent').innerHTML='<p class="sx531-intro">Choose the lift to load as an active SpartanX workout. Prescribed warm-up and working sets will be added automatically.</p>'+
   selector+liftPicker+preview+
   '<p class="sx531-help">Sets will be pre-filled and unchecked. <strong>Finish &amp; Save all prescribed working sets</strong> to advance this lift to the next week. Partial sessions are saved but do not advance.</p>'+
-  expanded+'<div class="sx531-sub-actions"><button type="button" id="sx531EditCycle">EDIT PROGRAMME / LIFTS</button><button type="button" id="sx531OpenCalculator">5/3/1 CALCULATOR</button></div>';
+  expanded+supportPanel+'<div class="sx531-sub-actions"><button type="button" id="sx531EditCycle">EDIT PROGRAMME / LIFTS</button><button type="button" id="sx531OpenCalculator">5/3/1 CALCULATOR</button></div>';
 }
 function openCompletedPreview(c){
  if(!c)return false;
@@ -309,7 +331,20 @@ function load(){
   planned.push(...bbbSets);
   work.push({name:bbbName,rest:90,notes:'BBB · '+w.bbb.pct+'% training max',sets:bbbSets.map(s=>mk(s,'Working Set'))});
  }
- activeCycle={id:c.id,week:n,lift,plannedSets:planned};
+ // Only explicit, still-checked optional assistance enters the workout.
+ // The original cycle's required sets remain exactly as they were.
+ if($('sx531IncludeAssistance')?.checked){
+  const existing=new Set(work.map(x=>String(x.name||'').toLowerCase()));
+  for(const x of recommendedAssistance(c,lift,n,w)){
+   if(existing.has(x.name.toLowerCase()))continue;
+   work.push({name:x.name,rest:x.rest,notes:'Spartan Intelligence · optional 5/3/1 assistance · '+
+    x.repsMin+'–'+x.repsMax+' reps · RIR '+x.rir+'. '+x.reason,
+    sx531Intelligence:{cycleId:c.id,lift,week:n,optional:true,plannedSets:x.sets},
+    sets:Array.from({length:x.sets},()=>({...base,weight:'',reps:String(x.repsMin),rpe:'',done:false,type:'Working Set'}))});
+   existing.add(x.name.toLowerCase());
+  }
+ }
+  activeCycle={id:c.id,week:n,lift,plannedSets:planned};
  $('activeWorkoutName').textContent=lift+' - Week '+n;
  $('workoutName').value=lift+' - Week '+n;
  closePreview(false);

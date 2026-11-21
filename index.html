@@ -4501,7 +4501,7 @@ let pendingRankCelebration=null;function closeWorkoutSavedDialog(){ $('workoutSa
  $('rankUnlockedBadge').alt=state.prestigeUnlocked?'Prestige achievement':state.current.name+' rank badge';
  $('rankUnlockedTitle').textContent=state.prestigeUnlocked?'Prestige '+state.prestige+' unlocked!':spartanxRankLabel(state.current.name,state.index)+' unlocked!';
  $('rankUnlockedMessage').textContent=state.prestigeUnlocked?
-  'You have completed all six ranks and earned '+state.count.toLocaleString()+' lifetime XP. Your next prestige journey begins now.':
+  'You have completed all six ranks and earned '+state.count.toLocaleString()+' lifetime XP. All rank badges remain permanently unlocked; only your rank progression begins again.':
   'You have completed '+state.workouts+' '+(state.workouts===1?'workout':'workouts')+' and earned '+state.count.toLocaleString()+' lifetime XP. You have reached the '+state.current.name+' rank!';
  $('rankUnlockedOverlay').classList.remove('hidden');$('rankUnlockedClose').focus();
 }$('rankUnlockedClose').onclick=()=>$('rankUnlockedOverlay').classList.add('hidden');$('rankUnlockedOverlay').addEventListener('click',e=>{if(e.target.id==='rankUnlockedOverlay')e.currentTarget.classList.add('hidden')});function showWorkoutSavedDialog(edited,xpEarned=0,weekBonus=0){
@@ -5246,7 +5246,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Check once on relaunch; never refresh automatically or interrupt a workout.
 })();
 </script>
-<script src="./assets/profile/profile-preview-parity.js?v=244"></script>
+<script src="./assets/profile/profile-preview-parity.js?v=370"></script>
 <script src="./assets/profile/profile-photo-crop.js?v=247"></script>
 <script src="./assets/workouts/workout-date.js?v=249"></script>
 <script src="./assets/exercises/exercise-stats-layout.js?v=304"></script>

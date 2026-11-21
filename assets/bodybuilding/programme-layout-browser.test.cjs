@@ -67,6 +67,7 @@ async function main(){
   await mobile.screenshot({path:'bodybuilding-builder-mobile.png',fullPage:false});
   console.log('PASS mobile layout');
 
+  desktop.once('dialog',dialog=>dialog.accept());
   await desktop.locator('#sxBBEdit > .sx-bb-actions [data-bb-action="discard"]').click();
   await desktop.waitForSelector('#workout.screen.active');
   console.log('PASS return from builder');

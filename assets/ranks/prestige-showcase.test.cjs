@@ -57,7 +57,7 @@ assert(panelBody.innerHTML.includes('360,000'));
 assert(panelBody.innerHTML.includes('SIX LAUREL TIERS'));
 assert(panelBody.innerHTML.includes('APOTHEOSIS · P60+'));
 assert.equal((panelBody.innerHTML.match(/sx-prestige-stage-gem/g)||[]).length,6);
-assert.equal((panelBody.innerHTML.match(/sx-prestige-stage[^-]/g)||[]).length,6);
+assert.equal((panelBody.innerHTML.match(/class="sx-prestige-stage (?:current|earned|locked)"/g)||[]).length,6);
 assert.equal(P.describe({prestige:60}).progress,1);
 P.close();
 assert.equal(overlay.hidden,true);

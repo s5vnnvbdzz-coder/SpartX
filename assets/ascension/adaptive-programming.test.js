@@ -41,8 +41,8 @@ assert.equal(rearDelt.max,20,'Reverse fly reps max at twenty');
 assert.ok(!api.LIB['Bench Press'].some(e=>
  ['Rear Delt Fly','Iso Rear Delt Fly'].includes(e.name)),
  'Older rear-delt variants are no longer prescribed');
-assert.ok(api.plan('Bench Press',2).some(e=>e.name==='Rear Delt Reverse Fly'),
- 'Active week uses new exercise');
+assert.ok(api.FOCUS_LIFTS.hypertrophy['Bench Press'].includes('Rear Delt Reverse Fly'),
+ 'The hypertrophy-priority bench programme includes the approved rear-delt exercise');
 assert.ok(api.plan('Bench Press',6).every(e=>e.name!=='Rear Delt Reverse Fly'),
  'Week six stays deload');
 const deadlift=api.plan('Deadlift',2);

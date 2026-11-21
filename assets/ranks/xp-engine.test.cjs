@@ -104,22 +104,34 @@ assert.equal(xp.badgeHighWater({totalXP:12100,index:0,prestige:2},5),5,
  // 52 weeks * 1,700 XP / 6,000 XP per prestige rounds to 15.
 assert.equal(xp.BASELINE_PRESTIGES_PER_YEAR,15);
 assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.name),
- ['bronze','silver','gold','platinum','mythic']);
-assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.start),[1,16,28,36,41]);
-assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.span),[15,12,8,5,3]);
-assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.milestone),[15,27,35,40,43]);
-assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.end),[15,27,35,40,null]);
+ ['bronze','silver','gold','platinum','mythic','apotheosis']);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.start),[1,16,28,36,41,60]);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.span),[15,12,8,5,3,null]);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.milestone),[15,27,35,40,43,60]);
+assert.deepEqual(Array.from(xp.LAUREL_TIERS,t=>t.end),[15,27,35,40,59,null]);
 for(const [prestige,name] of [[0,'none'],[1,'bronze'],[15,'bronze'],
  [16,'silver'],[27,'silver'],[28,'gold'],[35,'gold'],
  [36,'platinum'],[40,'platinum'],[41,'mythic'],
- [43,'mythic'],[100,'mythic']]){
+ [43,'mythic'],[59,'mythic'],[60,'apotheosis'],[100,'apotheosis']]){
  assert.equal(xp.prestigeBand(prestige),name,'Laurel stage for P'+prestige);
 }
 assert.equal(xp.prestigeTier(0),null);
 assert.equal(xp.prestigeTier(16).milestone,27);
 assert.equal(xp.prestigeTier(41).milestone,43);
 assert.equal(xp.prestigeTier(44).name,'mythic',
- 'The fifth laurel remains the final insignia after its three-prestige milestone');
+ 'Mythic persists after its three-prestige internal milestone until P59');
+assert.equal(xp.APOTHEOSIS_PRESTIGE,60);
+assert.equal(xp.prestigeTier(59).end,59);
+assert.equal(xp.prestigeTier(60).start,60);
+assert.equal(xp.prestigeTier(100).name,'apotheosis',
+ 'Apotheosis stays highest after P60');
+assert.equal(xp.laurelUpgrade(0,1)?.name,'bronze');
+assert.equal(xp.laurelUpgrade(14,15),null);
+assert.equal(xp.laurelUpgrade(15,16)?.name,'silver');
+assert.equal(xp.laurelUpgrade(40,41)?.name,'mythic');
+assert.equal(xp.laurelUpgrade(59,60)?.name,'apotheosis');
+assert.equal(xp.laurelUpgrade(60,61),null,'Ordinary prestiges should not retrigger a tier celebration');
+assert.equal(xp.laurelUpgrade(59,59),null,'No celebration when prestige did not increase');
 const root=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
 const profile=fs.readFileSync(path.join(__dirname,'../profile/profile-preview-parity.js'),'utf8');
 const style=fs.readFileSync(path.join(__dirname,'prestige-visuals.css'),'utf8');
@@ -136,10 +148,23 @@ assert(style.includes('[data-sx-prestige-band="mythic"]'),
  'Prestige visual bands progress independently of the current rank');
 assert(style.includes('[data-sx-prestige-band="platinum"]'),
  'The fourth laurel receives its own visual finish');
+assert(style.includes('[data-sx-prestige-band="apotheosis"]'),
+ 'The sixth laurel receives a unique white-gold finish');
 assert(root.includes("const next=window.SpartanXXP.LAUREL_TIERS.find(t=>t.start>state.prestige)"),
  'Home profile shows progress towards the next lifetime laurel');
 assert(root.includes("sx-prestige-tier-name"),
  'Feed cards show the unlocked laurel stage, not just a number');
+assert(root.includes('data-open-prestige-showcase'),
+ 'Prestige container is clickable');
+assert(root.includes('SpartanXPrestigeShowcase?.celebrate?.(state)'),
+ 'Laurel achievement uses a dedicated celebration only on tier upgrades');
+assert(root.includes('prestige-showcase.js?v=372'),
+ 'Prestige Showcase is loaded into the main iOS app');
+const showcase=fs.readFileSync(path.join(__dirname,'prestige-showcase.js'),'utf8');
+assert(showcase.includes('role="dialog" aria-modal="true"'),
+ 'Prestige Showcase is presented as a modal');
+assert(showcase.includes('data-sx-prestige-view')&&showcase.includes('data-sx-prestige-close'),
+ 'The unlock celebration has functioning showcase and dismissal controls');
 assert(!root.includes('spartanx_prestige_month'), 'Prestige is not monthly gated');
 
 console.log('PASS: XP, lifetime badge and prestige display scenarios');

@@ -87,12 +87,45 @@ async function run(){
    assert(m.pr.bottom<=m.social.y+2,'PR ends above followers: '+JSON.stringify(m));
    assert(m.social.bottom<=m.session.y+10,'Followers remain above the workout title: '+JSON.stringify(m));
    assert(m.scrollOverflow<=2,'No sideways scroll at '+width+'px: '+JSON.stringify(m));
+   // The Compound PR rotates through three lifts. In particular, the
+   // two-word Bench Press must remain on ONE line at every phone size.
+   for(const label of ['BENCH PRESS · 160 kg','BENCH PRESS · 162.5 kg',
+    'SQUAT · 185 kg','DEADLIFT · 215 kg']){
+    const detail=await card.evaluate((element,value)=>{
+     const pr=element.querySelector('[data-sx-compound-pr]');
+     const rank=element.querySelector('.sx-rank-line>b');
+     const crest=element.querySelector('.sx-gamer-prestige');
+     const cardBounds=element.getBoundingClientRect();
+     pr.textContent=value;
+     const range=document.createRange();
+     range.selectNodeContents(pr);
+     const lines=Array.from(range.getClientRects());
+     const rendered=range.getBoundingClientRect();
+     const badge=crest.getBoundingClientRect();
+     const overlap=rendered.left<badge.right&&rendered.right>badge.left
+      &&rendered.top<badge.bottom&&rendered.bottom>badge.top;
+     return {
+      label:value,lineCount:lines.length,renderedRight:rendered.right,
+      cardRight:cardBounds.right,overlapsPrestige:overlap,
+      prFont:parseFloat(getComputedStyle(pr).fontSize),
+      rankFont:parseFloat(getComputedStyle(rank).fontSize),
+      whiteSpace:getComputedStyle(pr).whiteSpace
+     };
+    },label);
+    assert.equal(detail.lineCount,1,'Compound PR must stay on one line: '+width+'px '+JSON.stringify(detail));
+    assert.equal(detail.whiteSpace,'nowrap','Prescribe single-line compound PR');
+    assert(Math.abs(detail.prFont-detail.rankFont)<.1,
+     'Rank and PR values use identical font sizes: '+JSON.stringify(detail));
+    assert(!detail.overlapsPrestige,'PR must not overlap prestige: '+JSON.stringify(detail));
+    assert(detail.renderedRight<=detail.cardRight+1,
+     'Compound PR must fit within card edge: '+JSON.stringify(detail));
+   }
    if(width===390){
     assert(m.card.h<270,'Compact mobile card is shorter than the old oversized presentation: '+JSON.stringify(m));
     await card.screenshot({path:'gaming-profile-compact-390.png'});
    }
   }
-  console.log('PASS: compact card, three dividers, matching social typography and close spacing at 4 widths');
+  console.log('PASS: compact card, dividers, uniform rank/PR fonts, four lifts on one line at 4 widths');
   if(errors.length)console.log('Browser warnings:',errors.slice(0,5));
  }catch(e){
   try{await page.screenshot({path:'gaming-profile-compact-failure.png'})}catch(_){}

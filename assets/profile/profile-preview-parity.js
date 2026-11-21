@@ -157,7 +157,7 @@ function rankAndIdentity(){
  const laurelHint=(band==='none'?'No laurel yet':band+' laurel')+(nextLaurel?' · next insignia P'+nextLaurel.start:' · highest insignia');
  const laurel='<svg viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m12 19-5-4-2 4m4-6-4-5-2 4m6-4 2-6 3 4m14 13 5-4 2 4m-4-6 4-5 2 4m-6-4-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>';
  $('sxProfileXPLevel').innerHTML='Level '+(rank.index+1)+
-  (prestige?' <span class="sx-prestige-inline" data-sx-prestige-band="'+band+'" title="Lifetime prestige '+prestige+' · '+laurelHint+'">'+laurel+' Prestige '+String(prestige).padStart(2,'0')+'</span>':
+  (prestige?' <button type="button" class="sx-prestige-inline sx-prestige-trigger" data-open-prestige-showcase data-sx-prestige-band="'+band+'" aria-label="Open Prestige Showcase" title="Lifetime prestige '+prestige+' · '+laurelHint+'">'+laurel+' Prestige '+String(prestige).padStart(2,'0')+'</button>':
    ' <em>✦</em> Prestige 00');
  // Rank progress resets each prestige; lifetime XP and earned badges do not.
  // The earlier display incorrectly compared lifetime XP against workout counts.

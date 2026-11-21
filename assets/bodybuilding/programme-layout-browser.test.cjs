@@ -8,6 +8,8 @@ async function openBuilder(browser,viewport){
  await page.goto('http://127.0.0.1:4173/index.html',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.SXBodybuildingProgrammes?.open&&
   document.getElementById('sxBodybuildingBuilder'),null,{timeout:20000});
+ // Open from Workout, mirroring normal SpartanX navigation history.
+ await page.evaluate(()=>window.spartanxNavigateScreen?.('workout',{instant:true}));
  await page.evaluate(()=>window.SXBodybuildingProgrammes.open());
  await page.waitForSelector('#sxBodybuildingBuilder.screen.active');
  await page.waitForSelector('#sxBBEdit:not([hidden])');

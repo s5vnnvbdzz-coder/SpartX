@@ -48,6 +48,8 @@ async function main(){
   assert(big.scrollWidth<=big.viewport+2,'No desktop horizontal overflow');
   assert(await desktop.locator('#sxBBEdit > .sx-bb-actions button').count()===2,'Save/Discard controls retained');
   await desktop.locator('#sxBBName').fill('Strength & Bodybuilding Layout Test');
+  // Changing training days intentionally asks permission before rebuilding.
+  desktop.once('dialog',dialog=>dialog.accept());
   await desktop.locator('#sxBBDays').selectOption('5');
   assert.equal(await desktop.locator('#sxBBEditorDays > .sx-bb-edit-day').count(),5,
    'Changing days must still rebuild the training split');

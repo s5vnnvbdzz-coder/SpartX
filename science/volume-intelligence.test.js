@@ -128,6 +128,37 @@ check('Bodybuilding goal Intelligence shares the same scientific source and inli
  assert(html.includes('volume-intelligence.js'));
  assert(ui.includes("SXScientificPanels?.render"));
 });
+check('live AscensionX adapter consults central Intelligence while preserving cycle data',()=>{
+ const store={
+  'ascensionx_strength_v1':JSON.stringify({cycle:{created:'2026-11-21T00:00:00Z',
+   exercises:['Back Squat','Bench Press','Deadlift'],
+   weeks:{'Back Squat':2,'Bench Press':2,'Deadlift':2},currentWeek:2}})
+ };
+ const storage={getItem:k=>store[k]??null,setItem:(k,v)=>{store[k]=String(v)}};
+ const w={localStorage:storage,document:{readyState:'loading',addEventListener(){}},addEventListener(){}};
+ const ctx=vm.createContext({window:w});
+ for(const file of ['assets/science/evidence-engine.js','assets/science/volume-intelligence.js','assets/ascension/adaptive-programming.js'])
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),ctx,{filename:file});
+ const before=store.ascensionx_strength_v1;
+ w.SXAscensionAdaptive.save({enabled:true,days:4,focus:'strength'},storage);
+ const week2=w.SXAscensionAdaptive.plan('Back Squat',2,{},storage);
+ assert(week2.length>=2);
+ assert(week2.every(ex=>ex.sets>=1&&ex.sets<=4));
+ assert(week2.some(ex=>ex.reason.includes('Spartan Intelligence:')));
+ assert.equal(store.ascensionx_strength_v1,before);
+ const week6=w.SXAscensionAdaptive.plan('Back Squat',6,{},storage);
+ assert.equal(week6.length,0);
+});
+check('new bespoke programmes invoke central set policy, while existing programme data stays unchanged',()=>{
+ const storage=memory({});
+ const w={localStorage:storage};
+ const ctx=vm.createContext({window:w});
+ for(const file of ['assets/science/evidence-engine.js','assets/science/volume-intelligence.js','assets/bodybuilding/programme-model.js'])
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),ctx,{filename:file});
+ const fresh=w.SXBodybuildingModel.fresh({kind:'hybrid',days:4,experience:'advanced'});
+ assert.equal(fresh.volumeIntelligence.version,V.VERSION);
+ assert(fresh.sessions.some(d=>d.exercises.some(e=>e.sxVolumePolicy===V.VERSION)));
+});
 check('new scripts and existing inline panel are valid JavaScript',()=>{
  for(const file of ['assets/science/volume-intelligence.js','intelligence/scientific-panel.js','assets/ascension/adaptive-programming.js','assets/bodybuilding/programme-builder.js']){
   new vm.Script(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),{filename:file});

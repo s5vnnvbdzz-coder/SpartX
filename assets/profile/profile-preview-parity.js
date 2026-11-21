@@ -121,6 +121,11 @@ function weeksSeries(){
  return buckets;
 }
 function compactNumber(n){return Math.round(n).toLocaleString(undefined,{maximumFractionDigits:0})}
+// Axis labels only: keep bar tooltips and selected values in full kg.
+function volumeAxisK(n){
+ const value=Math.max(0,Number(n)||0);
+ return value===0?'0':(value/1000).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+'k';
+}
 function formatted(n){if(metric==='duration')return Number(n.toFixed(1)).toLocaleString()+' hrs';if(metric==='volume')return compactNumber(n)+' kg';return compactNumber(n)+' '+(metric==='reps'?'reps':'sets')}
 function drawChart(){
  if(!$('sxProfileChartBars'))return;
@@ -128,8 +133,10 @@ function drawChart(){
  const bars=$('sxProfileChartBars');bars.innerHTML=series.map((s,i)=>'<button type="button" class="'+(i===selectedBar?'is-selected':'')+'" data-bar="'+i+'" style="--profile-bar:'+Math.max(s[metric]?3:1,s[metric]/scale*100).toFixed(2)+'%" title="'+escapeHTML(s.label+': '+formatted(s[metric]))+'" aria-label="'+escapeHTML(s.label+': '+formatted(s[metric]))+'"></button>').join('');
  bars.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{selectedBar=Number(b.dataset.bar);drawChart();}));
  const grid=max?max:0;
- $('sxProfileChartMax').textContent=metric==='duration'?(Number(grid*1.12).toFixed(1)+' hrs'):compactNumber(grid*1.12);
- $('sxProfileChartMid').textContent=metric==='duration'?(Number(grid*.56).toFixed(1)+' hrs'):compactNumber(grid*.56);
+ $('sxProfileChartMax').textContent=metric==='duration'?(Number(grid*1.12).toFixed(1)+' hrs'):
+  metric==='volume'?volumeAxisK(grid*1.12):compactNumber(grid*1.12);
+ $('sxProfileChartMid').textContent=metric==='duration'?(Number(grid*.56).toFixed(1)+' hrs'):
+  metric==='volume'?volumeAxisK(grid*.56):compactNumber(grid*.56);
  $('sxProfileChartLabels').innerHTML=[0,2,4,6,8,11].map(i=>'<span>'+escapeHTML(series[i].label)+'</span>').join('');
  const selected=series[selectedBar]||series[11];
  $('sxProfileChartReadout').innerHTML='<strong>'+escapeHTML(selected.label)+'</strong> · '+escapeHTML(formatted(selected[metric]));

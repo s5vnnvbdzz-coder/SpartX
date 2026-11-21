@@ -20,9 +20,10 @@
   for(const ex of live.exercises||[]){
    const name=E.canonical(ex.name);
    if(!name)continue;
-   if(!grouped.has(name))grouped.set(name,{name,sets:[],programmed:false});
+   if(!grouped.has(name))grouped.set(name,{name,sets:[],programmed:false,targetRpe:null});
    const row=grouped.get(name);
    row.sets.push(...ex.sets);row.programmed ||= !!ex.programmed;
+     if(Number.isFinite(ex.targetRpe)&&ex.targetRpe>=6&&ex.targetRpe<=10)row.targetRpe=ex.targetRpe;
   }
   const saved=Array.isArray(history)?history:[];
   const exercises=[...grouped.values()].map(group=>{
@@ -45,7 +46,9 @@
    else fatigue={kind:'positive',title:'Effort appears manageable',detail:'Logged RPE suggests controlled work so far. RPE is not a direct measure of recovery.'};
    const step=E.MOVES[group.name]?.step??2.5;
    let advice;
-   if(group.programmed)advice={kind:'neutral',title:'Follow your cycle progression',detail:'This lift belongs to a programmed cycle. Use its prescribed progression rather than an automatic increase.'};
+   if(group.programmed&&group.targetRpe!==null&&maxRpe>=group.targetRpe+.75)
+     advice={kind:'caution',title:'Effort above programme target',detail:'Completed set reached RPE '+maxRpe+' against target '+group.targetRpe+'. Check rest and technique; review remaining accessories. Your main-lift prescription is not automatically changed.'};
+    else if(group.programmed)advice={kind:'neutral',title:'Follow your cycle progression',detail:'This lift belongs to a programmed cycle. Use its prescribed progression rather than an automatic increase.'};
    else if(!work.length)advice={kind:'neutral',title:'Complete working sets first',detail:'There is not enough performance data to recommend a load change.'};
    else if(rpe==null)advice={kind:'neutral',title:'Record RPE for better guidance',detail:'Keep the planned load and log effort before considering an increase.'};
    else if(maxRpe>=9)advice={kind:'caution',title:'Maintain the planned load',detail:'A working set reached RPE '+maxRpe+'. Prioritise controlled repetitions and recovery.'};

@@ -99,8 +99,17 @@
     const priority=PRIORITIES.includes(options.priority)?options.priority:defaults.priority;
     const experience=EXPERIENCES.includes(options.experience)?options.experience:defaults.experience;
     const now=new Date().toISOString();
-    return {id:uid(),name:clean(options.name)||'My Bodybuilding Programme',kind,days,weeks,priority,experience,
+    const draft={id:uid(),name:clean(options.name)||'My Bodybuilding Programme',kind,days,weeks,priority,experience,
       createdAt:now,updatedAt:now,sessions:buildDays(days,priority)};
+    // Spartan Intelligence owns initial SET allocation; keep templates as
+    // exercise/split scaffolding, not universal 2-set prescriptions.
+    // Existing saved programmes are never migrated or silently rewritten.
+    const V=global.SXVolumeIntelligence;
+    return V?.rebalancePlan?.(draft,{
+      goal:kind==='hybrid'?'powerbuilding':'bodybuilding',
+      experience,
+      priority:priority==='upper'?'Shoulders':priority==='lower'?'Quads':'Balanced'
+    })||draft;
   }
   function exercise(raw){
     if(!raw||typeof raw!=='object')return null;

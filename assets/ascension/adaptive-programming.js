@@ -9,53 +9,53 @@
  const DAYS={3:['MON','WED','SAT'],4:['MON','TUE','THU','SAT'],5:['MON','TUE','THU','SAT','SUN']};
  const LIB={
   'Back Squat':[
-   {name:'Leg Extension',sets:3,min:10,max:15,rir:3,rest:90,muscles:'quadriceps',cost:1},
-   {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
-   {name:'45° Back Extension',sets:3,min:10,max:15,rir:2,rest:90,muscles:'glutes and spinal erectors',cost:1,cue:'Controlled hip hinge and neutral spine; avoid hyperextension.'},
-   {name:'Standing Calf Raise',sets:3,min:10,max:20,rir:3,rest:75,muscles:'calves',cost:1},
-   {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1}
+   {name:'Leg Extension',sets:4,min:10,max:15,rir:3,rest:90,muscles:'quadriceps',cost:1},
+   {name:'Seated Leg Curl',sets:4,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
+   {name:'45° Back Extension',sets:4,min:10,max:15,rir:2,rest:90,muscles:'glutes and spinal erectors',cost:1,cue:'Controlled hip hinge and neutral spine; avoid hyperextension.'},
+   {name:'Standing Calf Raise',sets:4,min:10,max:20,rir:3,rest:75,muscles:'calves',cost:1},
+   {name:'Pallof Press',sets:4,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1}
   ],
   'Bench Press':[
-   {name:'Iso-Lateral Row',sets:3,min:8,max:12,rir:3,rest:120,muscles:'upper back',cost:1},
-   {name:'Triceps Pushdown (Bar)',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
-   {name:'Hanging Knee Raise',sets:3,min:10,max:15,rir:2,rest:90,muscles:'abdominals and hip flexors',cost:1,cue:'Lift the pelvis without swinging.'},
-   {name:'Rear Delt Reverse Fly',sets:3,min:12,max:20,rir:3,rest:75,muscles:'shoulder stabilisers',cost:1},
-   {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1}
+   {name:'Iso-Lateral Row',sets:4,min:8,max:12,rir:3,rest:120,muscles:'upper back',cost:1},
+   {name:'Triceps Pushdown (Bar)',sets:4,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Hanging Knee Raise',sets:4,min:10,max:15,rir:2,rest:90,muscles:'abdominals and hip flexors',cost:1,cue:'Lift the pelvis without swinging.'},
+   {name:'Rear Delt Reverse Fly',sets:4,min:12,max:20,rir:3,rest:75,muscles:'shoulder stabilisers',cost:1},
+   {name:'Lat Pulldown',sets:4,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1}
   ],
   'Deadlift':[
-   {name:'Lat Pulldown',sets:3,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
-   {name:'Romanian Deadlift',sets:3,min:8,max:10,rir:3,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'Keep weight moderate and controlled after deadlifts; stop before form deteriorates.'},
-   {name:'Seated Leg Curl',sets:3,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
-   {name:'Pallof Press',sets:3,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
-   {name:'Seated Calf Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}
+   {name:'Lat Pulldown',sets:4,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
+   {name:'Romanian Deadlift',sets:4,min:8,max:10,rir:3,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'Keep weight moderate and controlled after deadlifts; stop before form deteriorates.'},
+   {name:'Seated Leg Curl',sets:4,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
+   {name:'Pallof Press',sets:4,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
+   {name:'Seated Calf Raise',sets:4,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}
   ],
   'Overhead Press':[
-   {name:'Dumbbell Row',sets:3,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
-   {name:'Triceps Pushdown (Bar)',sets:3,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
-   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+   {name:'Dumbbell Row',sets:4,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
+   {name:'Lateral Raise',sets:4,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
+   {name:'Triceps Pushdown (Bar)',sets:4,min:10,max:15,rir:3,rest:75,muscles:'triceps',cost:1},
+   {name:'Dumbbell Curl',sets:4,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
   ]
  };
  // Coach-prescribed accessories are reserved before optional movements fill a day.
  const PINNED={'Back Squat':'45° Back Extension','Bench Press':'Hanging Knee Raise','Deadlift':'Romanian Deadlift'};
  const FOURTH={
   strength:[
-   {name:'Machine Chest Press',sets:3,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
-   {name:'Iso-Lateral Row',sets:3,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:3,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
-   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+   {name:'Machine Chest Press',sets:4,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
+   {name:'Iso-Lateral Row',sets:4,min:8,max:12,rir:3,rest:105,muscles:'upper back',cost:1},
+   {name:'Lateral Raise',sets:4,min:12,max:20,rir:3,rest:75,muscles:'delts',cost:1},
+   {name:'Dumbbell Curl',sets:4,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
   ],
   balanced:[
-   {name:'Machine Chest Press',sets:3,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
-   {name:'Iso-Lateral Row',sets:3,min:8,max:12,rir:2,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:3,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
-   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
+   {name:'Machine Chest Press',sets:4,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
+   {name:'Iso-Lateral Row',sets:4,min:8,max:12,rir:2,rest:105,muscles:'upper back',cost:1},
+   {name:'Lateral Raise',sets:4,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
+   {name:'Dumbbell Curl',sets:4,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
   ],
   hypertrophy:[
-   {name:'Machine Chest Press',sets:3,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
-   {name:'Seated Cable Row',sets:3,min:10,max:15,rir:2,rest:105,muscles:'upper back',cost:1},
-   {name:'Lateral Raise',sets:3,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
-   {name:'Dumbbell Curl',sets:3,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
+   {name:'Machine Chest Press',sets:4,min:8,max:12,rir:2,rest:105,muscles:'chest',cost:1},
+   {name:'Seated Cable Row',sets:4,min:10,max:15,rir:2,rest:105,muscles:'upper back',cost:1},
+   {name:'Lateral Raise',sets:4,min:12,max:20,rir:2,rest:75,muscles:'delts',cost:1},
+   {name:'Dumbbell Curl',sets:4,min:10,max:15,rir:2,rest:75,muscles:'biceps',cost:1}
   ]
  };
  // A different priority must change the actual exercise prescription,
@@ -63,9 +63,9 @@
  // starting choices; the shared Spartan Intelligence policy doses working sets.
  const LOOKUP=[...Object.values(LIB).flat(),...Object.values(FOURTH).flat()];
  const ADDITIONAL={
-  'Incline Dumbbell Press':{name:'Incline Dumbbell Press',sets:3,min:8,max:12,rir:3,rest:120,muscles:'chest',cost:1},
-  'Leg Press':{name:'Leg Press',sets:3,min:10,max:15,rir:3,rest:120,muscles:'quadriceps',cost:2},
-  'Cable Curl':{name:'Cable Curl',sets:3,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+  'Incline Dumbbell Press':{name:'Incline Dumbbell Press',sets:4,min:8,max:12,rir:3,rest:120,muscles:'chest',cost:1},
+  'Leg Press':{name:'Leg Press',sets:4,min:10,max:15,rir:3,rest:120,muscles:'quadriceps',cost:2},
+  'Cable Curl':{name:'Cable Curl',sets:4,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
  };
  const itemFor=name=>{
   const found=LOOKUP.find(x=>x.name===name)||ADDITIONAL[name];
@@ -196,7 +196,7 @@
   if(item.name==='Romanian Deadlift'&&week>=5)return null;
   // Keep useful low-fatigue accessories during heavy weeks. Week 6 is the
   // deliberate no-assistance recovery week; Week 5 isn't a blanket one-set week.
-  const factor=[0,1,1,1,.80,.67,0][week]||0;
+  const factor=[0,1,1,1,.75,.75,0][week]||0;
   const isSupportDay=main==='Support';
   const added=focus==='hypertrophy'&&!isSupportDay&&main!=='Deadlift'?1:0;
   const V=global.SXVolumeIntelligence;
@@ -213,20 +213,20 @@
     experience:'intermediate',weeklyExposure:existingWeekly,remainingSlots:2,
     existingSets:item.sets+added,afterHeavyLift:main==='Deadlift'||item.cost>1
   });
-  // Preserve established prescriptions where the new heuristic is uncertain.
-  const evaluated=advisory?.sets||item.sets+added;
-  const baseline=Math.round(((item.sets+added)+evaluated)/2);
+  // A previous arithmetic blend with the advisory often reduced three-set
+  // prescriptions to two. Four is now the preferred normal-week allocation
+  // for low-fatigue support; higher-axial-fatigue work stays more conservative.
+  const baseline=item.cost>=2?Math.min(3,item.sets+added):Math.min(4,item.sets+added);
   // Only athlete-approved next-cycle accessory changes are applied.
   // Never edit main-lift loading, current-cycle history or taper weeks.
   const approvedDelta=week<=3&&cycleId&&activeCycle(storage)?.id===cycleId?
    global.SXAscensionCycleIntelligence?.adjustment?.(cycleId,item.name,storage)||0:0;
-  const adjustedBaseline=clamp(baseline+approvedDelta,1,4);
+  const adjustedBaseline=clamp(baseline+approvedDelta,item.cost>=2?2:1,4);
   let sets=isSupportDay&&week<=3?adjustedBaseline:Math.round(adjustedBaseline*factor);
-  if(week===5&&item.cost<=1)sets=Math.max(2,Math.min(sets,2));
   // More demanding accessories receive a steeper taper than low-fatigue
   // rows, calves, core and isolation movements.
   if(week>=4&&item.cost>=2)sets=Math.min(sets,1);
-  if(main==='Deadlift')sets=Math.min(sets,week>=4?2:3);
+  if(main==='Deadlift'&&week>=4)sets=Math.min(sets,2);
   if(week===6)sets=0;
   if(sets<1)return null;
   const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
@@ -242,7 +242,7 @@
   if(!LIFTS.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
   const chosen=FOCUS_LIFTS[focus]||FOCUS_LIFTS.strength;
   const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift]);
-  const cap=lift==='Deadlift'?(focus==='hypertrophy'?7:6):focus==='strength'?9:12;
+  const cap=lift==='Deadlift'?8:focus==='strength'?12:16;
   const maxExercises=lift==='Deadlift'?(focus==='hypertrophy'?3:2):focus==='strength'?3:4;
   const prescribed=candidates.map(item=>dose(item,w,focus,lift,cycleId,storage)).filter(Boolean);
   const pinnedName=focus==='strength'?PINNED[lift]:null;
@@ -465,7 +465,7 @@
       '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
      '</select></div>',
     '</div>',
-    '<p class="sx-adaptive-rule">Main-lift loading remains unchanged. Accessory volume reduces during heavy weeks, with no additional work on Week 6.</p>',
+    '<p class="sx-adaptive-rule">Standard weeks target four support sets where appropriate. Heavy weeks and high-fatigue movements use fewer sets; Week 6 has no accessory work.</p>',
     '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details">',
      '<summary>Preview your training days <span aria-hidden="true">⌄</span></summary>',
      '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
@@ -531,7 +531,7 @@
    }
    const recovery=document.createElement('p');
    recovery.className='sx-adaptive-preview-note';
-   recovery.textContent='The assistance prescription is generated by Adaptive Programming around your compound lifts and recovery constraints.';
+   recovery.textContent='Regular weeks: four working sets for suitable accessories. Weeks 4–5: usually three; high-fatigue and recovery-day work may have fewer. Week 6: no support work. Total weekly volume and overlap still matter.';
    preview.appendChild(recovery);
   }
   card.sxRender=render;

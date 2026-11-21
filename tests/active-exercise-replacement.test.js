@@ -275,4 +275,60 @@ test('both workout cards expose Replace through the options menu and existing ex
  assert(html.includes('window.spartanxNavigateScreen'));
  assert(html.includes('sx-exercise-menu-trigger'));
 });
+test('untouched active AscensionX support safely expands from two to four sets',()=>{
+ const existing={name:'Iso-Lateral Row',rest:120,
+  sxStrengthSizeCompanion:{cycleId:'current',lift:'Bench Press',week:2,
+   repsMin:8,repsMax:12,plannedSets:2},
+  sets:[{weight:'',reps:'8',rpe:'',type:'Working Set',done:false},
+   {weight:'',reps:'8',rpe:'',type:'Working Set',done:false}]};
+ const priorRest=existing.rest;
+ const adaptive={activeCycle:()=>({id:'current',lifts:['Bench Press']}),
+  enabled:()=>true,plan:()=>[{name:'Iso-Lateral Row',sets:4}]};
+ assert.equal(R.refreshUntouchedAdaptiveSets([existing],adaptive),1);
+ assert.equal(existing.sets.length,4);
+ assert.equal(existing.sxStrengthSizeCompanion.plannedSets,4);
+ assert.equal(existing.rest,priorRest);
+ assert.equal(R.refreshUntouchedAdaptiveSets([existing],adaptive),0);
+});
+test('new set prescription never changes entered work or unrelated cycles',()=>{
+ const make=(sets,id='current')=>({
+  name:'Iso-Lateral Row',sxStrengthSizeCompanion:{cycleId:id,lift:'Bench Press',week:2,
+   repsMin:8,plannedSets:2},sets
+ });
+ const template=()=>[{weight:'',reps:'8',rpe:'',type:'Working Set',done:false},
+  {weight:'',reps:'8',rpe:'',type:'Working Set',done:false}];
+ const logged=make(template());logged.sets[0].done=true;
+ const loaded=make(template());loaded.sets[0].weight='55';
+ const rated=make(template());rated.sets[0].rpe='8';
+ const edited=make(template());edited.sets[0].reps='12';
+ const changed=make(template());changed.replacementOf='Lat Pulldown';
+ const obsolete=make(template(),'old-cycle');
+ const manual={name:'Iso-Lateral Row',sets:template()};
+ const group=[logged,loaded,rated,edited,changed,obsolete,manual],before=JSON.stringify(group);
+ const adaptive={activeCycle:()=>({id:'current',lifts:['Bench Press']}),
+  enabled:()=>true,plan:()=>[{name:'Iso-Lateral Row',sets:4}]};
+ assert.equal(R.refreshUntouchedAdaptiveSets(group,adaptive),0);
+ assert.equal(JSON.stringify(group),before);
+ assert.equal(R.refreshUntouchedAdaptiveSets([make(template())],
+  {...adaptive,enabled:()=>false}),0);
+});
+test('unfinished support day can add one planned set without advancing a cycle',()=>{
+ const ex={name:'Machine Chest Press',sxPowerbuildingSupport:{
+  cycleId:'current',day:'SAT',week:5,repsMin:8,plannedSets:2,plannedExerciseCount:3
+ },sets:[{weight:'',reps:'8',rpe:'',done:false,type:'Working Set'},
+  {weight:'',reps:'8',rpe:'',done:false,type:'Working Set'}]};
+ const adaptive={activeCycle:()=>({id:'current',lifts:['Back Squat','Bench Press','Deadlift']}),
+  enabled:()=>true,plan:()=>[],
+  schedule:()=>({slots:[{kind:'support',day:'SAT',week:5,
+   exercises:[{name:'Machine Chest Press',sets:3}]}]})};
+ assert.equal(R.refreshUntouchedAdaptiveSets([ex],adaptive),1);
+ assert.equal(ex.sets.length,3);
+ assert.equal(ex.sxPowerbuildingSupport.plannedExerciseCount,3);
+ assert.equal(ex.sxPowerbuildingSupport.plannedSets,3);
+});
+test('host loads upgraded support helpers and refreshed adaptive cache',()=>{
+ assert(html.includes('refreshUntouchedAdaptiveSets(work,window.SXAscensionAdaptive)'));
+ assert(html.includes('exercise-replacement.js?v=369'));
+ assert(html.includes('adaptive-programming.js?v=369'));
+});
 console.log('Passed '+checks+' active exercise replacement checks.');

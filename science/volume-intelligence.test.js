@@ -159,6 +159,16 @@ check('new bespoke programmes invoke central set policy, while existing programm
  assert.equal(fresh.volumeIntelligence.version,V.VERSION);
  assert(fresh.sessions.some(d=>d.exercises.some(e=>e.sxVolumePolicy===V.VERSION)));
 });
+check('the shared scientific generator allocates sets through Spartan Intelligence',()=>{
+ const w={};
+ const ctx=vm.createContext({window:w});
+ for(const file of ['assets/science/evidence-engine.js','assets/science/volume-intelligence.js'])
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),ctx,{filename:file});
+ const plan=w.SXScientificEngine.generate({goal:'bodybuilding',days:4,minutes:90,
+  equipment:['barbell','dumbbell','machine','cable','bodyweight']});
+ assert(plan.sessions.some(day=>day.exercises.some(e=>e.sxVolumePolicy===V.VERSION)));
+ assert(plan.sessions.every(day=>day.exercises.every(e=>e.estimatedMinutes>=1)));
+});
 check('new scripts and existing inline panel are valid JavaScript',()=>{
  for(const file of ['assets/science/volume-intelligence.js','intelligence/scientific-panel.js','assets/ascension/adaptive-programming.js','assets/bodybuilding/programme-builder.js']){
   new vm.Script(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),{filename:file});

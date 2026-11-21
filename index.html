@@ -3824,7 +3824,8 @@ window.SpartanXStartPowerbuildingSupportSession=function(payload){
   notes:'Powerbuilding support · Week '+schedule.week+' · '+ex.min+'–'+ex.max+
    ' reps · '+ex.rir+' RIR · Target RPE '+(10-ex.rir),
   sxPowerbuildingSupport:{cycleId:cycle.id,week:schedule.week,day:slot.day,
-   repsMin:ex.min,repsMax:ex.max,rir:ex.rir},
+   repsMin:ex.min,repsMax:ex.max,rir:ex.rir,
+   plannedSets:ex.sets,plannedExerciseCount:slot.exercises.length},
   sets:Array.from({length:ex.sets},()=>({
    weight:'',reps:String(ex.min),rpe:'',type:'Working Set',done:false
   }))
@@ -4765,7 +4766,7 @@ document.addEventListener('keydown',e=>{
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=359',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=356"></script>
-<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=359"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=358"></script>
+<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=368"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=358"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -5239,7 +5240,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/science/evidence-engine.js?v=2"></script>
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=366"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=368"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=345"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){

@@ -1211,8 +1211,15 @@ function confirmCycleStart(){
  const {chosen,existing}=pendingCycleSelection;
  discardCycleConfirmation();
  applyCycleSelection(chosen,existing);
+ // Dispatch before closing: the editor can also emit ManageExit, and the
+ // parent needs the creation event before the embedded overlay closes.
+ const returnToSpartanX=!existing&&ascensionEmbeddedBySpartanX&&window.parent!==window;
+ if(returnToSpartanX){
+  try{window.parent.postMessage({type:'spartx:ascensionCycleCreated',
+   cycleId:state.cycle.created},location.origin)}catch(_){}
+ }
  closeCycleEditor();
- if(!existing)showScreen('workout');
+ if(!existing&&!returnToSpartanX)showScreen('workout');
 }
 function applyCycleSelection(chosen,existing){
  const weeks={...(state.cycle.weeks||{})};
@@ -2080,6 +2087,6 @@ init();
 </script>
 <script src="../assets/science/evidence-engine.js?v=2"></script>
 <script src="../assets/science/volume-intelligence.js?v=2"></script>
-<script src="../assets/ascension/adaptive-programming.js?v=366"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=368"></script>
 </body>
 </html>

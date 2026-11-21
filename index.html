@@ -2201,7 +2201,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 </div>
  <h2 class="sx-profile-more-title">Achievements &amp; strength</h2>
  <details class="card badge-collection-card" id="badgeCollection" open><summary><span><span class="eyebrow">YOUR ACHIEVEMENTS</span><strong>Badges</strong></span><span class="badge-count" id="badgeCount">1 / 8</span></summary><div class="badge-grid" id="profileBadgeGrid"></div></details>
- <div class="sx-profile-lift-history"><div class="card"><div class="eyebrow">ALL-TIME PERSONAL BESTS</div><h2>Compound rankings</h2><p class="muted tiny">Based on your heaviest logged weight for each lift, relative to bodyweight.</p><div class="rank-grid" id="liftRanks"><div class="rank-placeholder">Your squat, bench and deadlift ranks will appear here.</div></div><div class="card"><div class="eyebrow">TRAINING HISTORY</div><h2>Previous session stats</h2><div class="grid"><div class="stat"><span>SESSIONS</span><strong id="sessions">0</strong></div><div class="stat"><span>SETS LOGGED</span><strong id="sets">0</strong></div><div class="stat"><span>BEST EST. 1RM</span><strong id="best">—</strong></div><div class="stat"><span>TOTAL VOLUME</span><strong id="volume">0 kg</strong></div></div></div><div class="rank-legend">Mortal → Spartan → Hero → Demigod → Titan → Olympian</div></div></div>
+ <div class="sx-profile-lift-history"><div class="card"><div class="eyebrow">ALL-TIME PERSONAL BESTS</div><h2>Compound rankings</h2><p class="muted tiny">Based on your heaviest logged weight for each lift, relative to bodyweight.</p><div class="rank-grid" id="liftRanks"><div class="rank-placeholder">Your squat, bench and deadlift ranks will appear here.</div></div><div class="card"><div class="eyebrow">TRAINING HISTORY</div><h2>Previous session stats</h2><div class="grid"><div class="stat"><span>SESSIONS</span><strong id="sessions">0</strong></div><div class="stat"><span>SETS LOGGED</span><strong id="sets">0</strong></div><div class="stat"><span>BEST EST. 1RM</span><strong id="best">—</strong></div><div class="stat"><span>TOTAL VOLUME KG</span><strong id="volume" title="0 kg">0k</strong></div></div></div><div class="rank-legend">Mortal → Spartan → Hero → Demigod → Titan → Olympian</div></div></div>
 </section><div id="trainingStatsOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="trainingStatsTitle"><div class="detail-panel"><div class="row between"><div><div class="eyebrow">YOUR TRAINING</div><h2 id="trainingStatsTitle">Statistics</h2></div><button type="button" class="secondary small" id="closeTrainingStats">✕</button></div><div class="sx-seven-day-header"><strong>LAST 7 DAYS</strong><span id="sxSevenDayCount">0 workouts</span></div>
 <div id="sxSevenDayStrip" class="sx-week-strip" aria-label="Rolling seven-day workout calendar"></div>
 <div class="sx-seven-day-header"><strong>MUSCLES TRAINED</strong><span>Last 7 days</span></div>
@@ -2834,7 +2834,21 @@ $('workoutFeed').addEventListener('click',async e=>{
  if(deleteButton){const id=deleteButton.dataset.feedDelete,index=db.sessions.findIndex(s=>String(s.id)===id);if(index<0){renderWorkoutFeed();return;}const session=db.sessions[index],name=session.name||'Workout';if(!confirm('Delete "'+name+'" permanently? All workout data, including its exercise history and contribution to your stats, will be removed.'))return;db.sessions.splice(index,1);persist();stats();renderTrainingStats();return;}
  const button=e.target.closest('[data-feed-toggle]');if(!button){if(!e.target.closest('.feed-menu-wrap'))$('workoutFeed').querySelectorAll('.feed-menu').forEach(x=>x.classList.add('hidden'));return;}const extra=button.parentElement.querySelector('.feed-extra');if(!extra)return;const expanded=!extra.classList.contains('hidden');extra.classList.toggle('hidden',expanded);button.textContent=expanded?'SEE '+extra.children.length+' MORE '+(extra.children.length===1?'EXERCISE':'EXERCISES'):'SHOW FEWER EXERCISES';button.setAttribute('aria-expanded',String(!expanded));
 });
-function stats(){let all=db.sessions.flatMap(s=>s.exercises.flatMap(e=>e.sets));$('sessions').textContent=db.sessions.length;$('sets').textContent=all.length;$('volume').textContent=kg(all.reduce((a,s)=>a+s.weight*s.reps,0));$('best').textContent=all.length?kg(Math.max(...all.map(s=>s.weight*(1+s.reps/30)))):'—';renderProfile();renderSpartanRanks();renderLatestSessionRank();renderWorkoutFeed();renderSpartanProgress();}
+// Display-only conversion: training load stays stored and analysed in kg.
+function formatLifetimeVolumeK(weightKg){
+ const value=Math.max(0,Number(weightKg)||0);
+ return value===0?'0k':(value/1000).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+'k';
+}
+function stats(){
+ let all=db.sessions.flatMap(s=>s.exercises.flatMap(e=>e.sets));
+ $('sessions').textContent=db.sessions.length;
+ $('sets').textContent=all.length;
+ const totalVolumeKg=all.reduce((a,s)=>a+(Number(s.weight)||0)*(Number(s.reps)||0),0);
+ $('volume').textContent=formatLifetimeVolumeK(totalVolumeKg);
+ $('volume').title=kg(totalVolumeKg);
+ $('best').textContent=all.length?kg(Math.max(...all.map(s=>s.weight*(1+s.reps/30)))):'—';
+ renderProfile();renderSpartanRanks();renderLatestSessionRank();renderWorkoutFeed();renderSpartanProgress();
+}
 
 // SpartanX strength standards: original bodyweight-relative benchmarks.
 const SpartanX_RANKS=['Mortal','Spartan','Hero','Demigod','Titan','Olympian'];
@@ -5258,7 +5272,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Check once on relaunch; never refresh automatically or interrupt a workout.
 })();
 </script>
-<script src="./assets/profile/profile-preview-parity.js?v=372"></script>
+<script src="./assets/profile/profile-preview-parity.js?v=377"></script>
 <script src="./assets/profile/profile-photo-crop.js?v=247"></script>
 <script src="./assets/workouts/workout-date.js?v=249"></script>
 <script src="./assets/exercises/exercise-stats-layout.js?v=304"></script>

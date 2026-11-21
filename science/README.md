@@ -47,7 +47,7 @@ For all goal modes, initial set bands are heuristics. The scientific literature 
 
 ## Limitations and next steps
 
-- **5/3/1:** main sets and BBB are accounted for, with reviewable accessory suggestions in Intelligence. They are not yet inserted into a workout without athlete approval.
+- **5/3/1:** main sets and BBB are accounted for. In the existing 5/3/1 workout-import preview, users may check or uncheck **Include suggested assistance**. Optional accessory sets start unchecked, and the 5/3/1 progression requirements remain tied only to the original main and BBB sets.
 - **AscensionX:** exact upcoming main-lift set counts are owned by AscensionX; internal planning uses a proxy for accessory decisions and must not be described as measured or definitive.
 - **Bespoke:** initial working sets are adaptive to the weekly split, but progressive overload still uses the existing linked-workout engine. Future development must unify historical logs for all goal modes, improve exercise taxonomy, link recovery and performance trends, and add complete weekly programming validation.
 - Storage remains local per browsing context, not synchronised across devices.

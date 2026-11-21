@@ -17,7 +17,7 @@ function boot(lifts=['Back Squat','Bench Press','Deadlift'],week=1) {
 }
 const names=slot=>slot.exercises.map(ex=>ex.name);
 const signature=schedule=>schedule.slots.map(slot=>[slot.day,slot.title,
- ...slot.exercises.map(e=>e.name+':'+e.sets)]).join('|')).join('\n');
+ ...slot.exercises.map(e=>e.name+':'+e.sets)].join('|')).join('\n');
 let passed=0;
 function check(name,fn){fn();passed++;console.log('PASS '+name);}
 check('draft goal priority changes the actual prescription before a cycle exists',()=>{

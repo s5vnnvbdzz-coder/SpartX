@@ -57,9 +57,15 @@ assert(cardMarkup.includes("'+flag+'</div><div class=\"sx-gamer-info\""),
 assert(!cardMarkup.includes("+'</b>'+flag+"),
  'Rank row no longer includes the country flag');
 assert(cardMarkup.includes('sx-best-pr-line'),'Compound PR has a dedicated layout row');
-assert(html.includes('feed-gaming-card-compact.css?v=373'),'Compact mobile layout is versioned');
+assert(html.includes('feed-gaming-card-compact.css?v=374'),'Compact mobile layout is versioned');
 assert(compact.includes('position:absolute!important')&&compact.includes('.sx-portrait-country-flag'),
  'Country flag has standalone position beneath the frame');
+assert(compact.includes('justify-content:flex-start!important')&&compact.includes('gap:16px!important'),
+ 'Followers and Following are grouped rather than spread across the whole card');
+assert(compact.includes('font-size:12px!important')&&compact.includes('font-weight:700!important'),
+ 'Social numerals and labels share typography');
+assert(compact.includes('border-bottom:1px solid color-mix')&&compact.includes('.sx-gamer-top'),
+ 'Card restores separator lines for name, rank and PR');
 assert(compact.includes('min-height:150px!important')&&compact.includes('.sx-session-log'),
  'Card and saved workout row have intentional compact spacing');
 assert(html.includes("button.setAttribute('aria-expanded',String(!expanded))"),

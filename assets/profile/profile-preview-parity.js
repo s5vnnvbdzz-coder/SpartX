@@ -151,13 +151,18 @@ function rankAndIdentity(){
  }
  const flag=p.countryPublic===true&&typeof countryFlag==='function'?countryFlag(p.countryCode||p.country||p.countryOfOrigin||''):'';
  $('sxProfileCountryFlag').textContent=flag;
- const prestige=Math.max(0,Number(localStorage.getItem('spartanx_prestige_level_v1'))||0);
- $('sxProfileXPLevel').innerHTML='Level '+(rank.index+1)+' <em>✦</em> Prestige '+String(prestige).padStart(2,'0');
- const start=rank.current.workouts,finish=rank.next?rank.next.workouts:start;
- const progress=rank.next?Math.max(0,Math.min(1,(rank.count-start)/(finish-start))):1;
+ const prestige=rank.prestige;
+ const band=window.SpartanXXP.prestigeBand(prestige);
+ const laurel='<svg viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m12 19-5-4-2 4m4-6-4-5-2 4m6-4 2-6 3 4m14 13 5-4 2 4m-4-6 4-5 2 4m-6-4-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>';
+ $('sxProfileXPLevel').innerHTML='Level '+(rank.index+1)+
+  (prestige?' <span class="sx-prestige-inline" data-sx-prestige-band="'+band+'" title="Lifetime prestige '+prestige+'">'+laurel+' Prestige '+String(prestige).padStart(2,'0')+'</span>':
+   ' <em>✦</em> Prestige 00');
+ // Rank progress resets each prestige; lifetime XP and earned badges do not.
+ // The earlier display incorrectly compared lifetime XP against workout counts.
+ const progress=Math.max(0,Math.min(1,rank.rankProgress));
  $('sxProfileXPFill').style.width=(progress*100).toFixed(1)+'%';
- $('sxProfileXPCount').textContent=rank.next?rank.count+' / '+finish+' XP':rank.count+' XP · MAX RANK';
- $('sxProfileXPNext').textContent=rank.next?Math.round(progress*100)+'% to next rank':'MAX RANK';
+ $('sxProfileXPCount').textContent=rank.rankXP+' / '+window.SpartanXXP.PER_RANK+' XP';
+ $('sxProfileXPNext').textContent=Math.round(progress*100)+'% to '+(rank.next?'next rank':'next prestige');
  const bio=(p.bio||'').trim()||'Add a little about yourself.';
  $('profileDisplayBio').innerHTML=linkBio(bio);
 }

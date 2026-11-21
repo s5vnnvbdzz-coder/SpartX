@@ -120,7 +120,22 @@
    workouts:sessions.length,awards
   };
  }
+ // A rank repeats after each prestige, but its badge is permanent once
+ // earned. The persisted high-water mark also preserves pre-prestige badges
+ // when a historical session is later edited or no longer locally available.
+ const badgeHighWater=(score,stored=0)=>{
+  const earned=(Number(score?.prestige)||0)>0||(Number(score?.totalXP)||0)>=PRESTIGE_XP?
+   RANKS-1:Number(score?.index)||0;
+  return Math.max(0,Math.min(RANKS-1,Math.max(Number(stored)||0,earned)));
+ };
+ // Prestige is XP-based, never linked to a calendar month or an annual cap.
+ // A separate visual band gives the profile a visible milestone beyond P1.
+ const prestigeBand=value=>{
+  const count=Math.max(0,Math.floor(Number(value)||0));
+  return count>=10?'mythic':count>=5?'gold':count>=3?'silver':count>=1?'bronze':'none';
+ };
  root.SpartanXXP=Object.freeze({
-  calculate,PER_RANK,PRESTIGE_XP,STANDARD_AWARDS,ASCENSION_DAY_XP,ASCENSION_WEEK_BONUS
+  calculate,badgeHighWater,prestigeBand,PER_RANK,PRESTIGE_XP,
+  STANDARD_AWARDS,ASCENSION_DAY_XP,ASCENSION_WEEK_BONUS
  });
 })(typeof window!=='undefined'?window:globalThis);

@@ -1,0 +1,99 @@
+/* SpartanX prestige identity v370.
+ * Prestige is independent of the repeatedly earned six-rank portrait frame.
+ * The existing theme still governs the card; metallic detailing is layered.
+ */
+.sx-gamer-card.sx-prestige-earned,
+.sx-rank-prestige-mark,
+.sx-prestige-inline{
+ --sx-prestige-metal:#c68d5b;
+ --sx-prestige-shadow:rgba(198,141,91,.23);
+}
+.sx-gamer-card[data-sx-prestige-band="silver"],
+.sx-rank-prestige-mark[data-sx-prestige-band="silver"],
+.sx-prestige-inline[data-sx-prestige-band="silver"]{
+ --sx-prestige-metal:#d7dfea;
+ --sx-prestige-shadow:rgba(215,223,234,.27);
+}
+.sx-gamer-card[data-sx-prestige-band="gold"],
+.sx-rank-prestige-mark[data-sx-prestige-band="gold"],
+.sx-prestige-inline[data-sx-prestige-band="gold"]{
+ --sx-prestige-metal:#e6ba59;
+ --sx-prestige-shadow:rgba(230,186,89,.30);
+}
+.sx-gamer-card[data-sx-prestige-band="mythic"],
+.sx-rank-prestige-mark[data-sx-prestige-band="mythic"],
+.sx-prestige-inline[data-sx-prestige-band="mythic"]{
+ --sx-prestige-metal:#dac5ff;
+ --sx-prestige-shadow:rgba(189,147,255,.36);
+}
+/* Existing avatar and rank frame remain the current rank's artwork. */
+.sx-gamer-card.sx-prestige-earned{
+ border-color:color-mix(in srgb,var(--sx-prestige-metal) 48%,var(--lime))!important;
+ box-shadow:inset 0 0 12px var(--sx-prestige-shadow)!important;
+}
+.sx-gamer-card.sx-prestige-earned .sx-gamer-prestige{
+ min-width:58px;
+ display:grid;
+ justify-items:center;
+ align-content:center;
+ gap:0;
+ padding:5px 6px 4px;
+ border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 58%,transparent);
+ border-radius:10px;
+ background:linear-gradient(150deg,var(--sx-prestige-shadow),transparent 80%);
+ color:var(--sx-prestige-metal);
+ font-variant-numeric:tabular-nums;
+}
+.sx-gamer-card.sx-prestige-earned .sx-gamer-prestige .sx-prestige-laurel{
+ width:30px;height:22px;
+ display:block;
+ filter:drop-shadow(0 0 3px var(--sx-prestige-shadow));
+}
+.sx-gamer-card.sx-prestige-earned .sx-gamer-prestige .sx-prestige-label{
+ font-size:8px;
+ line-height:1.25;
+ letter-spacing:1px;
+ color:var(--sx-prestige-metal);
+}
+.sx-gamer-card.sx-prestige-earned .sx-gamer-prestige b{
+ line-height:1.13;
+ color:var(--sx-prestige-metal);
+ font-weight:900;
+ text-shadow:0 0 7px var(--sx-prestige-shadow);
+}
+.sx-rank-prestige-mark{
+ display:inline-flex;
+ width:fit-content;
+ margin-top:5px;
+ align-items:center;
+ gap:4px;
+ padding:3px 8px;
+ font-size:10px;
+ font-weight:800;
+ letter-spacing:.55px;
+ color:var(--sx-prestige-metal);
+ border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 46%,transparent);
+ border-radius:99px;
+ background:var(--sx-prestige-shadow);
+}
+.sx-rank-prestige-mark[hidden]{display:none!important}
+.sx-prestige-inline{
+ display:inline-flex;
+ align-items:center;
+ gap:4px;
+ padding:2px 5px;
+ border-radius:6px;
+ background:var(--sx-prestige-shadow);
+ color:var(--sx-prestige-metal);
+ font-style:normal;
+ font-weight:800;
+}
+.sx-prestige-inline svg{width:17px;height:17px;flex:0 0 17px}
+@media(max-width:390px){
+ .sx-gamer-card.sx-prestige-earned .sx-gamer-prestige{min-width:48px;padding:4px 3px}
+ .sx-gamer-card.sx-prestige-earned .sx-gamer-prestige .sx-prestige-laurel{width:26px;height:19px}
+ .sx-gamer-card.sx-prestige-earned .sx-gamer-prestige .sx-prestige-label{font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .sx-gamer-card.sx-prestige-earned .sx-gamer-prestige .sx-prestige-laurel{filter:none}
+}

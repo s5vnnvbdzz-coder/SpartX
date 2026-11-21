@@ -2054,6 +2054,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 }
 </style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
+<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=370">
 <link rel="stylesheet" href="./assets/themes/uniform-surfaces.css?v=340">
 <script defer src="./assets/charts/touch-scrub.js?v=344"></script>
 
@@ -2094,7 +2095,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
       <button type="button" class="rank-collapse-toggle" id="rankCollapseToggle" aria-expanded="false" aria-label="Expand Rank Progression" aria-controls="rankCurrentDetails rankProgressLabels rankXpHelp" title="Expand Rank Progression"><span aria-hidden="true" class="rank-collapse-symbol">+</span></button>
     </div>
   </div>
-  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div></div>
+  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span><span id="rankPrestigeMark" class="sx-rank-prestige-mark" hidden></span></div></div>
   <div class="rank-progress-track" id="rankExperienceTrack" role="progressbar" aria-label="Experience towards next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rankProgressFill"></span></div>
   <div class="row between rank-progress-labels rank-expanded-detail" id="rankProgressLabels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div>
   <div class="rank-tier-strip" id="homeRankTiers"></div>
@@ -2454,7 +2455,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/exercises/exercise-logging-guide.js?v=303"></script>
-<script src="./assets/ranks/xp-engine.js?v=324"></script>
+<script src="./assets/ranks/xp-engine.js?v=370"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -2551,9 +2552,11 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const bestText=sxCompoundSpotlightText();
  const avatar=photo?'<img src="'+esc(photo)+'" alt="Profile picture">':'<span>♙</span>';
  const prestige=state.prestige;
+ const prestigeBand=window.SpartanXXP.prestigeBand(prestige);
+ const crest=prestige?'<svg class="sx-prestige-laurel" viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19 7 15 5 19M9 13l-4-5-2 4M9 8l2-6 3 4M28 19l5-4 2 4M31 13l4-5 2 4M31 8l-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>':'';
  const rankFile=rank.file.replace(/\.svg$/i,'');
  const frameFile=p.standard==='female'?'female-frame-'+rankFile.replace(/^female-/,'')+'.svg':'male-profile-'+rankFile+'.svg';
- return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><span class="sx-gamer-prestige">PRESTIGE <b>'+prestige+'</b></span></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
+ return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div></div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><span class="sx-gamer-prestige" aria-label="Prestige '+prestige+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b></span></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b>'+flag+'</div><div class="sx-gamer-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
 }
 
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='toggleProfileCards'){localStorage.setItem(PROFILE_CARD_PREF,String(e.target.checked));renderWorkoutFeed()}});
@@ -2913,8 +2916,14 @@ function getWorkoutRank(){
  try{oldPrestige=Math.max(0,Math.floor(Number(localStorage.getItem('spartanx_prestige_level_v1'))||0))}catch(_){}
  const prestige=Math.max(oldPrestige,score.prestige);
  if(score.prestige>oldPrestige)try{localStorage.setItem('spartanx_prestige_level_v1',String(score.prestige))}catch(_){}
+ let savedBadge=0;
+ try{savedBadge=Math.max(0,Math.floor(Number(localStorage.getItem('spartanx_badge_high_water_v1'))||0))}catch(_){}
+ const badgeHighWater=window.SpartanXXP.badgeHighWater({...score,prestige},savedBadge);
+ if(badgeHighWater>savedBadge)try{
+  localStorage.setItem('spartanx_badge_high_water_v1',String(badgeHighWater));
+ }catch(_){}
  const ranks=activeProgressRanks(),index=score.index;
- return {...score,count:score.totalXP,progress:score.rankProgress,prestige,
+ return {...score,count:score.totalXP,progress:score.rankProgress,prestige,badgeHighWater,
   current:ranks[index],next:ranks[index+1]||null};
 }
 function renderSpartanProgress(){
@@ -2923,10 +2932,17 @@ function renderSpartanProgress(){
  $('rankXP').textContent=xp.toLocaleString()+' XP';document.body.dataset.sxRankTier=String(state.index===5?8:state.index+1);$('currentRankName').textContent=spartanxRankLabel(state.current.name,state.index);
  $('currentRankEmblem').src='./ranks/'+state.current.file;$('currentRankEmblem').alt=state.current.name+' rank emblem';
  $('rankWorkoutCount').textContent=state.workouts+' completed '+(state.workouts===1?'workout':'workouts');
+ const prestigeMark=$('rankPrestigeMark');
+ if(prestigeMark){
+  prestigeMark.hidden=state.prestige===0;
+  prestigeMark.textContent=state.prestige?'✦ PRESTIGE '+String(state.prestige).padStart(2,'0')+' · LIFETIME BADGES KEPT':'';
+  prestigeMark.dataset.sxPrestigeBand=window.SpartanXXP.prestigeBand(state.prestige);
+ }
  $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankExperienceTrack')?.setAttribute('aria-valuenow',String(Math.round(state.progress*100)));$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=(state.prestige?'Prestige '+state.prestige+' · ':'')+spartanxRankLabel(state.current.name,state.index);
  $('rankProgressTo').textContent=state.next?'Next: '+spartanxRankLabel(state.next.name,state.index+1)+' · '+state.remainingToNext+' XP to go':'Prestige '+(state.prestige+1)+' · '+state.toPrestige+' XP to go';
  $('homeRankTiers').innerHTML=activeProgressRanks().map((r,i)=>'<div class="rank-tier '+(i<=state.index?'earned':'')+(i===state.index?' current':'')+'"><img src="./ranks/'+r.file+'" alt=""><span class="rank-tier-name">'+esc(r.name)+'</span><span class="rank-tier-level">Rank '+(SPARTANX_RANK_NUMERALS[i]||'I')+'</span></div>').join('');
- const badges=activeProgressRanks().map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.index}));
+ // Current rank resets each prestige; achievements never do.
+ const badges=activeProgressRanks().map((r,i)=>({name:r.name,file:r.file,unlocked:i<=state.badgeHighWater}));
  badges.push({locked:true},{locked:true});
  const unlocked=badges.filter(b=>b.unlocked).length;$('badgeCount').textContent=unlocked+' / 8';
  $('profileBadgeGrid').innerHTML=badges.map(b=>{const locked=b.locked||!b.unlocked,selected=!locked&&getSelectedFlexBadge()?.name===b.name;return locked?'<div class="profile-badge locked" aria-label="'+(b.name||'Future')+' badge locked"><strong class="profile-badge-rank-name">'+(b.name||'Future badge')+'</strong><div class="badge-art"><svg class="badge-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><small>'+(b.locked?'Coming soon':'Rank not reached')+'</small></div>':'<button type="button" class="profile-badge unlocked '+(selected?'selected':'')+'" data-select-flex-badge="'+b.name+'" aria-pressed="'+selected+'"><strong class="profile-badge-rank-name">'+b.name+'</strong><div class="badge-art"><img src="./ranks/'+b.file+'" alt="'+b.name+' badge"></div><small>'+(selected?'Displayed on feed':'Tap to display')+'</small></button>';}).join('');
@@ -2937,13 +2953,13 @@ const FLEX_BADGE_KEY='spartx_selected_flex_badge_v1';
 function getSelectedFlexBadge(){
  const state=getWorkoutRank();let selected='';
  try{selected=localStorage.getItem(FLEX_BADGE_KEY)||''}catch(e){}
- const eligible=activeProgressRanks().filter((r,i)=>i<=state.index);
+ const eligible=activeProgressRanks().filter((r,i)=>i<=state.badgeHighWater);
  return eligible.find(r=>r.name===selected)||eligible[eligible.length-1]||null;
 }
 $('profileBadgeGrid').addEventListener('click',e=>{
  const button=e.target.closest('[data-select-flex-badge]');if(!button)return;
  const state=getWorkoutRank(),rank=activeProgressRanks().findIndex(r=>r.name===button.dataset.selectFlexBadge);
- if(rank<0||rank>state.index)return;
+ if(rank<0||rank>state.badgeHighWater)return;
  try{localStorage.setItem(FLEX_BADGE_KEY,button.dataset.selectFlexBadge)}catch(e){}
  renderSpartanProgress();renderWorkoutFeed();
 });
@@ -4485,7 +4501,7 @@ let pendingRankCelebration=null;function closeWorkoutSavedDialog(){ $('workoutSa
  $('rankUnlockedBadge').alt=state.prestigeUnlocked?'Prestige achievement':state.current.name+' rank badge';
  $('rankUnlockedTitle').textContent=state.prestigeUnlocked?'Prestige '+state.prestige+' unlocked!':spartanxRankLabel(state.current.name,state.index)+' unlocked!';
  $('rankUnlockedMessage').textContent=state.prestigeUnlocked?
-  'You have completed all six ranks and earned '+state.count.toLocaleString()+' lifetime XP. Your next prestige journey begins now.':
+  'You have completed all six ranks and earned '+state.count.toLocaleString()+' lifetime XP. All rank badges remain permanently unlocked; only your rank progression begins again.':
   'You have completed '+state.workouts+' '+(state.workouts===1?'workout':'workouts')+' and earned '+state.count.toLocaleString()+' lifetime XP. You have reached the '+state.current.name+' rank!';
  $('rankUnlockedOverlay').classList.remove('hidden');$('rankUnlockedClose').focus();
 }$('rankUnlockedClose').onclick=()=>$('rankUnlockedOverlay').classList.add('hidden');$('rankUnlockedOverlay').addEventListener('click',e=>{if(e.target.id==='rankUnlockedOverlay')e.currentTarget.classList.add('hidden')});function showWorkoutSavedDialog(edited,xpEarned=0,weekBonus=0){
@@ -5230,7 +5246,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Check once on relaunch; never refresh automatically or interrupt a workout.
 })();
 </script>
-<script src="./assets/profile/profile-preview-parity.js?v=244"></script>
+<script src="./assets/profile/profile-preview-parity.js?v=370"></script>
 <script src="./assets/profile/profile-photo-crop.js?v=247"></script>
 <script src="./assets/workouts/workout-date.js?v=249"></script>
 <script src="./assets/exercises/exercise-stats-layout.js?v=304"></script>

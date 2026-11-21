@@ -5,11 +5,17 @@ on:
     paths:
       - 'assets/ranks/xp-engine.js'
       - 'assets/ranks/xp-engine.test.cjs'
+      - 'assets/ranks/prestige-visuals.css'
+      - 'assets/profile/profile-preview-parity.js'
+      - 'index.html'
       - '.github/workflows/xp-prestige-checks.yml'
   pull_request:
     paths:
       - 'assets/ranks/xp-engine.js'
       - 'assets/ranks/xp-engine.test.cjs'
+      - 'assets/ranks/prestige-visuals.css'
+      - 'assets/profile/profile-preview-parity.js'
+      - 'index.html'
       - '.github/workflows/xp-prestige-checks.yml'
 permissions:
   contents: read

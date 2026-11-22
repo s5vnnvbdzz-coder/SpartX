@@ -3552,7 +3552,7 @@ function exerciseMuscles(name){
 function muscleNames(keys){return keys.map(k=>MUSCLE_LABELS[k]||k).join(', ');}
 const BODYWEIGHT_EXERCISES=new Set([
  'Push-Up','Close-Grip Push-Up','Bench Dip','Pull-Up','Chin-Up','Assisted Pull-Up',
- 'Glute Bridge','Hip Thrust','Single-Leg Hip Thrust',
+ 'Glute Bridge','Hip Thrust','Single-Leg Hip Thrust','45° Back Extension',
  'Bulgarian Split Squat','Reverse Lunge','Walking Lunge','Step-Up',
  'Ab Wheel','Decline Sit-Up','Hanging Knee Raise','Hanging Leg Raise',
  'Plank','Side Plank','Pallof Press'
@@ -5384,8 +5384,77 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   }
   return true; // The marker itself also needs saving.
  }
+ // v388: Reconcile an older active Squat draft exactly once. The athlete's
+ // existing load, completed sets, reps, RPE, time and unrelated exercises
+ // must remain intact. Only untouched, programme-generated rows are resized.
+ function reconcileActiveSquatDraft(){
+  const adaptive=window.SXAscensionAdaptive;
+  const companion=window.SXAscensionCompanion;
+  if(!adaptive?.activeCycle||!adaptive?.enabled||!companion?.forImport)return false;
+  const cycle=adaptive.activeCycle();
+  if(!cycle?.id||!adaptive.enabled(cycle.id)||!cycle.lifts?.includes('Back Squat'))return false;
+  const old=work.slice();
+  const main=old.find(ex=>ex?.ascensionLink?.lift==='Back Squat'&&
+   ex.ascensionLink?.cycleId===cycle.id&&
+   Number.isInteger(Number(ex.ascensionLink.week))&&
+   Number(ex.ascensionLink.week)>=1&&Number(ex.ascensionLink.week)<=5);
+  if(!main||Number(main.ascensionLink.supportSyncVersion)>=388)return false;
+  const link=main.ascensionLink;
+  let planned;
+  try{
+   planned=companion.forImport({
+    source:'AscensionX',exercise:'Back Squat',cycleId:cycle.id,
+    week:Number(link.week),tm:link.importedTm
+   },[]);
+  }catch(_){return false}
+  const names=['Hack Squat','Leg Extension','45° Back Extension','Pallof Press'];
+  if(!Array.isArray(planned)||!names.every(name=>planned.some(ex=>ex.name===name)))return false;
+  const normalize=name=>String(name||'').trim().toLowerCase();
+  const used=new Set([main]);
+  const ordered=[];
+  for(const name of names){
+   const prescription=planned.find(ex=>ex.name===name);
+   const existing=old.find(ex=>!used.has(ex)&&normalize(ex.name)===normalize(name)&&
+    !ex.ascensionLink&&!ex.bodybuildingLink&&!ex.sxPowerbuildingSupport&&
+    (!ex.sxStrengthSizeCompanion||
+     (ex.sxStrengthSizeCompanion.cycleId===cycle.id&&
+      Number(ex.sxStrengthSizeCompanion.week)===Number(link.week))));
+   const item=existing||prescription;
+   if(!item)return false;
+   if(existing?.sxStrengthSizeCompanion){
+    const prior=existing.sxStrengthSizeCompanion;
+    const oldSets=Array.isArray(existing.sets)?existing.sets:[];
+    // An untouched linked prescription may be updated to the new number
+    // of working sets. Never erase manually entered weights or completed work.
+    const untouched=oldSets.length===Number(prior.plannedSets)&&oldSets.length>0&&
+     oldSets.every(set=>set&&!set.done&&set.type==='Working Set'&&
+      (set.weight===''||set.weight==null)&&
+      (set.rpe===''||set.rpe==null)&&Number(set.reps)===Number(prior.repsMin));
+    if(untouched){
+     existing.sets=prescription.sets;
+     existing.rest=prescription.rest;
+     existing.notes=prescription.notes;
+     existing.sxStrengthSizeCompanion=prescription.sxStrengthSizeCompanion;
+    }
+   }
+   ordered.push(item);used.add(item);
+  }
+  const at=old.indexOf(main);
+  const leftovers=old.filter((ex,index)=>index!==at&&!ordered.includes(ex));
+  const before=leftovers.filter(ex=>old.indexOf(ex)<at);
+  const after=leftovers.filter(ex=>old.indexOf(ex)>at);
+  const next=[...before,main,...ordered,...after];
+  const rearranged=next.length!==old.length||next.some((ex,i)=>old[i]!==ex);
+  link.supportSyncVersion=388;
+  if(rearranged){
+   work.splice(0,work.length,...next);
+   remapActiveExerciseTimer(next.map(ex=>old.indexOf(ex)));
+  }
+  return true;
+ }
  const migrated=reconcileActiveDeadliftDraft();
- if(restored||renamed||rearDelts||refreshed||migrated){
+ const squatMigrated=reconcileActiveSquatDraft();
+ if(restored||renamed||rearDelts||refreshed||migrated||squatMigrated){
   renderWork();updateMinimizedSession();saveDraft();
  }
 })();

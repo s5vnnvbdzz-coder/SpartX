@@ -454,7 +454,9 @@
     const sets=Math.max(1,Math.min(item.sets,stressed?Math.min(2,cap):cap));
     const directArms=item.name==='Dumbbell Curl'||item.name==='Triceps Pushdown (Bar)';
     const easyRir=week>=4||profile.shortNext||stressed?4:3;
-    const rir=Math.max(item.rir,easyRir);
+    // Direct arms retain the approved RPE 7 target on normal Upper days,
+    // then drop to RPE 6 when tapering or protecting a nearby main lift.
+    const rir=directArms?easyRir:Math.max(item.rir,easyRir);
     return {...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
      ...(directArms?{min:10,max:15,targetReps:10}:{}),
      reason:item.reason+' Low-fatigue '+profile.role+' assistance, adjusted to selected compounds and recent main-lift effort.'};

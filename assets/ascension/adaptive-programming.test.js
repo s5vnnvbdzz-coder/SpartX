@@ -83,7 +83,7 @@ for(const focus of ['strength','balanced','hypertrophy']){
  }
 }
 api.save({focus:'strength'});
-for(const [week,expected] of [[4,2],[5,2],[6,0]]){
+for(const [week,expected] of [[4,3],[5,3],[6,0]]){
  const tapered=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
  tapered.api.save({enabled:true,focus:'strength',days:4});
  const fourth=tapered.api.schedule().slots[3];
@@ -255,8 +255,8 @@ week5Done.api.save({enabled:true,days:4});
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'The final loading-week support day is still available before Week 6 deload');
 assert.ok(week5Done.api.schedule().slots[3].exercises.length>=5&&
- week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===2),
- 'Week 5 retains five low-fatigue upper-body exercises with two sets');
+ week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===3),
+ 'Week 5 retains five low-fatigue upper-body exercises with three sets');
 
 // Three lifts can be on different weeks; the fourth day cannot inherit
 // Week 5 just because Squat and Bench are ahead of Deadlift.
@@ -318,7 +318,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=392'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=393'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -327,7 +327,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v110')&&embeddedSw.includes('adaptive-programming.js?v=392'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v111')&&embeddedSw.includes('adaptive-programming.js?v=393'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
@@ -384,15 +384,15 @@ function assistCase(lifts,days,week=2){
  return x;
 }
 const upperCase=assistCase(['Back Squat','Bench Press','Deadlift'],4,5);
-assert.equal(upperCase.api.schedule().slots[3].title,'Upper Assistance (Week 5)');
+assert.equal(upperCase.api.schedule().slots[3].title,'Upper Assistance - Week 5)');
 assert.ok(upperCase.api.schedule().slots[3].exercises.some(e=>e.name==='Dumbbell Curl'));
 assert.ok(upperCase.api.schedule().slots[3].exercises.some(e=>e.name==='Triceps Pushdown (Bar)'));
 const lowerCase=assistCase(['Back Squat','Bench Press','Overhead Press'],4);
-assert.equal(lowerCase.api.schedule().slots[3].title,'Lower Assistance (Week 2)');
+assert.equal(lowerCase.api.schedule().slots[3].title,'Lower Assistance - Week 2)');
 assert.ok(lowerCase.api.schedule().slots[3].exercises.every(e=>
  !['Hack Squat','Leg Press','Romanian Deadlift'].includes(e.name)));
 const balancedCase=assistCase(['Back Squat','Bench Press','Deadlift','Overhead Press'],5);
-assert.equal(balancedCase.api.schedule().slots[4].title,'Balanced Assistance (Week 2)');
+assert.equal(balancedCase.api.schedule().slots[4].title,'Balanced Assistance - Week 2)');
 assert.ok(balancedCase.api.schedule().slots[4].exercises.every(e=>e.sets<=2));
 assert.equal(assistCase(['Back Squat','Bench Press','Deadlift'],3).api.schedule().slots.length,3);
 const twoAssist=boot({'ascensionx_strength_v1':nextWeekCycle});
@@ -408,7 +408,7 @@ twoAssist.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
  date:new Date().toISOString(),exercises:satDone
 }]}));
 assert.equal(twoAssist.api.pendingSupportDay()?.day,'SUN');
-assert.equal(twoAssist.api.pendingSupportDay()?.title,'Balanced Assistance (Week 2)');
+assert.equal(twoAssist.api.pendingSupportDay()?.title,'Balanced Assistance - Week 2)');
 assert.equal(twoAssist.api.schedule().slots.find(slot=>slot.day==='SUN').week,2);
 const fatigueCase=assistCase(['Back Squat','Bench Press','Deadlift'],4);
 const stress=count=>JSON.stringify({sessions:[{date:new Date().toISOString(),
@@ -425,4 +425,37 @@ assert.ok(adaptiveSource.includes("line.textContent=ex.name+' '+ex.sets+' × '+r
 assert.ok(ascHtml.includes("title.textContent=slot.kind==='support'?slot.title"));
 assert.ok(ascHtml.includes('function nextAscensionSupportSlot(){'));
 
+// Lock the four-day programme to three working sets in every loading
+// week, without mutating historical workout records.
+for(const focus of ['strength','balanced','hypertrophy']){
+ for(let week=1;week<=6;week++){
+  const item=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
+  item.api.save({enabled:true,focus,days:4});
+  const squatPlan=item.api.plan('Back Squat',week);
+  const deadliftPlan=item.api.plan('Deadlift',week);
+  const supportPlan=item.api.schedule().slots[3].exercises;
+  if(week===6){
+   assert.equal(squatPlan.length,0);
+   assert.equal(deadliftPlan.length,0);
+   assert.equal(supportPlan.length,0);
+  }else{
+   assert.deepEqual(Array.from(squatPlan.map(e=>e.name)),
+    ['Hack Squat','Leg Extension','45° Back Extension','Pallof Press']);
+   assert.deepEqual(Array.from(deadliftPlan.map(e=>e.name)),
+    ['Romanian Deadlift','Lat Pulldown','Seated Leg Curl']);
+   for(const [label,exercises] of [['squat',squatPlan],['deadlift',deadliftPlan],['assistance',supportPlan]])
+    assert.ok(exercises.length>0&&exercises.every(ex=>ex.sets===3),
+     focus+' Week '+week+' '+label+' requires exactly three working sets');
+   assert.equal(deadliftPlan[0].tmPercent,45);
+   assert.equal(deadliftPlan[0].targetRpe,7);
+  }
+  assert.equal(item.api.schedule().slots[3].title,'Upper Assistance - Week '+week);
+ }
+}
+assert.ok(ascHtml.includes("i===0?'Top Set':'Back down '+i"),
+ 'Working-set preview labels Top Set and numbered Back down sets');
+assert.ok(ascHtml.includes("'W'+(i+1)+' · '"),
+ 'Warm-up preview labels W1 through W4 individually');
+assert.ok(ascHtml.includes('asc-spartan-set-line'),
+ 'Warm-up and working sets are placed on separate rows');
 console.log('AscensionX adaptive programming: tests passed');

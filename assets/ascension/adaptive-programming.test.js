@@ -318,7 +318,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=390'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=392'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -327,7 +327,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v108')&&embeddedSw.includes('adaptive-programming.js?v=390'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v110')&&embeddedSw.includes('adaptive-programming.js?v=392'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
@@ -375,5 +375,54 @@ assert.equal(shadowSource.sent[0].message.success,true);
 assert.equal(shadowSource.sent[0].message.requestId,'day4-1');
 assert.equal(responses[0].type,'spartx:ascensionAdaptiveSupportResult');
 assert.equal(responses[0].detail.success,true);
+
+// Adaptive assistance selection follows compound exposure, calendar and
+// the athlete's recorded fatigue, not a permanent fourth-day template.
+function assistCase(lifts,days,week=2){
+ const x=boot({'ascensionx_strength_v1':cycle(lifts,week)});
+ x.api.save({enabled:true,focus:'strength',days});
+ return x;
+}
+const upperCase=assistCase(['Back Squat','Bench Press','Deadlift'],4,5);
+assert.equal(upperCase.api.schedule().slots[3].title,'Upper Assistance (Week 5)');
+assert.ok(upperCase.api.schedule().slots[3].exercises.some(e=>e.name==='Dumbbell Curl'));
+assert.ok(upperCase.api.schedule().slots[3].exercises.some(e=>e.name==='Triceps Pushdown (Bar)'));
+const lowerCase=assistCase(['Back Squat','Bench Press','Overhead Press'],4);
+assert.equal(lowerCase.api.schedule().slots[3].title,'Lower Assistance (Week 2)');
+assert.ok(lowerCase.api.schedule().slots[3].exercises.every(e=>
+ !['Hack Squat','Leg Press','Romanian Deadlift'].includes(e.name)));
+const balancedCase=assistCase(['Back Squat','Bench Press','Deadlift','Overhead Press'],5);
+assert.equal(balancedCase.api.schedule().slots[4].title,'Balanced Assistance (Week 2)');
+assert.ok(balancedCase.api.schedule().slots[4].exercises.every(e=>e.sets<=2));
+assert.equal(assistCase(['Back Squat','Bench Press','Deadlift'],3).api.schedule().slots.length,3);
+const twoAssist=boot({'ascensionx_strength_v1':nextWeekCycle});
+twoAssist.api.save({enabled:true,focus:'strength',days:5});
+assert.equal(twoAssist.api.pendingSupportDay()?.day,'SAT');
+const satSlot=twoAssist.api.schedule().slots.find(slot=>slot.kind==='support'&&slot.day==='SAT');
+const satDone=satSlot.exercises.map(ex=>({
+ name:ex.name,sxPowerbuildingSupport:{cycleId:id,week:2,day:'SAT',
+  plannedSets:ex.sets,plannedExerciseCount:satSlot.exercises.length},
+ sets:Array.from({length:ex.sets},()=>({weight:40,reps:12,rpe:7,type:'Working Set',done:true}))
+}));
+twoAssist.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
+ date:new Date().toISOString(),exercises:satDone
+}]}));
+assert.equal(twoAssist.api.pendingSupportDay()?.day,'SUN');
+assert.equal(twoAssist.api.pendingSupportDay()?.title,'Balanced Assistance (Week 2)');
+assert.equal(twoAssist.api.schedule().slots.find(slot=>slot.day==='SUN').week,2);
+const fatigueCase=assistCase(['Back Squat','Bench Press','Deadlift'],4);
+const stress=count=>JSON.stringify({sessions:[{date:new Date().toISOString(),
+ exercises:[{name:'Bench Press',ascensionLink:{cycleId:id,lift:'Bench Press'},
+ sets:Array.from({length:count},()=>({type:'Working Set',done:true,weight:110,reps:3,rpe:9}))}]
+}]});
+fatigueCase.localStorage.setItem('spartx_db',stress(1));
+assert.equal(fatigueCase.api.schedule().slots[3].role,'upper');
+fatigueCase.localStorage.setItem('spartx_db',stress(2));
+assert.equal(fatigueCase.api.schedule().slots[3].role,'balanced');
+const adaptiveSource=fs.readFileSync(path.join(__dirname,'adaptive-programming.js'),'utf8');
+assert.ok(adaptiveSource.includes("slot.kind==='support'?slot.title:slot.day+' · '+slot.title"));
+assert.ok(adaptiveSource.includes("line.textContent=ex.name+' '+ex.sets+' × '+reps+' - RPE '+target"));
+assert.ok(ascHtml.includes("title.textContent=slot.kind==='support'?slot.title"));
+assert.ok(ascHtml.includes('function nextAscensionSupportSlot(){'));
 
 console.log('AscensionX adaptive programming: tests passed');

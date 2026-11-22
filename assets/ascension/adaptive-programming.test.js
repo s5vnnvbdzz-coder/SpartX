@@ -47,10 +47,17 @@ assert.ok(api.plan('Bench Press',6).every(e=>e.name!=='Rear Delt Reverse Fly'),
  'Week six stays deload');
 const deadlift=api.plan('Deadlift',2);
 assert.ok(deadlift.length>=2);
-assert.ok(deadlift.every(e=>e.sets===4),'Deadlift non-hinge support defaults to four sets in a standard week');
-for(const main of ['Back Squat','Bench Press'])assert.ok(api.plan(main,2).every(e=>e.sets===4),'Standard '+main+' support starts at four sets');
-assert.ok(deadlift.reduce((n,e)=>n+e.sets,0)<=8,'Deadlift accessories remain conservative relative to the full week');
-assert.ok(deadlift.every(e=>!/romanian|rdl|good morning|deadlift|squat/i.test(e.name)),'No heavy hinge/squat after pulling');
+assert.deepEqual(Array.from(deadlift.map(e=>e.name)),
+ ['Romanian Deadlift','Lat Pulldown','Seated Leg Curl'],'Deadlift support follows requested order');
+assert.equal(deadlift[0].sets,3,'RDLs use three sets');
+assert.equal(deadlift[0].min,8,'RDLs use eight reps');
+assert.equal(deadlift[0].targetRpe,7,'RDL target RPE is seven');
+assert.equal(deadlift[0].tmPercent,45,'RDLs use 45% of deadlift training max');
+assert.deepEqual(Array.from(api.plan('Back Squat',2).map(e=>e.name)),
+ ['Hack Squat','Leg Extension','45° Back Extension','Pallof Press'],
+ 'Squat support follows requested order');
+assert.ok(api.plan('Bench Press',2).every(e=>e.sets>=3),'Bench support retains recoverable volume');
+assert.ok(deadlift.reduce((n,e)=>n+e.sets,0)<=9,'Deadlift accessories stay within nine sets');
 assert.ok(deadlift.every(e=>e.rir>=3));
 assert.equal(api.plan('Deadlift',6).length,0,'Week 6 allows full recovery');
 const schedule=api.schedule();
@@ -59,18 +66,24 @@ assert.equal(schedule.slots.length,4);
 assert.equal(schedule.slots.filter(x=>x.kind==='ascension').length,3);
 assert.equal(schedule.slots.filter(x=>x.kind==='support').length,1);
 assert.ok(schedule.slots[3].exercises.length>0);
-assert.ok(schedule.slots[3].exercises.every(ex=>ex.sets===4),'Standard supporting day defaults to four sets');
+assert.ok(schedule.slots[3].exercises.every(ex=>ex.sets===3),'Day 4 support uses three sets in standard weeks');
 assert.ok(api.plan('Bench Press',4).every(ex=>ex.sets===3),'Taper week may reduce accessory sets');
-// Day 4 has four sets in standard weeks regardless of training focus.
+// Day 4 has direct arm work at controlled RPE in every training focus.
 for(const focus of ['strength','balanced','hypertrophy']){
  api.save({focus});
  const day4=api.schedule().slots[3];
  assert.equal(day4.kind,'support');
- assert.ok(day4.exercises.length>0&&day4.exercises.every(ex=>ex.sets===4),
-  'Day 4 '+focus+' work must use four working sets');
+ assert.equal(day4.exercises.length,5,'Five moderate upper-body exercises are prescribed');
+ assert.ok(day4.exercises.every(ex=>ex.sets===3),
+  'Day 4 '+focus+' uses three working sets');
+ for(const name of ['Triceps Pushdown (Bar)','Dumbbell Curl']){
+  const ex=day4.exercises.find(e=>e.name===name);
+  assert.ok(ex,'Day 4 '+focus+' includes '+name);
+  assert.equal(ex.min,10);assert.equal(ex.max,15);assert.equal(ex.targetRpe,7);
+ }
 }
 api.save({focus:'strength'});
-for(const [week,expected] of [[4,3],[5,3],[6,0]]){
+for(const [week,expected] of [[4,2],[5,2],[6,0]]){
  const tapered=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
  tapered.api.save({enabled:true,focus:'strength',days:4});
  const fourth=tapered.api.schedule().slots[3];
@@ -132,12 +145,14 @@ assert.equal(bridge.preference(legacyStorage).adaptive,true);
 assert.ok(bridge.forImport(imported,[],legacyStorage).length>0,'Adaptive exercises still load');
 for(const lift of ['Back Squat','Bench Press','Deadlift']){
  const entries=bridge.forImport({...imported,exercise:lift},[],legacyStorage);
- assert.ok(entries.every(ex=>!/(?:Romanian Deadlift|Paused Bench Press)/i.test(ex.name)),
-  'Neither retired accessory is added on the primary days');
+ assert.ok(entries.every(ex=>!/Paused Bench Press/i.test(ex.name)),
+  'Paused Bench stays retired');
+ if(lift==='Deadlift')assert.ok(entries.some(ex=>ex.name==='Romanian Deadlift'&&ex.sets.length===3),
+  'Deadlift day includes prescribed Romanian Deadlifts');
 }
-assert.ok(adaptive.schedule(null,legacyStorage).slots.every(slot=>
- slot.exercises.every(ex=>!/(?:Romanian Deadlift|Paused Bench Press)/i.test(ex.name))),
- 'No RDL/paused bench prescriptions appear on the fourth day');
+assert.ok(adaptive.schedule(null,legacyStorage).slots.find(slot=>slot.kind==='support').exercises.every(ex=>
+ !/(?:Romanian Deadlift|Paused Bench Press)/i.test(ex.name)),
+ 'Day 4 does not add a second fatiguing hinge');
 assert.equal(legacyStorage.getItem('ascensionx_strength_v1'),pastCycle,'Prior cycle and history preserved');
 const ascHtml=fs.readFileSync(path.join(__dirname,'../../AscensionX/index.html'),'utf8');
 const hostHtml=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
@@ -239,9 +254,9 @@ const week5Done=boot({'ascensionx_strength_v1':JSON.stringify({
 week5Done.api.save({enabled:true,days:4});
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'The final loading-week support day is still available before Week 6 deload');
-assert.ok(week5Done.api.schedule().slots[3].exercises.length>=3&&
- week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===3),
- 'Week 5 retains three low-fatigue support exercises with three working sets');
+assert.ok(week5Done.api.schedule().slots[3].exercises.length>=5&&
+ week5Done.api.schedule().slots[3].exercises.every(ex=>ex.sets===2),
+ 'Week 5 retains five low-fatigue upper-body exercises with two sets');
 
 // Three lifts can be on different weeks; the fourth day cannot inherit
 // Week 5 just because Squat and Bench are ahead of Deadlift.
@@ -302,6 +317,18 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 }]}));
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
+// Cycle views and embedded SW must load the current live support programme.
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=390'),
+ 'Embedded AscensionX must reference the current adaptive build');
+assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
+ 'View Cycle displays live adaptive training days');
+assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
+ 'Manage Cycle displays live adaptive training days');
+assert.ok(ascHtml.includes('Six-week accessory roadmap'),
+ 'View Cycle also shows a six-week accessory overview');
+const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
+assert.ok(embeddedSw.includes('ascensionx-shell-v108')&&embeddedSw.includes('adaptive-programming.js?v=390'),
+ 'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
  quickAccess.includes("lift:'__ADAPTIVE_SUPPORT__'"),

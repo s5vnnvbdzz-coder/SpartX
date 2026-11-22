@@ -3959,13 +3959,20 @@ function ensureAscensionStrengthSizeCompanions(d){
  for(const exercise of extras){
   const normalized=String(exercise.name||'').trim().toLowerCase();
   if(work.some(ex=>String(ex.name||'').trim().toLowerCase()===normalized))continue;
-  // The fixed RDL must be the next EXERCISE after the AscensionX main
-  // deadlift, including when a workout already contains other accessories.
-  const primaryIndex=exercise.sxStrengthSizeCompanion?.fixedDeadliftRdl?
-    work.findIndex(ex=>ex.ascensionLink?.cycleId===d.cycleId&&
+  // On Deadlift day, insert all three adaptive supports consecutively
+  // after the main lift: RDL, Lat Pulldown, Seated Leg Curl. When importing
+  // into a draft, retain existing user-entered exercises and logged sets.
+  const sequence=['Romanian Deadlift','Lat Pulldown','Seated Leg Curl'];
+  const order= d.exercise==='Deadlift'?sequence.indexOf(exercise.name):-1;
+  let after=order>=0?work.findIndex(ex=>ex.ascensionLink?.cycleId===d.cycleId&&
       ex.ascensionLink?.lift===d.exercise&&Number(ex.ascensionLink.week)===Number(d.week)):-1;
-  if(primaryIndex>=0)work.splice(primaryIndex+1,0,exercise);
-  else work.push(exercise);
+  if(after>=0){
+   for(const previous of sequence.slice(0,order)){
+    const prior=work.findIndex(ex=>String(ex.name||'').trim().toLowerCase()===previous.toLowerCase());
+    if(prior>after)after=prior;
+   }
+   work.splice(after+1,0,exercise);
+  }else work.push(exercise);
   inserted.push(exercise.name);
  }
  return inserted.length;
@@ -5310,7 +5317,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/science/evidence-engine.js?v=2"></script>
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=384"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=385"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=384"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){

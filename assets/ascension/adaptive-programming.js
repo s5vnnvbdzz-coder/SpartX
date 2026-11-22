@@ -98,17 +98,25 @@
   }
  };
  const SUPPORT_ROLES={
+  // Explicit Upper, Lower and Balanced templates are selected by the
+  // coverage/recovery planner, never by a fixed Day 4 index.
   strength:{
    upper:['Machine Chest Press','Iso-Lateral Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
-   recovery:['Pallof Press','Seated Calf Raise','Cable Curl']
+   lower:['Leg Extension','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
+   balanced:['Rear Delt Reverse Fly','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
+   recovery:['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press']
   },
   balanced:{
    upper:['Incline Dumbbell Press','Iso-Lateral Row','Rear Delt Reverse Fly','Triceps Pushdown (Bar)','Dumbbell Curl'],
-   recovery:['Triceps Pushdown (Bar)','Seated Calf Raise','Pallof Press']
+   lower:['Leg Extension','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
+   balanced:['Rear Delt Reverse Fly','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
+   recovery:['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press']
   },
   hypertrophy:{
    upper:['Machine Chest Press','Seated Cable Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
-   recovery:['Seated Leg Curl','Cable Curl','Seated Calf Raise']
+   lower:['Leg Extension','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
+   balanced:['Rear Delt Reverse Fly','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
+   recovery:['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press']
   }
  };
  const FOCUS_EXPLANATIONS={
@@ -371,33 +379,90 @@
   return buildLiftPlan(lift,w,prefs.focus,c.id,storage);
  }
  function weekFor(c,lift){return clamp(Number(c.weeks?.[lift]||c.currentWeek||1),1,6)}
+ // Interpret completed main-lift RPE as a conservative fatigue warning.
+ // This is not a recovery guarantee and never changes the barbell prescription.
+ function recentMainFatigue(c,storage=global.localStorage){
+  const result={upper:false,lower:false};
+  if(!c?.id)return result;
+  try{
+   const raw=storage.getItem('spartx_db');
+   if(!raw||raw.length>12000000)return result;
+   const sessions=JSON.parse(raw)?.sessions;
+   if(!Array.isArray(sessions))return result;
+   const cutoff=Date.now()-10*86400000;
+   for(const session of sessions.slice(0,150)){
+    const timestamp=Date.parse(session?.date);
+    if(!Number.isFinite(timestamp)||timestamp<cutoff||timestamp>Date.now()+86400000)continue;
+    for(const ex of Array.isArray(session.exercises)?session.exercises:[]){
+     const link=ex?.ascensionLink;
+     if(link?.cycleId!==c.id)continue;
+     const hard=(ex.sets||[]).some(set=>set?.done===true&&
+      String(set.type||'Working Set')==='Working Set'&&
+      set.rpe!==''&&set.rpe!==null&&Number(set.rpe)>=9);
+     if(hard){
+      if(['Back Squat','Deadlift'].includes(link.lift))result.lower=true;
+      if(['Bench Press','Overhead Press'].includes(link.lift))result.upper=true;
+     }
+    }
+   }
+  }catch(_){}
+  return result;
+ }
+ // The support planner fills the least-served movement region first, based
+ // on selected compounds, day count and support days already allocated.
+ // A day only 24h before the next compound must avoid stressing that region.
+ function supportProfile(c,prefs,index,week,storage=global.localStorage){
+  const days=DAYS[prefs.days]||[];
+  const shortNext=days[index]==='SUN'&&days[0]==='MON';
+  const firstLift=c.lifts[0];
+  const nextGroup=['Back Squat','Deadlift'].includes(firstLift)?'lower':'upper';
+  const fatigue=recentMainFatigue(c,storage);
+  let upper=(c.lifts.includes('Bench Press')?3:0)+(c.lifts.includes('Overhead Press')?3:0);
+  let lower=(c.lifts.includes('Back Squat')?3:0)+(c.lifts.includes('Deadlift')?3:0);
+  let previous=null,role='balanced';
+  for(let slot=c.lifts.length;slot<=index;slot++){
+   role=lower-upper>=1.5?'upper':upper-lower>=1.5?'lower':'balanced';
+   if(previous===role)role='balanced';
+   if(fatigue[role])role='balanced';
+   if(shortNext&&slot===index&&role===nextGroup)role='balanced';
+   if(slot<index){
+    if(role==='upper')upper+=3;
+    else if(role==='lower')lower+=3;
+    else {upper+=1.5;lower+=1.5}
+    previous=role;
+   }
+  }
+  // A late support day deliberately uses only easy, low-axial-fatigue
+  // exercises. Do not programme a hack squat/leg press or second heavy hinge.
+  const guarded=shortNext||index>c.lifts.length||fatigue.upper||fatigue.lower;
+  return {role,guarded,shortNext,fatigue};
+ }
  function supportExercises(c,prefs,index,week,storage=global.localStorage){
-  if(week>=6||!c?.lifts)return [];
-  const supportIndex=index-c.lifts.length;
-  if(supportIndex<0)return [];
-  const focus=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
-  const role=supportIndex===0?'upper':'recovery';
-  const candidates=pickItems(focus[role]||[]);
-  return candidates.map(item=>dose(item,week,prefs.focus,'Support',c.id||null,storage))
+  if(week>=6||!c?.lifts||index<c.lifts.length)return [];
+  const profile=supportProfile(c,prefs,index,week,storage);
+  const roles=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
+  const names=profile.shortNext&&profile.role==='balanced'?roles.recovery:
+   roles[profile.role]||roles.balanced;
+  return pickItems(names).map(item=>dose(item,week,prefs.focus,'Support',c.id||null,storage))
    .filter(Boolean).map(item=>{
-    if(role==='recovery')return {...item,sets:Math.min(2,item.sets),reason:item.reason+
-     ' Brief low-fatigue support ahead of the next main-lift week.'};
-    // Day 4: controlled upper-body volume, including direct biceps and triceps
-    // without repeating a heavy squat/hinge before next week's main lifts.
+    const group=['Leg Extension','Seated Leg Curl','Seated Calf Raise','Standing Calf Raise'].includes(item.name)?
+     'lower':'upper';
+    const core=item.name==='Pallof Press'||item.name==='Hanging Knee Raise';
+    const stressed=!core&&profile.fatigue[group];
+    const base=week<=3?3:2;
+    const cap=profile.guarded?Math.min(2,base):base;
+    const sets=Math.max(1,Math.min(item.sets,stressed?Math.min(2,cap):cap));
     const directArms=item.name==='Dumbbell Curl'||item.name==='Triceps Pushdown (Bar)';
-    const sets=Math.min(week<=3?3:2,item.sets);
-    const rir=directArms?(week<=3?3:4):item.rir;
-    return {...item,sets,rir,targetRpe:10-rir,
+    const easyRir=week>=4||profile.shortNext||stressed?4:3;
+    const rir=Math.max(item.rir,easyRir);
+    return {...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
      ...(directArms?{min:10,max:15,targetReps:10}:{}),
-     reason:item.reason+(directArms?' Direct arm work at controlled effort on Day 4.':'')};
+     reason:item.reason+' Low-fatigue '+profile.role+' assistance, adjusted to selected compounds and recent main-lift effort.'};
    });
  }
- function supportTitle(c,index,focus='strength'){
-  const extra=index-c.lifts.length;
-  const label=extra>0?'Low-fatigue recovery support':
-   focus==='strength'?'Upper-body strength support':
-   focus==='balanced'?'Balanced upper hypertrophy':'Upper hypertrophy support';
-  return 'Day '+(index+1)+' · '+label;
+ function supportTitle(c,prefs,index,week,storage=global.localStorage){
+  const role=supportProfile(c,prefs,index,week,storage).role;
+  return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance (Week '+week+')';
  }
  function completedSupportDay(c,day,week,expected,storage){
   // Only saved, completed exercises for this exact cycle/week/day count.
@@ -459,7 +524,7 @@
    if(!exercises.length)continue;
    if(!completedSupportDay(c,day,completedWeek,exercises,storage))
     return {day,index,kind:'support',week:completedWeek,
-     title:supportTitle(c,index,prefs.focus),exercises};
+     title:supportTitle(c,prefs,index,completedWeek,storage),role:supportProfile(c,prefs,index,completedWeek,storage).role,exercises};
   }
   return null;
  }
@@ -478,8 +543,9 @@
    const lift=c.lifts[index];
    if(lift)return {day,kind:'ascension',lift,week:weekFor(c,lift),
     title:lift+' · AscensionX · Week '+weekFor(c,lift),exercises:plan(lift,weekFor(c,lift),{},storage)};
-   return {day,kind:'support',title:supportTitle(c,index,prefs.focus),
-    week,lift:null,exercises:supportExercises(c,prefs,index,week,storage)};
+   return {day,kind:'support',title:supportTitle(c,prefs,index,week,storage),
+    week,lift:null,role:supportProfile(c,prefs,index,week,storage).role,
+    exercises:supportExercises(c,prefs,index,week,storage)};
   });
   return {valid:true,message:'Suggested layout, not guaranteed recovery. Main sets stay owned by AscensionX; reschedule around sleep, soreness and performance.',week,slots};
  }
@@ -511,7 +577,8 @@
    }
    const week=supportWeek;
    return {day,kind:'support',lift:null,week,
-    title:supportTitle(holder,index,focus),
+    title:supportTitle(holder,prefs,index,week,storage),
+    role:supportProfile(holder,prefs,index,week,storage).role,
     exercises:supportExercises(holder,prefs,index,week,storage)};
   });
   return {valid:true,focus,week:supportWeek,slots};
@@ -575,7 +642,7 @@
       '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
      '</select></div>',
     '</div>',
-    '<p class="sx-adaptive-rule">Squat and deadlift accessories follow their dedicated sequence. Day 4 includes direct biceps and triceps. Weeks 4–5 taper and Week 6 has no accessory work.</p>',
+    '<p class="sx-adaptive-rule">Assistance is selected for the gaps between your main lifts, with lighter work when recovery is limited.</p>',
     '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details" open>',
      '<summary>YOUR TRAINING DAYS · LIVE PROGRAMME <span aria-hidden="true">⌄</span></summary>',
      '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
@@ -611,41 +678,35 @@
      incompatible?'Select '+previewDays+' training days for '+selected.length+' primary lifts.':
      'Enabled for this cycle · changes to these controls save automatically.';
    preview.replaceChildren();
-   const note=document.createElement('p');
-   note.className='sx-adaptive-preview-note';
-   note.textContent=waiting?'Illustrative Week 1 preview · prescriptions become cycle-specific after creation.':
-    'Preview reflects your saved main-lift weeks; supporting sets do not advance AscensionX progression.';
-   preview.appendChild(note);
    const previewSettings={...pref,days:previewDays};
    const built=previewSchedule(selected,previewSettings,current&&!incompatible?current:null);
    if(!built.valid){
     const error=document.createElement('p');
     error.textContent=built.message;preview.appendChild(error);return;
    }
-   const focusInfo=document.createElement('p');
-   focusInfo.className='sx-adaptive-preview-note';
-   focusInfo.textContent=FOCUS_EXPLANATIONS[pref.focus]||FOCUS_EXPLANATIONS.strength;
-   preview.appendChild(focusInfo);
    for(const slot of built.slots){
     const box=document.createElement('div');
     box.className='sx-adaptive-preview-day';
     const heading=document.createElement('strong');
-    heading.textContent=slot.day+' · '+slot.title;
+    heading.textContent=slot.kind==='support'?slot.title:slot.day+' · '+slot.title;
     box.appendChild(heading);
     const details=document.createElement('div');
-    details.textContent=slot.exercises.length?
-     slot.exercises.map(ex=>ex.name+' · '+ex.sets+' × '+(ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+
-      (ex.tmPercent?' · RPE '+ex.targetRpe+' · '+ex.tmPercent+'% deadlift TM':
-       ex.sourceLift==='Back Squat'?' · RPE '+ex.targetRpe+
-        (Number(ex.suggestedKg)>0?' · suggested '+ex.suggestedKg+' kg':' · athlete chooses weight'):'')).join(' · '):
-     'No additional assistance prescribed';
+    details.className='sx-adaptive-preview-exercises';
+    if(!slot.exercises.length){
+     const line=document.createElement('div');
+     line.textContent='No accessories · recovery week';
+     details.appendChild(line);
+    }else for(const ex of slot.exercises){
+     const line=document.createElement('div');
+     line.className='sx-adaptive-preview-exercise';
+     const reps=ex.min===ex.max?String(ex.min):ex.min+'–'+ex.max;
+     const target=ex.targetRpe??(10-ex.rir);
+     line.textContent=ex.name+' '+ex.sets+' × '+reps+' - RPE '+target;
+     details.appendChild(line);
+    }
     box.appendChild(details);
     preview.appendChild(box);
    }
-   const recovery=document.createElement('p');
-   recovery.className='sx-adaptive-preview-note';
-   recovery.textContent='Current-week prescriptions shown above. Day 4 includes low-fatigue upper-body and arm work; Weeks 4–5 taper accessory sets; Week 6 is accessory-free. Completed sessions are never rewritten.';
-   preview.appendChild(recovery);
   }
   card.sxRender=render;
   card.addEventListener('change',event=>{

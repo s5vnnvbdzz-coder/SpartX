@@ -231,6 +231,8 @@ body[data-theme="energy-zero"] .asc-cancel-programme{background:rgba(79,26,29,.3
 .asc-spartan-import-dialog{max-height:calc(100dvh - 30px);overflow-y:auto}
 .asc-spartan-import-preview{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px;margin:12px 0;font-size:12px;line-height:1.7}
 .asc-spartan-import-preview strong{display:block;font-size:13px;color:var(--text)}
+.asc-spartan-import-preview .asc-spartan-set-line{display:block;padding:4px 0;border-bottom:1px solid var(--line);font-size:12px;line-height:1.5}
+.asc-spartan-import-preview .asc-spartan-set-line:last-child{border-bottom:0}
 .asc-spartan-import-label{display:block;margin-top:10px;color:var(--red2);font-size:10px;letter-spacing:1.2px;font-weight:850}
 .asc-spartan-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0 4px}
 .asc-spartan-import-actions button{min-height:52px;padding:9px 7px;font-size:11px;line-height:1.3}
@@ -1665,13 +1667,20 @@ function renderAscSpartanImportPreview(){
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
  const panel=$('ascSpartanImportPreview');
  if(!prescription){panel.textContent='Select an active cycle exercise.';return}
- const warmup=prescription.warmupSets.map((x,i)=>'W'+(i+1)+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
- const main=prescription.sets.map((x,i)=>(i===0?'Main '+(i+1):'Set '+(i+1))+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
+ // One row per actual imported set, in the same order SpartanX logs it.
+ // Week 6 is a deload: its three equal sets must not be called a Top Set.
+ const warmup=prescription.warmupSets.map((x,i)=>
+  '<div class="asc-spartan-set-line">W'+(i+1)+' · '+kg(x.weight)+' × '+x.reps+'</div>').join('');
+ const main=prescription.sets.map((x,i)=>{
+  const label=prescription.week===6?'Deload Set '+(i+1):
+   i===0?'Top Set':'Back down '+i;
+  return '<div class="asc-spartan-set-line">'+label+' · '+kg(x.weight)+' × '+x.reps+'</div>';
+ }).join('');
  const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
  const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT</span>'+adaptive.map(x=>'<div>'+sxCompactSupportText(x)+'</div>').join(''):'';
  const guardInfo=prescribed(prescription.exercise,prescription.week);
  const bridgeNote=guardInfo.loadGuard?'<div class="tiny" role="status" style="margin:9px 0;color:var(--red2)">'+loadGuardSummary(guardInfo)+'</div>':'';
- panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong>'+bridgeNote+'<span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+support;
+ panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong>'+bridgeNote+'<span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span>'+warmup+'<span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span>'+main+support;
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;

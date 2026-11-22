@@ -1,4 +1,4 @@
-/* SpartanX prestige identity v380.
+/* SpartanX prestige identity v382.
  * Prestige is independent of the repeatedly earned six-rank portrait frame.
  * The existing theme still governs the card; metallic detailing is layered.
  */
@@ -439,7 +439,7 @@ button.sx-prestige-inline.sx-prestige-trigger{
  font-size:clamp(15px,4.2vw,22px);
  line-height:1.2;
 }
-/* Same 56px compact tile, metallic outline, gradient and radii as profile. */
+/* Match the PROFILE-CARD version: neutral graphite outline, neutral dark fill, white crest; only the tier text and number stay metallic. */
 #homeRankProgression #rankPrestigeMark.sx-gamer-prestige.sx-prestige-trigger{
  display:grid!important;
  justify-items:center!important;
@@ -455,9 +455,9 @@ button.sx-prestige-inline.sx-prestige-trigger{
  box-sizing:border-box!important;
  -webkit-appearance:none!important;
  appearance:none!important;
- border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 65%,transparent)!important;
+ border:1px solid #424244!important;
  border-radius:10px!important;
- background:linear-gradient(150deg,var(--sx-prestige-shadow),transparent 85%)!important;
+ background:linear-gradient(155deg,#222225,#19191c 85%)!important;
  box-shadow:none!important;
  color:var(--sx-prestige-metal)!important;
  cursor:pointer;
@@ -469,8 +469,8 @@ button.sx-prestige-inline.sx-prestige-trigger{
  width:30px;
  height:22px;
  margin:0;
- color:var(--sx-prestige-metal);
- filter:drop-shadow(0 0 3px var(--sx-prestige-shadow));
+ color:#f4f4f5!important;
+ filter:none!important;
 }
 #homeRankProgression #rankPrestigeMark .sx-prestige-label{
  display:block;

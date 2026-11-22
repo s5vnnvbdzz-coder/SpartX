@@ -2961,6 +2961,7 @@ function renderSpartanProgress(){
  const prestigeMark=$('rankPrestigeMark');
  if(prestigeMark){
   prestigeMark.hidden=state.prestige===0;
+  $('rankCurrentDetails')?.classList.toggle('has-prestige-tile',state.prestige>0);
   const tier=window.SpartanXXP.prestigeTier(state.prestige);
   prestigeMark.innerHTML=state.prestige?spartanxPrestigeTileInner(state.prestige):'';
   prestigeMark.setAttribute('aria-label',state.prestige?

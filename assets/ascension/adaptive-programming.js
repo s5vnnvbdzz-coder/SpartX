@@ -663,6 +663,8 @@
    }else draft={...draft,...update};
    render();
    if(typeof global.renderCycleLoads==='function')global.renderCycleLoads();
+   if(typeof global.renderSXCycleManageLiveSnapshot==='function')
+    global.renderSXCycleManageLiveSnapshot();
   });
   const dialog=document.getElementById('cycleEditorBackdrop');
   if(dialog&&typeof MutationObserver==='function')

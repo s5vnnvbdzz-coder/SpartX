@@ -1,4 +1,4 @@
-/* SpartanX Prestige Showcase and laurel-tier celebrations v372.
+/* SpartanX Prestige page and laurel-tier celebrations v383.
  * Read-only lifetime achievements, separate from the six repeating ranks.
  */
 (function(global){
@@ -59,19 +59,27 @@
     '<span class="sx-prestige-stage-status">'+(t.current?'CURRENT':t.unlocked?'EARNED':'LOCKED')+'</span></li>';
   }).join('');
  }
+ function activePage(){
+  return global.document?.querySelector('main > .screen.active')?.id==='prestigeShowcase';
+ }
+ function backToPreviousPage(){
+  if(!activePage())return;
+  if(typeof global.spartanxReturnToScreen==='function')global.spartanxReturnToScreen('home');
+ }
  function display(source){
-  const root=ensureOverlay(),model=source||currentModel();
-  if(!root||!model)return false;
-  if(root.hidden)previousFocus=global.document.activeElement;
-  root.hidden=false;
-  root.dataset.sxPrestigeBand=model.tier;
-  root.classList.remove('is-celebration');
-  global.document.body.classList.add('sx-prestige-open');
-  root.querySelector('#sxPrestigeDialogBody').innerHTML=
-   '<div class="sx-prestige-eyebrow">SPARTANX · LIFETIME ACHIEVEMENTS</div>'+
+  const page=global.document?.getElementById('prestigeShowcase');
+  const pageBody=global.document?.getElementById('sxPrestigePageBody');
+  const model=source||currentModel();
+  if(!page||!pageBody||!model||typeof global.spartanxNavigateScreen!=='function')return false;
+  // The rare laurel-unlock celebration remains a separate full-screen reveal.
+  // Viewing the normal showcase exits that celebration before page navigation.
+  if(overlay&&!overlay.hidden)close();
+  page.dataset.sxPrestigeBand=model.tier;
+  pageBody.innerHTML=
+   '<div class="sx-prestige-page-panel">'+
    '<div class="sx-prestige-hero" data-sx-prestige-band="'+model.tier+'">'+laurelSvg(model.tier==='apotheosis')+
    '<div class="sx-prestige-hero-label">PRESTIGE SHOWCASE</div>'+
-   '<h2 id="sxPrestigeDialogTitle">'+titleCase(model.tier==='none'?'Your journey':model.tier+' Laurel')+'</h2>'+
+   '<h2>'+titleCase(model.tier==='none'?'Your journey':model.tier+' Laurel')+'</h2>'+
    '<p class="sx-prestige-hero-sub">Lifetime Prestige '+String(model.prestige).padStart(2,'0')+'</p></div>'+
    '<div class="sx-prestige-stat-grid">'+
    '<div><span>PRESTIGES</span><strong>'+model.prestige+'</strong></div>'+
@@ -84,9 +92,11 @@
    '<h3 class="sx-prestige-stages-title">SIX LAUREL TIERS</h3>'+
    '<ol class="sx-prestige-stage-list">'+stageRows(model)+'</ol>'+
    '<p class="sx-prestige-footnote">Prestige is continuous. Rank progression repeats every 6,000 XP; previously unlocked badges remain yours.</p>'+
-   '<button class="sx-prestige-primary" type="button" data-sx-prestige-close>CLOSE SHOWCASE</button>';
-  root.querySelector('.sx-prestige-dismiss')?.focus();
-  return true;
+   '</div>';
+  if(!activePage())global.spartanxNavigateScreen('prestigeShowcase',{instant:true});
+  else global.scrollTo(0,0);
+  page.querySelector('#sxPrestigePageBack')?.focus({preventScroll:true});
+  return activePage();
  }
  function celebrate(state){
   const model=describe(state);
@@ -124,6 +134,9 @@
   if(event.target?.closest?.('[data-open-prestige-showcase]')){
    event.preventDefault();display();return;
   }
+  if(event.target?.closest?.('[data-sx-prestige-back]')){
+   event.preventDefault();backToPreviousPage();return;
+  }
   if(!overlay||overlay.hidden)return;
   if(event.target===overlay||event.target?.closest?.('[data-sx-prestige-close]')){
    close();return;
@@ -133,6 +146,9 @@
   }
  });
  global.document?.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&activePage()){
+   event.preventDefault();backToPreviousPage();return;
+  }
   if(!overlay||overlay.hidden)return;
   if(event.key==='Escape'){event.preventDefault();close();return}
   if(event.key!=='Tab')return;

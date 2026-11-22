@@ -3959,11 +3959,13 @@ function ensureAscensionStrengthSizeCompanions(d){
  for(const exercise of extras){
   const normalized=String(exercise.name||'').trim().toLowerCase();
   if(work.some(ex=>String(ex.name||'').trim().toLowerCase()===normalized))continue;
-  // On Deadlift day, insert all three adaptive supports consecutively
-  // after the main lift: RDL, Lat Pulldown, Seated Leg Curl. When importing
-  // into a draft, retain existing user-entered exercises and logged sets.
-  const sequence=['Romanian Deadlift','Lat Pulldown','Seated Leg Curl'];
-  const order= d.exercise==='Deadlift'?sequence.indexOf(exercise.name):-1;
+  // Keep the complete fixed adaptive order immediately after its compound,
+  // whether starting a new session or appending to an existing draft.
+  const sequence=d.exercise==='Deadlift'?
+   ['Romanian Deadlift','Lat Pulldown','Seated Leg Curl']:
+   d.exercise==='Back Squat'?
+   ['Hack Squat','Leg Extension','45° Back Extension','Pallof Press']:[];
+  const order=sequence.indexOf(exercise.name);
   let after=order>=0?work.findIndex(ex=>ex.ascensionLink?.cycleId===d.cycleId&&
       ex.ascensionLink?.lift===d.exercise&&Number(ex.ascensionLink.week)===Number(d.week)):-1;
   if(after>=0){
@@ -5317,8 +5319,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/science/evidence-engine.js?v=2"></script>
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=385"></script>
-<script src="./assets/bodybuilding/ascension-companion.js?v=384"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=387"></script>
+<script src="./assets/bodybuilding/ascension-companion.js?v=387"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){
  // Only the on-device ACTIVE draft is eligible. Never touch saved workout

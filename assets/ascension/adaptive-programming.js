@@ -65,6 +65,8 @@
  const ADDITIONAL={
   'Incline Dumbbell Press':{name:'Incline Dumbbell Press',sets:4,min:8,max:12,rir:3,rest:120,muscles:'chest',cost:1},
   'Leg Press':{name:'Leg Press',sets:4,min:10,max:15,rir:3,rest:120,muscles:'quadriceps',cost:2},
+  'Hack Squat':{name:'Hack Squat',sets:3,min:8,max:10,rir:2,rest:150,muscles:'quadriceps and glutes',cost:2,
+   cue:'Controlled deep knee bend with a stable torso; use the machine range that feels comfortable.'},
   'Cable Curl':{name:'Cable Curl',sets:4,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
  };
  const itemFor=name=>{
@@ -191,6 +193,84 @@
   return {targetReps:clamp(repMin+1,ex.min,ex.max),suggestedKg:kg,
    reason:'Retain load and progress repetitions before increasing weight.'};
  }
+
+ // Machine loading is individual to an athlete and machine, so NEVER infer
+ // a Hack Squat / Leg Extension load from barbell squat training max.
+ // Use only completed exercise-specific history, without changing that history.
+ function latestSquatAccessoryHistory(name,storage=global.localStorage){
+  try{
+   const raw=storage.getItem('spartx_db');
+   if(!raw||raw.length>12000000)return null;
+   const sessions=JSON.parse(raw)?.sessions;
+   if(!Array.isArray(sessions))return null;
+   const records=[];
+   for(const session of sessions.slice(0,600)){
+    for(const exercise of Array.isArray(session.exercises)?session.exercises:[]){
+     if(norm(exercise.name)!==norm(name))continue;
+     const sets=(exercise.sets||[]).filter(set=>set?.done===true&&
+      !/^(?:w|warm.?up)$/i.test(String(set.type||''))&&
+      Number.isFinite(Number(set.weight))&&Number(set.weight)>0&&
+      Number.isInteger(Number(set.reps))&&Number(set.reps)>0);
+     if(sets.length)records.push({sets,when:Date.parse(session.date)||0});
+    }
+   }
+   records.sort((a,b)=>b.when-a.when);
+   return records[0]||null;
+  }catch(_){return null}
+ }
+ function recommendSquatAccessory(item,week,storage=global.localStorage){
+  const first={targetReps:item.min,suggestedKg:null,
+   reason:'Select a comfortable first working weight on this machine. Log actual reps and RPE so SpartanX can prescribe the next session.'};
+  // Cable/core work stays athlete-selected; machine weights are only compared
+  // against the exact same exercise, not a different machine or squat 1RM.
+  if(!['Hack Squat','Leg Extension','45° Back Extension','Leg Press'].includes(item.name))
+   return first;
+  const history=latestSquatAccessoryHistory(item.name,storage);
+  if(!history)return first;
+  const sets=history.sets,weights=sets.map(s=>Number(s.weight));
+  const base=Math.min(...weights);
+  const sameLoad=weights.every(n=>Math.abs(n-base)<0.01);
+  const rpes=sets.map(s=>s.rpe===''||s.rpe==null?NaN:Number(s.rpe));
+  const reliable=rpes.every(n=>Number.isFinite(n)&&n>=1&&n<=10);
+  const achieved=sets.length>=2&&sets.every(s=>Number(s.reps)>=item.max);
+  const easy=reliable&&rpes.every(n=>n<=item.targetRpe);
+  const hard=reliable&&rpes.some(n=>n>=9);
+  const missed=sets.some(s=>Number(s.reps)<item.min);
+  const rounding=n=>Math.max(2.5,Math.round(n/2.5)*2.5);
+  // Taper weeks do not drive load increases. Reduced volume and modestly
+  // reduced load target lower fatigue, without editing any recorded set.
+  if(week>=4)return {targetReps:item.min,suggestedKg:rounding(base*(week===4?.95:.90)),
+   reason:'Reduced loading for the AscensionX taper. Adjust to the prescribed RPE on this machine.'};
+  if(hard||missed)return {targetReps:item.min,suggestedKg:rounding(base*.95),
+   reason:'Previous exposure was too demanding or missed the minimum reps. Suggest a small load reduction; athlete may override.'};
+  if(reliable&&achieved&&easy&&sameLoad){
+   const increment=item.name==='Hack Squat'||item.name==='Leg Press'?5:2.5;
+   return {targetReps:item.min,suggestedKg:rounding(base+increment),
+    reason:'Previous completed sets reached the top of the range at the target RPE. Suggest a small load increase; athlete may override.'};
+  }
+  return {targetReps:item.min,suggestedKg:rounding(base),
+   reason:reliable?'Hold the previous successful working load and progress repetitions within the target RPE.':
+    'Previous weight is known, but RPE was not fully logged. Hold the weight until enough intensity data is available.'};
+ }
+ // Squat strength is the priority: a knee-dominant compound immediately after
+ // the barbell squat, followed by rectus-femoris, posterior-chain and core work.
+ // During Weeks 4–5 sets/intensity taper; Week 6 has no accessories.
+ function squatAdaptivePlan(week,storage=global.localStorage){
+  if(week>=6)return [];
+  const prescriptions=[
+   {name:'Hack Squat',sets:week<=3?3:week===4?2:1,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
+   {name:'Leg Extension',sets:week<=4?2:1,min:12,max:15,targetRpe:week<=3?8:7},
+   {name:'45° Back Extension',sets:week<=3?2:1,min:10,max:12,targetRpe:7},
+   {name:'Pallof Press',sets:week<=4?2:1,min:10,max:15,targetRpe:7}
+  ];
+  return prescriptions.map(spec=>{
+   const base=itemFor(spec.name);
+   const item={...base,...spec,rir:10-spec.targetRpe,sourceLift:'Back Squat',week};
+   const loading=recommendSquatAccessory(item,week,storage);
+   return {...item,...loading,reason:loading.reason+' '+
+    (base.cue||'Contribute useful support volume without another heavy barbell squat.')};
+  });
+ }
  function dose(item,week,focus,main,cycleId,storage){
   // RDLs are a fixed Deadlift-day prescription, not a generic adaptive
   // exercise. Their sets, reps and target RPE must not drift with heuristics.
@@ -261,6 +341,7 @@
     .map(ex=>({...ex,sets:Math.min(3,ex.sets)}));
    return [fixedRdl,...tail];
   }
+  if(lift==='Back Squat')return squatAdaptivePlan(w,storage);
   const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift])
    .filter(item=>item.name!=='Romanian Deadlift');
   const cap=focus==='strength'?12:16;

@@ -99,15 +99,15 @@
  };
  const SUPPORT_ROLES={
   strength:{
-   upper:['Machine Chest Press','Iso-Lateral Row','Lateral Raise'],
+   upper:['Machine Chest Press','Iso-Lateral Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
    recovery:['Pallof Press','Seated Calf Raise','Cable Curl']
   },
   balanced:{
-   upper:['Incline Dumbbell Press','Iso-Lateral Row','Rear Delt Reverse Fly'],
+   upper:['Incline Dumbbell Press','Iso-Lateral Row','Rear Delt Reverse Fly','Triceps Pushdown (Bar)','Dumbbell Curl'],
    recovery:['Triceps Pushdown (Bar)','Seated Calf Raise','Pallof Press']
   },
   hypertrophy:{
-   upper:['Machine Chest Press','Seated Cable Row','Lateral Raise'],
+   upper:['Machine Chest Press','Seated Cable Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
    recovery:['Seated Leg Curl','Cable Curl','Seated Calf Raise']
   }
  };
@@ -379,9 +379,18 @@
   const role=supportIndex===0?'upper':'recovery';
   const candidates=pickItems(focus[role]||[]);
   return candidates.map(item=>dose(item,week,prefs.focus,'Support',c.id||null,storage))
-   .filter(Boolean).map(item=>role==='recovery'?
-    {...item,sets:Math.min(2,item.sets),reason:item.reason+
-     ' Brief low-fatigue support ahead of the next main-lift week.'}:item);
+   .filter(Boolean).map(item=>{
+    if(role==='recovery')return {...item,sets:Math.min(2,item.sets),reason:item.reason+
+     ' Brief low-fatigue support ahead of the next main-lift week.'};
+    // Day 4: controlled upper-body volume, including direct biceps and triceps
+    // without repeating a heavy squat/hinge before next week's main lifts.
+    const directArms=item.name==='Dumbbell Curl'||item.name==='Triceps Pushdown (Bar)';
+    const sets=Math.min(week<=3?3:2,item.sets);
+    const rir=directArms?(week<=3?3:4):item.rir;
+    return {...item,sets,rir,targetRpe:10-rir,
+     ...(directArms?{min:10,max:15,targetReps:10}:{}),
+     reason:item.reason+(directArms?' Direct arm work at controlled effort on Day 4.':'')};
+   });
  }
  function supportTitle(c,index,focus='strength'){
   const extra=index-c.lifts.length;
@@ -566,9 +575,9 @@
       '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
      '</select></div>',
     '</div>',
-    '<p class="sx-adaptive-rule">Standard weeks target four support sets where appropriate. Heavy weeks and high-fatigue movements use fewer sets; Week 6 has no accessory work.</p>',
-    '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details">',
-     '<summary>Preview your training days <span aria-hidden="true">⌄</span></summary>',
+    '<p class="sx-adaptive-rule">Squat and deadlift accessories follow their dedicated sequence. Day 4 includes direct biceps and triceps. Weeks 4–5 taper and Week 6 has no accessory work.</p>',
+    '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details" open>',
+     '<summary>YOUR TRAINING DAYS · LIVE PROGRAMME <span aria-hidden="true">⌄</span></summary>',
      '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
     '</details>',
    '</div>',
@@ -635,7 +644,7 @@
    }
    const recovery=document.createElement('p');
    recovery.className='sx-adaptive-preview-note';
-   recovery.textContent='Regular weeks: four working sets for suitable accessories. Weeks 4–5: usually three; high-fatigue and recovery-day work may have fewer. Week 6: no support work. Total weekly volume and overlap still matter.';
+   recovery.textContent='Current-week prescriptions shown above. Day 4 includes low-fatigue upper-body and arm work; Weeks 4–5 taper accessory sets; Week 6 is accessory-free. Completed sessions are never rewritten.';
    preview.appendChild(recovery);
   }
   card.sxRender=render;

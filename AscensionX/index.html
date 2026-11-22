@@ -626,6 +626,24 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 <link rel="stylesheet" href="./obsidian-clean.css?v=355">
 <script defer src="../assets/charts/touch-scrub.js?v=340"></script>
 
+
+<style id="sx-live-adaptive-cycle-view-style">
+.sx-cycle-adaptive-roster{margin:12px 0;padding:16px!important}
+.sx-cycle-adaptive-roster h3,.sx-cycle-adaptive-weekly h3{margin:0 0 10px;font-size:15px;letter-spacing:.02em;color:var(--text)}
+.sx-cycle-adaptive-roster>.tiny{margin:0 0 12px;color:var(--muted)}
+.sx-cycle-adaptive-roster-days{display:grid;gap:9px}
+.sx-cycle-adaptive-roster-day{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel2)}
+.sx-cycle-adaptive-roster-day>strong{display:block;font-size:12px;letter-spacing:.025em;color:var(--text);margin-bottom:7px}
+.sx-cycle-adaptive-roster-ex{font-size:12px;color:var(--muted);padding:3px 0;line-height:1.45}
+.sx-cycle-adaptive-weekly{margin-top:15px;border-top:1px solid var(--line);padding-top:12px}
+.sx-cycle-adaptive-weekly-row{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.sx-cycle-adaptive-weekly-row:last-child{border-bottom:0}
+.sx-cycle-adaptive-weekly-row strong{font-size:12px;color:var(--text)}
+.sx-cycle-adaptive-weekly-row span{font-size:12px;color:var(--muted);line-height:1.5}
+#sxCycleManageLiveSnapshot .sx-cycle-adaptive-roster{margin:0 0 14px;background:var(--panel2)}
+#sxCycleManageLiveSnapshot .sx-cycle-adaptive-roster-day{background:var(--panel)}
+@media(max-width:450px){.sx-cycle-adaptive-roster{padding:12px!important}}
+</style>
 </head>
 <body>
 <header>
@@ -690,6 +708,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
   <div class="cycle-editor-body" id="cycleEditorScroll">
 <div class="card" id="cycleBuilderCard">
  <div class="row between sx-cycle-setup-intro"><div><div class="eyebrow">SIX-WEEK STRENGTH CYCLE</div><p class="tiny">Set up your lifts, training maxes and supporting exercises. Every compound progresses on its own week counter.</p></div><span class="pill red">6 WEEKS</span></div>
+ <div id="sxCycleManageLiveSnapshot" aria-live="polite"></div>
   <div class="asc-cycle-strength-editor" id="cycleStrengthEditor" aria-label="Starting strength for your cycle">
     <div class="eyebrow">01 · STARTING STRENGTH</div>
     <p class="tiny sx-cycle-section-description">Select a compound lift and edit its 1RM. AscensionX automatically recalculates its Training Max.</p>
@@ -903,6 +922,72 @@ function renderAscRank(){const r=ascRankState();$('ascRankName').textContent=asc
 function prestigeAscRank(){const r=ascRankState();if(r.level!==5)return;if(!confirm('Prestige to level '+(r.prestige+1)+'? Your rank resets to Mortal, but your workouts and training history are preserved.'))return;state.prestige={level:r.prestige+1,xpOffset:r.total};persist();toast('Prestige '+(r.prestige+1)+' unlocked!')}
 
 
+// Live Adaptive Programming roster shared by View and Manage Cycle.
+// Read from the active cycle on every open, never a frozen creation snapshot.
+function sxBuildAdaptiveCycleRoster(){
+ const card=document.createElement('section');
+ card.className='card sx-cycle-adaptive-roster';
+ const heading=document.createElement('h3');
+ heading.textContent='YOUR TRAINING DAYS · ADAPTIVE SUPPORT';
+ card.appendChild(heading);
+ const api=window.SXAscensionAdaptive;
+ const prefs=state.cycle.created?api?.read?.(state.cycle.created):null;
+ const description=document.createElement('p');
+ description.className='tiny';
+ if(!state.cycle.created||!api||!prefs?.enabled){
+  description.textContent='Adaptive Programming is off. Enable it in Manage Cycle to see your current supporting exercises.';
+  card.appendChild(description);
+  return card;
+ }
+ const schedule=api.schedule?.();
+ if(!schedule?.valid){
+  description.textContent=schedule?.message||'Unable to load adaptive training days.';
+  card.appendChild(description);
+  return card;
+ }
+ description.textContent='Current-week prescriptions · Athlete-adjustable loads · Main-lift sets stay controlled by AscensionX.';
+ card.appendChild(description);
+ const days=document.createElement('div');
+ days.className='sx-cycle-adaptive-roster-days';
+ for(const [index,slot] of schedule.slots.entries()){
+  const day=document.createElement('div');
+  day.className='sx-cycle-adaptive-roster-day';
+  const title=document.createElement('strong');
+  title.textContent='DAY '+(index+1)+' · '+slot.day+' · '+(slot.lift||slot.title)+' · WEEK '+slot.week;
+  day.appendChild(title);
+  if(slot.lift){
+   const main=document.createElement('div');
+   main.className='sx-cycle-adaptive-roster-ex';
+   main.textContent='1. '+slot.lift+' · Main AscensionX lift';
+   day.appendChild(main);
+  }
+  if(!slot.exercises?.length){
+   const noWork=document.createElement('div');
+   noWork.className='sx-cycle-adaptive-roster-ex';
+   noWork.textContent='Recovery week · No additional accessories';
+   day.appendChild(noWork);
+  }else for(const [i,ex] of slot.exercises.entries()){
+   const row=document.createElement('div');
+   row.className='sx-cycle-adaptive-roster-ex';
+   const reps=ex.min===ex.max?String(ex.min):ex.min+'–'+ex.max;
+   const target=Number(ex.targetRpe)||(10-Number(ex.rir));
+   const load=ex.tmPercent?' · '+ex.tmPercent+'% deadlift TM':
+    Number(ex.suggestedKg)>0?' · Suggested '+kg(ex.suggestedKg):
+    ' · Athlete selects weight';
+   row.textContent=(slot.lift?i+2:i+1)+'. '+ex.name+' · '+ex.sets+' × '+reps+' · RPE '+target+load;
+   day.appendChild(row);
+  }
+  days.appendChild(day);
+ }
+ card.appendChild(days);
+ return card;
+}
+function sxRenderManageAdaptiveRoster(){
+ const mount=$('sxCycleManageLiveSnapshot');
+ if(mount)mount.replaceChildren(sxBuildAdaptiveCycleRoster());
+}
+window.renderSXCycleManageLiveSnapshot=sxRenderManageAdaptiveRoster;
+
 let sxCycleViewHomeParent=null,sxCycleViewHomeSibling=null,sxCycleViewCaller=null;
 function openSXWorkoutCycleView(){
  const backdrop=$('sxCycleViewBackdrop'),details=$('cycleDetails'),holder=$('sxCycleViewContent');
@@ -928,6 +1013,7 @@ function openSXWorkoutCycleView(){
   '<p class="sx-cycle-view-muted">'+active.map(lift=>lift+' · Week '+currentWeekFor(lift)).join(' · ')+'</p>';
  summary.querySelector('strong').textContent=title;
  holder.replaceChildren(summary);
+ holder.appendChild(sxBuildAdaptiveCycleRoster());
  holder.appendChild(details);
  details.hidden=false;
  document.body.classList.add('sx-asc-workout-view');
@@ -1903,6 +1989,7 @@ function renderCycle(){
  $('saveCycleSelectionBtn').textContent=state.cycle.created?'Save cycle changes':'Create six-week cycle';$('deleteCycleButton').hidden=!state.cycle.created;
  $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');
  renderCycleLoads();
+ sxRenderManageAdaptiveRoster();
 }
 function renderCycleLoads(){
  const lift=$('cycleLift').value,logs=activeCycleLogs().filter(log=>log.lift===lift);
@@ -1922,6 +2009,32 @@ function renderCycleLoads(){
  $('cycleLoads').innerHTML='<div style="overflow-x:auto"><table class="settable"><thead><tr><th>Week</th><th>TM</th><th>Main load</th><th>Back-off</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
   (adjustmentNote?'<p class="tiny" role="status" style="margin-top:10px">'+adjustmentNote+'</p>':'')+
   '<p class="tiny" style="margin-top:8px">Past records are shown as logged. Editing your 1RM or TM updates the template, not a completed workout. Future targets may be bridged from actual completed loads to avoid a sudden jump.</p>';
+ // The original View Cycle table only showed barbell loads. Display the
+ // selected lift's actual adaptive prescription for each of the six weeks.
+ const adaptive=window.SXAscensionAdaptive;
+ if(state.cycle.created&&adaptive?.read?.(state.cycle.created)?.enabled&&selectedLifts().includes(lift)){
+  const section=document.createElement('section');
+  section.className='sx-cycle-adaptive-weekly';
+  const title=document.createElement('h3');
+  title.textContent=lift+' · Six-week accessory roadmap';
+  section.appendChild(title);
+  for(const week of PLAN.map(p=>p.week)){
+   const exercises=adaptive.plan(lift,week);
+   const row=document.createElement('div');
+   row.className='sx-cycle-adaptive-weekly-row';
+   const weekTag=document.createElement('strong');
+   weekTag.textContent='W'+week;
+   const detail=document.createElement('span');
+   detail.textContent=exercises.length?exercises.map(ex=>
+    ex.name+' '+ex.sets+' × '+(ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+
+    ' @ RPE '+(Number(ex.targetRpe)||(10-ex.rir))+
+    (ex.tmPercent?' ('+ex.tmPercent+'% deadlift TM)':'')
+   ).join(' · '):'No accessories · recovery week';
+   row.append(weekTag,detail);
+   section.appendChild(row);
+  }
+  $('cycleLoads').appendChild(section);
+ }
 }
 function renderProgress(){
  const sets=state.logs.flatMap(l=>l.sets),volume=sets.reduce((a,s)=>a+s.weight*s.reps,0),bestW=Math.max(0,...sets.map(s=>s.weight)),bestE=Math.max(0,...state.logs.map(l=>e1rm(l.topWeight,l.topReps)));
@@ -2087,6 +2200,6 @@ init();
 </script>
 <script src="../assets/science/evidence-engine.js?v=2"></script>
 <script src="../assets/science/volume-intelligence.js?v=2"></script>
-<script src="../assets/ascension/adaptive-programming.js?v=369"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=390"></script>
 </body>
 </html>

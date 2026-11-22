@@ -396,10 +396,13 @@
     for(const ex of Array.isArray(session.exercises)?session.exercises:[]){
      const link=ex?.ascensionLink;
      if(link?.cycleId!==c.id)continue;
-     const hard=(ex.sets||[]).some(set=>set?.done===true&&
+     const hardSets=(ex.sets||[]).filter(set=>set?.done===true&&
       String(set.type||'Working Set')==='Working Set'&&
       set.rpe!==''&&set.rpe!==null&&Number(set.rpe)>=9);
-     if(hard){
+     // One RPE 9 top set is common during strength weeks. Treat two hard
+     // sets, or one RPE 9.5+ set, as a stronger signal to protect recovery.
+     const strained=hardSets.length>=2||hardSets.some(set=>Number(set.rpe)>=9.5);
+     if(strained){
       if(['Back Squat','Deadlift'].includes(link.lift))result.lower=true;
       if(['Bench Press','Overhead Press'].includes(link.lift))result.upper=true;
      }

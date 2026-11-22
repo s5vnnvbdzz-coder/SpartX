@@ -415,11 +415,13 @@ button.sx-prestige-inline.sx-prestige-trigger{
  --sx-prestige-metal:#dac5ff;--sx-prestige-shadow:rgba(189,147,255,.37);
 }
 
-/* Rank Progression uses the exact same laurel art and layout as the
- * gaming Workout Feed card, without its old wide text banner. */
+/* Match Rank Progression's Prestige tile to the Workout Feed profile-card tile.
+ * Both badges use spartanxPrestigeTileInner() and the same prestige-band tokens.
+ * Keep only the layout placement distinct; artwork, padding, edge and text match.
+ */
 #homeRankProgression .rank-current-row.has-prestige-tile{
  display:grid;
- grid-template-columns:76px minmax(0,1fr) 65px;
+ grid-template-columns:76px minmax(0,1fr) 56px;
  gap:11px;
  align-items:center;
 }
@@ -437,25 +439,26 @@ button.sx-prestige-inline.sx-prestige-trigger{
  font-size:clamp(15px,4.2vw,22px);
  line-height:1.2;
 }
+/* Same 56px compact tile, metallic outline, gradient and radii as profile. */
 #homeRankProgression #rankPrestigeMark.sx-gamer-prestige.sx-prestige-trigger{
  display:grid!important;
  justify-items:center!important;
  align-content:center!important;
  gap:0!important;
- width:65px!important;
- min-width:0!important;
- max-width:65px!important;
+ width:56px!important;
+ min-width:56px!important;
+ max-width:56px!important;
  height:auto!important;
- min-height:85px!important;
+ min-height:0!important;
  margin:0!important;
- padding:7px 5px 6px!important;
+ padding:6px 5px!important;
  box-sizing:border-box!important;
  -webkit-appearance:none!important;
  appearance:none!important;
- border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 58%,var(--line))!important;
- border-radius:11px!important;
- background:linear-gradient(150deg,var(--sx-prestige-shadow),transparent 80%)!important;
- box-shadow:inset 0 1px 0 #ffffff0d!important;
+ border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 65%,transparent)!important;
+ border-radius:10px!important;
+ background:linear-gradient(150deg,var(--sx-prestige-shadow),transparent 85%)!important;
+ box-shadow:none!important;
  color:var(--sx-prestige-metal)!important;
  cursor:pointer;
  text-align:center!important;
@@ -474,12 +477,12 @@ button.sx-prestige-inline.sx-prestige-trigger{
  font-size:8px!important;
  line-height:1.25!important;
  letter-spacing:1px!important;
- font-weight:500!important;
+ font-weight:400!important;
  color:var(--sx-prestige-metal)!important;
 }
 #homeRankProgression #rankPrestigeMark b{
  display:block;
- font-size:22px!important;
+ font-size:20px!important;
  line-height:1.13!important;
  font-weight:900!important;
  color:var(--sx-prestige-metal)!important;
@@ -488,10 +491,10 @@ button.sx-prestige-inline.sx-prestige-trigger{
 #homeRankProgression #rankPrestigeMark .sx-prestige-tier-name{
  display:block;
  margin:0;
- font-size:8px!important;
+ font-size:7px!important;
  font-weight:900!important;
  line-height:1.3!important;
- letter-spacing:.7px!important;
+ letter-spacing:.8px!important;
  text-transform:uppercase;
  color:var(--sx-prestige-metal)!important;
 }
@@ -500,22 +503,7 @@ button.sx-prestige-inline.sx-prestige-trigger{
  outline:2px solid var(--sx-prestige-metal)!important;
  outline-offset:3px!important;
 }
-@media(max-width:380px){
- #homeRankProgression .rank-current-row.has-prestige-tile{
-  grid-template-columns:60px minmax(0,1fr) 57px;
-  gap:7px;
- }
- #homeRankProgression .rank-current-row.has-prestige-tile > img{
-  width:60px;
-  height:67px;
-  padding:5px;
- }
- #homeRankProgression #rankPrestigeMark.sx-gamer-prestige.sx-prestige-trigger{
-  width:57px!important;
-  max-width:57px!important;
-  min-height:78px!important;
-  padding:5px 3px!important;
- }
+@media(max-width:390px){
  #homeRankProgression #rankPrestigeMark .sx-prestige-laurel{
   width:26px;
   height:19px;
@@ -523,10 +511,29 @@ button.sx-prestige-inline.sx-prestige-trigger{
  #homeRankProgression #rankPrestigeMark .sx-prestige-label{
   font-size:7px!important;
  }
- #homeRankProgression #rankPrestigeMark b{
-  font-size:20px!important;
+}
+@media(max-width:380px){
+ #homeRankProgression .rank-current-row.has-prestige-tile{
+  grid-template-columns:60px minmax(0,1fr) 56px;
+  gap:7px;
+ }
+ #homeRankProgression .rank-current-row.has-prestige-tile > img{
+  width:60px;
+  height:67px;
+  padding:5px;
  }
  #homeRankProgression .rank-current-row.has-prestige-tile .rank-current-copy strong{
   font-size:clamp(13px,4vw,16px);
+ }
+}
+@media(max-width:355px){
+ #homeRankProgression .rank-current-row.has-prestige-tile{
+  grid-template-columns:60px minmax(0,1fr) 50px;
+ }
+ #homeRankProgression #rankPrestigeMark.sx-gamer-prestige.sx-prestige-trigger{
+  width:50px!important;
+  min-width:50px!important;
+  max-width:50px!important;
+  padding-inline:3px!important;
  }
 }

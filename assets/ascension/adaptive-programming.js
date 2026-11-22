@@ -74,8 +74,8 @@
  };
  const pickItems=names=>names.map(itemFor);
  const FOCUS_LIFTS={
-  // Strength: modest accessories that support the main lifts without another
-  // high-load hinge after deadlifts.
+  // Strength: modest support for the main lifts. Deadlift-day exercise order
+  // is handled separately by its dedicated adaptive prescription.
   strength:{
    'Back Squat':['Leg Extension','Seated Leg Curl','45° Back Extension','Standing Calf Raise','Pallof Press'],
    'Bench Press':['Iso-Lateral Row','Triceps Pushdown (Bar)','Hanging Knee Raise','Rear Delt Reverse Fly','Lat Pulldown'],
@@ -250,10 +250,21 @@
    targetReps:8,tmPercent:45,sourceLift:lift,week:w,
    reason:'3 × 8 at target RPE 7, using 45% of the current deadlift training max. Adjust load down if RPE exceeds 7.'
   }:null;
+  // Deadlift-day Adaptive Support has a fixed exercise ORDER, independent
+  // of the strength/balanced/hypertrophy focus. The final two accessories
+  // retain Adaptive Programming's dose and RPE recommendation rules.
+  // Reserve their three-set normal-week baseline before applying taper logic.
+  if(lift==='Deadlift'){
+   if(!fixedRdl)return [];
+   const tail=['Lat Pulldown','Seated Leg Curl'].map(name=>
+    dose(itemFor(name),w,focus,lift,cycleId,storage)).filter(Boolean)
+    .map(ex=>({...ex,sets:Math.min(3,ex.sets)}));
+   return [fixedRdl,...tail];
+  }
   const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift])
    .filter(item=>item.name!=='Romanian Deadlift');
-  const cap=lift==='Deadlift'?8:focus==='strength'?12:16;
-  const maxExercises=lift==='Deadlift'?(focus==='hypertrophy'?3:2):focus==='strength'?3:4;
+  const cap=focus==='strength'?12:16;
+  const maxExercises=focus==='strength'?3:4;
   const prescribed=candidates.map(item=>dose(item,w,focus,lift,cycleId,storage)).filter(Boolean);
   const pinnedName=focus==='strength'?PINNED[lift]:null;
   const pinnedSets=prescribed.find(ex=>ex.name===pinnedName)?.sets||0;

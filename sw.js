@@ -1,6 +1,6 @@
 /* SpartanX PWA — lightweight install so iOS is not blocked by any optional
    image/theme/tool asset. All successfully fetched files are cached on use. */
-const CACHE='spartanx-v390';
+const CACHE='spartanx-v391';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE)

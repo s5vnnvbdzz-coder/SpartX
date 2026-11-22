@@ -174,11 +174,13 @@ body.sx-asc-workout-manage #cycleEditorBackdrop #cycleExerciseOptions{
  display:flex;align-items:center;justify-content:space-between;gap:12px;
 }
 #sxAscAdaptiveCard .sx-adaptive-details[open] summary{border-bottom:1px solid var(--line)}
-#sxAscAdaptiveCard .sx-adaptive-preview{padding:3px 13px 12px;font-size:11px;line-height:1.6;}
+#sxAscAdaptiveCard .sx-adaptive-preview{padding:5px 13px 12px;font-size:13px;line-height:1.55;}
 #sxAscAdaptiveCard .sx-adaptive-preview-day{padding:10px 0;border-bottom:1px solid var(--line)}
 #sxAscAdaptiveCard .sx-adaptive-preview-day:last-child{border:0}
-#sxAscAdaptiveCard .sx-adaptive-preview-day strong{display:block;margin-bottom:3px;color:var(--text)}
+#sxAscAdaptiveCard .sx-adaptive-preview-day strong{display:block;margin-bottom:7px;color:var(--text);font-size:13px}
 #sxAscAdaptiveCard .sx-adaptive-preview-day div{color:var(--muted)}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercises{display:grid;gap:5px}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercise{line-height:1.5;font-size:12.5px}
 #sxAscAdaptiveCard .sx-adaptive-preview-note{margin:9px 0 4px;color:var(--muted)}
 #sxAscAdaptiveCard .sx-adaptive-status{
  margin:9px 0 0;font-size:11px;line-height:1.45;color:var(--red2);

@@ -232,7 +232,9 @@
   const sameLoad=weights.every(n=>Math.abs(n-base)<0.01);
   const rpes=sets.map(s=>s.rpe===''||s.rpe==null?NaN:Number(s.rpe));
   const reliable=rpes.every(n=>Number.isFinite(n)&&n>=1&&n<=10);
-  const achieved=sets.length>=2&&sets.every(s=>Number(s.reps)>=item.max);
+  // Do not award a progression for a partially completed 3-set hack squat.
+  const requiredSets=item.name==='Hack Squat'?3:2;
+  const achieved=sets.length>=requiredSets&&sets.every(s=>Number(s.reps)>=item.max);
   const easy=reliable&&rpes.every(n=>n<=item.targetRpe);
   const hard=reliable&&rpes.some(n=>n>=9);
   const missed=sets.some(s=>Number(s.reps)<item.min);
@@ -624,7 +626,9 @@
     const details=document.createElement('div');
     details.textContent=slot.exercises.length?
      slot.exercises.map(ex=>ex.name+' · '+ex.sets+' × '+(ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+
-      (ex.tmPercent?' · RPE '+ex.targetRpe+' · '+ex.tmPercent+'% deadlift TM':'')).join(' · '):
+      (ex.tmPercent?' · RPE '+ex.targetRpe+' · '+ex.tmPercent+'% deadlift TM':
+       ex.sourceLift==='Back Squat'?' · RPE '+ex.targetRpe+
+        (Number(ex.suggestedKg)>0?' · suggested '+ex.suggestedKg+' kg':' · athlete chooses weight'):'')).join(' · '):
      'No additional assistance prescribed';
     box.appendChild(details);
     preview.appendChild(box);

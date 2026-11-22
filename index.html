@@ -5321,15 +5321,71 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/bodybuilding/ascension-companion.js?v=384"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){
- // Only the on-device active workout is updated, never historical sessions.
- // Repair the manual row replacement and apply programme-specific exercise changes.
+ // Only the on-device ACTIVE draft is eligible. Never touch saved workout
+ // history, completed imported sessions or manually edited exercise sets.
  if(!sessionActive||editingSessionId!==null)return;
  const helper=window.SpartanXExerciseReplacement;
  const restored=helper?.repairActiveIsoLateralRows(work,window.SXAscensionAdaptive)||0;
  const renamed=helper?.renameActiveAscensionPushdowns(work,window.SXAscensionAdaptive)||0;
  const rearDelts=helper?.renameActiveAscensionRearDelts(work,window.SXAscensionAdaptive)||0;
  const refreshed=helper?.refreshUntouchedAdaptiveSets(work,window.SXAscensionAdaptive)||0;
- if(restored||renamed||rearDelts||refreshed){renderWork();updateMinimizedSession();saveDraft();}
+ // v386: Older active AscensionX deadlift drafts are snapshots, so a change
+ // to the Adaptive Programming template would otherwise never appear there.
+ // Sync ONCE to avoid re-adding an accessory the athlete later removes.
+ function reconcileActiveDeadliftDraft(){
+  const adaptive=window.SXAscensionAdaptive;
+  const companion=window.SXAscensionCompanion;
+  if(!adaptive?.activeCycle||!adaptive?.enabled||!companion?.forImport)return false;
+  const cycle=adaptive.activeCycle();
+  if(!cycle?.id||!adaptive.enabled(cycle.id)||!cycle.lifts?.includes('Deadlift'))return false;
+  const old=work.slice();
+  const main=old.find(ex=>ex?.ascensionLink?.lift==='Deadlift'&&
+   ex.ascensionLink?.cycleId===cycle.id&&
+   Number.isInteger(Number(ex.ascensionLink?.week))&&
+   Number(ex.ascensionLink.week)>=1&&Number(ex.ascensionLink.week)<=5);
+  if(!main||main.ascensionLink.supportSyncVersion>=386)return false;
+  const link=main.ascensionLink;
+  const details={source:'AscensionX',exercise:'Deadlift',
+   cycleId:cycle.id,week:Number(link.week),tm:link.importedTm};
+  let planned;
+  try{planned=companion.forImport(details,[])}catch(_){return false}
+  const names=['Romanian Deadlift','Lat Pulldown','Seated Leg Curl'];
+  if(!Array.isArray(planned)||!names.every(name=>planned.some(ex=>ex.name===name)))return false;
+  const normalized=name=>String(name||'').trim().toLowerCase();
+  const seen=new Set([main]);
+  const ordered=[];
+  for(const name of names){
+   // Preserve any already entered/completed exercise and its exact sets,
+   // notes, loads and RPE. New prescriptions alone receive default values.
+   const existing=old.find(ex=>!seen.has(ex)&&normalized(ex.name)===normalized(name)&&
+    (!ex.ascensionLink&&!ex.bodybuildingLink&&!ex.sxPowerbuildingSupport)&&
+    (!ex.sxStrengthSizeCompanion||
+      (ex.sxStrengthSizeCompanion.cycleId===cycle.id&&
+       Number(ex.sxStrengthSizeCompanion.week)===Number(link.week))));
+   const item=existing||planned.find(ex=>ex.name===name);
+   if(!item)return false;
+   seen.add(item);
+   ordered.push(item);
+  }
+  const mainAt=old.indexOf(main);
+  const remaining=old.filter((ex,index)=>index!==mainAt&&!ordered.includes(ex));
+  const before=remaining.filter(ex=>old.indexOf(ex)<mainAt);
+  const after=remaining.filter(ex=>old.indexOf(ex)>mainAt);
+  const next=[...before,main,...ordered,...after];
+  const changed=next.length!==old.length||next.some((ex,i)=>old[i]!==ex);
+  link.supportSyncVersion=386;
+  if(changed){
+   work.splice(0,work.length,...next);
+   // Keep running rest countdowns and their superset targets correctly
+   // attached to the original exercise when indices change.
+   remapActiveExerciseTimer(next.map(ex=>old.indexOf(ex)));
+  }
+  return true; // The marker itself also needs saving.
+ }
+ const migrated=reconcileActiveDeadliftDraft();
+ if(restored||renamed||rearDelts||refreshed||migrated){
+  renderWork();updateMinimizedSession();saveDraft();
+ }
 })();
 </script>
 <script src="./assets/bodybuilding/programme-model.js?v=5"></script>

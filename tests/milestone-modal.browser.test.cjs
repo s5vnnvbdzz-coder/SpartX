@@ -19,7 +19,7 @@ const {chromium}=require('playwright');
   });
   await page.locator('#trackerNav [data-screen="profile"]').click();
   const details=page.locator('#profile .sx-profile-details');
-  await details.locator('summary').click();
+  await details.locator(':scope > summary').click();
   const opener=page.locator('#sxOpenMilestoneProgression');
   await opener.waitFor({state:'visible'});
   for(const width of [320,375,390,430,768]){

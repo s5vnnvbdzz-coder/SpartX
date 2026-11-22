@@ -8,6 +8,10 @@ on:
       - 'assets/ranks/prestige-showcase.js'
       - 'assets/ranks/prestige-showcase.test.cjs'
       - 'assets/ranks/prestige-visuals.css'
+      - 'assets/ranks/milestone-engine.js'
+      - 'assets/ranks/milestone-engine.test.cjs'
+      - 'assets/ranks/milestone-modal.js'
+      - 'assets/ranks/milestone-modal.css'
       - 'assets/profile/profile-preview-parity.js'
       - 'index.html'
       - '.github/workflows/xp-prestige-checks.yml'
@@ -18,6 +22,10 @@ on:
       - 'assets/ranks/prestige-showcase.js'
       - 'assets/ranks/prestige-showcase.test.cjs'
       - 'assets/ranks/prestige-visuals.css'
+      - 'assets/ranks/milestone-engine.js'
+      - 'assets/ranks/milestone-engine.test.cjs'
+      - 'assets/ranks/milestone-modal.js'
+      - 'assets/ranks/milestone-modal.css'
       - 'assets/profile/profile-preview-parity.js'
       - 'index.html'
       - '.github/workflows/xp-prestige-checks.yml'
@@ -35,7 +43,11 @@ jobs:
         run: |
           node --check assets/ranks/xp-engine.js
           node --check assets/ranks/prestige-showcase.js
+          node --check assets/ranks/milestone-engine.js
+          node --check assets/ranks/milestone-modal.js
       - name: Test rank XP, lifetime insignias and badge permanence
         run: node assets/ranks/xp-engine.test.cjs
       - name: Test Showcase and laurel unlock celebration
         run: node assets/ranks/prestige-showcase.test.cjs
+      - name: Test lifetime milestone progress and cycle verification
+        run: node assets/ranks/milestone-engine.test.cjs

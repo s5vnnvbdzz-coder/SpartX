@@ -384,15 +384,15 @@ function assistCase(lifts,days,week=2){
  return x;
 }
 const upperCase=assistCase(['Back Squat','Bench Press','Deadlift'],4,5);
-assert.equal(upperCase.api.schedule().slots[3].title,'Upper Assistance - Week 5)');
+assert.equal(upperCase.api.schedule().slots[3].title,'Upper Assistance - Week 5');
 assert.ok(upperCase.api.schedule().slots[3].exercises.some(e=>e.name==='Dumbbell Curl'));
 assert.ok(upperCase.api.schedule().slots[3].exercises.some(e=>e.name==='Triceps Pushdown (Bar)'));
 const lowerCase=assistCase(['Back Squat','Bench Press','Overhead Press'],4);
-assert.equal(lowerCase.api.schedule().slots[3].title,'Lower Assistance - Week 2)');
+assert.equal(lowerCase.api.schedule().slots[3].title,'Lower Assistance - Week 2');
 assert.ok(lowerCase.api.schedule().slots[3].exercises.every(e=>
  !['Hack Squat','Leg Press','Romanian Deadlift'].includes(e.name)));
 const balancedCase=assistCase(['Back Squat','Bench Press','Deadlift','Overhead Press'],5);
-assert.equal(balancedCase.api.schedule().slots[4].title,'Balanced Assistance - Week 2)');
+assert.equal(balancedCase.api.schedule().slots[4].title,'Balanced Assistance - Week 2');
 assert.ok(balancedCase.api.schedule().slots[4].exercises.every(e=>e.sets<=2));
 assert.equal(assistCase(['Back Squat','Bench Press','Deadlift'],3).api.schedule().slots.length,3);
 const twoAssist=boot({'ascensionx_strength_v1':nextWeekCycle});
@@ -408,7 +408,7 @@ twoAssist.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
  date:new Date().toISOString(),exercises:satDone
 }]}));
 assert.equal(twoAssist.api.pendingSupportDay()?.day,'SUN');
-assert.equal(twoAssist.api.pendingSupportDay()?.title,'Balanced Assistance - Week 2)');
+assert.equal(twoAssist.api.pendingSupportDay()?.title,'Balanced Assistance - Week 2');
 assert.equal(twoAssist.api.schedule().slots.find(slot=>slot.day==='SUN').week,2);
 const fatigueCase=assistCase(['Back Squat','Bench Press','Deadlift'],4);
 const stress=count=>JSON.stringify({sessions:[{date:new Date().toISOString(),

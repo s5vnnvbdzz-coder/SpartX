@@ -70,8 +70,8 @@
   overlay.innerHTML='<section class="sx-milestone-dialog" role="dialog" aria-modal="true" aria-labelledby="sxMilestoneTitle" tabindex="-1">'+
    '<div class="sx-milestone-toolbar"><span>SPARTANX · LIFETIME ACHIEVEMENTS</span>'+
    '<button type="button" class="sx-milestone-close" data-close-milestones aria-label="Close Milestone Progression">✕</button></div>'+
-   '<header class="sx-milestone-heading"><h2 id="sxMilestoneTitle">Milestone Progression</h2>'+
-   '<p>Earn achievement badges through consistent training. Prestige never resets these milestones.</p></header>'+
+   '<div class="sx-milestone-heading"><h2 id="sxMilestoneTitle">Milestone Progression</h2>'+
+   '<p>Earn achievement badges through consistent training. Prestige never resets these milestones.</p></div>'+
    '<div class="sx-milestone-overview" id="sxMilestoneOverview"></div>'+
    '<div class="sx-milestone-collection" id="sxMilestoneCollection"></div>'+
    '<p class="sx-milestone-note">Figures come from saved workouts and verified completed AscensionX cycles. Unlocked achievement tiers are retained on this device.</p>'+

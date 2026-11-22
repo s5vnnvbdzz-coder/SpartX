@@ -454,7 +454,7 @@ for(const focus of ['strength','balanced','hypertrophy']){
 }
 assert.ok(ascHtml.includes("i===0?'Top Set':'Back down '+i"),
  'Working-set preview labels Top Set and numbered Back down sets');
-assert.ok(ascHtml.includes("'W'+(i+1)+' · '"),
+assert.ok(ascHtml.includes("W'+(i+1)+' · '"),
  'Warm-up preview labels W1 through W4 individually');
 assert.ok(ascHtml.includes('asc-spartan-set-line'),
  'Warm-up and working sets are placed on separate rows');

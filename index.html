@@ -3957,8 +3957,16 @@ function ensureAscensionStrengthSizeCompanions(d){
  if(!extras.length)return 0;
  const inserted=[];
  for(const exercise of extras){
-  if(work.some(ex=>String(ex.name||'').trim().toLowerCase()===exercise.name.toLowerCase()))continue;
-  work.push(exercise);inserted.push(exercise.name);
+  const normalized=String(exercise.name||'').trim().toLowerCase();
+  if(work.some(ex=>String(ex.name||'').trim().toLowerCase()===normalized))continue;
+  // The fixed RDL must be the next EXERCISE after the AscensionX main
+  // deadlift, including when a workout already contains other accessories.
+  const primaryIndex=exercise.sxStrengthSizeCompanion?.fixedDeadliftRdl?
+    work.findIndex(ex=>ex.ascensionLink?.cycleId===d.cycleId&&
+      ex.ascensionLink?.lift===d.exercise&&Number(ex.ascensionLink.week)===Number(d.week)):-1;
+  if(primaryIndex>=0)work.splice(primaryIndex+1,0,exercise);
+  else work.push(exercise);
+  inserted.push(exercise.name);
  }
  return inserted.length;
 }
@@ -5302,8 +5310,8 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/science/evidence-engine.js?v=2"></script>
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=369"></script>
-<script src="./assets/bodybuilding/ascension-companion.js?v=345"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=384"></script>
+<script src="./assets/bodybuilding/ascension-companion.js?v=384"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){
  // Only the on-device active workout is updated, never historical sessions.

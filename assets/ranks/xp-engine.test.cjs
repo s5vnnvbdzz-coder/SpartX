@@ -150,10 +150,16 @@ assert(style.includes('[data-sx-prestige-band="platinum"]'),
  'The fourth laurel receives its own visual finish');
 assert(style.includes('[data-sx-prestige-band="apotheosis"]'),
  'The sixth laurel receives a unique white-gold finish');
-assert(root.includes("const next=window.SpartanXXP.LAUREL_TIERS.find(t=>t.start>state.prestige)"),
- 'Home profile shows progress towards the next lifetime laurel');
+assert(!root.includes("const next=window.SpartanXXP.LAUREL_TIERS.find(t=>t.start>state.prestige)"),
+ 'Next-laurel details move out of the compact Rank Progression tile and remain in Prestige Showcase');
 assert(root.includes("sx-prestige-tier-name"),
  'Feed cards show the unlocked laurel stage, not just a number');
+assert(root.includes('spartanxPrestigeTileInner(prestige)'),
+ 'Rank Progression and Workout Feed reuse the same prestige visual markup');
+assert(root.includes('rankPrestigeMark')&&root.includes("prestigeMark.innerHTML=state.prestige?spartanxPrestigeTileInner(state.prestige):''"),
+ 'The wide Rank Progression prestige text is replaced by the compact laurel');
+assert(!root.includes('LAUREL\'+(next?'),
+ 'The long next-laurel banner no longer appears inside the rank panel');
 assert(root.includes('data-open-prestige-showcase'),
  'Prestige container is clickable');
 assert(root.includes('SpartanXPrestigeShowcase?.celebrate?.(state)'),

@@ -945,20 +945,19 @@ function sxBuildAdaptiveCycleRoster(){
   card.appendChild(description);
   return card;
  }
- description.textContent='Current-week prescriptions · Athlete-adjustable loads · Main-lift sets stay controlled by AscensionX.';
- card.appendChild(description);
+ // The roster is intentionally concise. Loading details live in the workout logger.
  const days=document.createElement('div');
  days.className='sx-cycle-adaptive-roster-days';
  for(const [index,slot] of schedule.slots.entries()){
   const day=document.createElement('div');
   day.className='sx-cycle-adaptive-roster-day';
   const title=document.createElement('strong');
-  title.textContent='DAY '+(index+1)+' · '+slot.day+' · '+(slot.lift||slot.title)+' · WEEK '+slot.week;
+  title.textContent=slot.kind==='support'?slot.title:slot.day+' · '+slot.lift+' (Week '+slot.week+')';
   day.appendChild(title);
   if(slot.lift){
    const main=document.createElement('div');
    main.className='sx-cycle-adaptive-roster-ex';
-   main.textContent='1. '+slot.lift+' · Main AscensionX lift';
+   main.textContent=slot.lift+' · Main lift';
    day.appendChild(main);
   }
   if(!slot.exercises?.length){
@@ -966,15 +965,11 @@ function sxBuildAdaptiveCycleRoster(){
    noWork.className='sx-cycle-adaptive-roster-ex';
    noWork.textContent='Recovery week · No additional accessories';
    day.appendChild(noWork);
-  }else for(const [i,ex] of slot.exercises.entries()){
+  }else for(const ex of slot.exercises){
    const row=document.createElement('div');
    row.className='sx-cycle-adaptive-roster-ex';
    const reps=ex.min===ex.max?String(ex.min):ex.min+'–'+ex.max;
-   const target=Number(ex.targetRpe)||(10-Number(ex.rir));
-   const load=ex.tmPercent?' · '+ex.tmPercent+'% deadlift TM':
-    Number(ex.suggestedKg)>0?' · Suggested '+kg(ex.suggestedKg):
-    ' · Athlete selects weight';
-   row.textContent=(slot.lift?i+2:i+1)+'. '+ex.name+' · '+ex.sets+' × '+reps+' · RPE '+target+load;
+   row.textContent=ex.name+' '+ex.sets+' × '+reps+' - RPE '+(ex.targetRpe??(10-ex.rir));
    day.appendChild(row);
   }
   days.appendChild(day);
@@ -1485,7 +1480,7 @@ window.addEventListener('message',e=>{
  if(e.data?.type==='spartx:ascensionHostPreviewRequest'&&ascensionEmbeddedBySpartanX){
   const lifts=state.cycle.created?selectedLifts():[];
   const support=window.SXAscensionAdaptive?.enabled(state.cycle.created)?
-    window.SXAscensionAdaptive.schedule()?.slots?.find(x=>x.kind==='support'&&x.exercises.length):null;
+    nextAscensionSupportSlot():null;
   const choice=e.data.lift;
   const pendingSupport=window.SXAscensionAdaptive?.pendingSupportDay?.();
   const preferred=choice==='__ADAPTIVE_SUPPORT__'&&support?choice:
@@ -1497,13 +1492,13 @@ window.addEventListener('message',e=>{
    return;
   }
   picker.innerHTML=lifts.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
-  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+' · '+support.day+'</option>');
+  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+'</option>');
   picker.value=preferred;
   renderAscSpartanImportPreview();
   window.parent.postMessage({
    type:'spartx:ascensionHostPreview',ready:true,
    lifts:[...lifts.map(lift=>({lift,week:currentWeekFor(lift)})),
-    ...(support?[{lift:'__ADAPTIVE_SUPPORT__',week:support.week,label:support.title+' · '+support.day}]:[])],
+    ...(support?[{lift:'__ADAPTIVE_SUPPORT__',week:support.week,label:support.title}]:[])],
    selectedLift:preferred,
    previewHtml:panel.innerHTML
   },location.origin);
@@ -1600,8 +1595,8 @@ function continueAscensionTraining(){
  picker.innerHTML=choices.map(lift=>'<option value="'+lift+'">'+lift+' · Week '+currentWeekFor(lift)+'</option>').join('');
  // The adaptive fourth day uses the same Continue → Load workflow, but does not advance the primary lifts.
  if(adaptive?.enabled(state.cycle.created)){
-  const support=adaptive.schedule()?.slots?.find(slot=>slot.kind==='support'&&slot.exercises.length);
-  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+' · '+support.day+'</option>');
+  const support=nextAscensionSupportSlot();
+  if(support)picker.insertAdjacentHTML('beforeend','<option value="__ADAPTIVE_SUPPORT__">'+support.title+'</option>');
  }
  picker.value=[...picker.options].some(option=>option.value===preferred)?preferred:choices[0];
  renderAscSpartanImportPreview();
@@ -1644,15 +1639,27 @@ function buildAscSpartanWorkout(lift){
    nominalTop:info.loadGuard.nominalTop,adjustedTop:info.topLoad
   }:null};
 }
+// In a five-day cycle two distinct assistance sessions may be due. Resolve
+// the next INCOMPLETE slot, not the first support slot in the timetable.
+function nextAscensionSupportSlot(){
+ const api=window.SXAscensionAdaptive;
+ const slots=api?.schedule?.()?.slots?.filter(slot=>slot.kind==='support'&&slot.exercises?.length)||[];
+ const pending=api?.pendingSupportDay?.();
+ return slots.find(slot=>pending&&slot.day===pending.day&&slot.week===pending.week)||
+  slots[0]||null;
+}
+function sxCompactSupportText(ex){
+ const reps=ex.min===ex.max?String(ex.min):ex.min+'–'+ex.max;
+ return ex.name+' '+ex.sets+' × '+reps+' - RPE '+(ex.targetRpe??(10-ex.rir));
+}
 function renderAscSpartanImportPreview(){
  if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
-  const support=window.SXAscensionAdaptive?.schedule()?.slots?.find(slot=>slot.kind==='support'&&slot.exercises.length);
+  const support=nextAscensionSupportSlot();
   const panel=$('ascSpartanImportPreview');
   if(!support){panel.textContent='No support training day is available this week.';return}
-  panel.innerHTML='<strong>'+support.title+' · '+support.day+'</strong>'+
-   '<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+support.exercises.length+' EXERCISES</span>'+
-   support.exercises.map(ex=>'<div>'+ex.name+' · '+ex.sets+' × '+ex.min+'–'+ex.max+' · '+ex.rir+' RIR</div>').join('')+
-   '<p class="tiny">All sets start unchecked. This day supports the strength cycle and does not advance any main lift.</p>';
+  panel.innerHTML='<strong>'+support.title+'</strong>'+
+   '<span class="asc-spartan-import-label">ADAPTIVE SUPPORT</span>'+
+   support.exercises.map(ex=>'<div>'+sxCompactSupportText(ex)+'</div>').join('');
   return;
  }
  const prescription=buildAscSpartanWorkout($('ascSpartanImportLift').value);
@@ -1661,7 +1668,7 @@ function renderAscSpartanImportPreview(){
  const warmup=prescription.warmupSets.map((x,i)=>'W'+(i+1)+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
  const main=prescription.sets.map((x,i)=>(i===0?'Main '+(i+1):'Set '+(i+1))+' · '+kg(x.weight)+' × '+x.reps).join(' · ');
  const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
- const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT · '+adaptive.length+' EXERCISES</span>'+adaptive.map(x=>'<div>'+x.name+' · '+x.sets+' × '+x.min+'–'+x.max+' · '+x.rir+' RIR</div>').join(''):'';
+ const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT</span>'+adaptive.map(x=>'<div>'+sxCompactSupportText(x)+'</div>').join(''):'';
  const guardInfo=prescribed(prescription.exercise,prescription.week);
  const bridgeNote=guardInfo.loadGuard?'<div class="tiny" role="status" style="margin:9px 0;color:var(--red2)">'+loadGuardSummary(guardInfo)+'</div>':'';
  panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong>'+bridgeNote+'<span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span><div>'+warmup+'</div><span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span><div>'+main+'</div>'+support;
@@ -1670,7 +1677,7 @@ function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;
  if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
   const support=window.SXAscensionAdaptive?.schedule();
-  const slot=support?.slots?.find(x=>x.kind==='support'&&x.exercises.length);
+  const slot=nextAscensionSupportSlot();
   if(!support?.valid||!slot){toast('No support day is currently available');return}
   ascSpartanImportPending=String(Date.now());
   $('ascSpartanImportConfirm').disabled=true;
@@ -2027,8 +2034,7 @@ function renderCycleLoads(){
    const detail=document.createElement('span');
    detail.textContent=exercises.length?exercises.map(ex=>
     ex.name+' '+ex.sets+' × '+(ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+
-    ' @ RPE '+(Number(ex.targetRpe)||(10-ex.rir))+
-    (ex.tmPercent?' ('+ex.tmPercent+'% deadlift TM)':'')
+    ' - RPE '+(ex.targetRpe??(10-ex.rir))
    ).join(' · '):'No accessories · recovery week';
    row.append(weekTag,detail);
    section.appendChild(row);

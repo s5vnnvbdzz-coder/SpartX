@@ -42,7 +42,8 @@ async function run(){
     const border=el=>getComputedStyle(el).borderBottomWidth;
     const font=el=>Number.parseFloat(getComputedStyle(el).fontSize);
     return {
-     card:rect(card),name:rect(card.querySelector('.sx-gamer-top>strong')),
+     card:rect(card),outer:rect(card.closest('.workout-feed-card--profile')),
+     name:rect(card.querySelector('.sx-gamer-top>strong')),
      rank:rect(rank),pr:rect(pr),
      prestige:rect(card.querySelector('.sx-gamer-prestige')),
      emblem:rect(emblem),flag:rect(flag),
@@ -53,6 +54,9 @@ async function run(){
      separators:[top,rank,pr].map(border),
      separatorWidths:[top,rank,pr].map(el=>rect(el)?.w),
      socialAlignment:getComputedStyle(social).justifyContent,
+     socialGap:parseFloat(getComputedStyle(social).columnGap),
+     socialToSessionGap:rect(session).y-rect(social).bottom,
+     socialTapHeight:Math.min(rect(followers).h,rect(following).h),
      flagWithinEmblem:emblem?.contains(flag),
      flagInRank:rank?.contains(flag),
      flagLoaded:!!flag?.querySelector('img[src*="ranks/flags/gb.svg"]'),
@@ -73,7 +77,13 @@ async function run(){
    assert(Math.abs(m.followerLabelSize-m.followerNumberSize)<.2
     && Math.abs(m.followingLabelSize-m.followingNumberSize)<.2,
     'Follower and Following numbers are exactly the same size as their labels: '+JSON.stringify(m));
-   assert(m.following.x-m.followers.right<=22 && m.following.x-m.followers.right>=0,
+   assert(m.socialGap<=7 && m.socialGap>=5,
+    'Followers/Following now have a compact six-pixel group gap: '+JSON.stringify(m));
+   assert(m.socialTapHeight>=43,
+    'Social links retain an accessible touch area despite tighter spacing');
+   assert(m.socialToSessionGap<22,
+    'Remove wasted height between social stats and session row: '+JSON.stringify(m));
+   assert(m.following.x-m.followers.right<=9 && m.following.x-m.followers.right>=0,
     'Social metrics are grouped close together without overlapping: '+JSON.stringify(m));
    assert(m.prestigeAction,'Prestige Showcase button remains interactive');
    assert.equal(m.sessionTitle,'Bench Press - Week 4','Saved workout remains unchanged');
@@ -121,11 +131,12 @@ async function run(){
      'Compound PR must fit within card edge: '+JSON.stringify(detail));
    }
    if(width===390){
-    assert(m.card.h<270,'Compact mobile card is shorter than the old oversized presentation: '+JSON.stringify(m));
+    assert(m.card.h<240,'Gaming card should be visibly shorter: '+JSON.stringify(m));
+    assert(m.outer.h<275,'Full feed container should shrink from screenshot proportions: '+JSON.stringify(m));
     await card.screenshot({path:'gaming-profile-compact-390.png'});
    }
   }
-  console.log('PASS: compact card, dividers, uniform rank/PR fonts, four lifts on one line at 4 widths');
+  console.log('PASS: shorter feed card, closer social stats, touch targets, separators and four lift labels at 4 widths');
   if(errors.length)console.log('Browser warnings:',errors.slice(0,5));
  }catch(e){
   try{await page.screenshot({path:'gaming-profile-compact-failure.png'})}catch(_){}

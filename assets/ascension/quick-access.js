@@ -75,7 +75,7 @@ function refresh(){
  const empty=byId('sxAscensionEmpty');if(empty)empty.hidden=true;
  byId('sxAscensionTitle').textContent=cycle.title;
  byId('sxAscensionSummary').textContent='AscensionX · Powerlifting · Week '+upNext.week+' of 6';
- byId('sxAscensionNext').textContent=upNext.kind==='support'?'NEXT: '+upNext.title+' · Week '+upNext.week:'NEXT: '+upNext.lift+' · Week '+upNext.week;
+ byId('sxAscensionNext').textContent=upNext.kind==='support'?'NEXT: '+upNext.title:'NEXT: '+upNext.lift+' · Week '+upNext.week;
  byId('sxAscensionPercent').textContent=percent+'%';
  byId('sxAscensionProgressFill').style.width=percent+'%';
  byId('sxAscensionProgress').setAttribute('aria-valuenow',String(percent));

@@ -2054,7 +2054,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 }
 </style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
-<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=372">
+<link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=380">
 <link rel="stylesheet" href="./assets/profile/feed-gaming-card-compact.css?v=378">
 <link rel="stylesheet" href="./assets/ranks/milestone-modal.css?v=379">
 <link rel="stylesheet" href="./assets/themes/uniform-surfaces.css?v=340">
@@ -2097,7 +2097,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
       <button type="button" class="rank-collapse-toggle" id="rankCollapseToggle" aria-expanded="false" aria-label="Expand Rank Progression" aria-controls="rankCurrentDetails rankProgressLabels rankXpHelp" title="Expand Rank Progression"><span aria-hidden="true" class="rank-collapse-symbol">+</span></button>
     </div>
   </div>
-  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span><button id="rankPrestigeMark" type="button" class="sx-rank-prestige-mark" data-open-prestige-showcase aria-label="Open Prestige Showcase" hidden></button></div></div>
+  <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div><button id="rankPrestigeMark" type="button" class="sx-gamer-prestige sx-rank-prestige-mark sx-prestige-trigger" data-open-prestige-showcase aria-label="Open Prestige Showcase" hidden></button></div>
   <div class="rank-progress-track" id="rankExperienceTrack" role="progressbar" aria-label="Experience towards next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rankProgressFill"></span></div>
   <div class="row between rank-progress-labels rank-expanded-detail" id="rankProgressLabels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div>
   <div class="rank-tier-strip" id="homeRankTiers"></div>
@@ -2543,6 +2543,15 @@ function sxRotateCompoundSpotlight(){
 document.addEventListener('visibilitychange',()=>{
  if(!document.hidden)sxRotateCompoundSpotlight();
 });
+// The Rank Progression and Workout Feed use exactly the same laurel artwork
+// and text hierarchy. Prestige is separate from the six repeating rank badges.
+const SPARTANX_PRESTIGE_LAUREL_SVG='<svg class="sx-prestige-laurel" viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19 7 15 5 19M9 13l-4-5-2 4M9 8l2-6 3 4M28 19l5-4 2 4M31 13l4-5 2 4M31 8l-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>';
+function spartanxPrestigeTileInner(prestige){
+ const tier=window.SpartanXXP.prestigeTier(prestige);
+ return (prestige?SPARTANX_PRESTIGE_LAUREL_SVG:'')+
+  '<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+
+  (tier?'<small class="sx-prestige-tier-name">'+tier.name+'</small>':'');
+}
 function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const state=getWorkoutRank(),p=profile||{};
  const rank=state.current;
@@ -2556,10 +2565,10 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
  const prestige=state.prestige;
  const prestigeBand=window.SpartanXXP.prestigeBand(prestige);
  const prestigeTier=window.SpartanXXP.prestigeTier(prestige);
- const crest=prestige?'<svg class="sx-prestige-laurel" viewBox="0 0 40 30" fill="none" aria-hidden="true"><path d="M18 25C10 22 6 16 7 6M22 25c8-3 12-9 11-19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19 7 15 5 19M9 13l-4-5-2 4M9 8l2-6 3 4M28 19l5-4 2 4M31 13l4-5 2 4M31 8l-2-6-3 4" stroke="currentColor" stroke-width="1.4"/><path d="m20 7 3 5-3 5-3-5z" fill="currentColor"/></svg>':'';
+ const crest=prestige?SPARTANX_PRESTIGE_LAUREL_SVG:'';
  const rankFile=rank.file.replace(/\.svg$/i,'');
  const frameFile=p.standard==='female'?'female-frame-'+rankFile.replace(/^female-/,'')+'.svg':'male-profile-'+rankFile+'.svg';
- return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div>'+flag+'</div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><button type="button" class="sx-gamer-prestige sx-prestige-trigger" data-open-prestige-showcase aria-label="View prestige showcase · Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+crest+'<span class="sx-prestige-label">PRESTIGE</span><b>'+prestige+'</b>'+(prestigeTier?'<small class="sx-prestige-tier-name">'+prestigeTier.name+'</small>':'')+'</button></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b></div><div class="sx-gamer-line sx-best-pr-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
+ return '<div class="sx-gamer-card'+(sessionLog?' sx-with-session-log':'')+(prestige?' sx-prestige-earned':'')+'" data-sx-prestige-band="'+prestigeBand+'"><div class="sx-gamer-emblem sx-portrait-frame-slot"><img class="sx-rank-portrait-frame" src="./ranks/'+frameFile+'" alt="" aria-hidden="true"><div class="sx-gamer-avatar">'+avatar+'</div>'+flag+'</div><div class="sx-gamer-info"><div class="sx-gamer-top"><strong>'+esc(name)+'</strong><button type="button" class="sx-gamer-prestige sx-prestige-trigger" data-open-prestige-showcase aria-label="View prestige showcase · Prestige '+prestige+(prestigeTier?' · '+prestigeTier.name+' laurel':'')+'">'+spartanxPrestigeTileInner(prestige)+'</button></div><div class="sx-gamer-line sx-rank-line"><small>RANK</small><b>'+esc(spartanxRankLabel(rank.name,state.index))+'</b></div><div class="sx-gamer-line sx-best-pr-line"><small>BEST COMPOUND PR</small><span data-sx-compound-pr>'+esc(bestText)+'</span></div>'+(window.SpartanXSocial?window.SpartanXSocial.cardStatsMarkup():'')+'</div>'+sessionLog+'</div>';
 }
 
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='toggleProfileCards'){localStorage.setItem(PROFILE_CARD_PREF,String(e.target.checked));renderWorkoutFeed()}});
@@ -2953,10 +2962,10 @@ function renderSpartanProgress(){
  if(prestigeMark){
   prestigeMark.hidden=state.prestige===0;
   const tier=window.SpartanXXP.prestigeTier(state.prestige);
-  const next=window.SpartanXXP.LAUREL_TIERS.find(t=>t.start>state.prestige);
-  prestigeMark.textContent=state.prestige?
-   '✦ PRESTIGE '+String(state.prestige).padStart(2,'0')+' · '+tier.name.toUpperCase()+
-   ' LAUREL'+(next?' · NEXT P'+next.start:' · HIGHEST INSIGNIA'):'';
+  prestigeMark.innerHTML=state.prestige?spartanxPrestigeTileInner(state.prestige):'';
+  prestigeMark.setAttribute('aria-label',state.prestige?
+   'View Prestige Showcase · Prestige '+state.prestige+' · '+tier.name+' laurel':
+   'Open Prestige Showcase');
   prestigeMark.dataset.sxPrestigeBand=window.SpartanXXP.prestigeBand(state.prestige);
  }
  $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankExperienceTrack')?.setAttribute('aria-valuenow',String(Math.round(state.progress*100)));$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=(state.prestige?'Prestige '+state.prestige+' · ':'')+spartanxRankLabel(state.current.name,state.index);

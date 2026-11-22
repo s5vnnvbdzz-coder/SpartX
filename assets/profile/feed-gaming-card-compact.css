@@ -1,4 +1,4 @@
-/* SpartanX gaming workout-feed profile: compact header v375.
+/* SpartanX gaming workout-feed profile: compact header v378.
  * Rank and compound PR sit directly below the athlete's name.
  * Prestige stays tappable in the top-right but no longer occupies an
  * oversized row. The country flag sits beneath the tier portrait frame.
@@ -220,4 +220,36 @@ body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line > [data-sx-compo
  body #workoutFeed .sx-gamer-card .sx-gamer-line.sx-best-pr-line > [data-sx-compound-pr]{
   max-width:calc(100% + 61px)!important;
  }
+}
+
+/* v378 — Tighter Home workout-feed card without shrinking the rank portrait,
+ * moving the country flag, or reducing the social links' tap targets. */
+body #workoutFeed .workout-feed-card--profile{
+ padding:2px 4px 4px!important;
+ margin:6px 0 9px!important;
+}
+body #workoutFeed .sx-gamer-card.sx-with-session-log{
+ margin:17px 2px 7px 10px!important;
+ padding-top:9px!important;
+ padding-bottom:5px!important;
+}
+body #workoutFeed .sx-gamer-card.sx-with-session-log > .sx-gamer-info{
+ min-height:0!important;
+ padding-bottom:0!important;
+}
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics{
+ gap:6px!important;
+ margin:0!important;
+}
+body #workoutFeed .sx-gamer-card .sx-feed-social-metrics button[data-sx-social-jump]{
+ gap:2px!important;
+ padding:2px 1px!important;
+ min-height:44px!important;
+}
+body #workoutFeed .sx-gamer-card.sx-with-session-log .sx-session-log{
+ margin-top:0!important;
+}
+body #workoutFeed .sx-gamer-card .sx-session-log>summary{
+ min-height:44px!important;
+ padding:6px 3px 3px!important;
 }

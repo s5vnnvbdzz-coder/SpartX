@@ -24,7 +24,7 @@
   ],
   'Deadlift':[
    {name:'Lat Pulldown',sets:4,min:8,max:12,rir:3,rest:105,muscles:'lats',cost:1},
-   {name:'Romanian Deadlift',sets:4,min:8,max:10,rir:3,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'Keep weight moderate and controlled after deadlifts; stop before form deteriorates.'},
+   {name:'Romanian Deadlift',sets:3,min:8,max:8,rir:3,rest:150,muscles:'hamstrings and glutes',cost:2,cue:'A controlled hinge directly after deadlifts. Stop at target RPE 7; reduce weight if needed.'},
    {name:'Seated Leg Curl',sets:4,min:10,max:15,rir:3,rest:90,muscles:'hamstrings',cost:1},
    {name:'Pallof Press',sets:4,min:10,max:15,rir:3,rest:75,muscles:'trunk',cost:1},
    {name:'Seated Calf Raise',sets:4,min:12,max:20,rir:3,rest:75,muscles:'calves',cost:1}
@@ -37,7 +37,7 @@
   ]
  };
  // Coach-prescribed accessories are reserved before optional movements fill a day.
- const PINNED={'Back Squat':'45° Back Extension','Bench Press':'Hanging Knee Raise','Deadlift':'Romanian Deadlift'};
+ const PINNED={'Back Squat':'45° Back Extension','Bench Press':'Hanging Knee Raise'};
  const FOURTH={
   strength:[
    {name:'Machine Chest Press',sets:4,min:8,max:12,rir:3,rest:105,muscles:'chest',cost:1},
@@ -192,8 +192,9 @@
    reason:'Retain load and progress repetitions before increasing weight.'};
  }
  function dose(item,week,focus,main,cycleId,storage){
-  // Moderate RDLs stop before the final heavy and assessment weeks.
-  if(item.name==='Romanian Deadlift'&&week>=5)return null;
+  // RDLs are a fixed Deadlift-day prescription, not a generic adaptive
+  // exercise. Their sets, reps and target RPE must not drift with heuristics.
+  if(item.name==='Romanian Deadlift')return null;
   // Keep useful low-fatigue accessories during heavy weeks. Week 6 is the
   // deliberate no-assistance recovery week; Week 5 isn't a blanket one-set week.
   const factor=[0,1,1,1,.75,.75,0][week]||0;
@@ -241,20 +242,26 @@
   const w=Number(week);
   if(!LIFTS.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
   const chosen=FOCUS_LIFTS[focus]||FOCUS_LIFTS.strength;
-  const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift]);
+  // A requested, fixed RDL block takes first position after the main Deadlift,
+  // in every working week. Week 6 retains AscensionX's no-accessory recovery
+  // rule. The training max for the actual session is supplied on import.
+  const fixedRdl=lift==='Deadlift'&&w<6?{
+   ...itemFor('Romanian Deadlift'),sets:3,min:8,max:8,rir:3,targetRpe:7,
+   targetReps:8,tmPercent:45,sourceLift:lift,week:w,
+   reason:'3 × 8 at target RPE 7, using 45% of the current deadlift training max. Adjust load down if RPE exceeds 7.'
+  }:null;
+  const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift])
+   .filter(item=>item.name!=='Romanian Deadlift');
   const cap=lift==='Deadlift'?8:focus==='strength'?12:16;
   const maxExercises=lift==='Deadlift'?(focus==='hypertrophy'?3:2):focus==='strength'?3:4;
   const prescribed=candidates.map(item=>dose(item,w,focus,lift,cycleId,storage)).filter(Boolean);
   const pinnedName=focus==='strength'?PINNED[lift]:null;
-  // Never force a Romanian Deadlift onto a heavy deadlift day. Prefer curls
-  // and pulling work rather than duplicating another fatiguing hinge.
-  const safePinned=pinnedName==='Romanian Deadlift'?'Seated Leg Curl':pinnedName;
-  const pinnedSets=prescribed.find(ex=>ex.name===safePinned)?.sets||0;
-  let count=0,pinnedSelected=false;
-  const selected=[];
+  const pinnedSets=prescribed.find(ex=>ex.name===pinnedName)?.sets||0;
+  let count=fixedRdl?.sets||0,pinnedSelected=false;
+  const selected=fixedRdl?[fixedRdl]:[];
   for(const ex of prescribed){
    if(selected.length>=maxExercises)break;
-   const isPinned=ex.name===safePinned;
+   const isPinned=ex.name===pinnedName;
    const reserved=!isPinned&&!pinnedSelected?pinnedSets:0;
    if(count+ex.sets+reserved>cap)continue;
    selected.push(ex);count+=ex.sets;
@@ -524,7 +531,8 @@
     box.appendChild(heading);
     const details=document.createElement('div');
     details.textContent=slot.exercises.length?
-     slot.exercises.map(ex=>ex.name+' · '+ex.sets+' × '+ex.min+'–'+ex.max).join(' · '):
+     slot.exercises.map(ex=>ex.name+' · '+ex.sets+' × '+(ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+
+      (ex.tmPercent?' · RPE '+ex.targetRpe+' · '+ex.tmPercent+'% deadlift TM':'')).join(' · '):
      'No additional assistance prescribed';
     box.appendChild(details);
     preview.appendChild(box);

@@ -129,8 +129,8 @@
     const main=canonical(details.exercise),week=Number(details.week);
     if(!main||!active.lifts.includes(main)||p.excluded.includes(main))return [];
     if(!Number.isInteger(week)||week<1||week>6)return [];
-    // The pinned deadlift-day RDL is first; all other exercises remain optional
-    // Adaptive Programming support. Dedupe against existing workout entries.
+    // Ordered squat/deadlift accessories are owned by Adaptive Programming.
+    // Dedupe against existing workout entries; prescribed loads remain editable.
     const exists=new Set(existingNames.map(normName));
     return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding,lifts:active.lifts})
       .filter(item=>!exists.has(normName(item.name)))
@@ -146,7 +146,10 @@
         const prescription=fixedRdl?
           ' · 3 × 8 reps · Target RPE 7 · 45% deadlift training max'+
           (Number.isFinite(tm)&&tm>0?' ('+tm+' kg TM; '+prescribedKg+' kg prescribed)':' (enter training max to calculate weight)'):
-          ' · '+item.min+'–'+item.max+' reps · ~'+item.rir+' reps in reserve';
+          ' · '+item.sets+' × '+item.min+(item.min===item.max?'':'–'+item.max)+
+          ' reps · Target RPE '+(Number(item.targetRpe)||rpe)+
+          (item.sourceLift==='Back Squat'?' · Athlete-adjustable load'+
+            (prescribedKg>0?' · Suggested '+prescribedKg+' kg':' · Choose starting weight'):'');
         return {
           name:item.name,rest:item.rest,
           notes:'AscensionX Adaptive Programming · '+main+' · Week '+week+prescription+

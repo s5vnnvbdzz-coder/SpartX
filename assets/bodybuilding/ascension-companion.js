@@ -129,23 +129,39 @@
     const main=canonical(details.exercise),week=Number(details.week);
     if(!main||!active.lifts.includes(main)||p.excluded.includes(main))return [];
     if(!Number.isInteger(week)||week<1||week>6)return [];
-    // No legacy RDL/paused-bench insertion; only adaptive-selected exercises.
+    // The pinned deadlift-day RDL is first; all other exercises remain optional
+    // Adaptive Programming support. Dedupe against existing workout entries.
     const exists=new Set(existingNames.map(normName));
     return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding,lifts:active.lifts})
       .filter(item=>!exists.has(normName(item.name)))
-      .map(item=>({
-        name:item.name,rest:item.rest,
-        notes:(p.adaptive?'AscensionX Adaptive Programming':'AscensionX Strength & Size companion')+' · '+main+' · Week '+week+
-          ' · '+item.min+'–'+item.max+' reps · ~'+item.rir+
-          ' reps in reserve. Optional. Does not affect AscensionX cycle progression.'+
-          (item.reason?' '+item.reason:''),
-        sxStrengthSizeCompanion:{cycleId:active.id,lift:main,week,adaptive:p.adaptive===true,
-          targetRir:item.rir,repsMin:item.min,repsMax:item.max,plannedSets:item.sets},
-        sets:Array.from({length:item.sets},()=>({
-          weight:Number(item.suggestedKg)>0?String(item.suggestedKg):'',reps:String(item.targetReps||item.min),
-          rpe:'',type:'Working Set',done:false
-        }))
-      }));
+      .map(item=>{
+        const fixedRdl=item.name==='Romanian Deadlift'&&Number(item.tmPercent)===45;
+        const tm=Number(details.tm);
+        // All loaded weights use SpartanX's normal nearest-2.5 kg rounding.
+        // The recorded RPE stays blank; RPE 7 is a target, not a logged result.
+        const prescribedKg=fixedRdl&&Number.isFinite(tm)&&tm>0?
+          Math.round(tm*0.45/2.5)*2.5:Number(item.suggestedKg)||0;
+        const reps=Number(item.targetReps||item.min);
+        const rpe=Number(item.targetRpe)||(10-item.rir);
+        const prescription=fixedRdl?
+          ' · 3 × 8 reps · Target RPE 7 · 45% deadlift training max'+
+          (Number.isFinite(tm)&&tm>0?' ('+tm+' kg TM; '+prescribedKg+' kg prescribed)':' (enter training max to calculate weight)'):
+          ' · '+item.min+'–'+item.max+' reps · ~'+item.rir+' reps in reserve';
+        return {
+          name:item.name,rest:item.rest,
+          notes:'AscensionX Adaptive Programming · '+main+' · Week '+week+prescription+
+            '. Does not count towards AscensionX main-lift completion.'+
+            (item.reason?' '+item.reason:''),
+          sxStrengthSizeCompanion:{cycleId:active.id,lift:main,week,adaptive:p.adaptive===true,
+            targetRir:item.rir,targetRpe:rpe,repsMin:item.min,repsMax:item.max,plannedSets:item.sets,
+            ...(fixedRdl?{fixedDeadliftRdl:true,trainingMaxKg:Number.isFinite(tm)&&tm>0?tm:null,
+              trainingMaxPercent:45}:null)},
+          sets:Array.from({length:item.sets},()=>({
+            weight:prescribedKg>0?String(prescribedKg):'',reps:String(reps),
+            rpe:'',type:'Working Set',done:false
+          }))
+        };
+      });
   }
   /* Powerbuilding is scheduling guidance, not a second AscensionX cycle.
      Each primary lift remains owned by its own existing AscensionX import. */

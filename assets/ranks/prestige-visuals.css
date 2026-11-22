@@ -537,3 +537,87 @@ button.sx-prestige-inline.sx-prestige-trigger{
   padding-inline:3px!important;
  }
 }
+
+/* v383 · Prestige Showcase is a dedicated SpartanX secondary page.
+   The main tab bar and global header are intentionally hidden; the existing
+   secondary-page back arrow returns to the original page and scroll position.
+   The fullscreen overlay above remains reserved for new-laurel celebrations. */
+body:has(> main > #prestigeShowcase.screen.active) > header,
+body:has(> main > #prestigeShowcase.screen.active) > #sxMainHeaderSpacer,
+body:has(> main > #prestigeShowcase.screen.active) #trackerNav,
+body:has(> main > #prestigeShowcase.screen.active) #minimizedSession,
+body:has(> main > #prestigeShowcase.screen.active) #floatingRestTimer{
+ display:none!important;
+}
+body:has(> main > #prestigeShowcase.screen.active) > main{
+ width:100%!important;
+ max-width:680px!important;
+ margin:0 auto!important;
+ padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(30px + env(safe-area-inset-bottom,0px))!important;
+ overflow:visible!important;
+}
+#prestigeShowcase.sx-prestige-page.active{
+ min-height:calc(100dvh - 48px);
+ padding:0 0 18px!important;
+}
+#prestigeShowcase .sx-prestige-page-header{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:14px;
+ margin:0 0 18px;
+}
+#prestigeShowcase .sx-prestige-page-heading{flex:1 1 auto;min-width:0}
+#prestigeShowcase .sx-prestige-page-heading .eyebrow{
+ font-size:10px;
+ line-height:1.35;
+ letter-spacing:1.15px;
+ color:var(--muted);
+}
+#prestigeShowcase .sx-prestige-page-heading h1{
+ margin:5px 0 0;
+ font-size:clamp(24px,5vw,31px);
+ line-height:1.14;
+}
+#prestigeShowcase #sxPrestigePageBack.sx-page-back{
+ order:2;
+ flex:0 0 48px!important;
+ margin-left:auto!important;
+}
+#prestigeShowcase .sx-prestige-page-content{
+ min-width:0;
+}
+#prestigeShowcase .sx-prestige-page-panel{
+ border:1px solid color-mix(in srgb,var(--sx-prestige-metal) 45%,var(--line));
+ border-radius:18px;
+ padding:19px 17px 17px;
+ background:radial-gradient(ellipse at 50% 0%,var(--sx-prestige-shadow),transparent 44%),
+  linear-gradient(145deg,var(--panel2),var(--panel) 60%,var(--bg));
+ box-shadow:0 16px 50px #0005;
+}
+#prestigeShowcase{
+ --sx-prestige-metal:var(--lime);
+ --sx-prestige-shadow:color-mix(in srgb,var(--lime) 22%,transparent);
+}
+#prestigeShowcase[data-sx-prestige-band="bronze"]{--sx-prestige-metal:#c68d5b;--sx-prestige-shadow:rgba(198,141,91,.23)}
+#prestigeShowcase[data-sx-prestige-band="silver"]{--sx-prestige-metal:#d7dfea;--sx-prestige-shadow:rgba(215,223,234,.27)}
+#prestigeShowcase[data-sx-prestige-band="gold"]{--sx-prestige-metal:#e6ba59;--sx-prestige-shadow:rgba(230,186,89,.30)}
+#prestigeShowcase[data-sx-prestige-band="platinum"]{--sx-prestige-metal:#c8e8ef;--sx-prestige-shadow:rgba(126,196,215,.32)}
+#prestigeShowcase[data-sx-prestige-band="mythic"]{--sx-prestige-metal:#dac5ff;--sx-prestige-shadow:rgba(189,147,255,.36)}
+#prestigeShowcase[data-sx-prestige-band="apotheosis"]{--sx-prestige-metal:#ffebac;--sx-prestige-shadow:rgba(255,218,122,.32)}
+#prestigeShowcase .sx-prestige-hero{padding:0 5px 19px}
+#prestigeShowcase .sx-prestige-hero .sx-prestige-crest{width:126px;height:126px}
+#prestigeShowcase .sx-prestige-hero h2{font-size:clamp(22px,5.4vw,28px)}
+#prestigeShowcase .sx-prestige-stat-grid{margin:7px 0 19px}
+#prestigeShowcase .sx-prestige-stat-grid > div{padding:15px 5px 13px}
+#prestigeShowcase .sx-prestige-stages-title{margin:20px 0 10px!important}
+#prestigeShowcase .sx-prestige-stage{padding:11px 12px}
+#prestigeShowcase .sx-prestige-footnote{margin:17px 3px 2px}
+#prestigeShowcase > .spartanx-page-footer{display:none!important}
+@media(max-width:390px){
+ body:has(> main > #prestigeShowcase.screen.active) > main{padding-inline:12px!important}
+ #prestigeShowcase .sx-prestige-page-panel{padding:16px 11px 14px}
+ #prestigeShowcase .sx-prestige-page-heading h1{font-size:24px}
+ #prestigeShowcase .sx-prestige-stat-grid{gap:6px}
+ #prestigeShowcase .sx-prestige-stat-grid strong{font-size:16px}
+}

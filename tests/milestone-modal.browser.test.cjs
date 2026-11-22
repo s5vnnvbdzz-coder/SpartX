@@ -51,7 +51,7 @@ const {chromium}=require('playwright');
    assert.equal(result.title,'Milestone Progression');
    assert.equal(result.entryCount,4,'The four achievement paths are visible');
    assert.match(result.workouts,/15 \/ 100 workouts/);
-   assert.match(result.volume,/2\.3k \/ 1M kg lifted/);
+   assert.match(result.volume,/22\.5k \/ 1M kg lifted/);
    assert(result.overlay.w>=width-1,'Overlay covers available width '+width+': '+JSON.stringify(result));
    assert(result.overlay.h>=840,'Overlay covers full screen '+width+': '+JSON.stringify(result));
    assert(result.dialog.right<=width+1,'Dialog fits screen '+width+': '+JSON.stringify(result));

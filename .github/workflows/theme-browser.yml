@@ -7,6 +7,10 @@ on:
       - 'assets/profile/profile-layout-hevy.css'
       - 'tests/profile-dashboard-compact.browser.test.cjs'
       - 'assets/profile/profile-preview-parity.js'
+      - 'assets/ranks/milestone-engine.js'
+      - 'assets/ranks/milestone-modal.js'
+      - 'assets/ranks/milestone-modal.css'
+      - 'tests/milestone-modal.browser.test.cjs'
       - 'tests/profile-volume-axis.browser.test.cjs'
       - 'tests/home-feed-gaming-compact.browser.test.cjs'
       - 'index.html'
@@ -41,6 +45,7 @@ jobs:
           node tests/home-feed-gaming-compact.browser.test.cjs
           node tests/profile-dashboard-compact.browser.test.cjs
           node tests/profile-volume-axis.browser.test.cjs
+          node tests/milestone-modal.browser.test.cjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,4 +64,6 @@ jobs:
             profile-dashboard-compact-failure.png
             profile-volume-axis-390.png
             profile-volume-axis-failure.png
+            milestone-modal-mobile-390.png
+            milestone-modal-failure.png
           if-no-files-found: ignore

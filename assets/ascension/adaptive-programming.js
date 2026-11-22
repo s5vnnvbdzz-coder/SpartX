@@ -268,10 +268,10 @@
  function squatAdaptivePlan(week,storage=global.localStorage){
   if(week>=6)return [];
   const prescriptions=[
-   {name:'Hack Squat',sets:week<=3?3:week===4?2:1,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
-   {name:'Leg Extension',sets:week<=4?2:1,min:12,max:15,targetRpe:week<=3?8:7},
-   {name:'45° Back Extension',sets:week<=3?2:1,min:10,max:12,targetRpe:7},
-   {name:'Pallof Press',sets:week<=4?2:1,min:10,max:15,targetRpe:7}
+   {name:'Hack Squat',sets:3,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
+   {name:'Leg Extension',sets:3,min:12,max:15,targetRpe:week<=3?8:7},
+   {name:'45° Back Extension',sets:3,min:10,max:12,targetRpe:7},
+   {name:'Pallof Press',sets:3,min:10,max:15,targetRpe:7}
   ];
   return prescriptions.map(spec=>{
    const base=itemFor(spec.name);
@@ -348,7 +348,9 @@
    if(!fixedRdl)return [];
    const tail=['Lat Pulldown','Seated Leg Curl'].map(name=>
     dose(itemFor(name),w,focus,lift,cycleId,storage)).filter(Boolean)
-    .map(ex=>({...ex,sets:Math.min(3,ex.sets)}));
+    .map(ex=>({...ex,sets:3,
+     // Maintain accessory volume through loading weeks; lower effort in taper.
+     targetRpe:w<=3?7:w===4?6.5:6,rir:w<=3?3:w===4?3.5:4}));
    return [fixedRdl,...tail];
   }
   if(lift==='Back Squat')return squatAdaptivePlan(w,storage);
@@ -452,9 +454,11 @@
      'lower':'upper';
     const core=item.name==='Pallof Press'||item.name==='Hanging Knee Raise';
     const stressed=!core&&profile.fatigue[group];
-    const base=week<=3?3:2;
-    const cap=profile.guarded?Math.min(2,base):base;
-    const sets=Math.max(1,Math.min(item.sets,stressed?Math.min(2,cap):cap));
+    // Four-day plans keep three working sets in Weeks 1–5.
+    // Reduce target effort rather than silently deleting volume.
+    // Five-day plans may use two sets for close-together support sessions.
+    const sets=prefs.days===4?3:
+     Math.max(1,Math.min(3,item.sets,profile.guarded||stressed?2:3));
     const directArms=item.name==='Dumbbell Curl'||item.name==='Triceps Pushdown (Bar)';
     const easyRir=week>=4||profile.shortNext||stressed?4:3;
     // Direct arms retain the approved RPE 7 target on normal Upper days,
@@ -467,7 +471,7 @@
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
   const role=supportProfile(c,prefs,index,week,storage).role;
-  return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance (Week '+week+')';
+  return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance - Week '+week;
  }
  function completedSupportDay(c,day,week,expected,storage){
   // Only saved, completed exercises for this exact cycle/week/day count.

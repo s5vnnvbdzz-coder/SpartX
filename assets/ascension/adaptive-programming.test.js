@@ -297,6 +297,23 @@ assert(ascHtml.includes('sx_ascension_native_import_v1')&&
 assert(hostHtml.includes("['intelligence','ascension'].includes(query.get('sxReturn'))"),
  'Intelligence and AscensionX must preserve their return tab');
 
+// Native AscensionX navigation must preserve source scroll position across a
+// full-page round trip, and use the shared back-arrow element, not bare text.
+assert.ok(rootHost.includes("rememberAscensionReturnScroll('tools')")&&
+ rootHost.includes('rememberAscensionReturnScroll(from)')&&
+ rootHost.includes("source,top,inner,toolsMain,at:Date.now()"),
+ 'Both the Tools link and Workout quick-access preserve their launch position');
+assert.ok(hostHtml.includes("sxPageScrollPositions.set(source,{top:ascPosition.top,inner:ascPosition.inner})")&&
+ hostHtml.includes("window.addEventListener('load',afterLayout"),
+ 'Return to AscensionX source tab restores position after page layout');
+assert.ok(ascHtml.includes("a.innerHTML='<span=\\\"sx-page-back-arrow\\\"")&&
+ ascHtml.includes("history.scrollRestoration='manual'")&&
+ ascHtml.includes("window.addEventListener('pageshow',afterNativeLayout"),
+ 'Native AscensionX uses visible back-arrow component and starts at the top');
+assert.ok(rootHost.includes('class="ascension-launch">OPEN ASCENSIONX</a>')&&
+ !rootHost.includes('OPEN ASCENSIONX <span'),
+ 'Tools AscensionX launch button has no decorative arrow');
+
 // A completed support workout must not be invalidated by new prescription
 // sizes after an engine update (old Week 5 was one set).
 const oneSetLegacy=['Machine Chest Press','Iso-Lateral Row'].map(name=>({
@@ -334,7 +351,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v113')&&embeddedSw.includes('adaptive-programming.js?v=394'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v114')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&

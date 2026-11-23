@@ -185,6 +185,53 @@
   }
   return changed;
  }
+ // Upgrade only an untouched, imported support-day Machine Chest Press
+ // draft to the new Bench Press assistance prescription. Never transfer
+ // any recorded machine load, reps or RPE to a barbell exercise.
+ function upgradeUntouchedSupportBench(work,adaptive){
+  if(!Array.isArray(work)||!adaptive?.activeCycle||!adaptive?.enabled)return 0;
+  let cycle=null,schedule=null;
+  try{
+   cycle=adaptive.activeCycle();
+   if(!cycle?.id||!adaptive.enabled(cycle.id))return 0;
+   schedule=adaptive.schedule(cycle);
+  }catch(_){return 0}
+  if(!schedule?.valid)return 0;
+  let changed=0;
+  for(const ex of work){
+   if(!ex||norm(ex.name)!==norm('Machine Chest Press')||
+      ex.ascensionLink||ex.bodybuildingLink||clean(ex.replacementOf))continue;
+   const link=ex.sxPowerbuildingSupport;
+   const week=Number(link?.week);
+   if(!link||link.cycleId!==cycle.id||!clean(link.day)||
+      !Number.isInteger(week)||week<1||week>5)continue;
+   const slot=schedule.slots?.find(x=>x.kind==='support'&&
+    x.day===link.day&&Number(x.week)===week);
+   const planned=slot?.exercises?.find(x=>norm(x.name)===norm('Bench Press'));
+   if(!planned)continue;
+   const sets=ex.sets;
+   const original=Number(link.plannedSets),minimum=Number(link.repsMin);
+   if(!Array.isArray(sets)||sets.length!==original||
+      !Number.isInteger(minimum)||minimum<1||
+      !sets.every(set=>set&&set.done===false&&
+       String(set.type||'Working Set')==='Working Set'&&
+       !filled(set.weight)&&!filled(set.rpe)&&Number(set.reps)===minimum))continue;
+   ex.name='Bench Press';
+   ex.rest=planned.rest||150;
+   ex.sets=Array.from({length:planned.sets},()=>({
+    weight:'',reps:String(planned.min),rpe:'',type:'Working Set',done:false
+   }));
+   ex.notes='AscensionX Upper Assistance · Week '+week+
+    ' · '+planned.min+'–'+planned.max+' reps · Target RPE '+
+    (planned.targetRpe??10-planned.rir)+'. Technique-focused bench volume, not a main-lift top set.';
+   link.repsMin=planned.min;
+   link.repsMax=planned.max;
+   link.rir=planned.rir;
+   link.plannedSets=planned.sets;
+   changed++;
+  }
+  return changed;
+ }
  // Align ONLY untouched active, imported AscensionX support rows with a new
  // prescription after the athlete updates the app. Saved sessions, individual
  // edited sets and completed exercises are never rewritten.
@@ -230,6 +277,6 @@
  global.SpartanXExerciseReplacement=Object.freeze({
   prepare,hasRecordedData,repairActiveIsoLateralRows,
   renameActiveAscensionPushdowns,renameActiveAscensionRearDelts,
-  refreshUntouchedAdaptiveSets
+  upgradeUntouchedSupportBench,refreshUntouchedAdaptiveSets
  });
 })(window);

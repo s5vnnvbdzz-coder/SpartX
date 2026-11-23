@@ -40,26 +40,30 @@
   const bestPriorWeight=Math.max(...history.map(s=>s.kg));
   const priorEst=Math.max(...history.filter(s=>s.reps<=10)
    .map(s=>strength({weight:s.kg,reps:s.reps})),0);
-  // A weight-for-reps PR is a non-dominated set: more weight for at least
-  // the same reps, or more reps at a given load. We compare against history
-  // and suppress weaker duplicates achieved in the SAME live session.
-  const frontier=recorded.filter((set,i)=>!recorded.some((other,j)=>j!==i&&
-   other.kg>=set.kg&&other.reps>=set.reps&&
-   (other.kg>set.kg||other.reps>set.reps)));
-  const records=[];
-  for(const set of frontier){
+  // One exercise gets ONE weight × reps award per workout. Multiple
+  // successful sets, including identical sets, are competing candidates for
+  // the same PB rather than separate trophies. If a new actual 1RM was
+  // achieved, it takes precedence over a multi-rep PB; otherwise choose
+  // the highest-performing new set by Epley score, then kg and reps.
+  const candidates=recorded.map(set=>{
    const priorForReps=Math.max(0,...history.filter(x=>x.reps>=set.reps).map(x=>x.kg));
-   if(set.kg<=priorForReps+0.0001)continue;
-   const trueSingle=set.reps===1&&set.kg>bestPriorWeight+0.0001;
-   records.push({
-    kind:trueSingle?'oneRm':'repPr',
-    title:trueSingle?'New 1RM':'Weight × reps record',
-    kg:set.kg,reps:set.reps,
-    previousKg:priorForReps>0?priorForReps:null,
-    subtitle:trueSingle?'Heaviest completed single recorded for this exercise':
-     'Best completed weight for '+set.reps+' or more reps'
-   });
-  }
+   if(set.kg<=priorForReps+0.0001)return null;
+   return {...set,priorForReps,
+    trueSingle:set.reps===1&&set.kg>bestPriorWeight+0.0001};
+  }).filter(Boolean);
+  candidates.sort((a,b)=>Number(b.trueSingle)-Number(a.trueSingle)||
+   strength({weight:b.kg,reps:b.reps})-strength({weight:a.kg,reps:a.reps})||
+   b.kg-a.kg||b.reps-a.reps);
+  const records=[];
+  const winner=candidates[0];
+  if(winner)records.push({
+   kind:winner.trueSingle?'oneRm':'repPr',
+   title:winner.trueSingle?'New 1RM':'Weight × reps record',
+   kg:winner.kg,reps:winner.reps,
+   previousKg:winner.priorForReps>0?winner.priorForReps:null,
+   subtitle:winner.trueSingle?'Heaviest completed single recorded for this exercise':
+    'Best completed weight for '+winner.reps+' or more reps'
+  });
   // Only multi-rep sets can set an ESTIMATED 1RM. Never label an Epley
   // calculation a tested 1RM, or extrapolate from extreme rep counts.
   const bestEst=recorded.filter(set=>set.reps>=2&&set.reps<=10)

@@ -2491,7 +2491,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/workouts/session-achievements.js?v=396"></script>
 <script src="./assets/exercises/exercise-logging-guide.js?v=303"></script>
-<script src="./assets/ranks/xp-engine.js?v=372"></script>
+<script src="./assets/ranks/xp-engine.js?v=397"></script>
 <script>
 const $=id=>document.getElementById(id);let db=JSON.parse(localStorage.getItem('spartx_db')||'{"sessions":[],"plan":[]}'),work=[],seconds=120,interval=null,exerciseTimers={};
 let activeCycle=null;const CYCLE_STORAGE_KEY='spartanx_531_saved_cycles_v1';
@@ -2969,9 +2969,10 @@ const SPARTANX_RANK_NUMERALS=['I','II','III','IV','V','VIII'];
 function spartanxRankLabel(name,index){return name+' - Rank '+(SPARTANX_RANK_NUMERALS[index]||'I');}
 function activeProgressRanks(){return db.profile?.standard==='female'?SPARTANX_FEMALE_RANKS:SPARTANX_PROGRESS_RANKS;}
 function getWorkoutRank(){
- let ascension=null;
+ let ascension=null,adaptivePreferences=null;
  try{ascension=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null')}catch(_){}
- const score=window.SpartanXXP.calculate(db.sessions,ascension);
+ try{adaptivePreferences=JSON.parse(localStorage.getItem('sx_ascension_adaptive_v1')||'null')}catch(_){}
+ const score=window.SpartanXXP.calculate(db.sessions,ascension,adaptivePreferences);
  let oldPrestige=0;
  try{oldPrestige=Math.max(0,Math.floor(Number(localStorage.getItem('spartanx_prestige_level_v1'))||0))}catch(_){}
  const prestige=Math.max(oldPrestige,score.prestige);

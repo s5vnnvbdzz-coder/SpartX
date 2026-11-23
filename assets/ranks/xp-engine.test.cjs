@@ -99,8 +99,10 @@ const support=(date,id,finished=true,week=1,slot='SAT')=>day(date,id,
   sets:Array.from({length:3},(_,i)=>({type:'Working Set',
    done:finished||i<2,weight:20,reps:10}))
  })));
-assert.equal(xp.calculate(imports,state([]),fourDayPreferences).totalXP,1350,
- 'Do not grant the weekly bonus before the prescribed fourth day');
+assert.equal(xp.calculate(imports,state([]),fourDayPreferences).totalXP,1700,
+ 'Protect the weekly 350 XP bonus earned under the old rule');
+assert.equal(xp.calculate(imports,state([]),fourDayPreferences).legacyBonusXP,350,
+ 'Older earned weeks are auditable as grandfathered bonuses');
 const fourth=support('2026-11-07','upper-assistance');
 const fullWeek=xp.calculate([...imports,fourth],state([]),fourDayPreferences);
 assert.equal(fullWeek.totalXP,2150,
@@ -111,19 +113,52 @@ assert.equal(fullWeek.ascensionDays,4);
 assert.equal(fullWeek.awards.find(x=>x.date==='2026-11-07').xp,450,
  'Completed Day 4 assistance is paid as AscensionX, not standard workout');
 assert.equal(xp.calculate([...imports,support('2026-11-07','partial',false)],
- state([]),fourDayPreferences).totalXP,1575,
- 'Incomplete assistance receives standard XP, not the AscensionX day or weekly bonus');
+ state([]),fourDayPreferences).totalXP,1925,
+ 'Incomplete assistance receives standard XP without revoking a previously earned bonus');
 assert.equal(xp.calculate([...imports,fourth,fourth],state([]),fourDayPreferences).totalXP,2150,
  'Repeatedly saving the same support session does not duplicate XP');
 assert.equal(xp.calculate([...imports,fourth,support('2026-11-07','repeat')],
  state([]),fourDayPreferences).totalXP,2150,
  'Repeated assistance on the same day cannot award another daily 450');
 assert.equal(xp.calculate([...imports,fourth],state([]),
- {[cycle]:{enabled:true,days:5}}).bonusXP,0,
- 'Five-day programming requires both extra support slots before the weekly reward');
+ {[cycle]:{enabled:true,days:5}}).bonusXP,350,
+ 'Five-day programming retains bonus already earned before the rule update');
 assert.equal(xp.calculate([...imports,fourth,support('2026-11-08','fifth',true,1,'SUN')],
  state([]),{[cycle]:{enabled:true,days:5}}).bonusXP,350,
  'Five-day programming awards the weekly bonus after both support slots');
+// New post-cutoff weeks must complete all programme days before the 350 XP bonus.
+const futureCycle='2026-12-01T12:00:00.000Z';
+const futurePrefs={[futureCycle]:{enabled:true,days:4}};
+const futureImports=['Back Squat','Bench Press','Deadlift'].map((lift,i)=>({
+ id:'future-'+i,date:'2026-12-0'+(i+1)+'T10:00:00',
+ exercises:[{name:lift,ascensionLink:{cycleId:futureCycle,lift,week:1,
+  plannedSets:[{weight:80,reps:5}]},
+  sets:[{type:'Working Set',done:true,weight:80,reps:5}]}]
+}));
+const futureState={cycle:{created:futureCycle,exercises:['Back Squat','Bench Press','Deadlift']},logs:[]};
+assert.equal(xp.calculate(futureImports,futureState,futurePrefs).totalXP,1350,
+ 'New weeks have no earned bonus until the support workout is complete');
+const futureDay4={...fourth,date:'2026-12-04T10:00:00',id:'future-support',
+ exercises:fourth.exercises.map(ex=>({
+  ...ex,sxPowerbuildingSupport:{...ex.sxPowerbuildingSupport,cycleId:futureCycle}
+ }))};
+assert.equal(xp.calculate([...futureImports,futureDay4],futureState,futurePrefs).totalXP,2150,
+ 'New completed four-day week earns four programme days and weekly bonus');
+const historicWeeks=[0,1,2].flatMap(week=>
+ ['Back Squat','Bench Press','Deadlift'].map((lift,i)=>({
+  id:'historical-'+week+'-'+i,
+  date:'2026-11-'+String(2+7*week+i).padStart(2,'0')+'T10:00:00',
+  exercises:[{name:lift,ascensionLink:{cycleId:cycle,lift,week:week+1,
+   plannedSets:[{weight:80,reps:5}]},
+   sets:[{type:'Working Set',done:true,weight:80,reps:5}]}]
+ })));
+const legacyScore=xp.calculate(historicWeeks,state([]),fourDayPreferences);
+assert.equal(legacyScore.totalXP,5100,
+ 'All three previously earned 350 XP week bonuses remain credited');
+assert.equal(legacyScore.legacyBonusXP,1050,
+ 'Three older weekly rewards retain the exact 1050 XP previously earned');
+assert.equal(xp.calculate(historicWeeks.slice(0,8),state([]),fourDayPreferences).legacyBonusXP,700,
+ 'Incomplete historic programme weeks do not receive a bonus');
 // Badges are permanent achievements, not repeated prestige-cycle rewards.
 assert.equal(xp.badgeHighWater({totalXP:0,index:0,prestige:0}),0);
 assert.equal(xp.badgeHighWater({totalXP:4800,index:4,prestige:0}),4);

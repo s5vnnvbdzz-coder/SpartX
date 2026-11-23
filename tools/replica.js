@@ -61,9 +61,31 @@ ascensionToolCard.setAttribute('aria-labelledby','ascensionXToolTitle');
 ascensionToolCard.innerHTML=
  '<div class="card-head"><h2 id="ascensionXToolTitle">AscensionX</h2></div>'+
  '<p class="hint" style="margin:0 0 13px;line-height:1.55">Full six-week strength programming, adaptive training, training history and progression.</p>'+
- '<a id="openAscensionX" href="./AscensionX/?sxIntegrated=1&from=tools&mode=home" class="ascension-launch">OPEN ASCENSIONX <span aria-hidden="true">↗</span></a>'+
+ '<a id="openAscensionX" href="./AscensionX/?sxIntegrated=1&from=tools&mode=home" class="ascension-launch">OPEN ASCENSIONX</a>'+
  '<p class="hint" style="margin:11px 0 0">Opens as a full AscensionX programme page within your SpartanX platform.</p>';
 shadow.querySelector('main').appendChild(ascensionToolCard);
+
+// Save the exact origin scroll position before navigating to the native
+// AscensionX programme page. The SPA's in-memory scroll map is lost during
+// this full-page navigation, so the return position must survive one reload.
+const SX_ASCENSION_RETURN_SCROLL_KEY='sx_ascension_return_scroll_v1';
+function rememberAscensionReturnScroll(source){
+ const page=document.getElementById(source);
+ const root=document.scrollingElement||document.documentElement;
+ const top=Math.max(0,window.scrollY||0,root?.scrollTop||0,document.body.scrollTop||0);
+ const inner=Math.max(0,page?.scrollTop||0);
+ const toolsMain=source==='tools'?Math.max(0,shadow.querySelector('main')?.scrollTop||0):0;
+ try{
+  sessionStorage.setItem(SX_ASCENSION_RETURN_SCROLL_KEY,JSON.stringify({
+   source,top,inner,toolsMain,at:Date.now()
+  }));
+ }catch(_){}
+}
+ascensionToolCard.querySelector('#openAscensionX')?.addEventListener('click',event=>{
+ if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||
+    event.shiftKey||event.altKey)return;
+ rememberAscensionReturnScroll('tools');
+});
 
 // Intelligence launches from Tools, including when the link is clicked
 // inside this shadow root (ordinary document click handlers do not see it).
@@ -80,7 +102,6 @@ sxToolInfoStyles.textContent=
  '.sx-tools-intelligence-card{color:var(--txt)}.sx-tools-intelligence-card h2{font-size:17px}'+
  '.sx-tools-intelligence-card a.sx-intelligence-entry-link{color:var(--lime)!important;text-decoration:none}'+
  '#ascensionXToolCard .ascension-launch{display:flex!important;align-items:center;justify-content:center;gap:9px;min-height:47px;width:100%;font-size:12px;font-weight:850;letter-spacing:.7px;text-decoration:none;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff09}'+
- '#ascensionXToolCard .ascension-launch span{color:var(--lime);font-size:19px;line-height:1}'+
  '.page-title-row .page-actions{display:none!important}';
 shadow.appendChild(sxToolInfoStyles);
 
@@ -98,6 +119,7 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  url.searchParams.set('mode',option);
  if(typeof lift==='string'&&['Back Squat','Bench Press','Deadlift','Overhead Press','__ADAPTIVE_SUPPORT__'].includes(lift))
   url.searchParams.set('lift',lift);
+ rememberAscensionReturnScroll(from);
  window.location.assign(url.toString());
  return true;
 };

@@ -63,6 +63,11 @@
  // starting choices; the shared Spartan Intelligence policy doses working sets.
  const LOOKUP=[...Object.values(LIB).flat(),...Object.values(FOURTH).flat()];
  const ADDITIONAL={
+  // Technical bench volume for Upper Assistance: separate from the
+  // AscensionX main-lift top-set/back-down prescription.
+  'Bench Press':{name:'Bench Press',sets:3,min:8,max:10,rir:3,rest:150,
+   muscles:'chest and triceps',cost:1,
+   cue:'Controlled, repeatable bench technique. No maximal or grinding reps; leave at least three reps in reserve.'},
   'Incline Dumbbell Press':{name:'Incline Dumbbell Press',sets:4,min:8,max:12,rir:3,rest:120,muscles:'chest',cost:1},
   'Leg Press':{name:'Leg Press',sets:4,min:10,max:15,rir:3,rest:120,muscles:'quadriceps',cost:2},
   'Hack Squat':{name:'Hack Squat',sets:3,min:8,max:10,rir:2,rest:150,muscles:'quadriceps and glutes',cost:2,
@@ -101,19 +106,19 @@
   // Explicit Upper, Lower and Balanced templates are selected by the
   // coverage/recovery planner, never by a fixed Day 4 index.
   strength:{
-   upper:['Machine Chest Press','Iso-Lateral Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
+   upper:['Bench Press','Iso-Lateral Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
    lower:['Leg Extension','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
    balanced:['Rear Delt Reverse Fly','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
    recovery:['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press']
   },
   balanced:{
-   upper:['Incline Dumbbell Press','Iso-Lateral Row','Rear Delt Reverse Fly','Triceps Pushdown (Bar)','Dumbbell Curl'],
+   upper:['Bench Press','Iso-Lateral Row','Rear Delt Reverse Fly','Triceps Pushdown (Bar)','Dumbbell Curl'],
    lower:['Leg Extension','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
    balanced:['Rear Delt Reverse Fly','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
    recovery:['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press']
   },
   hypertrophy:{
-   upper:['Machine Chest Press','Seated Cable Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
+   upper:['Bench Press','Seated Cable Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl'],
    lower:['Leg Extension','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
    balanced:['Rear Delt Reverse Fly','Seated Leg Curl','Seated Calf Raise','Pallof Press'],
    recovery:['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press']
@@ -460,10 +465,12 @@
     const sets=prefs.days===4?3:
      Math.max(1,Math.min(3,item.sets,profile.guarded||stressed?2:3));
     const directArms=item.name==='Dumbbell Curl'||item.name==='Triceps Pushdown (Bar)';
+    const supportBench=item.name==='Bench Press';
     const easyRir=week>=4||profile.shortNext||stressed?4:3;
-    // Direct arms retain the approved RPE 7 target on normal Upper days,
-    // then drop to RPE 6 when tapering or protecting a nearby main lift.
-    const rir=directArms?easyRir:Math.max(item.rir,easyRir);
+    // Bench assistance is controlled technique/volume work, never a second
+    // heavy top-set day. Three working sets in a four-day plan; RPE 7 in
+    // normal weeks, easing to RPE 6 when recovery is limited.
+    const rir=directArms||supportBench?easyRir:Math.max(item.rir,easyRir);
     return {...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
      ...(directArms?{min:10,max:15,targetReps:10}:{}),
      reason:item.reason+' Low-fatigue '+profile.role+' assistance, adjusted to selected compounds and recent main-lift effort.'};

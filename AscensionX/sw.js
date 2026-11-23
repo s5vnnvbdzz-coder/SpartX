@@ -1,6 +1,6 @@
 // Keep the standalone AscensionX app fresh on iOS. Navigation and HTML are
 // network-first; all other shell assets remain available offline.
-const CACHE = 'ascensionx-shell-v114';
+const CACHE = 'ascensionx-shell-v115';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', '../assets/energy-can.svg', '../assets/themes/spartanx-ascension-embed.css?v=288', '../assets/ascension/load-guard.js?v=338', '../assets/ascension/cycle-progression.js?v=346', '../assets/ascension/cycle-intelligence.js?v=1', '../assets/themes/uniform-surfaces.css?v=340', '../assets/themes/shared-theme.js?v=340', '../assets/charts/touch-scrub.js?v=340', '../assets/science/evidence-engine.js?v=2', '../assets/science/volume-intelligence.js?v=2', '../assets/ascension/adaptive-programming.js?v=394', '../assets/ascension/cycle-builder-ui.css?v=392', './obsidian-clean.css?v=355'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -16,6 +16,22 @@ self.addEventListener('fetch', event => {
  if(url.origin !== self.location.origin)return;
  // The previous cache-first strategy could keep showing an old programme UI.
  const isDocument=event.request.mode === 'navigate'||url.pathname.endsWith('/AscensionX/index.html')||url.pathname.endsWith('/AscensionX/');
+ if(isDocument&&url.searchParams.get('sxIntegrated')==='1'){
+  // The integrated first-party programme shares its cache with SpartanX.
+  // Immediately use any prefetched page (even if the root service worker
+  // stored it) while quietly validating the latest deployed document.
+  const fresh=fetch(event.request,{cache:'no-store'}).then(response=>{
+   if(response?.ok){
+    const copy=response.clone();
+    event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{}));
+   }
+   return response;
+  });
+  event.waitUntil(fresh.catch(()=>{}));
+  event.respondWith(caches.match(event.request).then(cached=>cached||fresh)
+   .catch(()=>fresh).catch(()=>Response.error()));
+  return;
+ }
  if(isDocument){
   event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{
    if(response && response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));}

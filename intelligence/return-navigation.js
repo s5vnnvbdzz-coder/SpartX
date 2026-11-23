@@ -32,6 +32,17 @@
     url.searchParams.set('from',source);
     url.searchParams.set('sxIntegrated','1');
     link.href=url.toString();
+    // Moving between Intelligence dashboards should not add another
+    // browser-history entry between this module and its SpartanX origin.
+    if(!link.dataset.sxIntegratedBrandRoute){
+     link.dataset.sxIntegratedBrandRoute='true';
+     link.addEventListener('click',event=>{
+      if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||
+         event.shiftKey||event.altKey)return;
+      event.preventDefault();
+      location.replace(link.href);
+     });
+    }
    }
   }
  };

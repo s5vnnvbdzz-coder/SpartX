@@ -94,7 +94,8 @@ for(const [week,expected] of [[4,3],[5,3],[6,0]]){
 assert.equal(schedule.slots[3].day,'SAT');
 api.save({focus:'hypertrophy'});
 assert.equal(api.read(id).focus,'hypertrophy');
-assert.ok(api.schedule().slots[3].exercises.some(ex=>ex.name==='Machine Chest Press'));
+assert.ok(api.schedule().slots[3].exercises.some(ex=>ex.name==='Bench Press'),
+ 'Upper Assistance replaces the Machine Chest Press with Bench Press');
 const history={sessions:[{
  date:'2026-11-09T08:00:00Z',
  exercises:[{name:'Iso-Lateral Row',sxStrengthSizeCompanion:{cycleId:id,week:2},
@@ -318,7 +319,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=393'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=394'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -327,7 +328,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v111')&&embeddedSw.includes('adaptive-programming.js?v=393'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v112')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
@@ -458,4 +459,62 @@ assert.ok(ascHtml.includes("W'+(i+1)+' · '"),
  'Warm-up preview labels W1 through W4 individually');
 assert.ok(ascHtml.includes('asc-spartan-set-line'),
  'Warm-up and working sets are placed on separate rows');
+// Build 394: Upper Assistance uses the barbell bench as a secondary,
+// technique-focused exposure, never another main AscensionX top set.
+for(const focus of ['strength','balanced','hypertrophy']){
+ for(const week of [1,2,3,4,5,6]){
+  const b=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],week)});
+  b.api.save({enabled:true,focus,days:4});
+  const slot=b.api.schedule().slots[3];
+  if(week===6){
+   assert.equal(slot.exercises.length,0,'Week 6 remains accessory free');
+   continue;
+  }
+  assert.equal(slot.exercises[0].name,'Bench Press',focus+' Week '+week+' starts with bench assistance');
+  assert.ok(!slot.exercises.some(ex=>ex.name==='Machine Chest Press'||
+   ex.name==='Incline Dumbbell Press'),'No legacy first chest press in Upper Assistance');
+  assert.equal(slot.exercises[0].sets,3,'Three supplementary bench sets in every loading week');
+  assert.equal(slot.exercises[0].min,8);assert.equal(slot.exercises[0].max,10);
+  assert.equal(slot.exercises[0].targetRpe,week<=3?7:6);
+  assert.equal(slot.exercises[0].suggestedKg,null,'Athlete establishes a safe support bench load');
+  assert.ok(!b.api.plan('Bench Press',week).some(ex=>ex.name==='Bench Press'),
+   'Secondary bench does not appear as a main bench accessory');
+ }
+}
+// Existing or completed support-day sets must not be relabelled as bench
+// presses, because machine loads have different effective resistance.
+const replaceSource=fs.readFileSync(path.join(__dirname,'../workouts/exercise-replacement.js'),'utf8');
+const replaceWindow={};
+vm.runInNewContext(replaceSource,{window:replaceWindow});
+const originalLink={cycleId:id,week:2,day:'SAT',plannedSets:3,plannedExerciseCount:5,
+ repsMin:8,repsMax:12,rir:3};
+function supportDraft(weight='',done=false){
+ return [{name:'Machine Chest Press',
+  sxPowerbuildingSupport:{...originalLink},
+  sets:Array.from({length:3},(_,i)=>({
+   weight:i===0?weight:'',reps:'8',rpe:'',done:i===0&&done,type:'Working Set'
+  }))}];
+}
+const newBench={name:'Bench Press',sets:3,min:8,max:10,rir:3,rest:150,targetRpe:7};
+const forBenchMigration={
+ activeCycle:()=>({id}),
+ enabled:()=>true,
+ schedule:()=>({valid:true,slots:[{kind:'support',day:'SAT',week:2,exercises:[newBench]}]})
+};
+const freshSupport=supportDraft();
+assert.equal(replaceWindow.SpartanXExerciseReplacement.upgradeUntouchedSupportBench(
+ freshSupport,forBenchMigration),1);
+assert.equal(freshSupport[0].name,'Bench Press');
+assert.equal(freshSupport[0].sxPowerbuildingSupport.plannedSets,3);
+assert.equal(freshSupport[0].sets.length,3);
+assert.equal(replaceWindow.SpartanXExerciseReplacement.upgradeUntouchedSupportBench(
+ freshSupport,forBenchMigration),0,'Migration occurs only once');
+for(const entered of [supportDraft('70'),supportDraft('70',true)]){
+ assert.equal(replaceWindow.SpartanXExerciseReplacement.upgradeUntouchedSupportBench(
+  entered,forBenchMigration),0,'Never overwrite an entered or completed set');
+ assert.equal(entered[0].name,'Machine Chest Press');
+}
+assert.ok(hostHtml.includes('upgradeUntouchedSupportBench(work,window.SXAscensionAdaptive)'),
+ 'Restored active SpartanX support draft must invoke safe bench migration');
+
 console.log('AscensionX adaptive programming: tests passed');

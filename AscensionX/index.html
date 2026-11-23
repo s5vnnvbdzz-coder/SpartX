@@ -1039,6 +1039,12 @@ function closeSXWorkoutCycleView(save=false){
  const caller=sxCycleViewCaller;sxCycleViewCaller=null;
  if(caller?.isConnected)caller.focus({preventScroll:true});
  try{window.parent.postMessage({type:'spartx:ascensionViewExit'},location.origin)}catch(_){}
+ // Native View Cycle launched from Workout returns to that tab on Back.
+ if(window.__sxAscNative){
+  const q=new URLSearchParams(location.search);
+  if(q.get('mode')==='view'&&['workout','activeWorkout'].includes(q.get('from')))
+   window.location.assign('../?sxReturn=ascension&sxFrom='+q.get('from'));
+ }
 }
 
 // One actual single-page-application view for BOTH programme editor routes.
@@ -1103,6 +1109,13 @@ function closeCycleEditor(fromPopState=false){
  cycleEditorHasHistoryEntry=false;
  if(returnToSpartanX){
   try{window.parent.postMessage({type:'spartx:ascensionManageExit'},location.origin)}catch(_){}
+ }
+ // Keep first-party Manage/Build Cycle Back consistent with SpartanX.
+ if(window.__sxAscNative&&!fromPopState){
+  const q=new URLSearchParams(location.search);
+  if(['manage','setup'].includes(q.get('mode'))&&
+     ['workout','activeWorkout'].includes(q.get('from')))
+   window.location.assign('../?sxReturn=ascension&sxFrom='+q.get('from'));
  }
 }
 document.addEventListener('keydown',event=>{

@@ -1374,6 +1374,13 @@ function resetEmbeddedAscensionOpening(){
  });
 }
 function showScreen(id,addHistory=true){
+ // In the integrated first-party page all actual workout logging belongs to
+ // SpartanX. Do not open AscensionX's historical standalone workout logger.
+ if(window.__sxAscNative&&id==='workout'){
+  if(state.cycle.created&&selectedLifts().length)continueAscensionTraining();
+  else openCycleEditor();
+  return;
+ }
  // Build/Edit Programme is a navigable SPA page, shared with Workout Manage Cycle.
  if(id==='cycle'||id==='programme'){
   openCycleEditor();

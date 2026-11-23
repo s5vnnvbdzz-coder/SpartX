@@ -69,14 +69,15 @@ shadow.querySelector('main').appendChild(ascensionToolCard);
 // AscensionX programme page. The SPA's in-memory scroll map is lost during
 // this full-page navigation, so the return position must survive one reload.
 const SX_ASCENSION_RETURN_SCROLL_KEY='sx_ascension_return_scroll_v1';
-function rememberAscensionReturnScroll(source){
+function rememberAscensionReturnScroll(source,kind='ascension'){
  const page=document.getElementById(source);
  const root=document.scrollingElement||document.documentElement;
  const top=Math.max(0,window.scrollY||0,root?.scrollTop||0,document.body.scrollTop||0);
  const inner=Math.max(0,page?.scrollTop||0);
  const toolsMain=source==='tools'?Math.max(0,shadow.querySelector('main')?.scrollTop||0):0;
  try{
-  sessionStorage.setItem(SX_ASCENSION_RETURN_SCROLL_KEY,JSON.stringify({
+  const key=kind==='intelligence'?'sx_intelligence_return_scroll_v1':SX_ASCENSION_RETURN_SCROLL_KEY;
+  sessionStorage.setItem(key,JSON.stringify({
    source,top,inner,toolsMain,at:Date.now()
   }));
  }catch(_){}
@@ -94,16 +95,45 @@ if(sxIntelligenceCard){
  shadow.querySelector('main').appendChild(sxIntelligenceCard);
  sxIntelligenceCard.classList.add('sx-tools-intelligence-card');
  sxIntelligenceCard.querySelectorAll('a[href^="./intelligence/"]').forEach(a=>{
-  a.href='./intelligence/?from=tools';
+  a.href='./intelligence/?from=tools&sxIntegrated=1';
+  a.addEventListener('click',event=>{
+   if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||
+      event.shiftKey||event.altKey)return;
+   rememberAscensionReturnScroll('tools','intelligence');
+  });
  });
 }
 const sxToolInfoStyles=document.createElement('style');
 sxToolInfoStyles.textContent=
  '.sx-tools-intelligence-card{color:var(--txt)}.sx-tools-intelligence-card h2{font-size:17px}'+
- '.sx-tools-intelligence-card a.sx-intelligence-entry-link{color:var(--lime)!important;text-decoration:none}'+
- '#ascensionXToolCard .ascension-launch{display:flex!important;align-items:center;justify-content:center;gap:9px;min-height:47px;width:100%;font-size:12px;font-weight:850;letter-spacing:.7px;text-decoration:none;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff09}'+
+ '#ascensionXToolCard .ascension-launch,.sx-tools-intelligence-card a.sx-intelligence-entry-link{display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;min-height:47px!important;width:100%!important;box-sizing:border-box!important;margin-top:13px!important;padding:12px 15px!important;font-size:12px!important;line-height:1.25!important;font-weight:850!important;letter-spacing:.7px!important;text-decoration:none!important;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px!important;box-shadow:inset 0 1px 0 #ffffff09!important}'+
  '.page-title-row .page-actions{display:none!important}';
 shadow.appendChild(sxToolInfoStyles);
+
+// Low-priority document prefetch reduces the first navigation delay on
+// compatible browsers. Do not load either analytics engine into SpartanX
+// or block the Workout tab; each module retains its own first-party route.
+let sxModulesPrefetched=false;
+function prefetchTrainingModules(){
+ if(sxModulesPrefetched||navigator.connection?.saveData)return;
+ if(!document.getElementById('tools')?.classList.contains('active'))return;
+ sxModulesPrefetched=true;
+ const urls=[
+  './intelligence/?from=tools&sxIntegrated=1',
+  './AscensionX/?sxIntegrated=1&from=tools&mode=home'
+ ];
+ for(const href of urls){
+  const link=document.createElement('link');
+  link.rel='prefetch';link.as='document';link.href=new URL(href,location.href).href;
+  document.head.appendChild(link);
+ }
+}
+document.getElementById('trackerNav')?.addEventListener('click',()=>{
+ requestAnimationFrame(prefetchTrainingModules);
+});
+window.addEventListener('pageshow',prefetchTrainingModules,{passive:true});
+if(document.readyState==='complete')requestAnimationFrame(prefetchTrainingModules);
+else window.addEventListener('load',prefetchTrainingModules,{once:true});
 
 // Existing Workout quick-access and programme buttons continue to call this
 // compatibility name; now it navigates to the SAME first-party programme page.

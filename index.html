@@ -2257,7 +2257,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
 <section id="routineBuilderScreen" class="screen"><div class="row between"><div><div class="eyebrow">ROUTINE BUILDER</div><h1>Create routine</h1></div><button type="button" class="back-button spartan-back-button sx-page-back" id="cancelRoutineBuilder"><span class="sx-page-back-arrow" aria-hidden="true">←</span></button></div><div class="card"><label for="routineName">ROUTINE NAME</label><input id="routineName" maxlength="40" placeholder="e.g. Upper body A"><div class="row between" style="margin-top:15px"><h2>Exercises</h2><span class="tiny" id="routineExerciseCount">0 exercises</span></div><div id="routineDraftList"><p class="muted tiny">Add exercises to build your routine.</p></div><button id="addRoutineExercise" class="secondary" style="width:100%;margin-top:10px">＋ ADD EXERCISE</button><button id="saveRoutine" class="start-workout-button">SAVE ROUTINE</button></div></section>
 <section id="activeWorkout" class="screen">
  <div class="sx-active-workout-name"><h1 id="activeWorkoutName" role="button" tabindex="0" title="Tap to rename workout" aria-label="Rename active workout">Workout</h1></div>
-<div class="session-summary-sticky" id="sessionSummarySticky"><div class="session-summary-bar"><div class="summary-metric session-duration-metric"><span>DURATION</span><div class="session-duration-control"><strong id="sessionClock">00:00:00</strong><button type="button" id="sessionPauseButton" class="session-pause-button" aria-label="Pause workout timer" title="Pause workout timer">Ⅱ</button></div></div><div class="summary-metric"><span>VOLUME</span><strong id="liveVolume">0 kg</strong></div><div class="summary-metric"><span>SETS</span><strong id="liveSets">0</strong></div><button type="button" class="muscle-preview" id="openMuscleDiagram" aria-label="View muscles worked" title="View muscles worked"><div id="muscleDiagram"></div></button><button type="button" class="summary-dismiss" id="dismissSessionSummary" aria-label="Hide session summary">×</button></div></div><div id="discardWorkoutOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="discardWorkoutTitle"><div class="detail-panel" style="max-width:360px;text-align:center"><div class="eyebrow">END SESSION</div><h2 id="discardWorkoutTitle" style="font-size:22px;margin:10px 0">Are you sure?</h2><p class="muted" style="margin:0 0 20px">Do you want to discard this workout? Your exercises and logged sets will be lost.</p><div class="row" style="gap:10px"><button id="cancelDiscardWorkout" class="secondary" type="button" style="flex:1">NO</button><button id="confirmDiscardWorkout" type="button" style="flex:1;background:#e34b4b;color:#fff">YES</button></div></div></div><div id="muscleOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2>Muscles worked</h2><button class="secondary small" id="closeMuscleDiagram">Close</button></div><div id="muscleDiagramLarge" class="muscle-diagram"></div><div id="muscleLegend" class="muscle-legend"></div></div></div><div id="prOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2 id="prTitle">Personal records</h2><button class="secondary small" id="closePr">Close</button></div><div id="prDetails"></div></div></div>
+<div class="session-summary-sticky" id="sessionSummarySticky"><div class="session-summary-bar"><div class="summary-metric session-duration-metric"><span>DURATION</span><div class="session-duration-control"><strong id="sessionClock">00:00:00</strong><button type="button" id="sessionPauseButton" class="session-pause-button" aria-label="Pause workout timer" title="Pause workout timer">Ⅱ</button></div></div><div class="summary-metric"><span>VOLUME</span><strong id="liveVolume">0 kg</strong></div><div class="summary-metric"><span>SETS</span><strong id="liveSets">0</strong></div><button type="button" class="muscle-preview" id="openMuscleDiagram" aria-label="View muscles worked" title="View muscles worked"><div id="muscleDiagram"></div></button><button type="button" class="summary-dismiss" id="dismissSessionSummary" aria-label="Hide session summary">×</button></div></div><div id="discardWorkoutOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="discardWorkoutTitle"><div class="detail-panel" style="max-width:360px;text-align:center"><div class="eyebrow">END SESSION</div><h2 id="discardWorkoutTitle" style="font-size:22px;margin:10px 0">Are you sure?</h2><p class="muted" style="margin:0 0 20px">Do you want to discard this workout? Your exercises and logged sets will be lost.</p><div class="row" style="gap:10px"><button id="cancelDiscardWorkout" class="secondary" type="button" style="flex:1">NO</button><button id="confirmDiscardWorkout" type="button" style="flex:1;background:#e34b4b;color:#fff">YES</button></div></div></div><div id="muscleOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2>Muscles worked</h2><button class="secondary small" id="closeMuscleDiagram">Close</button></div><div id="muscleDiagramLarge" class="muscle-diagram"></div><div id="muscleLegend" class="muscle-legend"></div></div></div><div id="prOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prTitle"><div class="detail-panel sx-achievement-modal"><div class="row between"><div><div class="eyebrow">NEW PERSONAL RECORD</div><h2 id="prTitle">Achievements</h2></div><button type="button" class="secondary small" id="closePr" aria-label="Close achievement details">✕</button></div><div id="prDetails" aria-live="polite"></div></div></div>
 <div id="exerciseList"></div>
 <button id="openExerciseLibrary" class="library-add-button">＋ ADD EXERCISE</button>
 <div id="regularWorkoutActions" class="row" style="display:flex;gap:10px;margin-top:16px;align-items:stretch"><button type="button" id="discardWorkout" class="secondary" style="flex:1;min-width:0;border-color:#a94444;color:#ff7777;padding:15px 8px;font-weight:850">DISCARD</button><button type="button" id="finishWorkoutBottom" class="start-workout-button" style="flex:1;min-width:0;margin:0;padding:15px 8px;font-weight:850">✓ FINISH &amp; SAVE</button></div>
@@ -2432,6 +2432,32 @@ body.sx-black-yellow .eyebrow,body.sx-black-yellow .brand span{color:#f4cd37}
 body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),inset 0 0 18px rgba(244,205,55,.035)!important}
 @media(prefers-reduced-motion:reduce){body.sx-black-yellow *,body.sx-black-yellow *::before,body.sx-black-yellow *::after{animation-duration:.01ms!important}}
 </style>
+
+<style id="sx-live-achievement-style">
+#activeWorkout .exercise-title-row .sx-live-pr-slot{display:inline-flex;align-items:center;flex:0 0 auto}
+#activeWorkout .exercise-title-row .sx-live-pr-slot:empty{display:none}
+#activeWorkout .exercise-title-row .sx-live-pr-button{width:32px;height:32px;min-width:32px;min-height:32px;
+ padding:0!important;display:inline-flex;align-items:center;justify-content:center;
+ background:linear-gradient(145deg,#41351f,#1b2025)!important;
+ color:#f4d277!important;border:1px solid #93773e!important;
+ box-shadow:0 0 12px #c5a34b24!important;border-radius:10px;cursor:pointer}
+#activeWorkout .exercise-title-row .sx-live-pr-button:focus-visible{outline:2px solid #f4d277;outline-offset:2px}
+#activeWorkout .exercise-title-row .exercise-title{min-width:0}
+#prOverlay .sx-achievement-modal{max-width:390px;width:calc(100% - 26px);border:1px solid #96763e;
+ border-radius:17px;background:var(--panel);color:var(--txt)}
+#prOverlay .sx-achievement-modal .eyebrow{color:#e5c16e}
+#prOverlay .sx-achievement-modal h2{font-size:21px;margin:4px 0 0}
+#prOverlay .sx-achievement-intro{color:var(--muted);font-size:12px;margin:14px 0;line-height:1.45}
+#prOverlay .sx-achievement-list{display:grid;gap:9px}
+#prOverlay .sx-achievement-entry{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+#prOverlay .sx-achievement-entry-icon{font-size:22px;flex-shrink:0}
+#prOverlay .sx-achievement-entry-copy{min-width:0;display:grid;gap:4px}
+#prOverlay .sx-achievement-entry-copy strong{font-size:13px;color:var(--txt)}
+#prOverlay .sx-achievement-value{font-size:18px;font-weight:800;color:#eac778}
+#prOverlay .sx-achievement-meta,#prOverlay .sx-achievement-previous{font-size:11px;line-height:1.45;color:var(--muted)}
+#prOverlay .sx-achievement-footnote{font-size:11px;line-height:1.45;color:var(--muted);margin:14px 0 0}
+@media(max-width:400px){#activeWorkout .exercise-title-row .sx-live-pr-button{width:28px;height:28px;min-width:28px;min-height:28px}}
+</style>
 <style id="sx-cycle-rpe-comparison-styles">
 /* Only the original RPE gauge changes colour; set layout and theme stay intact. */
 #rpeSheetComparison.sx-rpe-sheet-comparison{
@@ -2463,6 +2489,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/workouts/exercise-replacement.js?v=394"></script>
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
+<script src="./assets/workouts/session-achievements.js?v=395"></script>
 <script src="./assets/exercises/exercise-logging-guide.js?v=303"></script>
 <script src="./assets/ranks/xp-engine.js?v=372"></script>
 <script>
@@ -3079,9 +3106,58 @@ function isCycleRpeEligible(exercise){
   exercise?.bodybuildingLink||
   /(?:SpartanX cycle:|Imported from (?:AscensionX|5\/3\/1|SpartanX Tools))/i.test(exercise?.notes||''));
 }
+
+const sxTrophySvg='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v9a4 4 0 0 1-8 0V3Z"/><path d="M8 5H4v2a5 5 0 0 0 5 5M16 5h4v2a5 5 0 0 1-5 5M12 16v3M8 21h8"/></svg>';
+function sxLiveAchievements(i,history){
+ const api=window.SpartanXSessionAchievements,exercise=work[i];
+ if(!sessionActive||editingSessionId!==null||!api||!exercise||
+    window.SpartanXCardio?.isCardio(exercise.name))return [];
+ return api.forExercise(exercise,history||api.historyIndex(db.sessions||[]));
+}
+function sxLiveAchievementButton(i,name,items){
+ if(!items.length)return '';
+ return '<button type="button" class="sx-live-pr-button" onclick="openSessionAchievement('+i+')"'+
+  ' title="View new personal records" aria-label="View '+items.length+
+  ' new achievement'+(items.length===1?'':'s')+' for '+esc(name)+'">'+
+  sxTrophySvg+'</button>';
+}
+function refreshLiveAchievementBadge(i){
+ const slot=$('exerciseList')?.children[i]?.querySelector('[data-sx-live-pr-slot]');
+ if(slot)slot.innerHTML=sxLiveAchievementButton(i,work[i]?.name||'',sxLiveAchievements(i));
+}
+window.openSessionAchievement=i=>{
+ const ex=work[i],records=sxLiveAchievements(i);
+ if(!ex||!records.length)return;
+ const modal=$('prOverlay');
+ $('prTitle').textContent=ex.name;
+ $('prDetails').innerHTML='<p class="sx-achievement-intro">New personal records from completed sets in this workout.</p>'+
+  '<div class="sx-achievement-list">'+records.map(record=>{
+   const estimated=record.kind==='estimated';
+   const result=estimated?displayWeight(record.valueKg)+' estimated 1RM':
+    displayWeight(record.kg)+' × '+record.reps;
+   const previous=record.previousKg==null?'First comparable recorded set':
+    'Previous comparable best: '+displayWeight(record.previousKg);
+   return '<div class="sx-achievement-entry"><span class="sx-achievement-entry-icon" aria-hidden="true">🏆</span>'+
+    '<div class="sx-achievement-entry-copy"><strong>'+esc(record.title)+'</strong>'+
+    '<span class="sx-achievement-value">'+esc(result)+'</span>'+
+    '<span class="sx-achievement-meta">'+esc(record.subtitle)+'</span>'+
+    '<span class="sx-achievement-previous">'+esc(previous)+'</span></div></div>';
+  }).join('')+'</div>'+
+  '<p class="sx-achievement-footnote">A tested 1RM is a completed single. Estimated 1RM uses the Epley formula and is not a tested maximum.</p>';
+ modal.classList.remove('hidden');
+ $('closePr')?.focus();
+};
+$('prOverlay').addEventListener('click',event=>{
+ if(event.target===event.currentTarget)$('prOverlay').classList.add('hidden');
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&!$('prOverlay').classList.contains('hidden'))
+  $('prOverlay').classList.add('hidden');
+});
 function renderWork(){
  // An indexed snapshot keeps per-set comparisons quick even with long workout histories.
  const rpeHistory=window.SpartanXRpeTrend?.historyIndex(db.sessions||[]);
+ const achievementHistory=window.SpartanXSessionAchievements?.historyIndex(db.sessions||[]);
  $('exerciseList').innerHTML=work.map((e,i)=>{
   if(window.SpartanXCardio?.isCardio(e.name)){
    const key=window.SpartanXCardio.canonical(e.name).toLowerCase();
@@ -3093,6 +3169,7 @@ function renderWork(){
   // The picker always shows the base interval. +1:00 is applied only
   // to the countdown after the final warm-up and numbered working sets.
   const displayRest=Math.max(1,Math.round(Number(e.rest)||120));
+  const newRecords=sxLiveAchievements(i,achievementHistory);
    const rows=e.sets.map((s,j)=>{
    const previousSet=previousExercise?.sets[j],previousText=previousSet?displayWeight(previousSet.weight)+' × '+previousSet.reps:'—';
    // Programme-only gauge: compare exact exercise, kg load and repetitions.
@@ -3106,7 +3183,7 @@ function renderWork(){
    const normalNumber=e.sets.slice(0,j+1).filter(x=>!['Warm-up','Backdown Set','Failure Set'].includes(x.type)).length;
    return '<div class="set-entry '+(s.done?'is-complete':'')+'"><div class="set-row"><span class="set-type-wrap"><button type="button" class="set-number set-type-picker set-type-trigger" aria-label="Choose set type" onclick="openSetTypeSheet('+i+','+j+')">'+(marker||normalNumber)+'</button><span class="set-type-display">'+(marker||normalNumber)+'</span></span><span class="previous-value">'+esc(previousText)+'</span><button type="button" class="set-number-pad-trigger" aria-label="Edit weight" onclick="openNumberPad('+i+','+j+',0)">'+esc(weightValueFromKg(+s.weight||0)||'—')+'</button><button type="button" class="set-number-pad-trigger" aria-label="Edit reps" onclick="openNumberPad('+i+','+j+',1)">'+esc(s.reps||'—')+'</button><button type="button" class="set-rpe-trigger'+trendAttrs+' onclick="openRpeSheet('+i+','+j+')"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 17a9 9 0 1 1 15.6 0"/><path d="M12 14.5 16.5 8"/><circle cx="12" cy="14.5" r="1.5"/></svg><span>'+(s.rpe!==''&&s.rpe!=null?esc(s.rpe):'')+'</span></button><input class="done" type="checkbox" '+(s.done?'checked':'')+' aria-label="Complete set" onchange="completeSet('+i+','+j+',this.checked)"></div></div>';
   }).join('');
-  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><button type="button" class="exercise-title sx-exercise-stats-link" data-live-exercise-link="'+esc(e.name)+'" aria-label="View statistics for '+esc(e.name)+'">'+esc(e.name)+'</button><button type="button" class="exercise-menu secondary small sx-exercise-menu-trigger" onclick="openExerciseActions('+i+')" aria-label="Options for '+esc(e.name)+'" aria-haspopup="dialog">⋮</button></div>'+supersetBannerFor(i)+'<textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-duration-setting"><label for="restDuration-'+i+'">BASE REST INTERVAL'+(ascensionRestPlan(i,e.sets.findIndex(s=>isNumberedWorkoutSet(s))).seconds>displayRest?' · MAIN SETS +1:00':'')+'</label><select id="restDuration-'+i+'" aria-label="Rest interval for '+esc(e.name)+'" onchange="setRest('+i+',this.value)">'+Array.from(new Set([...Array.from({length:20},(_,k)=>(k+1)*15),...Array.from({length:14},(_,k)=>330+k*30),displayRest])).sort((a,b)=>a-b).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
+  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><button type="button" class="exercise-title sx-exercise-stats-link" data-live-exercise-link="'+esc(e.name)+'" aria-label="View statistics for '+esc(e.name)+'">'+esc(e.name)+'</button><span class="sx-live-pr-slot" data-sx-live-pr-slot>'+sxLiveAchievementButton(i,e.name,newRecords)+'</span><button type="button" class="exercise-menu secondary small sx-exercise-menu-trigger" onclick="openExerciseActions('+i+')" aria-label="Options for '+esc(e.name)+'" aria-haspopup="dialog">⋮</button></div>'+supersetBannerFor(i)+'<textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-duration-setting"><label for="restDuration-'+i+'">BASE REST INTERVAL'+(ascensionRestPlan(i,e.sets.findIndex(s=>isNumberedWorkoutSet(s))).seconds>displayRest?' · MAIN SETS +1:00':'')+'</label><select id="restDuration-'+i+'" aria-label="Rest interval for '+esc(e.name)+'" onchange="setRest('+i+',this.value)">'+Array.from(new Set([...Array.from({length:20},(_,k)=>(k+1)*15),...Array.from({length:14},(_,k)=>330+k*30),displayRest])).sort((a,b)=>a-b).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
  }).join('');
  updateLiveStats();
 }
@@ -3195,7 +3272,7 @@ window.openExerciseActions=i=>{
  if(!sessionActive||!Number.isInteger(i)||!work[i])return;
  sxActiveActionsUI?.openMenu(i);
 };
-window.setVal=(i,j,k,v)=>{work[i].sets[j][['weight','reps','rpe'][k]]=k===0?(v===''?'':weightValueToKg(+v).toFixed(3)):v;saveDraft();updateLiveStats()};
+window.setVal=(i,j,k,v)=>{work[i].sets[j][['weight','reps','rpe'][k]]=k===0?(v===''?'':weightValueToKg(+v).toFixed(3)):v;saveDraft();updateLiveStats();refreshLiveAchievementBadge(i)};
 let pendingSetType=null;window.openSetTypeSheet=(i,j)=>{pendingSetType={i,j};const sheet=$('setTypeSheet');sheet.classList.add('is-open');sheet.setAttribute('aria-hidden','false');};window.closeSetTypeSheet=()=>{const sheet=$('setTypeSheet');sheet.classList.remove('is-open');sheet.setAttribute('aria-hidden','true');pendingSetType=null;};$('setTypeSheet').querySelectorAll('[data-set-type]').forEach(btn=>btn.addEventListener('click',()=>{if(!pendingSetType)return;const {i,j}=pendingSetType;closeSetTypeSheet();window.setType(i,j,btn.dataset.setType);}));
 function updateRpeComparisonPreview(value){
  const status=$('rpeSheetComparison');
@@ -3403,6 +3480,7 @@ window.completeSet=(i,j,done)=>{
  }
  if(done&&editingSessionId===null&&(!window.SpartanXCardio?.isCardio(work[i].name)||
   window.SXActiveExerciseActions?.badge(work,i)))startRest(i,j);
+ refreshLiveAchievementBadge(i);
  updateLiveStats();saveDraft();
 };
 function isNumberedWorkoutSet(set){
@@ -5245,7 +5323,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=394;
+ const BUILD=395;
  const label=document.getElementById('sxCurrentBuildLabel');
  if(label)label.textContent='Build '+BUILD;
  if(status)status.textContent='Build '+BUILD;

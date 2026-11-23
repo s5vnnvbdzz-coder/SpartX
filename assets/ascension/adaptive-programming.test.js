@@ -303,7 +303,7 @@ assert.ok(rootHost.includes("rememberAscensionReturnScroll('tools')")&&
  rootHost.includes('rememberAscensionReturnScroll(from)')&&
  rootHost.includes("source,top,inner,toolsMain,at:Date.now()"),
  'Both the Tools link and Workout quick-access preserve their launch position');
-assert.ok(hostHtml.includes("sxPageScrollPositions.set(source,{top:ascPosition.top,inner:ascPosition.inner})")&&
+assert.ok(hostHtml.includes("sxPageScrollPositions.set(source,{top:modulePosition.top,inner:modulePosition.inner})")&&
  hostHtml.includes("window.addEventListener('load',afterLayout"),
  'Return to AscensionX source tab restores position after page layout');
 assert.ok(ascHtml.includes(`a.innerHTML=\'<span class="sx-page-back-arrow"`)&&
@@ -313,6 +313,22 @@ assert.ok(ascHtml.includes(`a.innerHTML=\'<span class="sx-page-back-arrow"`)&&
 assert.ok(rootHost.includes('class="ascension-launch">OPEN ASCENSIONX</a>')&&
  !rootHost.includes('OPEN ASCENSIONX <span'),
  'Tools AscensionX launch button has no decorative arrow');
+
+// Intelligence now uses the same first-party return navigation as AscensionX.
+assert.ok(hostHtml.includes("'sx_intelligence_return_scroll_v1'")&&
+ hostHtml.includes("query.get('sxReturn')==='ascension'?")&&
+ hostHtml.includes("['intelligence','ascension'].includes(query.get('sxReturn'))"),
+ 'Returning from Intelligence restores the original Tools/Workout scroll position');
+assert.ok(rootHost.includes("rememberAscensionReturnScroll('tools','intelligence')")&&
+ rootHost.includes("'.sx-tools-intelligence-card a.sx-intelligence-entry-link")===false&&
+ rootHost.includes('sxIntegrated=1'),
+ 'Intelligence Tools button saves its source and uses an integrated module route');
+assert.ok(rootHost.includes("prefetchTrainingModules()")&&
+ rootHost.includes("link.rel='prefetch'"),
+ 'Tools prefetches integrated programme pages without mounting duplicate engines');
+assert.ok(hostHtml.includes('OPEN SPARTANX INTELLIGENCE</a>')&&
+ !hostHtml.includes('OPEN SPARTANX INTELLIGENCE ↗</a>'),
+ 'SpartanX Intelligence launch no longer displays an arrow');
 
 // A completed support workout must not be invalidated by new prescription
 // sizes after an engine update (old Week 5 was one set).
@@ -351,7 +367,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v114')&&embeddedSw.includes('adaptive-programming.js?v=394'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v115')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&

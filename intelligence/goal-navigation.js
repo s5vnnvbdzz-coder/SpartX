@@ -22,7 +22,10 @@
   const explicit=params.get('goal');
   const incomingFrom=params.get('from');
   const launchFrom=['workout','home','profile','tools','activeWorkout'].includes(incomingFrom)?incomingFrom:null;
-  const sourceSuffix=launchFrom?'&from='+encodeURIComponent(launchFrom):'';
+  // Keep both the originating SpartanX screen and integrated module mode
+  // when moving between strength, bodybuilding and weight-loss dashboards.
+  const sourceSuffix=(launchFrom?'&from='+encodeURIComponent(launchFrom):'')+
+   (params.get('sxIntegrated')==='1'?'&sxIntegrated=1':'');
   const requestedSection=validSection(params.get('tab'))||savedSection()||'overview';
   let stored='powerlifting';
   try{const value=window.localStorage.getItem(STORAGE_KEY);if(KNOWN.includes(value))stored=value}catch(_){}
@@ -57,11 +60,11 @@
     }catch(_){}
     const destination='?goal='+encodeURIComponent(value)+'&tab='+encodeURIComponent(section)+sourceSuffix;
     if(MAIN){
-      if(value!=='powerlifting')window.location.assign('./goals.html'+destination);
+      if(value!=='powerlifting')window.location.replace('./goals.html'+destination);
       return;
     }
     if(value==='powerlifting'){
-      window.location.assign('./'+destination);
+      window.location.replace('./'+destination);
       return;
     }
     window.history.replaceState(null,'','./goals.html'+destination);

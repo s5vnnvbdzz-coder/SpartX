@@ -131,6 +131,12 @@ function prefetchTrainingModules(){
 document.getElementById('trackerNav')?.addEventListener('click',()=>{
  requestAnimationFrame(prefetchTrainingModules);
 });
+// Includes carousel gestures and programmatic navigation to Tools, not only
+// bottom-tab taps.
+const sxToolsScreen=document.getElementById('tools');
+if(sxToolsScreen)new MutationObserver(()=>{
+ if(sxToolsScreen.classList.contains('active'))prefetchTrainingModules();
+}).observe(sxToolsScreen,{attributes:true,attributeFilter:['class']});
 window.addEventListener('pageshow',prefetchTrainingModules,{passive:true});
 if(document.readyState==='complete')requestAnimationFrame(prefetchTrainingModules);
 else window.addEventListener('load',prefetchTrainingModules,{once:true});

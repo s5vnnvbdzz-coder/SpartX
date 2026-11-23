@@ -306,7 +306,7 @@ assert.ok(rootHost.includes("rememberAscensionReturnScroll('tools')")&&
 assert.ok(hostHtml.includes("sxPageScrollPositions.set(source,{top:ascPosition.top,inner:ascPosition.inner})")&&
  hostHtml.includes("window.addEventListener('load',afterLayout"),
  'Return to AscensionX source tab restores position after page layout');
-assert.ok(ascHtml.includes("a.innerHTML='<span=\\\"sx-page-back-arrow\\\"")&&
+assert.ok(ascHtml.includes(`a.innerHTML=\'<span class="sx-page-back-arrow"`)&&
  ascHtml.includes("history.scrollRestoration='manual'")&&
  ascHtml.includes("window.addEventListener('pageshow',afterNativeLayout"),
  'Native AscensionX uses visible back-arrow component and starts at the top');

@@ -2114,7 +2114,7 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
     </div>
     <span aria-hidden="true" style="font-size:30px;line-height:1;color:var(--lime)">✦</span>
   </div>
-  <a class="sx-intelligence-entry-link" href="./intelligence/" style="display:flex;align-items:center;justify-content:center;margin-top:13px;padding:12px 15px;border:1px solid color-mix(in srgb,var(--lime) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--lime) 9%,var(--panel2));color:var(--lime);font-size:12px;letter-spacing:.8px;font-weight:850;text-decoration:none">OPEN SPARTANX INTELLIGENCE ↗</a>
+  <a class="sx-intelligence-entry-link" href="./intelligence/?sxIntegrated=1" style="display:flex;align-items:center;justify-content:center;margin-top:13px;padding:12px 15px;border:1px solid color-mix(in srgb,var(--lime) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--lime) 9%,var(--panel2));color:var(--lime);font-size:12px;letter-spacing:.8px;font-weight:850;text-decoration:none">OPEN SPARTANX INTELLIGENCE</a>
 </section>
 
 <div class="row between" style="margin:20px 2px 8px"><div><div class="eyebrow">YOUR TRAINING JOURNEY</div><h2 style="margin:5px 0 0">Workout Feed</h2></div><span class="tiny" id="workoutFeedCount">0 workouts</span></div>
@@ -3707,6 +3707,12 @@ document.addEventListener('click',event=>{
   const source=document.querySelector('main > .screen.active')?.id||'workout';
   sessionStorage.setItem(SX_INTELLIGENCE_RETURN_KEY,JSON.stringify({screen:source,at:Date.now()}));
   sessionStorage.setItem('sx_intelligence_launch_source_v1',source);
+  const root=document.scrollingElement||document.documentElement;
+  const top=Math.max(0,window.scrollY||0,root?.scrollTop||0,document.body.scrollTop||0);
+  sessionStorage.setItem('sx_intelligence_return_scroll_v1',JSON.stringify({
+   source,top,inner:Math.max(0,document.getElementById(source)?.scrollTop||0),
+   toolsMain:0,at:Date.now()
+  }));
   const destination=new URL(anchor.getAttribute('href'),location.href);
   destination.searchParams.set('from',source);
   anchor.href=destination.toString();
@@ -4730,11 +4736,12 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
  const sourceHint=query.get('sxFrom');
  const source=fromModule&&['home','workout','activeWorkout','profile','tools'].includes(sourceHint)?sourceHint:null;
  if(!fromModule&&!context)return;
- // The launch snapshot belongs to one AscensionX navigation and expires
- // automatically. Never apply a stale Tools position to another screen.
- let ascPosition=null;
- if(query.get('sxReturn')==='ascension'){
-  const key='sx_ascension_return_scroll_v1';
+ // The launching tab and its scroll position survive navigation to either
+ // first-party module; stale or mismatched snapshots are ignored.
+ let modulePosition=null;
+ if(['intelligence','ascension'].includes(query.get('sxReturn'))){
+  const key=query.get('sxReturn')==='ascension'?
+   'sx_ascension_return_scroll_v1':'sx_intelligence_return_scroll_v1';
   try{
    const saved=JSON.parse(sessionStorage.getItem(key)||'null');
    sessionStorage.removeItem(key);
@@ -4742,7 +4749,7 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
       Date.now()-saved.at>=0&&Date.now()-saved.at<3600000&&
       Number.isFinite(saved.top)&&Number.isFinite(saved.inner)&&
       saved.top>=0&&saved.inner>=0)
-    ascPosition={top:saved.top,inner:saved.inner,
+    modulePosition={top:saved.top,inner:saved.inner,
      toolsMain:Math.max(0,Number(saved.toolsMain)||0)};
   }catch(_){}
  }
@@ -4755,17 +4762,17 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
  }else if(document.getElementById(original)?.classList.contains('screen')){
   switchScreen(original,{instant:true});
  }
- if(ascPosition&&source){
-  sxPageScrollPositions.set(source,{top:ascPosition.top,inner:ascPosition.inner});
+ if(modulePosition&&source){
+  sxPageScrollPositions.set(source,{top:modulePosition.top,inner:modulePosition.inner});
   let userMoved=false;
   for(const type of ['touchstart','pointerdown','wheel','keydown'])
    document.addEventListener(type,()=>{userMoved=true},{passive:true,once:true});
   const restore=()=>{
    if(userMoved||document.querySelector('main > .screen.active')?.id!==source)return;
-   sxScrollToScreenPosition(source,ascPosition);
+   sxScrollToScreenPosition(source,modulePosition);
    if(source==='tools'){
     const toolMain=document.getElementById('toolsReplica')?.shadowRoot?.querySelector('main');
-    if(toolMain)toolMain.scrollTop=ascPosition.toolsMain;
+    if(toolMain)toolMain.scrollTop=modulePosition.toolsMain;
    }
   };
   // Re-apply after the Tools component and page layout have mounted. The
@@ -5006,7 +5013,7 @@ document.addEventListener('keydown',e=>{
 });
 $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=359',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=hashScreen==='tools'?'tools':'home';try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=356"></script>
-<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=401"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=392"></script>
+<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=402"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/quick-access.js?v=392"></script>
 <script src="./assets/navigation/main-carousel.js"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.

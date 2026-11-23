@@ -2252,7 +2252,7 @@ function init(){
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=105').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=114').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.
@@ -2275,6 +2275,29 @@ init();
  if(query.get('sxIntegrated')!=='1')return;
  window.__sxAscNative=true;
  document.body.classList.add('sx-ascension-native-page');
+ // iOS Safari can apply old document scroll restoration after AscensionX
+ // has already rendered Home. Force the first entry to begin at the top,
+ // without jumping if the athlete has started interacting.
+ try{history.scrollRestoration='manual'}catch(_){}
+ document.documentElement.style.scrollBehavior='auto';
+ let nativeUserInteracted=false;
+ const markNativeInteraction=()=>{nativeUserInteracted=true};
+ for(const type of ['touchstart','pointerdown','wheel','keydown'])
+  document.addEventListener(type,markNativeInteraction,{passive:true,once:true});
+ const nativeScrollTop=()=>{
+  if(nativeUserInteracted)return;
+  window.scrollTo({top:0,left:0,behavior:'instant'});
+  if(document.scrollingElement)document.scrollingElement.scrollTop=0;
+  document.documentElement.scrollTop=0;
+  document.body.scrollTop=0;
+ };
+ const afterNativeLayout=()=>{
+  nativeScrollTop();
+  requestAnimationFrame(()=>{nativeScrollTop();requestAnimationFrame(nativeScrollTop)});
+ };
+ afterNativeLayout();
+ window.addEventListener('load',afterNativeLayout,{once:true,passive:true});
+ window.addEventListener('pageshow',afterNativeLayout,{once:true,passive:true});
  const validSources=new Set(['tools','home','workout','activeWorkout','profile']);
  const source=validSources.has(query.get('from'))?query.get('from'):'tools';
  const back=new URL('../',location.href);
@@ -2288,7 +2311,7 @@ init();
   a.className='iconbtn sx-page-back';
   a.setAttribute('aria-label','Back to SpartanX '+source);
   a.setAttribute('title','Back to '+source);
-  a.textContent='←';
+  a.innerHTML='<span class="sx-page-back-arrow" aria-hidden="true">←</span>';
   a.style.cssText='display:grid;place-items:center;text-decoration:none;font-size:20px';
   header.appendChild(a);
  }

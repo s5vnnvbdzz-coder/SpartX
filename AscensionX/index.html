@@ -878,7 +878,7 @@ const ASC_RANK_NUMERALS=['I','II','III','IV','V','VIII'];
 function ascRankLabel(level){return ASC_RANKS[level]+' - Rank '+ASC_RANK_NUMERALS[level];}
 const SX_SHARED_THEME_KEY='spartanx_shared_active_theme_v1';
 const SX_THEME_MAP={'dark':'dark','light':'light','spartan-red':'spartan','spartan-bronze':'bronze','spartan-gold':'gold','spartan-blue':'athena','spartan-amethyst':'amethyst','sx-black-yellow':'black-yellow','spartan-olympian':'gold','olympian-athena':'gold','sx-monster':'monster','sx-obsidian-white':'obsidian','sx-cyberpunk':'cyberpunk','premium-olympus':'gold','amazonian-crimson':'spartan','athenas-aegis':'athena','cosmic-nebula':'dark','spartan-pantheon':'bronze'};
-function ascOpenedFromSpartanX(){const params=new URLSearchParams(location.search);if(params.get('from')==='spartanx')return true;try{const ref=new URL(document.referrer);return ref.origin===location.origin&&ref.pathname.replace(/\/$/,'')===location.pathname.replace(/AscensionX\/index\.html$|AscensionX\/$/,'').replace(/\/$/,'')}catch(e){return false}}
+function ascOpenedFromSpartanX(){const params=new URLSearchParams(location.search);if(params.get('from')==='spartanx'||params.get('sxIntegrated')==='1')return true;try{const ref=new URL(document.referrer);return ref.origin===location.origin&&ref.pathname.replace(/\/$/,'')===location.pathname.replace(/AscensionX\/index\.html$|AscensionX\/$/,'').replace(/\/$/,'')}catch(e){return false}}
 function applyAscTheme(){let theme=state.theme||'dark';if(ascOpenedFromSpartanX()){let main='';try{main=localStorage.getItem(SX_SHARED_THEME_KEY)||''}catch(e){}if(main)theme=SX_THEME_MAP[main]||'dark'}document.body.dataset.theme=theme;document.body.dataset.inheritedTheme=ascOpenedFromSpartanX()?'true':'false';return theme}
 function setAscTheme(theme){if(!ASC_THEMES.some(t=>t[0]===theme))return;state.theme=theme;applyAscTheme();persist(false);renderSettings()}
 function prepareEmbeddedAscensionOverview(){
@@ -1302,6 +1302,11 @@ function confirmCycleStart(){
    cycleId:state.cycle.created},location.origin)}catch(_){}
  }
  closeCycleEditor();
+ if(!existing&&window.__sxAscNative){
+  // Return to the shared SpartanX workout list after creating the first cycle.
+  window.location.assign('../?sxReturn=ascension&sxFrom=workout');
+  return;
+ }
  if(!existing&&!returnToSpartanX)showScreen('workout');
 }
 function applyCycleSelection(chosen,existing){
@@ -1585,7 +1590,7 @@ window.addEventListener('message',e=>{
  }
 });
 function continueAscensionTraining(){
- if(!ascensionEmbeddedBySpartanX||!state.cycle.created){showScreen('workout');return}
+ if((!ascensionEmbeddedBySpartanX&&!window.__sxAscNative)||!state.cycle.created){showScreen('workout');return}
  const choices=selectedLifts();
  if(!choices.length){showScreen('workout');return}
  const picker=$('ascSpartanImportLift');
@@ -1684,6 +1689,31 @@ function renderAscSpartanImportPreview(){
 }
 function requestAscensionSpartanImport(){
  if(ascSpartanImportPending!==null)return;
+ // The native AscensionX programme page shares the same origin and state as
+ // SpartanX. Hand off the prescription once rather than postMessage to an iframe.
+ if(window.__sxAscNative){
+  const selected=$('ascSpartanImportLift').value;
+  let handoff=null;
+  if(selected==='__ADAPTIVE_SUPPORT__'){
+   const slot=window.SXAscensionAdaptive?.pendingSupportDay?.();
+   const schedule=window.SXAscensionAdaptive?.schedule?.();
+   if(!slot||!schedule?.valid||!schedule.slots.some(s=>
+    s.kind==='support'&&s.day===slot.day&&s.week===slot.week)){
+    toast('Complete the prescribed main lifts before starting assistance.');return;
+   }
+   handoff={kind:'support',cycleId:state.cycle.created,week:slot.week,
+    day:slot.day,name:slot.title};
+  }else{
+   const workout=buildAscSpartanWorkout(selected);
+   if(!workout){toast('No eligible AscensionX workout was found.');return;}
+   handoff={kind:'main',workout};
+  }
+  try{
+   sessionStorage.setItem('sx_ascension_native_import_v1',JSON.stringify(handoff));
+  }catch(_){toast('Unable to prepare the workout import on this device.');return;}
+  window.location.assign('../?sxReturn=ascension&sxFrom=workout&sxImport=1');
+  return;
+ }
  if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
   const support=window.SXAscensionAdaptive?.schedule();
   const slot=nextAscensionSupportSlot();
@@ -2216,5 +2246,52 @@ init();
 <script src="../assets/science/evidence-engine.js?v=2"></script>
 <script src="../assets/science/volume-intelligence.js?v=2"></script>
 <script src="../assets/ascension/adaptive-programming.js?v=394"></script>
+
+<script id="sx-ascension-first-party-route">
+/* First-party AscensionX programme page — no iframe or duplicate cycle. */
+(function(){
+ 'use strict';
+ const query=new URLSearchParams(location.search);
+ if(query.get('sxIntegrated')!=='1')return;
+ window.__sxAscNative=true;
+ document.body.classList.add('sx-ascension-native-page');
+ const validSources=new Set(['tools','home','workout','activeWorkout','profile']);
+ const source=validSources.has(query.get('from'))?query.get('from'):'tools';
+ const back=new URL('../',location.href);
+ back.searchParams.set('sxReturn','ascension');
+ back.searchParams.set('sxFrom',source);
+ const header=document.querySelector('body > header .row');
+ if(header&&!document.getElementById('sxAscNativeBack')){
+  const a=document.createElement('a');
+  a.id='sxAscNativeBack';
+  a.href=back.toString();
+  a.className='iconbtn sx-page-back';
+  a.setAttribute('aria-label','Back to SpartanX '+source);
+  a.setAttribute('title','Back to '+source);
+  a.textContent='←';
+  a.style.cssText='display:grid;place-items:center;text-decoration:none;font-size:20px';
+  header.appendChild(a);
+ }
+ const launch=()=>{
+  const mode=query.get('mode')||'home';
+  const lift=query.get('lift');
+  if(mode==='continue'&&state.cycle.created){
+   if(selectedLifts().includes(lift)){
+    $('liftSelect').value=lift;
+    $('workWeek').value=currentWeekFor(lift);
+    renderWorkout();
+   }
+   continueAscensionTraining();
+  }else if((mode==='manage'||mode==='setup')&&
+   (mode==='setup'||state.cycle.created)){
+   openCycleEditor();
+  }else if(mode==='view'&&state.cycle.created){
+   openSXWorkoutCycleView();
+  }
+ };
+ if(document.readyState==='complete')launch();
+ else window.addEventListener('load',launch,{once:true});
+})();
+</script>
 </body>
 </html>

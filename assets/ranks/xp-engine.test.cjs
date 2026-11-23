@@ -89,6 +89,41 @@ assert.equal(xp.calculate([],twoLifts).totalXP,1250,
  'Selected programme lifts determine full-week completion');
 assert.equal(xp.calculate([],state(logs.concat(logs))).totalXP,1700,
  'Duplicate AscensionX records cannot award twice');
+// Four-day AscensionX: the imported support day earns 450 XP (not standard
+// Day 1 XP), and the 350 XP full-week reward waits for the prescribed support.
+const fourDayPreferences={[cycle]:{enabled:true,days:4}};
+const support=(date,id,finished=true,week=1,slot='SAT')=>day(date,id,
+ Array.from({length:3},(_,n)=>({
+  name:['Bench Press','Iso-Lateral Row','Lateral Raise'][n],
+  sxPowerbuildingSupport:{cycleId:cycle,week,day:slot,plannedSets:3,plannedExerciseCount:3},
+  sets:Array.from({length:3},(_,i)=>({type:'Working Set',
+   done:finished||i<2,weight:20,reps:10}))
+ })));
+assert.equal(xp.calculate(imports,state([]),fourDayPreferences).totalXP,1350,
+ 'Do not grant the weekly bonus before the prescribed fourth day');
+const fourth=support('2026-11-07','upper-assistance');
+const fullWeek=xp.calculate([...imports,fourth],state([]),fourDayPreferences);
+assert.equal(fullWeek.totalXP,2150,
+ 'Three main days, Day 4 assistance and one weekly bonus total 2150 XP');
+assert.equal(fullWeek.ascensionXP,1800);
+assert.equal(fullWeek.bonusXP,350);
+assert.equal(fullWeek.ascensionDays,4);
+assert.equal(fullWeek.awards.find(x=>x.date==='2026-11-07').xp,450,
+ 'Completed Day 4 assistance is paid as AscensionX, not standard workout');
+assert.equal(xp.calculate([...imports,support('2026-11-07','partial',false)],
+ state([]),fourDayPreferences).totalXP,1575,
+ 'Incomplete assistance receives standard XP, not the AscensionX day or weekly bonus');
+assert.equal(xp.calculate([...imports,fourth,fourth],state([]),fourDayPreferences).totalXP,2150,
+ 'Repeatedly saving the same support session does not duplicate XP');
+assert.equal(xp.calculate([...imports,fourth,support('2026-11-07','repeat')],
+ state([]),fourDayPreferences).totalXP,2150,
+ 'Repeated assistance on the same day cannot award another daily 450');
+assert.equal(xp.calculate([...imports,fourth],state([]),
+ {[cycle]:{enabled:true,days:5}}).bonusXP,0,
+ 'Five-day programming requires both extra support slots before the weekly reward');
+assert.equal(xp.calculate([...imports,fourth,support('2026-11-08','fifth',true,1,'SUN')],
+ state([]),{[cycle]:{enabled:true,days:5}}).bonusXP,350,
+ 'Five-day programming awards the weekly bonus after both support slots');
 // Badges are permanent achievements, not repeated prestige-cycle rewards.
 assert.equal(xp.badgeHighWater({totalXP:0,index:0,prestige:0}),0);
 assert.equal(xp.badgeHighWater({totalXP:4800,index:4,prestige:0}),4);
@@ -164,7 +199,7 @@ assert(root.includes('data-open-prestige-showcase'),
  'Prestige container is clickable');
 assert(root.includes('SpartanXPrestigeShowcase?.celebrate?.(state)'),
  'Laurel achievement uses a dedicated celebration only on tier upgrades');
-assert(root.includes('prestige-showcase.js?v=372'),
+assert(root.includes('prestige-showcase.js?v=383'),
  'Prestige Showcase is loaded into the main iOS app');
 const showcase=fs.readFileSync(path.join(__dirname,'prestige-showcase.js'),'utf8');
 assert(showcase.includes('role="dialog" aria-modal="true"'),

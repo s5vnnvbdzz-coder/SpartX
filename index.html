@@ -3972,6 +3972,51 @@ window.SpartanXStartPowerbuildingSupportSession=function(payload){
  switchScreen('activeWorkout',{instant:true});renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
  return true;
 };
+
+ // The first-party AscensionX support-day import recalculates the prescribed
+ // workout from the actual active programme. The handoff never provides sets.
+window.SpartanXStartAscensionAdaptiveSupportSession=function(payload){
+ const api=window.SXAscensionAdaptive;
+ const cycle=api?.activeCycle?.(),pref=cycle?api.read(cycle.id):null;
+ const pending=api?.pendingSupportDay?.(),schedule=api?.schedule?.();
+ if(!cycle||!pref?.enabled||!schedule?.valid||!pending||
+    payload?.cycleId!==cycle.id||Number(payload?.week)!==Number(pending.week)||
+    payload?.day!==pending.day)return false;
+ const slot=schedule.slots?.find(s=>s.kind==='support'&&s.day===pending.day&&
+  s.week===pending.week&&s.title===payload.name&&Array.isArray(s.exercises)&&s.exercises.length);
+ if(!slot||sessionActive||editingSessionId!==null){
+  if(sessionActive)alert('Finish or discard your current workout before loading another.');
+  return false;
+ }
+ const alreadyLogged=(db.sessions||[]).some(record=>(record.exercises||[]).some(ex=>
+  ex.sxPowerbuildingSupport?.cycleId===cycle.id&&
+  Number(ex.sxPowerbuildingSupport.week)===Number(pending.week)&&
+  ex.sxPowerbuildingSupport.day===pending.day));
+ if(alreadyLogged&&!confirm('You have already saved this AscensionX support day. Load another session anyway?'))return false;
+ work=slot.exercises.map(ex=>({
+  name:ex.name,rest:Number(ex.rest)||90,
+  notes:'AscensionX Adaptive Programming · Week '+pending.week+
+   ' · '+ex.min+'–'+ex.max+' reps · Target RPE '+(ex.targetRpe??(10-ex.rir)),
+  sxPowerbuildingSupport:{
+   cycleId:cycle.id,week:pending.week,day:pending.day,
+   repsMin:ex.min,repsMax:ex.max,rir:ex.rir,
+   plannedSets:ex.sets,plannedExerciseCount:slot.exercises.length
+  },
+  sets:Array.from({length:ex.sets},()=>({
+   weight:'',reps:String(ex.min),rpe:'',type:'Working Set',done:false
+  }))
+ }));
+ libraryMode='workout';activeCycle=null;
+ window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
+ clearInterval(sessionTicker);sessionTicker=null;
+ sessionStarted=null;sessionPausedAt=null;sessionActive=true;
+ const title=slot.title;
+ $('activeWorkoutName').textContent=title;$('workoutName').value=title;
+ $('sessionClock').textContent='00:00:00';
+ switchScreen('activeWorkout',{instant:true});
+ renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
+ return true;
+};
 function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
 function renderSavedRoutines(){
  const a=Array.isArray(db.routines)?db.routines:[];
@@ -4671,7 +4716,7 @@ $('export').onclick=()=>{let a=document.createElement('a'),u=URL.createObjectURL
 $('import').onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text());if(!Array.isArray(d.sessions))throw 0;db=d;persist();stats();renderSavedRoutines();renderSpartanRanks();renderLatestSessionRank();renderProfile();alert('Backup imported.');}catch{alert('Could not read that backup.');}e.target.value='';};
 $('minimizedSession').onclick=resumeSession;$('resumeSession').onclick=e=>{e.stopPropagation();resumeSession();};$('minimizedSession').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();resumeSession();}};
 restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
-// Returning from Intelligence should restore the workout view, not force Home.
+// Returning from Intelligence or native AscensionX restores the originating tab.
 // If a rest is still in progress, show Active Workout so its floating timer
 // becomes visible again with the correct wall-clock remaining time.
 (function restoreIntelligenceReturn(){
@@ -4681,10 +4726,10 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
   if(raw){const parsed=JSON.parse(raw);if(parsed?.at&&Date.now()-parsed.at<3600000)context=parsed}
  }catch(_){}
  const query=new URLSearchParams(location.search);
- const fromIntelligence=query.get('sxReturn')==='intelligence';
+ const fromModule=['intelligence','ascension'].includes(query.get('sxReturn'));
  const sourceHint=query.get('sxFrom');
- const source=fromIntelligence&&['home','workout','activeWorkout','profile','tools'].includes(sourceHint)?sourceHint:null;
- if(!fromIntelligence&&!context)return;
+ const source=fromModule&&['home','workout','activeWorkout','profile','tools'].includes(sourceHint)?sourceHint:null;
+ if(!fromModule&&!context)return;
  try{sessionStorage.removeItem(SX_INTELLIGENCE_RETURN_KEY)}catch(_){}
  const original=source||context?.screen||(sessionActive?'activeWorkout':'workout');
  if(sessionActive&&editingSessionId===null){
@@ -4694,7 +4739,7 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
  }else if(document.getElementById(original)?.classList.contains('screen')){
   switchScreen(original,{instant:true});
  }
- if(fromIntelligence){
+ if(fromModule){
   try{history.replaceState(null,'',location.pathname+location.hash)}catch(_){}
  }
  updateFloatingRestTimer();
@@ -5546,4 +5591,27 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
 <script src="./assets/bodybuilding/programme-builder.js?v=367"></script>
 <script src="./assets/ranks/prestige-showcase.js?v=383"></script>
+<script id="sx-ascension-native-workout-handoff">
+(function(){
+ 'use strict';
+ // Installed after the shared SpartanX and adaptive engines: no second log.
+ window.addEventListener('load',()=>{
+  const KEY='sx_ascension_native_import_v1';
+  let raw=null;
+  try{raw=sessionStorage.getItem(KEY);if(raw)sessionStorage.removeItem(KEY)}catch(_){}
+  if(!raw)return;
+  let item=null;
+  try{item=JSON.parse(raw)}catch(_){}
+  let success=false;
+  if(item?.kind==='main'&&item.workout?.source==='AscensionX'&&
+     typeof window.spartanxImport531==='function'){
+   try{success=window.spartanxImport531(item.workout)===true}catch(_){}
+  }else if(item?.kind==='support'&&
+   typeof window.SpartanXStartAscensionAdaptiveSupportSession==='function'){
+   try{success=window.SpartanXStartAscensionAdaptiveSupportSession(item)===true}catch(_){}
+  }
+  if(!success)alert('AscensionX could not load this programme session. Your saved cycle and workout history are unchanged. Reopen AscensionX and try again.');
+ },{once:true});
+})();
+</script>
 </body></html>

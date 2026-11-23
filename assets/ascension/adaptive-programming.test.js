@@ -284,12 +284,18 @@ const rootHost=fs.readFileSync(path.join(__dirname,'../../tools/replica.js'),'ut
 assert(ascHtml.includes("type:'spartx:ascensionCycleCreated'")&&
  ascHtml.includes("if(!existing&&!returnToSpartanX)showScreen('workout')"),
  'Embedded cycle creation must signal SpartanX, standalone can use its native Workout');
-assert(rootHost.includes("if(e.data?.type==='spartx:ascensionCycleCreated')")&&
- rootHost.includes("window.spartanxNavigateScreen('workout',{instant:true})")&&
- rootHost.includes('window.spartanxRefreshAscensionQuickAccess?.()'),
- 'Embedded cycle creation must exit to SpartanX Workout with a refreshed Continue card');
-assert(rootHost.includes("e.source!==ascensionEmbedFrame.contentWindow"),
- 'The embedded creation protocol must reject untrusted windows');
+assert(rootHost.includes("window.spartanxOpenEmbeddedAscensionX=")&&
+ rootHost.includes("url.searchParams.set('sxIntegrated','1')")&&
+ rootHost.includes("window.location.assign(url.toString())"),
+ 'Tools and Workout now launch the first-party AscensionX programme page');
+assert(!rootHost.includes('ascensionXEmbedFrame')&&
+ !rootHost.includes('ascensionPortalHost'),
+ 'AscensionX no longer uses an iframe or embedded portal');
+assert(ascHtml.includes('sx_ascension_native_import_v1')&&
+ hostHtml.includes('SpartanXStartAscensionAdaptiveSupportSession'),
+ 'The native support workout uses the existing SpartanX logger');
+assert(hostHtml.includes("['intelligence','ascension'].includes(query.get('sxReturn'))"),
+ 'Intelligence and AscensionX must preserve their return tab');
 
 // A completed support workout must not be invalidated by new prescription
 // sizes after an engine update (old Week 5 was one set).
@@ -328,7 +334,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v112')&&embeddedSw.includes('adaptive-programming.js?v=394'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v113')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&

@@ -320,7 +320,7 @@ assert.ok(hostHtml.includes("'sx_intelligence_return_scroll_v1'")&&
  hostHtml.includes("['intelligence','ascension'].includes(query.get('sxReturn'))"),
  'Returning from Intelligence restores the original Tools/Workout scroll position');
 assert.ok(rootHost.includes("rememberAscensionReturnScroll('tools','intelligence')")&&
- rootHost.includes("'.sx-tools-intelligence-card a.sx-intelligence-entry-link")===false&&
+ rootHost.includes('#ascensionXToolCard .ascension-launch,.sx-tools-intelligence-card a.sx-intelligence-entry-link')&&
  rootHost.includes('sxIntegrated=1'),
  'Intelligence Tools button saves its source and uses an integrated module route');
 assert.ok(rootHost.includes("prefetchTrainingModules()")&&

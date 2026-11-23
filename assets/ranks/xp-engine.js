@@ -41,7 +41,34 @@
      Number(set.reps)>=Number(required[i]?.reps)&&Number(required[i]?.reps)>0))return null;
   return {cycleId:link.cycleId,lift:link.lift,week:link.week};
  };
- function calculate(savedSessions,ascension){
+ // A support workout belongs to AscensionX even though it has no main-lift ascensionLink.
+ // Trust only the cycle/week/day and prescription metadata saved with that session.
+ const supportCompletions=session=>{
+  const groups=new Map();
+  for(const ex of Array.isArray(session?.exercises)?session.exercises:[]){
+   const link=ex?.sxPowerbuildingSupport;
+   if(!link||typeof link.cycleId!=='string'||!Number.isFinite(Date.parse(link.cycleId))||
+      !Number.isInteger(Number(link.week))||Number(link.week)<1||Number(link.week)>6||
+      !['MON','TUE','WED','THU','FRI','SAT','SUN'].includes(link.day)||
+      !Number.isInteger(Number(link.plannedSets))||Number(link.plannedSets)<1||
+      !Number.isInteger(Number(link.plannedExerciseCount))||
+      Number(link.plannedExerciseCount)<1||Number(link.plannedExerciseCount)>30)continue;
+   const key=link.cycleId+'|'+link.week+'|'+link.day;
+   if(!groups.has(key))groups.set(key,{cycleId:link.cycleId,week:Number(link.week),
+    day:link.day,required:Number(link.plannedExerciseCount),exercises:[]});
+   groups.get(key).exercises.push({ex,link});
+  }
+  return [...groups.values()].filter(group=>
+   group.exercises.length>=group.required&&group.exercises.every(({ex,link})=>{
+    if(Number(link.plannedExerciseCount)!==group.required)return false;
+    const done=(Array.isArray(ex.sets)?ex.sets:[]).filter(set=>
+     set?.done===true&&set.type==='Working Set'&&
+     Number.isFinite(Number(set.weight))&&Number(set.weight)>=0&&
+     Number.isInteger(Number(set.reps))&&Number(set.reps)>0);
+    return done.length>=Number(link.plannedSets);
+   }));
+ };
+ function calculate(savedSessions,ascension,adaptivePreferences){
   const days=new Map(),completions=new Map(),sessionById=new Map();
   const sessions=Array.isArray(savedSessions)?savedSessions:[];
   const state=ascension&&typeof ascension==='object'?ascension:{};
@@ -49,9 +76,11 @@
   const getDay=date=>{if(!days.has(date))days.set(date,{date,hasStandard:false,hasAscension:false});return days.get(date);};
   const record=(item,date)=>{
    const key=item.cycleId+'|'+item.week;
-   if(!completions.has(key))completions.set(key,{cycleId:item.cycleId,week:item.week,lifts:new Set(),dates:new Set()});
+   if(!completions.has(key))completions.set(key,{cycleId:item.cycleId,week:item.week,lifts:new Set(),supportDays:new Set(),dates:new Set()});
    const entry=completions.get(key);
-   entry.lifts.add(item.lift);entry.dates.add(date);
+   if(item.lift)entry.lifts.add(item.lift);
+   if(item.day)entry.supportDays.add(item.day);
+   entry.dates.add(date);
   };
   for(const session of sessions){
    if(session?.id!==undefined&&session.id!==null)sessionById.set(String(session.id),session);
@@ -61,6 +90,11 @@
    for(const ex of session.exercises){
     const link=validAscLink(ex);
     if(link){day.hasAscension=true;record(link,date);}
+   }
+   // Day 4/5 assistance is not an AscensionX compound log. Read the saved
+   // sxPowerbuildingSupport prescription and require every prescribed set.
+   for(const support of supportCompletions(session)){
+    day.hasAscension=true;record(support,date);
    }
   }
   for(const log of logs){
@@ -104,7 +138,15 @@
    const selected=active&&Array.isArray(state.cycle.exercises)
     ?[...new Set(state.cycle.exercises.filter(l=>LIFTS.includes(l)))]
     :LIFTS.slice(0,3); // Conservative default for legacy archived cycles.
-   if(selected.length&&selected.every(lift=>item.lifts.has(lift)))completedWeeks++;
+   const prefs=adaptivePreferences&&typeof adaptivePreferences==='object'?
+    adaptivePreferences[item.cycleId]:null;
+   const configuredDays=prefs?.enabled===true&&[3,4,5].includes(Number(prefs.days))?
+    Number(prefs.days):selected.length;
+   // Prescribed assistance days count toward the weekly bonus. The Week 6
+   // deload has no additional support-day requirement.
+   const requiredSupport=item.week===6?0:Math.max(0,configuredDays-selected.length);
+   if(selected.length&&selected.every(lift=>item.lifts.has(lift))&&
+      item.supportDays.size>=requiredSupport)completedWeeks++;
   }
   const bonusXP=completedWeeks*ASCENSION_WEEK_BONUS;
   const totalXP=standardXP+ascensionXP+bonusXP;

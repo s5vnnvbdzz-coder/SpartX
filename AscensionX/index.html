@@ -2252,7 +2252,7 @@ function init(){
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=114').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=115').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.
@@ -2313,6 +2313,25 @@ init();
   a.setAttribute('title','Back to '+source);
   a.innerHTML='<span class="sx-page-back-arrow" aria-hidden="true">←</span>';
   a.style.cssText='display:grid;place-items:center;text-decoration:none;font-size:20px';
+  // Tools → AscensionX Home → Back can restore the previous SpartanX page
+  // directly from browser history (and the back/forward cache if available).
+  // Other programme subpages retain their own explicit Back destinations.
+  a.addEventListener('click',event=>{
+   if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||
+      event.shiftKey||event.altKey||query.get('mode')!=='home'||history.length<2)return;
+   let valid=false;
+   try{
+    const saved=JSON.parse(sessionStorage.getItem('sx_ascension_return_scroll_v1')||'null');
+    valid=saved?.source===source&&Number.isFinite(saved.at)&&
+     Date.now()-saved.at>=0&&Date.now()-saved.at<3600000;
+   }catch(_){}
+   if(!valid)return;
+   event.preventDefault();
+   let departed=false;
+   window.addEventListener('pagehide',()=>{departed=true},{once:true});
+   history.back();
+   setTimeout(()=>{if(!departed)location.assign(a.href)},900);
+  });
   header.appendChild(a);
  }
  const launch=()=>{

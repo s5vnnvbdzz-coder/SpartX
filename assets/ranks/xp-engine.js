@@ -6,6 +6,9 @@
  'use strict';
  const PER_RANK=1000, RANKS=6, PRESTIGE_XP=PER_RANK*RANKS;
  const STANDARD_AWARDS=[225,325,425,525], ASCENSION_DAY_XP=450, ASCENSION_WEEK_BONUS=350;
+ // The four-/five-day eligibility rule was introduced on 23 November 2026.
+ // Do not retroactively revoke weekly bonuses earned under the old rule.
+ const LEGACY_WEEK_CUTOFF='2026-11-23';
  const LIFTS=['Back Squat','Bench Press','Deadlift','Overhead Press'];
  const isoDate=date=>{
   if(typeof date!=='string'||!date.trim())return '';
@@ -76,9 +79,14 @@
   const getDay=date=>{if(!days.has(date))days.set(date,{date,hasStandard:false,hasAscension:false});return days.get(date);};
   const record=(item,date)=>{
    const key=item.cycleId+'|'+item.week;
-   if(!completions.has(key))completions.set(key,{cycleId:item.cycleId,week:item.week,lifts:new Set(),supportDays:new Set(),dates:new Set()});
+   if(!completions.has(key))completions.set(key,{cycleId:item.cycleId,week:item.week,
+    lifts:new Set(),firstLiftDate:new Map(),supportDays:new Set(),dates:new Set()});
    const entry=completions.get(key);
-   if(item.lift)entry.lifts.add(item.lift);
+   if(item.lift){
+    entry.lifts.add(item.lift);
+    const prior=entry.firstLiftDate.get(item.lift);
+    if(!prior||date<prior)entry.firstLiftDate.set(item.lift,date);
+   }
    if(item.day)entry.supportDays.add(item.day);
    entry.dates.add(date);
   };
@@ -132,7 +140,7 @@
    standardXP+=xp;standardDays++;
    awards.push({date:day.date,kind:'standard',xp,week,dayNumber:count});
   }
-  let completedWeeks=0;
+  let completedWeeks=0,legacyBonusWeeks=0;
   for(const item of completions.values()){
    const active=state.cycle?.created===item.cycleId;
    const selected=active&&Array.isArray(state.cycle.exercises)
@@ -145,8 +153,18 @@
    // Prescribed assistance days count toward the weekly bonus. The Week 6
    // deload has no additional support-day requirement.
    const requiredSupport=item.week===6?0:Math.max(0,configuredDays-selected.length);
-   if(selected.length&&selected.every(lift=>item.lifts.has(lift))&&
-      item.supportDays.size>=requiredSupport)completedWeeks++;
+   const mainsComplete=selected.length>0&&selected.every(lift=>item.lifts.has(lift));
+   const supportComplete=item.supportDays.size>=requiredSupport;
+   // Prior to Build 397 the bonus was earned as soon as all primary lifts
+   // were complete. Retain those historical earned rewards for all athletes.
+   // Repeated workouts after the cutoff cannot create a new legacy award:
+   // each required lift must already have completed by that date.
+   const legacyEarned=requiredSupport>0&&mainsComplete&&selected.every(lift=>
+    (item.firstLiftDate.get(lift)||'9999-12-31')<=LEGACY_WEEK_CUTOFF);
+   if(mainsComplete&&(supportComplete||legacyEarned)){
+    completedWeeks++;
+    if(legacyEarned&&!supportComplete)legacyBonusWeeks++;
+   }
   }
   const bonusXP=completedWeeks*ASCENSION_WEEK_BONUS;
   const totalXP=standardXP+ascensionXP+bonusXP;
@@ -159,6 +177,7 @@
    rankProgress:rankXP/PER_RANK,remainingToNext:PER_RANK-rankXP,
    toPrestige:PRESTIGE_XP-cycleXP,
    standardXP,standardDays,ascensionXP,ascensionDays,bonusXP,completedWeeks,
+   legacyBonusWeeks,legacyBonusXP:legacyBonusWeeks*ASCENSION_WEEK_BONUS,
    workouts:sessions.length,awards
   };
  }

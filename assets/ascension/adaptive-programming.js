@@ -583,7 +583,7 @@
     // Bench assistance is controlled technique/volume work, never a second
     // heavy top-set day. Three working sets in a four-day plan; RPE 7 in
     // normal weeks, easing to RPE 6 when recovery is limited.
-    const rir=supportSquat?week>=4?5:4:
+    const rir=supportSquat?4:
      directArms||supportBench?easyRir:Math.max(item.rir,easyRir);
     // dose() ran before the final day-specific RPE adjustment. Recalculate
     // the accessory recommendation using the actual prescribed effort.

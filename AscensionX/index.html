@@ -664,6 +664,8 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
 /* Set the route before the first paint, not after the dashboard loads. */
 (function(){
  const q=new URLSearchParams(location.search);
+ // Available to the programme engine before init() or its popstate handler.
+ window.__sxAscNative=q.get('sxIntegrated')==='1';
  if(q.get('sxIntegrated')==='1'&&['view','manage'].includes(q.get('mode'))&&
   ['workout','activeWorkout'].includes(q.get('from')))
   document.documentElement.dataset.sxIntegratedCycleRoute=q.get('mode');
@@ -1008,6 +1010,37 @@ function sxRenderManageAdaptiveRoster(){
 }
 window.renderSXCycleManageLiveSnapshot=sxRenderManageAdaptiveRoster;
 
+// Full-page Workout cycle routes are not separate AscensionX navigation
+// levels. Their Back action must return to SpartanX's originating workout,
+// never dismiss a modal and reveal the AscensionX Home dashboard.
+function workoutCycleReturnSource(){
+ if(!window.__sxAscNative)return null;
+ const q=new URLSearchParams(location.search);
+ return ['view','manage','setup'].includes(q.get('mode'))&&
+  ['workout','activeWorkout'].includes(q.get('from'))?q.get('from'):null;
+}
+function returnFromWorkoutCycle(forceReplace=false){
+ const source=workoutCycleReturnSource();
+ if(!source)return false;
+ const fallback=new URL('../',location.href);
+ fallback.searchParams.set('sxReturn','ascension');
+ fallback.searchParams.set('sxFrom',source);
+ let launchedFromSpartanX=false;
+ try{
+  const saved=JSON.parse(sessionStorage.getItem('sx_ascension_return_scroll_v1')||'null');
+  launchedFromSpartanX=saved?.source===source&&Number.isFinite(saved.at)&&
+   Date.now()-saved.at>=0&&Date.now()-saved.at<3600000;
+ }catch(_){}
+ // Returning by history can reuse the already loaded Workout document and
+ // its scroll position. Direct links retain the explicit fallback URL.
+ if(!forceReplace&&launchedFromSpartanX&&history.length>1){
+  let departed=false;
+  window.addEventListener('pagehide',()=>{departed=true},{once:true});
+  history.back();
+  setTimeout(()=>{if(!departed)location.replace(fallback.toString())},900);
+ }else location.replace(fallback.toString());
+ return true;
+}
 let sxCycleViewHomeParent=null,sxCycleViewHomeSibling=null,sxCycleViewCaller=null;
 function openSXWorkoutCycleView(){
  const backdrop=$('sxCycleViewBackdrop'),details=$('cycleDetails'),holder=$('sxCycleViewContent');
@@ -1051,6 +1084,8 @@ function closeSXWorkoutCycleView(save=false){
  const backdrop=$('sxCycleViewBackdrop'),details=$('cycleDetails');
  if(!backdrop?.classList.contains('open'))return;
  if(save)persist(false);
+ // Navigate while the focused view is still visible: no brief Home flash.
+ if(returnFromWorkoutCycle())return;
  delete document.documentElement.dataset.sxIntegratedCycleRoute;
  backdrop.classList.remove('open');
  backdrop.setAttribute('aria-hidden','true');
@@ -1066,12 +1101,6 @@ function closeSXWorkoutCycleView(save=false){
  const caller=sxCycleViewCaller;sxCycleViewCaller=null;
  if(caller?.isConnected)caller.focus({preventScroll:true});
  try{window.parent.postMessage({type:'spartx:ascensionViewExit'},location.origin)}catch(_){}
- // Native View Cycle launched from Workout returns to that tab on Back.
- if(window.__sxAscNative){
-  const q=new URLSearchParams(location.search);
-  if(q.get('mode')==='view'&&['workout','activeWorkout'].includes(q.get('from')))
-   window.location.assign('../?sxReturn=ascension&sxFrom='+q.get('from'));
- }
 }
 
 // One actual single-page-application view for BOTH programme editor routes.
@@ -1082,7 +1111,11 @@ let cycleEditorOpenedFromWorkout=false,cycleEditorReturnScreen='home',cycleEdito
 function openCycleEditor(){
  const page=$('cycleEditorBackdrop');
  if(!page||page.classList.contains('open'))return;
- cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage');
+ // Identify the originating Workout route BEFORE adding the page class.
+ // The previous check only inspected an unset class, incorrectly treating
+ // this as a standalone editor and pushing a #programme history entry.
+ cycleEditorOpenedFromWorkout=!!workoutCycleReturnSource()||
+  document.body.classList.contains('sx-asc-workout-manage');
  cycleEditorReturnScreen=document.querySelector('.screen.active')?.id||'home';
  cycleEditorHasHistoryEntry=false;
  // The same page class drives the identical full-width header, scrolling
@@ -1111,6 +1144,10 @@ function openCycleEditor(){
 function closeCycleEditor(fromPopState=false){
  const page=$('cycleEditorBackdrop');
  if(!page||!page.classList.contains('open'))return;
+ if(workoutCycleReturnSource()){
+  window.SXAscensionAdaptive?.discardDraft?.();
+  if(returnFromWorkoutCycle(fromPopState))return;
+ }
  delete document.documentElement.dataset.sxIntegratedCycleRoute;
  const returnToSpartanX=cycleEditorOpenedFromWorkout,returnScreen=cycleEditorReturnScreen;
  cycleEditorOpenedFromWorkout=false;
@@ -1137,13 +1174,6 @@ function closeCycleEditor(fromPopState=false){
  cycleEditorHasHistoryEntry=false;
  if(returnToSpartanX){
   try{window.parent.postMessage({type:'spartx:ascensionManageExit'},location.origin)}catch(_){}
- }
- // Keep first-party Manage/Build Cycle Back consistent with SpartanX.
- if(window.__sxAscNative&&!fromPopState){
-  const q=new URLSearchParams(location.search);
-  if(['manage','setup'].includes(q.get('mode'))&&
-     ['workout','activeWorkout'].includes(q.get('from')))
-   window.location.assign('../?sxReturn=ascension&sxFrom='+q.get('from'));
  }
 }
 document.addEventListener('keydown',event=>{
@@ -1431,6 +1461,12 @@ function showScreen(id,addHistory=true){
 }
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
 window.addEventListener('popstate',e=>{
+ // Hardware/iOS swipe Back from a focused Workout cycle must never reveal
+ // the AscensionX dashboard or re-open the standalone programme editor.
+ if(workoutCycleReturnSource()){
+  returnFromWorkoutCycle(true);
+  return;
+ }
  const requested=e.state?.screen||'home';
  if(requested==='programme'){
   if(!$('cycleEditorBackdrop')?.classList.contains('open'))openCycleEditor();
@@ -2279,7 +2315,14 @@ function init(){
  setupProfileCollapse();
  applyAscTheme();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
- renderAll();showScreen('home',false);history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');processAscensionSpartanCompletionQueue();
+ renderAll();
+ // Dedicated View/Manage Cycle owns a direct route. Do not initialise Home
+ // or rewrite this history entry to #home before the focused page mounts.
+ if(!workoutCycleReturnSource()){
+  showScreen('home',false);
+  history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
+ }
+ processAscensionSpartanCompletionQueue();
  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=116').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});

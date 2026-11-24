@@ -504,8 +504,22 @@
   if(week>=6||!c?.lifts||index<c.lifts.length)return [];
   const profile=supportProfile(c,prefs,index,week,storage);
   const roles=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
-  const names=profile.shortNext&&profile.role==='balanced'?roles.recovery:
+  let names=profile.shortNext&&profile.role==='balanced'?roles.recovery:
    roles[profile.role]||roles.balanced;
+  // In five-day programmes Saturday and Sunday are consecutive. Do not
+  // prescribe the same accessories on both days. Fill with low-fatigue
+  // alternatives, maintaining the last-day two-set recovery cap.
+  if(prefs.days===5&&index>c.lifts.length){
+   const previous=new Set(supportExercises(c,prefs,index-1,week,storage).map(ex=>norm(ex.name)));
+   const distinct=names.filter(name=>!previous.has(norm(name)));
+   const backup=['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press',
+    'Dumbbell Curl','Triceps Pushdown (Bar)','Lateral Raise','Seated Leg Curl'];
+   for(const name of backup){
+    if(distinct.length>=3)break;
+    if(!previous.has(norm(name))&&!distinct.some(item=>norm(item)===norm(name)))distinct.push(name);
+   }
+   names=distinct;
+  }
   return pickItems(names).map(item=>dose(item,week,prefs.focus,'Support',c.id||null,storage))
    .filter(Boolean).map(item=>{
     const group=['Leg Extension','Seated Leg Curl','Seated Calf Raise','Standing Calf Raise'].includes(item.name)?

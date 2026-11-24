@@ -151,7 +151,7 @@ function weekPlan(p,index){
   const names=d.exercises.map(e=>e.name);
   if(new Set(names).size!==names.length)warnings.push('Check repeated exercise in '+d.name);
   // Keep session-length heuristics visible. Do not silently delete primary lifts.
-  const estimate=d.exercises.reduce((m,e)=>m+(e.role==='primary'?10:3)+e.sets.length*(1.5+e.rest/60),5);
+  const estimate=d.exercises.reduce((m,e)=>m+3+e.sets.reduce((time,set)=>time+(set.type==='warmup'?2.5:e.role==='primary'?5:e.role==='secondary'?4:3),0),5);
   d.estimatedMinutes=Math.round(estimate);
   if(estimate>p.minutes)warnings.push(d.name+' could exceed '+p.minutes+' minutes; consider assistance reductions.');
  }

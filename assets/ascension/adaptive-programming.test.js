@@ -115,6 +115,40 @@ const noAdvance={sessions:[{date:'2026-11-09T09:00:00Z',exercises:[{
 localStorage.setItem('spartx_db',JSON.stringify(noAdvance));
 assert.equal(api.plan('Bench Press',3).find(e=>e.name==='Iso-Lateral Row').suggestedKg,null,
  'Incomplete sets never justify progression');
+// Classic AscensionX support now uses relevant prior exercise history even
+// when the athlete has not yet completed that exercise in the current cycle.
+// Never borrow an unrelated exercise's load or revise a saved session.
+const nonCycle={sessions:[{date:'2026-11-10T08:00:00Z',exercises:[{
+ name:'Iso-Lateral Row',sets:[
+  {weight:'40',reps:'12',rpe:'6',type:'Working Set',done:true},
+  {weight:'40',reps:'12',rpe:'6',type:'Working Set',done:true}]
+}]}]};
+localStorage.setItem('spartx_db',JSON.stringify(nonCycle));
+assert.ok(api.plan('Bench Press',3).find(e=>e.name==='Iso-Lateral Row').suggestedKg>40,
+ 'Previous completed exercise-specific sessions seed an adaptive load');
+assert.equal(api.plan('Bench Press',3).find(e=>e.name==='Iso-Lateral Row').targetReps,8,
+ 'After reaching the top of the range, repeat minimum reps at the new suggested weight');
+assert.ok(api.schedule().slots[3].exercises.some(e=>e.name==='Iso-Lateral Row'&&e.suggestedKg>40),
+ 'The fourth support day receives the same exercise-specific load recommendation');
+const overEffort={sessions:[{date:'2026-11-10T08:00:00Z',exercises:[{
+ name:'Iso-Lateral Row',sets:[
+  {weight:'40',reps:'7',rpe:'9.5',type:'Working Set',done:true},
+  {weight:'40',reps:'7',rpe:'9.5',type:'Working Set',done:true}]
+}]}]};
+localStorage.setItem('spartx_db',JSON.stringify(overEffort));
+assert.ok(api.plan('Bench Press',3).find(e=>e.name==='Iso-Lateral Row').suggestedKg<40,
+ 'Missed reps and excessive RPE yield a modest suggested load reduction');
+localStorage.setItem('spartx_db',JSON.stringify(nonCycle));
+assert.equal(api.plan('Bench Press',4).find(e=>e.name==='Iso-Lateral Row').suggestedKg,37.5,
+ 'Heavy classic weeks taper accessory loads instead of raising them');
+assert.equal(localStorage.getItem('ascensionx_strength_v1'),before,
+ 'Adaptive support calculations never edit the classic programme');
+const newHostHtml=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
+assert.ok(/id="sxAscensionBetaPreviewCard"[^>]*hidden/.test(newHostHtml),
+ 'The separate AscensionX 2.0 programme card is hidden');
+assert.ok(newHostHtml.includes("weight:Number(ex.suggestedKg)>0?String(ex.suggestedKg):''"),
+ 'Support day import prepopulates the suggested weight for all classic support exercises');
+
 localStorage.setItem('ascensionx_strength_v1',cycle(['Back Squat','Bench Press','Deadlift','Overhead Press']));
 api.save({days:3});
 assert.equal(api.schedule().valid,false,'Cannot assign four independent compounds to three separate days');
@@ -391,7 +425,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=414'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=415'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -401,7 +435,7 @@ assert.ok(!ascHtml.includes('<div id="sxCycleManageLiveSnapshot"')&&
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v123')&&embeddedSw.includes('adaptive-programming.js?v=414'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v124')&&embeddedSw.includes('adaptive-programming.js?v=415'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 

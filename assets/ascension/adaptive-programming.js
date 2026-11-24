@@ -187,24 +187,40 @@
   }catch(_){return null}
  }
  function recommend(ex,cycleId,week,storage){
-  const old=lastLinked(ex.name,cycleId,week,storage);
-  if(!old)return {targetReps:ex.min,suggestedKg:null,reason:'Establish a comfortable load at the prescribed RIR.'};
+  // The classic six-week main lift stays authoritative. Accessories use only
+  // their own completed lifting history, even if it predates this cycle.
+  // A technical support Bench Press must never inherit a competition bench load.
+  const old=lastLinked(ex.name,cycleId,week,storage)||
+   (ex.name==='Bench Press'?null:latestSquatAccessoryHistory(ex.name,storage));
+  if(!old||old.sets.length<2)return {targetReps:ex.min,suggestedKg:null,
+   reason:'Choose an appropriate starting load, then log completed sets and RPE to individualise this exercise.'};
   const weights=old.sets.map(s=>Number(s.weight));
-  const sameLoad=weights.every(w=>Math.abs(w-weights[0])<0.01);
-  const repMin=Math.min(...old.sets.map(s=>Number(s.reps)));
-  const hasRpe=old.sets.every(s=>s.rpe!==''&&s.rpe!==null&&Number.isFinite(Number(s.rpe))&&Number(s.rpe)>=1&&Number(s.rpe)<=10);
-  const easy=hasRpe&&old.sets.every(s=>Number(s.rpe)<=10-ex.rir+.5);
-  const hard=hasRpe&&old.sets.every(s=>Number(s.rpe)>=9.5);
-  const kg=sameLoad?weights[0]:null;
-  if(kg!==null&&repMin>=ex.max&&easy){
-   const increase=kg>=50?2.5:kg>=20?1.25:0.5;
-   return {targetReps:ex.min,suggestedKg:Math.round((kg+increase)*4)/4,
-    reason:'All logged sets reached the top of the rep range at controlled RPE; suggest a small load increase.'};
+  const base=Math.min(...weights);
+  const sameLoad=weights.every(w=>Math.abs(w-base)<.01);
+  const reps=old.sets.map(s=>Number(s.reps));
+  const low=Math.min(...reps);
+  const rpes=old.sets.map(s=>s.rpe===''||s.rpe==null?NaN:Number(s.rpe));
+  const logged=rpes.every(n=>Number.isFinite(n)&&n>=1&&n<=10);
+  const target=Number(ex.targetRpe)||(10-Number(ex.rir||3));
+  const full=old.sets.length>=2;
+  const missed=reps.some(r=>r<ex.min);
+  const hard=logged&&rpes.some(r=>r>=9.5||r>target+1.5);
+  const easy=logged&&rpes.every(r=>r<=target+.5);
+  const toStep=(kg,step)=>Math.max(step,Math.round(kg/step)*step);
+  if(week>=4)return {targetReps:ex.min,suggestedKg:toStep(base*.95,2.5),
+   reason:'Intensification: suggest a modestly lighter accessory load and reduce fatigue. Adjust to the target RPE.'};
+  if(missed||hard)return {targetReps:ex.min,suggestedKg:toStep(base*.95,2.5),
+   reason:'Previous completed work missed the minimum reps or substantially exceeded target effort; reduce load slightly.'};
+  if(full&&sameLoad&&low>=ex.max&&easy){
+   const increment=base>=50?2.5:base>=20?1.25:.5;
+   return {targetReps:ex.min,suggestedKg:Math.round((base+increment)*4)/4,
+    reason:'All completed sets reached the top of the repetition range at controlled RPE; progress load conservatively.'};
   }
-  if(hard)return {targetReps:ex.min,suggestedKg:kg,
-   reason:'Previous sets were very demanding; hold load and leave repetitions in reserve.'};
-  return {targetReps:clamp(repMin+1,ex.min,ex.max),suggestedKg:kg,
-   reason:'Retain load and progress repetitions before increasing weight.'};
+  if(!logged)return {targetReps:Math.max(ex.min,Math.min(ex.max,low)),suggestedKg:base,
+   reason:'Exercise history provides a starting load; hold progression until RPE has been recorded consistently.'};
+  return {targetReps:Math.min(ex.max,Math.max(ex.min,low+(easy?1:0))),suggestedKg:base,
+   reason:easy?'Previous exercise-specific sets were controlled; add one repetition before increasing load.':
+    'Maintain the previous exercise-specific load and repetitions until target RPE is reached.'};
  }
 
  // Machine loading is individual to an athlete and machine, so NEVER infer
@@ -326,7 +342,7 @@
   if(week===6)sets=0;
   if(sets<1)return null;
   const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
-  const ex={...item,sets,rir,sourceLift:main,week};
+  const ex={...item,sets,rir,targetRpe:10-rir,sourceLift:main,week};
   const rec=recommend(ex,cycleId,week,storage);
   return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')+
     (advisory?' Spartan Intelligence: '+advisory.reason+' The set allocation is a reviewable heuristic.':'')+
@@ -336,8 +352,6 @@
  function buildLiftPlan(lift,week,focus,cycleId,storage=global.localStorage){
   const w=Number(week);
   if(!LIFTS.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
-  const redesigned=global.SXAscensionV2Bridge?.plan(lift,w,cycleId,storage);
-  if(Array.isArray(redesigned))return redesigned;
   const chosen=FOCUS_LIFTS[focus]||FOCUS_LIFTS.strength;
   // A requested, fixed RDL block takes first position after the main Deadlift,
   // in every working week. Week 6 retains AscensionX's no-accessory recovery
@@ -451,7 +465,6 @@
  }
  function supportExercises(c,prefs,index,week,storage=global.localStorage){
   if(week>=6||!c?.lifts||index<c.lifts.length)return [];
-  if(index===3&&prefs.days===4){const redesigned=global.SXAscensionV2Bridge?.plan('Support',week,c.id,storage);if(Array.isArray(redesigned))return redesigned;}
   const profile=supportProfile(c,prefs,index,week,storage);
   const roles=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
   const names=profile.shortNext&&profile.role==='balanced'?roles.recovery:
@@ -480,10 +493,6 @@
    });
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
-  if(index===3&&prefs.days===4){
-   const bridge=global.SXAscensionV2Bridge,exercises=bridge?.plan('Support',week,c.id,storage);
-   if(Array.isArray(exercises)&&exercises.length)return bridge.supportTitle(exercises,week);
-  }
   const role=supportProfile(c,prefs,index,week,storage).role;
   return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance - Week '+week;
  }

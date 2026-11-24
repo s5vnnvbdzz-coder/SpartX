@@ -2191,7 +2191,7 @@ main > #profile.screen > .spartanx-page-footer{
     <div class="sx-programme-footer" style="margin-top:12px"><span class="sx-programme-next">Build your AscensionX programme.</span><button type="button" class="sx-programme-continue" id="sxAscensionEmptySetup">SET UP ›</button></div>
    </section>
   </div>
-  <section class="card sx-programme-card" id="sxAscensionBetaPreviewCard" aria-label="AscensionX 2.0 beta programme preview">
+  <section class="card sx-programme-card" id="sxAscensionBetaPreviewCard" aria-label="AscensionX 2.0 beta programme preview" hidden aria-hidden="true" style="display:none!important">
    <div class="sx-programme-head"><div><div class="sx-programme-kicker">ASCENSIONX 2.0 · POWERLIFTING</div><h3 class="sx-programme-title">Personalised Programming</h3></div><span class="sx-programme-tag">BETA PREVIEW</span></div>
    <p class="sx-programme-meta">Explore personalised 8, 12 and 16-week programmes without changing your current cycle.</p>
    <div class="sx-programme-footer"><span class="sx-programme-next">Read-only programme sandbox</span><button type="button" class="sx-programme-continue" id="sxAscensionBetaOpen">EXPLORE ›</button></div>
@@ -4031,7 +4031,7 @@ window.SpartanXStartAscensionAdaptiveSupportSession=function(payload){
  if(alreadyLogged&&!confirm('You have already saved this AscensionX support day. Load another session anyway?'))return false;
  work=slot.exercises.map(ex=>({
   name:ex.name,rest:Number(ex.rest)||90,
-  notes:(ex.sxV2Bridge?'AscensionX 2.0 · ':'AscensionX Adaptive Programming · ')+'Week '+pending.week+
+  notes:'AscensionX Adaptive Programming · Week '+pending.week+
    ' · '+ex.min+'–'+ex.max+' reps · Target RPE '+(ex.targetRpe??(10-ex.rir)),
   sxPowerbuildingSupport:{
    cycleId:cycle.id,week:pending.week,day:pending.day,
@@ -4039,7 +4039,7 @@ window.SpartanXStartAscensionAdaptiveSupportSession=function(payload){
    plannedSets:ex.sets,plannedExerciseCount:slot.exercises.length
   },
   sets:Array.from({length:ex.sets},()=>({
-   weight:ex.sxV2Bridge&&Number(ex.suggestedKg)>0?String(ex.suggestedKg):'',reps:String(ex.min),rpe:'',type:'Working Set',done:false
+   weight:Number(ex.suggestedKg)>0?String(ex.suggestedKg):'',reps:String(ex.targetReps||ex.min),rpe:'',type:'Working Set',done:false
   }))
  }));
  libraryMode='workout';activeCycle=null;
@@ -5531,7 +5531,7 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
 <script src="./assets/ascension/programming-v2.js?v=408"></script><script src="./assets/ascension/classic-v2-bridge.js?v=414"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=414"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=415"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=387"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){

@@ -484,7 +484,33 @@
   const role=supportProfile(c,prefs,index,week,storage).role;
   return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance - Week '+week;
  }
+ const SUPPORT_CONFIRM_KEY='sx_ascension_support_confirm_v1';
+ function supportCandidates(c,day,week,storage=global.localStorage){
+  try{
+   const sessions=JSON.parse(storage.getItem('spartx_db')||'{}')?.sessions;
+   if(!Array.isArray(sessions))return [];
+   return sessions.filter(s=>{
+    if(s?.id==null||!Number.isFinite(Date.parse(s.date))||Date.parse(s.date)<Date.parse(c.id))return false;
+    const ex=s.exercises||[];
+    if(!ex.some(e=>(e.sets||[]).some(z=>z.done===true&&!/^(w|warm.?up|cardio)$/i.test(String(z.type||''))&&Number.isFinite(Number(z.weight))&&Number(z.weight)>=0&&Number.isInteger(Number(z.reps))&&Number(z.reps)>0)))return false;
+    const links=ex.map(e=>e.sxPowerbuildingSupport).filter(Boolean);
+    if(links.length)return links.every(l=>l.cycleId===c.id&&Number(l.week)===week&&String(l.day).toUpperCase()===day);
+    if(ex.some(e=>e.ascensionLink||e.bodybuildingLink||e.sxStrengthSizeCompanion)||read(c.id,storage).days!==4||day!=='SAT')return false;
+    const name=String(s.name||'').trim().replace(/[–—·]/g,'-');
+    return new RegExp('^(?:(?:Upper|Lower|Balanced) Assistance|Secondary Squat & Bench)\\s*-\\s*Week\\s+'+week+'$','i').test(name);
+   }).map(s=>({id:String(s.id),name:String(s.name||'Assistance workout'),date:s.date,sets:(s.exercises||[]).reduce((n,e)=>n+(e.sets||[]).filter(z=>z.done===true).length,0)}));
+  }catch(_){return []}
+ }
+ function confirmSavedSupport(id,storage=global.localStorage){
+  const c=activeCycle(storage),p=c&&pendingSupportDay(c,storage);
+  if(!p||!supportCandidates(c,p.day,p.week,storage).some(s=>s.id===String(id)))return false;
+  let data={};try{data=JSON.parse(storage.getItem(SUPPORT_CONFIRM_KEY)||'{}')||{}}catch(_){}
+  if(typeof data!=='object'||Array.isArray(data))data={};
+  data[c.id+'|'+p.week+'|'+p.day]=String(id);
+  storage.setItem(SUPPORT_CONFIRM_KEY,JSON.stringify(data));return true;
+ }
  function completedSupportDay(c,day,week,expected,storage){
+  try{const id=JSON.parse(storage.getItem(SUPPORT_CONFIRM_KEY)||'{}')[c.id+'|'+week+'|'+day];if(typeof id==='string'&&supportCandidates(c,day,week,storage).some(s=>s.id===id))return true;}catch(_){}
   // Only saved, completed exercises for this exact cycle/week/day count.
   // Partial support workouts must not make the next suggested day disappear.
   try{
@@ -495,7 +521,7 @@
    return sessions.some(session=>{
     const exercises=(session?.exercises||[]).filter(ex=>{
      const link=ex?.sxPowerbuildingSupport;
-     return link?.cycleId===c.id&&Number(link.week)===week&&link.day===day;
+     return link?.cycleId===c.id&&Number(link.week)===week&&String(link.day).toUpperCase()===day;
     });
     const valid=ex=>(ex.sets||[]).filter(set=>set?.done===true&&
       !/^(w|warm.?up|cardio)$/i.test(String(set.type||''))&&
@@ -783,7 +809,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,supportCandidates,confirmSavedSupport,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

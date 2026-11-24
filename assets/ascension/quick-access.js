@@ -68,7 +68,7 @@ function sxAscModalGet(){
  '<h2 id="sxAscContinueTitle">Log this workout in SpartanX?</h2>'+
  '<p>Choose a training day. Its exact prescribed sets will load into SpartanX Workout.</p>'+
  '<label for="sxAscContinueLift">Exercise</label><select id="sxAscContinueLift"></select>'+
- '<div id="sxAscContinuePreview" aria-live="polite"></div>'+
+ '<div id="sxAscContinuePreview" aria-live="polite"></div><div id="sxAscSupportRecovery" hidden></div>'+
  '<p>All sets start unchecked. Completing the prescribed working sets advances your AscensionX programme.</p>'+
  '<p id="sxAscContinueError" role="alert" hidden></p></div>'+
  '<div class="sx-asc-actions"><button type="button" id="sxAscContinueCancel">CANCEL</button>'+
@@ -81,7 +81,7 @@ function sxAscModalGet(){
  overlay.addEventListener('keydown',event=>{
   if(event.key==='Escape'){event.preventDefault();sxAscModalClose()}
   if(event.key==='Tab'){
-   const items=[...overlay.querySelectorAll('select,button')];
+   const items=[...overlay.querySelectorAll('select,button')].filter(el=>!el.closest('[hidden]')&&!el.disabled);
    if(event.shiftKey&&document.activeElement===items[0]){event.preventDefault();items.at(-1).focus()}
    else if(!event.shiftKey&&document.activeElement===items.at(-1)){event.preventDefault();items[0].focus()}
   }
@@ -107,6 +107,7 @@ function sxAscModalRender(){
  const state=window.SXAscensionPrescription?.read?.();
  if(!select||!box||!state)return;
  box.replaceChildren();sxAscModalMessage('');
+ const recovery=byId('sxAscSupportRecovery');if(recovery){recovery.replaceChildren();recovery.hidden=true;}
  const unit=state.profile.unit==='lbs'?'lbs':'kg';
  const weight=value=>Number(Number(value)*(unit==='lbs'?2.2046226218:1)).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit;
  if(select.value==='__ADAPTIVE_SUPPORT__'){
@@ -116,6 +117,18 @@ function sxAscModalRender(){
   for(const ex of slot.exercises||[]){
    const reps=ex.min===ex.max?ex.min:ex.min+'–'+ex.max;
    sxAscModalLine(box,ex.name+' · '+ex.sets+' × '+reps+' · RPE '+(ex.targetRpe??10-ex.rir));
+  }
+  const api=window.SXAscensionAdaptive,c=api?.activeCycle?.();
+  const candidates=c?api.supportCandidates?.(c,slot.day,slot.week)||[]:[];
+  if(recovery&&candidates.length){
+   recovery.hidden=false;
+   const label=document.createElement('p');label.textContent='Already completed this assistance day? Confirm your saved workout without logging it again.';recovery.appendChild(label);
+   for(const saved of candidates){
+    const b=document.createElement('button');b.type='button';b.className='secondary';b.style.cssText='display:block;width:100%;margin:8px 0;white-space:normal';b.textContent='Confirm saved: '+saved.name+' · '+new Date(saved.date).toLocaleDateString()+' · '+saved.sets+' logged sets';
+    b.onclick=()=>{if(!confirm('Confirm that this saved workout completed '+slot.title+'? Your training history will not change.'))return;
+     try{if(!api.confirmSavedSupport(saved.id)){sxAscModalMessage('Saved workout is no longer eligible. Reopen Continue.');return;}refresh();sxAscModalOpen();}catch(e){sxAscModalMessage('Unable to save completion: '+e.message);}
+    };recovery.appendChild(b);
+   }
   }
   return;
  }
@@ -156,9 +169,9 @@ function sxAscModalOpen(preferred){
  const selected=preferred&&[...select.options].some(o=>o.value===preferred)?preferred:
   pending?'__ADAPTIVE_SUPPORT__':cycle.upNext.lift;
  select.value=[...select.options].some(o=>o.value===selected)?selected:lifts[0];
- sxAscOrigin=document.activeElement;
+ if(modal.hidden)sxAscOrigin=document.activeElement;
  modal.hidden=false;modal.setAttribute('aria-hidden','false');
- sxAscModalRender();select.focus({preventScroll:true});
+ sxAscModalRender();modal.querySelector('#sxAscContinueCancel').focus({preventScroll:true});
  return true;
 }
 function sxAscModalLoad(){
@@ -262,7 +275,7 @@ byId('sxAscensionManage').addEventListener('click',()=>{
  launch('manage','workout');
 });
 window.addEventListener('spartx:ascensionCycleUpdated',refresh);
-window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY||e.key===null)refresh()});
+window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY||e.key==='spartx_db'||e.key==='sx_ascension_support_confirm_v1'||e.key===null)refresh()});
 window.addEventListener('pageshow',refresh);
 // Adaptive Programming loads after this card. Refresh once the full page loads.
 window.addEventListener('load',refresh);

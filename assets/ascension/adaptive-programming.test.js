@@ -391,7 +391,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=394'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=411'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -401,7 +401,7 @@ assert.ok(!ascHtml.includes('<div id="sxCycleManageLiveSnapshot"')&&
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v118')&&embeddedSw.includes('adaptive-programming.js?v=394'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v120')&&embeddedSw.includes('adaptive-programming.js?v=411'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 
@@ -613,3 +613,28 @@ assert.ok(hostHtml.includes('upgradeUntouchedSupportBench(work,window.SXAscensio
  'Restored active SpartanX support draft must invoke safe bench migration');
 
 console.log('AscensionX adaptive programming: tests passed');
+
+// Recover a saved assistance session without duplicate logging.
+function check(api,store,assert){
+ const id='2026-11-01T10:00:00.000Z',lifts=['Back Squat','Bench Press','Deadlift'];
+ const cycle=JSON.stringify({cycle:{created:id,exercises:lifts,weeks:Object.fromEntries(lifts.map(l=>[l,5])),currentWeek:5},logs:lifts.map(lift=>({cycleId:id,lift,week:4,setsComplete:true,date:'2026-11-20T10:00:00Z'}))});
+ store.setItem('ascensionx_strength_v1',cycle);api.save({enabled:true,days:4,focus:'strength'},store);
+ const session={id:123,date:'2026-11-21T14:00:00Z',name:'Upper Assistance - Week 4',exercises:[{name:'Bench Press',sets:[{weight:100,reps:8,done:true,type:'Working Set'}]}]};
+ const saved=JSON.stringify({sessions:[session]});store.setItem('spartx_db',saved);
+ const c=api.activeCycle(store);
+ assert(api.pendingSupportDay(c,store)?.week===4,'unlinked session requires confirmation');
+ assert(api.supportCandidates(c,'SAT',4,store).length===1,'saved session found');
+ assert(!api.confirmSavedSupport('other',store),'no arbitrary completion');
+ assert(api.confirmSavedSupport('123',store),'confirmed');
+ assert(api.pendingSupportDay(c,store)===null,'advance to week five');
+ assert(store.getItem('spartx_db')===saved&&store.getItem('ascensionx_strength_v1')===cycle,'history unchanged');
+ store.setItem('spartx_db',JSON.stringify({sessions:[]}));
+ assert(api.pendingSupportDay(c,store)?.week===4,'deleted record invalidates confirmation');
+ const wrong={...session,id:456,exercises:[{...session.exercises[0],sxPowerbuildingSupport:{cycleId:'older-cycle',week:4,day:'SAT'}}]};
+ store.setItem('spartx_db',JSON.stringify({sessions:[wrong]}));
+ assert(api.supportCandidates(c,'SAT',4,store).length===0,'wrong cycle rejected');
+ const linked={...session,id:789,exercises:[{...session.exercises[0],sxPowerbuildingSupport:{cycleId:id,week:4,day:'sat',plannedSets:1,plannedExerciseCount:1}}]};
+ store.setItem('spartx_db',JSON.stringify({sessions:[linked]}));
+ assert(api.pendingSupportDay(c,store)===null,'linked day recognised');
+}
+{const recovery=boot({});check(recovery.api,recovery.localStorage,(value,message)=>assert.ok(value,message));}

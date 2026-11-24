@@ -32,6 +32,7 @@ jobs:
           node --check AscensionX2/sw.js
           node --check AscensionX2/assessment-core.js
           node --check AscensionX2/assessment.js
+          node --check AscensionX2/select-replace-inputs.js
           node --check tests/ax-athlete-assessment.test.js
           node --check tests/ax-athlete-assessment.browser.cjs
           node --check tests/ascensionx2-standalone.test.js

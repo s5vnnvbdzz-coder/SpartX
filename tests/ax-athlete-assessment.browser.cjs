@@ -26,8 +26,28 @@ async function run(browserType,device){
   assert.equal(await page.locator('input[name="deadliftMax"]').inputValue(),'215');
   await page.locator('#axNext').click();
   assert.match(await page.locator('#stepHeading').innerText(),/Understand your starting point/);
+  // Mobile numeric editing must highlight the current value, not append to it.
+  const age=page.locator('#axAssessmentForm input[name="age"]');
+  await age.click();
+  const selection=await age.evaluate(el=>({type:el.type,start:el.selectionStart,end:el.selectionEnd,len:el.value.length}));
+  assert.equal(selection.type,'text');
+  assert.equal(selection.start,0);
+  assert.equal(selection.end,selection.len);
+  await age.press('3');
+  assert.equal(await age.inputValue(),'3','First typed character replaces age, not 363');
+  await age.fill('36');
+  await age.press('Tab');
   await page.locator('#axNext').click();
   assert.match(await page.locator('#stepHeading').innerText(),/Establish your strength baseline/);
+  const currentSquat=page.locator('#axAssessmentForm input[name="squatMax"]');
+  await currentSquat.click();
+  const squatSelected=await currentSquat.evaluate(el=>({start:el.selectionStart,end:el.selectionEnd,len:el.value.length}));
+  assert.equal(squatSelected.start,0);
+  assert.equal(squatSelected.end,squatSelected.len);
+  await currentSquat.press('1');
+  assert.equal(await currentSquat.inputValue(),'1','Existing 185 kg replaced, not appended');
+  await currentSquat.fill('185');
+  await currentSquat.press('Tab');
   await page.locator('input[name="squatGoal"]').fill('195');
   await page.locator('input[name="benchGoal"]').fill('167.5');
   await page.locator('input[name="deadliftGoal"]').fill('225');

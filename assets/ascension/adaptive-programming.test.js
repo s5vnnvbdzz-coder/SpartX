@@ -518,7 +518,7 @@ assert.equal(fatigueCase.api.schedule().slots[3].role,'balanced');
 const adaptiveSource=fs.readFileSync(path.join(__dirname,'adaptive-programming.js'),'utf8');
 assert.ok(adaptiveSource.includes("slot.kind==='support'?slot.title:slot.day+' · '+slot.title"));
 assert.ok(adaptiveSource.includes("line.textContent=ex.name+' '+ex.sets+' × '+reps+' - RPE '+target"));
-assert.ok(ascHtml.includes("title.textContent=slot.kind==='support'?slot.title"));
+assert.ok(ascHtml.includes("title.textContent=sessionName+' - Day '+(index+1)+' Week '+slot.week"));
 assert.ok(ascHtml.includes('function nextAscensionSupportSlot(){'));
 
 // Lock the four-day programme to three working sets in every loading

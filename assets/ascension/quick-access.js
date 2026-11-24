@@ -118,8 +118,8 @@ function sxAscModalRender(){
   sxAscModalLine(box,slot.title,true);
   if(!slot.ready)sxAscModalLine(box,'Upcoming assistance · You can preview or manually reschedule this session. The primary lifts remain the recommended next workout.');
   for(const ex of slot.exercises||[]){
-   const reps=ex.min===ex.max?ex.min:ex.min+'–'+ex.max;
-   sxAscModalLine(box,ex.name+' · '+ex.sets+' × '+reps+' · RPE '+(ex.targetRpe??10-ex.rir));
+   const rendered=window.SXAscensionAdaptive?.formatPrescription?.(ex);
+   sxAscModalLine(box,rendered||ex.name+' · '+ex.sets+' sets');
   }
   const api=window.SXAscensionAdaptive,c=api?.activeCycle?.();
   const candidates=c?api.supportCandidates?.(c,slot.day,slot.week)||[]:[];
@@ -146,10 +146,19 @@ function sxAscModalRender(){
   (workout.week===6?'Deload Set '+(i+1):i===0?'Top Set':'Back Down '+i)+
   ' · '+weight(set.weight)+' × '+set.reps));
  if(window.SXAscensionAdaptive?.enabled?.(workout.cycleId)){
-  const items=window.SXAscensionAdaptive?.plan?.(select.value,workout.week)||[];
+  // Use the EXACT importer that builds the active workout, not a generic
+  // preview. For example, Deadlift RDL is 45% of the approved deadlift TM.
+  const items=window.SXAscensionCompanion?.forImport?.(workout,[],localStorage)||[];
   if(items.length)sxAscModalLine(box,'ADAPTIVE SUPPORT',true);
-  for(const ex of items)sxAscModalLine(box,ex.name+' · '+ex.sets+' × '+
-   (ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+' · RPE '+(ex.targetRpe??10-ex.rir));
+  for(const ex of items){
+   const sets=ex.sets||[],first=sets[0]||{};
+   const target=ex.sxStrengthSizeCompanion?.targetRpe;
+   sxAscModalLine(box,ex.name+' · '+sets.length+' × '+
+    (first.weight!==''&&first.weight!=null?weight(first.weight):'choose load')+
+    ' × '+first.reps+' reps · RPE '+(target||'—'));
+  }
+ }else{
+  sxAscModalLine(box,'Adaptive Support is OFF for this cycle. Enable it in Manage Cycle to include supporting exercises.');
  }
 }
 function sxAscModalOpen(preferred){

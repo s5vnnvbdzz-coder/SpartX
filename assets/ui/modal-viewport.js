@@ -16,6 +16,11 @@
   return true;
  }
  function surface(el){
+  // Set-type, RPE and numeric sheets transition visibility for 250 ms.
+  // Once marked open, claim modal ownership immediately rather than leaving
+  // a brief frame where the background can scroll or receive taps.
+  if(el.matches('.set-type-sheet.is-open')&&el.isConnected&&!el.hidden&&
+    el.getAttribute('aria-hidden')!=='true')return el;
   if(!visible(el))return null;
   if(el.matches('dialog[open]'))return el;
   for(let node=el;node&&node!==doc.body;node=parent(node))if(win.getComputedStyle(node).position==='fixed')return node;

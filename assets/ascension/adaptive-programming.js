@@ -283,13 +283,50 @@
    reason:reliable?'Hold the previous successful working load and progress repetitions within the target RPE.':
     'Previous weight is known, but RPE was not fully logged. Hold the weight until enough intensity data is available.'};
  }
+ // Intelligent exercise selection for an already-active classic cycle:
+ // preserve the quad-priority slot, but select the familiar machine using
+ // actual completed exercise history. Never infer machine kg from squat max.
+ function preferredQuadAccessory(storage=global.localStorage){
+  const hack=latestSquatAccessoryHistory('Hack Squat',storage);
+  const press=latestSquatAccessoryHistory('Leg Press',storage);
+  if(!press)return 'Hack Squat';
+  if(!hack)return 'Leg Press';
+  return press.when>hack.when?'Leg Press':'Hack Squat';
+ }
+ function currentTrainingMax(lift,storage=global.localStorage){
+  try{
+   const x=JSON.parse(storage.getItem(CYCLE_KEY)||'null');
+   if(!x?.cycle?.created||!x?.profile?.max)return null;
+   const step=Number(x.profile.rounding)||2.5;
+   const approved=Number(x.cycle.trainingMaxes?.[lift]);
+   const oneRm=Number(x.profile.max[lift]);
+   const pct=Number(x.profile.tmPct)||95;
+   const tm=approved>0?approved:oneRm>0?oneRm*pct/100:0;
+   return tm>0&&Number.isFinite(tm)?Math.round(tm/step)*step:null;
+  }catch(_){return null}
+ }
+ function secondaryBenchSuggestion(week,storage=global.localStorage){
+  const tm=currentTrainingMax('Bench Press',storage);
+  if(!tm)return null;
+  // A technique/volume prescription, not a second classic top set.
+  const fraction=week<=3?.65:week===4?.60:.55;
+  return Math.max(2.5,Math.round(tm*fraction/2.5)*2.5);
+ }
+ function formatPrescription(ex){
+  const count=Math.max(0,Number(ex?.sets)||0),reps=Number(ex?.targetReps||ex?.min)||0;
+  const kg=Number(ex?.suggestedKg)>0?Number(ex.suggestedKg)+' kg':'choose starting kg';
+  const range=ex?.min===ex?.max?String(ex.min):ex?.min+'–'+ex?.max;
+  return String(ex?.name||'Exercise')+' · '+count+' × '+kg+' × '+reps+
+   ' reps (range '+range+') · RPE '+(ex?.targetRpe??(10-Number(ex?.rir||3)));
+ }
+
  // Squat strength is the priority: a knee-dominant compound immediately after
  // the barbell squat, followed by rectus-femoris, posterior-chain and core work.
  // During Weeks 4–5 sets/intensity taper; Week 6 has no accessories.
  function squatAdaptivePlan(week,storage=global.localStorage){
   if(week>=6)return [];
   const prescriptions=[
-   {name:'Hack Squat',sets:3,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
+   {name:preferredQuadAccessory(storage),sets:3,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
    {name:'Leg Extension',sets:3,min:12,max:15,targetRpe:week<=3?8:7},
    {name:'45° Back Extension',sets:3,min:10,max:12,targetRpe:7},
    {name:'Pallof Press',sets:3,min:10,max:15,targetRpe:7}
@@ -377,8 +414,8 @@
   if(lift==='Back Squat')return squatAdaptivePlan(w,storage);
   const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift])
    .filter(item=>item.name!=='Romanian Deadlift');
-  const cap=focus==='strength'?12:16;
-  const maxExercises=focus==='strength'?3:4;
+  const cap=16;
+  const maxExercises=4;
   const prescribed=candidates.map(item=>dose(item,w,focus,lift,cycleId,storage)).filter(Boolean);
   const pinnedName=focus==='strength'?PINNED[lift]:null;
   const pinnedSets=prescribed.find(ex=>ex.name===pinnedName)?.sets||0;
@@ -487,9 +524,23 @@
     // heavy top-set day. Three working sets in a four-day plan; RPE 7 in
     // normal weeks, easing to RPE 6 when recovery is limited.
     const rir=directArms||supportBench?easyRir:Math.max(item.rir,easyRir);
-    return {...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
+    // dose() ran before the final day-specific RPE adjustment. Recalculate
+    // the accessory recommendation using the actual prescribed effort.
+    const final={...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
      ...(directArms?{min:10,max:15,targetReps:10}:{}),
      reason:item.reason+' Low-fatigue '+profile.role+' assistance, adjusted to selected compounds and recent main-lift effort.'};
+    if(supportBench){
+     const benchKg=secondaryBenchSuggestion(week,storage);
+     const previous=Number(item.suggestedKg)>0?Number(item.suggestedKg):null;
+     final.suggestedKg=benchKg===null?null:previous===null?benchKg:Math.min(benchKg,previous);
+     final.reason+=' Secondary bench volume at an appropriately low share of the CURRENT AscensionX training max.';
+    }else{
+     const updated=recommend(final,c.id,week,storage);
+     final.suggestedKg=updated.suggestedKg;
+     final.targetReps=updated.targetReps;
+     final.reason+=' '+updated.reason;
+    }
+    return final;
    });
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
@@ -714,7 +765,7 @@
       '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
      '</select></div>',
     '</div>',
-    '<p class="sx-adaptive-rule">Assistance is selected for the gaps between your main lifts, with lighter work when recovery is limited.</p>',
+    '<p class="sx-adaptive-rule">The same live prescriptions apply to the remaining weeks of your active AscensionX cycle. Main-lift top sets and back-down sets remain unchanged.</p>',
     '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details" open>',
      '<summary>YOUR TRAINING DAYS · LIVE PROGRAMME <span aria-hidden="true">⌄</span></summary>',
      '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
@@ -773,7 +824,7 @@
      line.className='sx-adaptive-preview-exercise';
      const reps=ex.min===ex.max?String(ex.min):ex.min+'–'+ex.max;
      const target=ex.targetRpe??(10-ex.rir);
-     line.textContent=ex.name+' '+ex.sets+' × '+reps+' - RPE '+target;
+     line.textContent=formatPrescription(ex);
      details.appendChild(line);
     }
     box.appendChild(details);
@@ -835,7 +886,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,formatPrescription,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

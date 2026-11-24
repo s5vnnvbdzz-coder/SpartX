@@ -1,7 +1,7 @@
 /* AscensionX 2.0: isolated, read-only powerlifting preview. No storage or live cycle writes. */
 (function(root){const api=(function factory(){
 "use strict";
-const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], LIFTS=["Back Squat","Bench Press","Deadlift"], VERSION="2.0-preview.1";
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], LIFTS=["Back Squat","Bench Press","Deadlift"], VERSION="2.0-preview.2";
 const CATALOG={
 quad:[["Hack Squat","full"],["Leg Press","full"],["Bulgarian Split Squat","basic"]],
 curl:[["Seated Leg Curl","full"],["Sliding Leg Curl","basic"]],
@@ -79,7 +79,7 @@ function generate(input,volume){
   if(role==="hinge")n=Math.min(n,2);
   if(volume?.countExposure&&volume?.recommendWorkingSets&&!recovery&&role!=="hinge"){
    const current=volume.countExposure(sessions.map(x=>({exercises:x.exercises.map(e=>({name:e.name,sets:e.sets.filter(z=>z.type!=="warmup")}))})));
-   const info=volume.classify(option[0]);if(info){const d=volume.recommendWorkingSets({name:option[0],goal:"powerlifting",experience:p.experience,weeklyExposure:current[info.primary]?.effective||0,remainingSlots:2,lowReadiness:risk>=4,existingSets:n});n=Math.min(n,Math.max(2,d.sets));}
+   const info=volume.classify(option[0]);if(info){const d=volume.recommendWorkingSets({name:option[0],goal:"powerlifting",experience:p.experience,weeklyExposure:current[info.primary]?.effective||0,remainingSlots:2,lowReadiness:risk>=4,existingSets:n});n=Math.min(n,d.status==="unknown-exercise"?n:(risk>=4||beginner||phase==="Intensification"?2:current[info.primary]?.effective>=d.targetRange?.[1]?2:Math.max(3,d.sets)));}
   }
   add(s,option[0],"accessory",Array.from({length:n},()=>({type:"work",kg:null,reps,rpe:recovery?6:role==="hinge"?7:8})),role==="hinge"?150:120,why+" Establish an exercise-specific load at the target effort.");
  }
@@ -96,7 +96,7 @@ function generate(input,volume){
  accessory(sessions[0],"quad",10,"Additional knee-dominant work with lower axial demand.");accessory(sessions[0],"curl",12,"Hamstring coverage.");accessory(sessions[0],"core",12,"Trunk work.");
  accessory(sessions[1],"row",10,"Upper-back support.");accessory(sessions[1],"chest",10,"Supplemental pressing.");accessory(sessions[1],"triceps",12,"Elbow extension support.");accessory(sessions[1],"side",15,"Shoulder coverage.");
  accessory(sessions[2],"pull",10,"Vertical pulling.");accessory(sessions[2],"curl",12,"Knee-flexion work without another demanding hinge.");
- if(!recovery&&risk<2&&p.experience!=="beginner")accessory(sessions[2],"hinge",8,"Optional additional hinge with controlled effort.");
+ if(!recovery&&risk<=2&&p.experience!=="beginner"&&phase!=="Intensification")accessory(sessions[2],"hinge",8,"Optional controlled hinge; omit if deadlift effort or lower-back recovery is poor.");
  if(count===4){accessory(sessions[3],"row",10,"Upper-back coverage.");accessory(sessions[3],"biceps",12,"Elbow flexion.");accessory(sessions[3],"triceps",12,"Elbow extension.");accessory(sessions[3],"calf",15,"Lower-leg coverage.");}
  }
  function duration(s){return 8+s.exercises.reduce((n,e)=>n+3+((e.role==="secondary"||e.role==="assessment")?6:0)+e.sets.reduce((t,z)=>t+(z.type==="warmup"?2:1+e.restSeconds/60),0),0);}

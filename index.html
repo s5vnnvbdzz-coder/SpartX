@@ -3128,7 +3128,7 @@ function supersetBannerFor(index){
 function isCycleRpeEligible(exercise){
  return editingSessionId===null&&!!(activeCycle||exercise?.ascensionLink||
   exercise?.sxStrengthSizeCompanion||exercise?.sxPowerbuildingSupport||
-  exercise?.bodybuildingLink||
+  exercise?.bodybuildingLink||exercise?.sxAscensionV2||
   /(?:SpartanX cycle:|Imported from (?:AscensionX|5\/3\/1|SpartanX Tools))/i.test(exercise?.notes||''));
 }
 
@@ -3269,7 +3269,7 @@ window.removeEx=i=>{
  if(!Number.isInteger(i)||!work[i])return false;
  const item=work[i];
  const logged=window.SpartanXExerciseReplacement?.hasRecordedData(item);
- const tracked=!!(item.ascensionLink||item.bodybuildingLink||item.sxPowerbuildingSupport||item.sxStrengthSizeCompanion);
+ const tracked=!!(item.ascensionLink||item.bodybuildingLink||item.sxPowerbuildingSupport||item.sxStrengthSizeCompanion||item.sxAscensionV2);
  const cycleMain=!!activeCycle&&/(?:SpartanX cycle:|Imported from SpartanX Tools)/i.test(item.notes||'');
  if((logged||tracked||cycleMain)&&!confirm('Remove '+item.name+' from this workout?'+
   (logged?'\\n\\nIts entered and completed sets will be lost.':'')+
@@ -4045,6 +4045,25 @@ window.SpartanXStartAscensionAdaptiveSupportSession=function(payload){
  $('sessionClock').textContent='00:00:00';
  switchScreen('activeWorkout',{instant:true});
  renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
+ return true;
+};
+window.SpartanXStartAscensionV2Session=function(payload){
+ const api=window.SXAscensionV2Lifecycle,entry=api?.read(localStorage);
+ if(!entry||entry.id!==payload?.programmeId)return false;
+ if(sessionActive||editingSessionId!==null){alert('Finish or discard the current workout before loading AscensionX 2.0.');return false;}
+ // Do not silently run competing strength programmes.
+ if(window.SXAscensionAdaptive?.activeCycle?.()){alert('A legacy AscensionX programme is present. Keep it intact; use the experimental preview until you are ready to switch.');return false;}
+ const progress=api.progress(entry,db.sessions||[]),slot=progress.next;
+ if(!slot||slot.id!==payload.slotId)return false;
+ if(!confirm('Load AscensionX 2.0 · Week '+slot.week+' · '+slot.day+'? All sets start unchecked. Review the suggested targets before training.'))return false;
+ work=api.makeWorkout(entry,slot,db.sessions||[]);
+ if(!work.length)return false;
+ libraryMode='workout';activeCycle=null;
+ window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
+ clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;
+ const title='AscensionX 2.0 - '+slot.day+' - Week '+slot.week;
+ $('activeWorkoutName').textContent=title;$('workoutName').value=title;$('sessionClock').textContent='00:00:00';
+ switchScreen('activeWorkout',{instant:true});renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
  return true;
 };
 function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
@@ -5661,6 +5680,10 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
 <script src="./assets/bodybuilding/programme-builder.js?v=367"></script>
 <script src="./assets/ranks/prestige-showcase.js?v=383"></script>
+<script src="./assets/ascension/programme-v2-lifecycle.js?v=2"></script>
+<script id="sx-ascension-v2-handoff">
+window.addEventListener('load',()=>{try{const key=window.SXAscensionV2Lifecycle.HANDOFF,raw=sessionStorage.getItem(key);if(!raw)return;sessionStorage.removeItem(key);const item=JSON.parse(raw);if(!window.SpartanXStartAscensionV2Session(item))alert('Experimental programme session not loaded. Your workout history and legacy programme are unchanged.');}catch(e){alert('Experimental programme session not loaded.');}},{once:true});
+</script>
 <script id="sx-ascension-native-workout-handoff">
 (function(){
  'use strict';

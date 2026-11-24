@@ -5,3 +5,7 @@ This branch introduces a non-destructive 8/12/16-week powerlifting planner. It d
 Open `AscensionX/programme-preview.html` on a local static server, or follow the preview link from the cycle editor. Run `node assets/ascension/programming-v2.test.js` for deterministic checks. Next: browser and integration tests, data versioning, historical loads, approval-controlled workout import, completion state and full adaptation, profile persistence, mobile and offline support. Do not merge/deploy as a finished engine without review.
 
 Evidence: https://pubmed.ncbi.nlm.nih.gov/41843416/ and https://pubmed.ncbi.nlm.nih.gov/32917000/; existing shared science library documents fractional exposure and its limitations.
+
+## Preview 2
+
+Explicit local saved-programme support, next-session progression derived from original SpartanX saved sets, and a first-party workout handoff. A legacy AscensionX cycle or active workout blocks import. No automatic overwriting of legacy cycles. The next session is complete only when all prescribed working set IDs appear in one saved workout with valid logged reps; partial saves do not advance. Repeated comparable RPE observations inform conservative load suggestions; missing RPE never triggers automatic progression. Three sets are the ordinary accessory starting baseline, with lower doses for high exposure, recovery phases or limited time. These changes require browser, mobile, sync, and regression testing before deployment.

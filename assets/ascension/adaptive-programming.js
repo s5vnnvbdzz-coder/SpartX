@@ -480,7 +480,10 @@
    });
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
-  if(index===3&&prefs.days===4&&global.SXAscensionV2Bridge?.plan('Support',week,c.id,storage))return 'Secondary Squat & Bench - Week '+week;
+  if(index===3&&prefs.days===4){
+   const bridge=global.SXAscensionV2Bridge,exercises=bridge?.plan('Support',week,c.id,storage);
+   if(Array.isArray(exercises)&&exercises.length)return bridge.supportTitle(exercises,week);
+  }
   const role=supportProfile(c,prefs,index,week,storage).role;
   return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance - Week '+week;
  }
@@ -497,7 +500,7 @@
     if(links.length)return links.every(l=>l.cycleId===c.id&&Number(l.week)===week&&String(l.day).toUpperCase()===day);
     if(ex.some(e=>e.ascensionLink||e.bodybuildingLink||e.sxStrengthSizeCompanion)||read(c.id,storage).days!==4||day!=='SAT')return false;
     const name=String(s.name||'').trim().replace(/[–—·]/g,'-');
-    return new RegExp('^(?:(?:Upper|Lower|Balanced) Assistance|Secondary Squat & Bench)\\s*-\\s*Week\\s+'+week+'$','i').test(name);
+    return new RegExp('^(?:(?:Upper|Lower|Balanced|Adaptive) Assistance|Secondary Squat & Bench|Secondary Bench & Assistance|Secondary Squat & Assistance)\\s*-\\s*Week\\s+'+week+'$','i').test(name);
    }).map(s=>({id:String(s.id),name:String(s.name||'Assistance workout'),date:s.date,sets:(s.exercises||[]).reduce((n,e)=>n+(e.sets||[]).filter(z=>z.done===true).length,0)}));
   }catch(_){return []}
  }

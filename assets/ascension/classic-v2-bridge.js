@@ -90,6 +90,14 @@ function build(profile,s,week,lift,storage=root.localStorage){
  while(out.length&&duration()>p.minutes){const e=out.at(-1);if(e.sets>1)e.sets--;else out.pop();}
  return out.length?out:null;
 }
+// The session name follows the actual final prescription after tapering and time trimming.
+function supportTitle(exercises,week){
+ const list=Array.isArray(exercises)?exercises:[];
+ const hasSquat=list.some(e=>/^(?:(?:Paused|Tempo|Back|Front) )?Squat$/i.test(e.name)&&Number(e.sets)>0);
+ const hasBench=list.some(e=>/^(?:(?:Paused|Close-Grip) )?Bench Press$/i.test(e.name)&&Number(e.sets)>0);
+ const label=hasSquat&&hasBench?"Secondary Squat & Bench":hasSquat?"Secondary Squat & Assistance":hasBench?"Secondary Bench & Assistance":"Adaptive Assistance";
+ return label+" - Week "+week;
+}
 function proposal(profile,storage=root.localStorage){
  const s=snapshot(storage);if(!s.ok)throw Error(s.message);
  if(s.startWeek>5)throw Error("Only deload or assessment remains. Finish the current cycle instead of introducing new support.");
@@ -100,6 +108,7 @@ function proposal(profile,storage=root.localStorage){
  // re-evaluated at each future import. The legacy cycle stays authoritative.
  const slots=LIFTS.concat("Support").map((lift,i)=>({day:DAYS[i],lift,week:s.startWeek,exercises:build(p,s,s.startWeek,lift,storage)}));
  if(slots.some(x=>!x.exercises?.length))throw Error("Could not fit all four training days. Keep the classic cycle or revise the profile.");
+ for(const slot of slots)slot.title=slot.lift==="Support"?supportTitle(slot.exercises,slot.week):slot.lift+" - Week "+slot.week;
  return {cycleId:s.id,startWeek:s.startWeek,signature:s.signature,profile:base.profile,main:s.main,completed:s.completed,slots};
 }
 function apply(draft,storage=root.localStorage){
@@ -115,5 +124,5 @@ function plan(lift,week,cycleId,storage=root.localStorage){
  return build(record.profile,s,week,lift,storage);}catch{return null;}
 }
 function disable(storage=root.localStorage){storage.removeItem(KEY);}
-return {KEY,snapshot,read,proposal,apply,plan,disable};
+return {KEY,snapshot,read,proposal,apply,plan,disable,supportTitle};
 })(root);})(typeof window!=='undefined'?window:globalThis);

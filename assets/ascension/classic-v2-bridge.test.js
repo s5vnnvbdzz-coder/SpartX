@@ -21,6 +21,16 @@ function test(api,root){
  ok(root.SXAscensionAdaptive.plan("Deadlift",6,{},storage).length===0,"deload");
  const imported=root.SXAscensionCompanion.forImport({source:"AscensionX",exercise:"Deadlift",cycleId:id,week:3,tm:202.5},[],storage);
  ok(imported.length===draft.slots[2].exercises.length&&imported.every(e=>!e.ascensionLink&&e.sets.every(z=>!z.done)),"same logger import");
+ // Titles reflect actual secondary lifts, including late-cycle tapering.
+ ok(draft.slots[3].title==="Secondary Squat & Bench - Week 3","normal week title");
+ for(const week of [4,5]){
+  const ex=api.plan("Support",week,id,storage);
+  ok(ex.some(e=>e.name==="Bench Press")&&!ex.some(e=>/squat/i.test(e.name)),"late-cycle secondary squat omitted");
+  ok(api.supportTitle(ex,week)==="Secondary Bench & Assistance - Week "+week,"late-cycle title matches prescription");
+ }
+ ok(api.supportTitle([{name:"Hack Squat",sets:3}],3)==="Adaptive Assistance - Week 3","hack squat is not a secondary competition squat");
+ ok(api.supportTitle([{name:"Tempo Squat",sets:2}],3)==="Secondary Squat & Assistance - Week 3","squat-only title");
+ ok(api.supportTitle([{name:"Paused Squat",sets:0},{name:"Bench Press",sets:1}],5)==="Secondary Bench & Assistance - Week 5","zero sets not counted");
  const pending=root.SXAscensionAdaptive.pendingSupportDay(null,storage);ok(pending?.week===2&&pending.exercises.every(e=>!e.sxV2Bridge),"pending old fourth day preserved");
  api.disable(storage);ok(JSON.stringify(root.SXAscensionAdaptive.plan("Deadlift",3,{},storage))===JSON.stringify(classic),"classic restored");
  storage.setItem("spartx_draft_v1",'{"sessionActive":true}');let blocked=false;try{api.apply(draft,storage)}catch{blocked=true}ok(blocked,"active workout guard");

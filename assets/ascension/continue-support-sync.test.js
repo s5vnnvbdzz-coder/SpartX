@@ -92,7 +92,7 @@ check('Week 5 existing squat is automatically re-ordered without changing a sing
  const t=boot();t.api.save({enabled:true,days:4,focus:'strength'},t.storage);
  const d={...details(),week:5},m=main(d);
  const planned=t.companion.forImport(d,[],t.storage);
- const names=planned.map(ex=>ex.name);
+ const names=Array.from(planned,ex=>ex.name);
  assert.deepEqual(names,['Leg Press','Leg Extension','45° Back Extension','Hanging Knee Raise']);
  const rows=planned.slice().reverse();
  rows[0].sets[0].done=true;rows[0].sets[0].rpe='8';

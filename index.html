@@ -4119,6 +4119,7 @@ function ensureAscensionStrengthSizeCompanions(d){
  // seen in View Cycle and the Continue preview. Entered sets are protected.
  const synced=window.SXAscensionContinueSupport?.reconcile?.(work,d,api,localStorage);
  if(synced?.handled){
+  if(synced.protected&&typeof toast==='function')toast('Previously entered assistance is preserved. New support prescriptions will apply to fresh sessions.');
   if(synced.changed&&Array.isArray(synced.previousOrder)){
    const positions=work.map(ex=>synced.previousOrder.indexOf(ex));
    remapActiveExerciseTimer(positions);

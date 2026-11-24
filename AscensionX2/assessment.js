@@ -136,7 +136,7 @@ function checkStep(index){
 }
 function updateSchedule(){
  const f=getValues(),days=api.recommendSchedule(f.availability,Number(f.days));
- $('schedulePreview').textContent=days?days.join(' · '):'SELECT MORE AVAILABLE DAYS';
+ $('schedulePreview').textContent=days?days.join(' · ').toUpperCase():'SELECT MORE AVAILABLE DAYS';
  $('scheduleReason').textContent=days?
   'Suggested order: squat, bench, deadlift'+(days.length>=4?', secondary squat and bench':'')+
   (days.length===5?', then upper assistance':'')+'. You can revise your availability before generating.':

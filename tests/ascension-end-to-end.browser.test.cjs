@@ -83,15 +83,15 @@ async function run(type,device){
   fail(viewed.week?.includes('Week 1')&&viewed.week?.includes('Hack Squat')&&viewed.visible==='false',
    'View Cycle shows current live prescribed support');
   await page.locator('#sxCycleViewSave').click();
-  await page.waitForURL(url=>url.pathname==='/'&&url.searchParams.get('sxReturn')==='ascension');
-  await page.waitForFunction(()=>!document.getElementById('sxAscensionQuickCard')?.hidden);
+  await page.waitForFunction(()=>location.pathname==='/'&&document.querySelector('.screen.active')?.id==='workout'&&
+    !document.getElementById('sxAscensionQuickCard')?.hidden);
   await page.locator('#sxAscensionOptions').click();
   await page.locator('#sxAscensionManage').click();
   await page.waitForFunction(()=>document.getElementById('cycleEditorBackdrop')?.classList.contains('open'));
   fail(await page.locator('#sxAscAdaptiveEnabled').isChecked(),'Manage Cycle retains adaptive toggle');
   await page.locator('#cycleEditorClose').click();
-  await page.waitForURL(url=>url.pathname==='/'&&url.searchParams.get('sxReturn')==='ascension');
-  await page.waitForFunction(()=>!document.getElementById('sxAscensionQuickCard')?.hidden);
+  await page.waitForFunction(()=>location.pathname==='/'&&document.querySelector('.screen.active')?.id==='workout'&&
+    !document.getElementById('sxAscensionQuickCard')?.hidden);
   console.log('PASS View/Manage/Back navigation '+device);
   await page.locator('#sxAscensionContinue').click();
   await page.waitForFunction(()=>!document.getElementById('sxAscContinueBackdrop')?.hidden);

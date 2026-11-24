@@ -35,12 +35,73 @@
   }
   return changed?{...state,cycle:{...c,weeks}}:state;
  }
+ // A completed SpartanX workout is the durable source of truth when the
+ // cross-page completion queue was consumed by an older broken app version.
+ // Only same-cycle, explicitly linked, fully prescribed sets may be recovered.
+ function reconcileSavedSpartanSessions(state,storage=global.localStorage){
+  const cycle=state?.cycle;
+  if(!cycle?.created||!Array.isArray(state.logs))return state;
+  const start=Date.parse(cycle.created);
+  if(!Number.isFinite(start))return state;
+  const allowed=new Set((Array.isArray(cycle.exercises)?cycle.exercises:LIFTS).filter(x=>LIFTS.includes(x)));
+  const saved=sessions(storage);
+  if(!saved.length)return reconcileCompletedWeeks(state);
+  const logs=state.logs.slice();
+  let changed=false;
+  for(const session of saved.slice().reverse()){
+   if(!Array.isArray(session?.exercises)||session.id==null)continue;
+   const date=Date.parse(session.date||'');
+   if(!Number.isFinite(date)||date<start)continue;
+   for(const exercise of session.exercises){
+    const link=exercise?.ascensionLink;
+    if(!link||link.cycleId!==cycle.created||link.lift!==exercise.name||!allowed.has(link.lift))continue;
+    const week=Number(link.week);
+    if(!Number.isInteger(week)||week<1||week>PLAN.length)continue;
+    const plan=PLAN[week-1],required=plan.deload?3:1+plan.backSets;
+    const prescribed=Array.isArray(link.plannedSets)?link.plannedSets:[];
+    const completed=(Array.isArray(exercise.sets)?exercise.sets:[]).filter(x=>
+     ['Working Set','Backdown Set','B'].includes(x?.type));
+    if(prescribed.length!==required||completed.length!==required||
+     completed.some((set,i)=>set.done!==true||
+      !Number.isFinite(Number(set.weight))||Number(set.weight)<=0||
+      !Number.isInteger(Number(set.reps))||
+      Number(set.reps)<(plan.deload?5:i===0?plan.topReps:plan.backReps)||
+      !Number.isFinite(Number(prescribed[i]?.weight))||Number(prescribed[i].weight)<=0||
+      !Number.isFinite(Number(prescribed[i]?.reps))||
+      Number(set.weight)+0.01<Number(prescribed[i].weight)||
+      Number(set.reps)<Number(prescribed[i].reps)))continue;
+    const isThisLog=log=>log?.lift===link.lift&&Number(log.week)===week&&
+     (log.cycleId===cycle.created||
+      (!log.cycleId&&Number.isFinite(Date.parse(log.date||''))&&Date.parse(log.date)>=start));
+    if(logs.some(log=>isThisLog(log)&&log.setsComplete===true))continue;
+    const sets=completed.map((set,i)=>({
+     label:plan.deload?'Deload '+(i+1):i===0?'Top set':'Back-off '+i,
+     weight:Number(set.weight),reps:Number(set.reps),
+     rpe:set.rpe==null||set.rpe===''?null:Number(set.rpe),done:true
+    }));
+    const scores=sets.map(x=>x.rpe).filter(x=>x!==null&&Number.isFinite(x));
+    const avgRpe=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;
+    const existingIndex=logs.findIndex(isThisLog);
+    const prior=existingIndex<0?null:logs[existingIndex];
+    const recovered={...prior,id:prior?.id??(Number.isFinite(Number(session.id))?Number(session.id):date),
+     date:session.date,source:'SpartanX',sourceSessionId:String(session.id),
+     cycleId:cycle.created,lift:link.lift,week,sets,topWeight:sets[0].weight,
+     topReps:sets[0].reps,volume:sets.reduce((sum,x)=>sum+x.weight*x.reps,0),
+     notes:prior?.notes||'Recovered from completed SpartanX workout',
+     avgRpe,success:avgRpe===null||avgRpe<=plan.rpe,setsComplete:true};
+    if(existingIndex>=0)logs[existingIndex]=recovered;
+    else logs.push(recovered);
+    changed=true;
+   }
+  }
+  return reconcileCompletedWeeks(changed?{...state,logs}:state);
+ }
  function read(storage=global.localStorage){
   try{
    const state=JSON.parse(storage.getItem(key)||'null');
    if(!state?.cycle?.created||!Array.isArray(state.logs)||!state.profile?.max)return null;
    if(!Number.isFinite(Date.parse(state.cycle.created)))return null;
-   const reconciled=reconcileCompletedWeeks(state);
+   const reconciled=reconcileSavedSpartanSessions(state,storage);
    if(reconciled!==state)try{storage.setItem(key,JSON.stringify(reconciled))}catch(_){}
    return reconciled;
   }catch(_){return null}
@@ -95,5 +156,5 @@
     nominalTop:safe.nominalTop,adjustedTop:top
    }:null};
  }
- global.SXAscensionPrescription=Object.freeze({PLAN,LIFTS,read,build,reconcileCompletedWeeks});
+ global.SXAscensionPrescription=Object.freeze({PLAN,LIFTS,read,build,reconcileCompletedWeeks,reconcileSavedSpartanSessions});
 })(window);

@@ -869,7 +869,7 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
 <nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
 <script src="../assets/ascension/load-guard.js?v=338"></script>
-<script src="../assets/ascension/workout-prescription.js?v=421"></script>
+<script src="../assets/ascension/workout-prescription.js?v=422"></script>
 <script src="../assets/ascension/cycle-progression.js?v=346"></script>
 <script src="../assets/ascension/cycle-intelligence.js?v=1"></script>
 <script>
@@ -1299,11 +1299,13 @@ function activeCycleLogs(){return state.logs.filter(logInActiveCycle);}
 // A completed Week 5 log is authoritative even if an older save left the
 // pointer at Week 5. Only advance; never alter workout history or main loads.
 function syncCompletedLiftProgress(){
- const repaired=window.SXAscensionPrescription?.reconcileCompletedWeeks?.(state);
+ // Re-read saved SpartanX history, not just AscensionX's own logs. A failed
+ // old completion queue may have left a verified workout unsynchronised.
+ const repaired=window.SXAscensionPrescription?.reconcileSavedSpartanSessions?.(state,localStorage);
  if(!repaired||repaired===state)return false;
- const previous=state.cycle.weeks;
- state.cycle.weeks=repaired.cycle.weeks;
- if(!persist(false)){state.cycle.weeks=previous;return false;}
+ const oldLogs=state.logs,oldWeeks=state.cycle.weeks;
+ state.logs=repaired.logs;state.cycle.weeks=repaired.cycle.weeks;
+ if(!persist(false)){state.logs=oldLogs;state.cycle.weeks=oldWeeks;return false;}
  return true;
 }
 function openDeleteCycle(){
@@ -2347,7 +2349,7 @@ function init(){
   history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  }
  processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=131').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=132').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.

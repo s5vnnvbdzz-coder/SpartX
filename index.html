@@ -5451,10 +5451,14 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=408;
+ const BUILD=409;
+ // Public version advances by one minor release every 200 internal builds.
+ // Keep BUILD numeric for precise update detection, even within one version.
+ const versionForBuild=build=>{const milestone=Math.floor(build/200);return (1+Math.floor(milestone/10))+'.'+(milestone%10);};
+ const VERSION=versionForBuild(BUILD);
  const label=document.getElementById('sxCurrentBuildLabel');
- if(label)label.textContent='Build '+BUILD;
- if(status)status.textContent='Build '+BUILD;
+ if(label)label.textContent='Build '+VERSION;
+ if(status)status.textContent='Build '+VERSION;
  const button=document.getElementById('sxCheckUpdates');
  if(!('serviceWorker' in navigator))return;
  let checking=false;
@@ -5503,7 +5507,7 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
    else{
     // A now-current page must not retain an old update banner.
     document.getElementById('sxUpdateBanner')?.remove();
-    if(manual&&status)status.textContent=newest===BUILD?'Up to date · Build '+BUILD:'Unable to confirm latest version.';
+    if(manual&&status)status.textContent=newest===BUILD?'Up to date · Build '+VERSION:'Unable to confirm latest version.';
    }
   }catch(_){if(manual&&status)status.textContent='Cannot check right now. Try again online.';}
   finally{checking=false;}

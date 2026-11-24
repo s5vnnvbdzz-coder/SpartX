@@ -122,8 +122,8 @@ function weekPlan(p,index){
   const fatigue=lean||w>=9;
   const secondaryReps=fatigue?3:w<=3?5:w<=7?4:3;
   const secondaryCount=fatigue?2:3;
-  const pause=round(p.maxes['Back Squat']*(fatigue?.55:w<=3?.63:w<=7?.68:.70),p.step);
-  const close=round(p.maxes['Bench Press']*(fatigue?.55:w<=3?.65:w<=7?.71:.73),p.step);
+  const pause=round(p.maxes['Back Squat']*(fatigue ? 0.55 : w<=3 ? 0.63 : w<=7 ? 0.68 : 0.70),p.step);
+  const close=round(p.maxes['Bench Press']*(fatigue ? 0.55 : w<=3 ? 0.65 : w<=7 ? 0.71 : 0.73),p.step);
   days.push(addDay('Day 4 · Secondary Squat & Bench',[
    variant(squatWeak.includes('hips-first')?'Tempo Squat':'Paused Back Squat',pause,secondaryCount,secondaryReps),
    variant('Close-Grip Bench Press',close,secondaryCount,secondaryReps),

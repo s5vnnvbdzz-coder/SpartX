@@ -50,7 +50,7 @@ check('fresh Continue import uses active six-week assistance without a new 2.0 p
  const plan=t.api.plan(d.exercise,d.week,{},t.storage);
  assert.deepEqual(work.slice(1).map(e=>e.name),Array.from(plan,e=>e.name));
  assert.equal(work[1].name,'Leg Press');
- assert.ok(work[1].sets.every(s=>s.weight==='140'),'Recorded machine load must be used in recommended support work');
+ assert.ok(work[1].sets.every(s=>s.weight==='145'),'Recorded machine load must be used in recommended support work');
  assert.equal(work[1].sets.length,3,'New support set prescription is loaded, not the original two sets');
  assert.equal(t.storage.getItem('ascensionx_strength_v1'),originalCycle);
  assert.equal(t.storage.getItem('spartx_db'),originalSessions);

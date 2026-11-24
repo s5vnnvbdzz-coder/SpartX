@@ -48,5 +48,6 @@ jobs:
           done
           node tests/ascension-end-to-end.browser.test.cjs
       - name: Validate popup viewport and nested modal scroll recovery
+        if: always()
         run: |
           node tests/modal-viewport.browser.test.cjs

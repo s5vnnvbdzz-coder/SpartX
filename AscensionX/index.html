@@ -619,7 +619,7 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
  }
 }
 </style>
-<link rel="stylesheet" href="../assets/ascension/cycle-builder-ui.css?v=392">
+<link rel="stylesheet" href="../assets/ascension/cycle-builder-ui.css?v=406">
 <link rel="stylesheet" href="../assets/themes/theme-consistency.css?v=316">
 
 <script defer src="../assets/themes/shared-theme.js?v=340"></script>
@@ -2320,7 +2320,7 @@ function init(){
   history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  }
  processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=117').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=118').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.

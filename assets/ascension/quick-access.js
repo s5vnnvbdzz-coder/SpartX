@@ -90,7 +90,7 @@ function sxAscModalGet(){
 }
 function sxAscModalClose(){
  if(!sxAscModal||sxAscModal.hidden)return;
- sxAscModal.hidden=true;sxAscModal.setAttribute('aria-hidden','true');
+ sxAscModal.hidden=true;sxAscModal.setAttribute('aria-hidden','true');window.SXModalViewport?.refresh();
  if(sxAscOrigin?.isConnected)sxAscOrigin.focus({preventScroll:true});
  sxAscOrigin=null;
 }
@@ -175,7 +175,7 @@ function sxAscModalOpen(preferred){
  select.value=[...select.options].some(o=>o.value===selected)?selected:lifts[0];
  if(modal.hidden)sxAscOrigin=document.activeElement;
  modal.hidden=false;modal.setAttribute('aria-hidden','false');
- sxAscModalRender();modal.querySelector('#sxAscContinueCancel').focus({preventScroll:true});
+ sxAscModalRender();window.SXModalViewport?.refresh();modal.querySelector('#sxAscContinueCancel').focus({preventScroll:true});
  return true;
 }
 function sxAscModalLoad(){

@@ -1,0 +1,13 @@
+/* Modal viewport ownership: no edits to existing popup scroll snapshots. */
+html.sx-modal-open,html.sx-modal-open body{overflow:hidden!important;overscroll-behavior:none!important}
+html.sx-modal-open body #trackerNav#trackerNav,
+html.sx-modal-open body nav[aria-label="Main navigation"],
+html.sx-modal-open body #minimizedSession,
+html.sx-modal-open body .floating-rest-bar{display:none!important;pointer-events:none!important}
+[data-sx-modal-surface]{overscroll-behavior:contain!important}
+[data-sx-modal-surface] :is(.detail-panel,.set-type-sheet-panel,.sx-asc-scroll,.settings-modal,.cycle-confirm-dialog){overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#sxAscContinueBackdrop{inset:0!important;box-sizing:border-box;max-height:100dvh!important;height:100dvh!important}
+#sxAscContinueDialog{min-height:0;max-height:100%;box-sizing:border-box}
+#sxAscContinueDialog .sx-asc-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#sxAscContinueDialog .sx-asc-actions{flex:0 0 auto}
+html:has(#sxAscContinueBackdrop:not([hidden])) #trackerNav#trackerNav{display:none!important;pointer-events:none!important}

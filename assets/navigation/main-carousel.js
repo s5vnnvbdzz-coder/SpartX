@@ -45,7 +45,7 @@
   });
  };
  const ready=()=>{
-  if(!enabled||!mobile.matches||busy)return false;
+  if(!enabled||!mobile.matches||busy||document.documentElement.classList.contains('sx-modal-open'))return false;
   const current=active();
   if(!current||!PAGES.includes(current.id))return false;
   const body=document.body;

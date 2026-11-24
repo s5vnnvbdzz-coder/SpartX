@@ -31,6 +31,154 @@ if(slot)slot.prepend(card);
 else if(startCard)startCard.before(card);
 else workout.appendChild(card);
 const byId=id=>document.getElementById(id);
+
+/* First-party Continue dialog: SpartanX Workout stays underneath.
+ * All barbell prescription calculations come from shared AscensionX import.
+ * No iframe, second workout logger or navigation on Cancel/Load.
+ */
+let sxAscModal=null,sxAscOrigin=null;
+function sxAscModalGet(){
+ if(sxAscModal)return sxAscModal;
+ const css=document.createElement('style');
+ css.id='sxAscContinueNativeStyle';
+ css.textContent=[
+ '#sxAscContinueBackdrop[hidden]{display:none!important}',
+ '#sxAscContinueBackdrop{position:fixed;inset:0;z-index:290000;display:flex;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));background:#000b;backdrop-filter:blur(4px);overscroll-behavior:contain}',
+ '#sxAscContinueDialog{width:min(100%,550px);max-height:100%;display:flex;flex-direction:column;overflow:hidden;border-radius:17px;border:1px solid var(--line);background:var(--panel);box-shadow:0 20px 70px #000c;color:var(--txt)}',
+ '#sxAscContinueDialog .sx-asc-scroll{padding:18px;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}',
+ '#sxAscContinueDialog h2{font-size:20px;margin:8px 0 10px}',
+ '#sxAscContinueDialog p{font-size:12px;color:var(--muted);line-height:1.5}',
+ '#sxAscContinueDialog label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}',
+ '#sxAscContinueDialog select{width:100%;font-size:16px;min-height:45px;padding:9px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--txt)}',
+ '#sxAscContinuePreview{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:12px;font-size:12px;line-height:1.55}',
+ '#sxAscContinuePreview .sx-asc-heading{color:var(--lime);font-weight:850;font-size:10px;letter-spacing:.5px;margin:12px 0 4px}',
+ '#sxAscContinuePreview .sx-asc-line{padding:3px 0;border-bottom:1px solid var(--line)}',
+ '#sxAscContinueDialog .sx-asc-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 15px calc(13px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}',
+ '#sxAscContinueDialog .sx-asc-actions button{width:100%;min-width:0;min-height:49px;font-weight:900;font-size:11px;border-radius:12px;padding:10px 7px}',
+ '#sxAscContinueCancel{background:var(--panel2)!important;color:var(--txt)!important;border:1px solid var(--line)!important}',
+ '#sxAscContinueLoad{background:color-mix(in srgb,var(--lime) 17%,var(--panel2))!important;color:var(--txt)!important;border:1px solid var(--lime)!important}',
+ '#sxAscContinueError{color:#ff8990!important}'
+ ].join('\n');
+ document.head.appendChild(css);
+ const overlay=document.createElement('div');
+ overlay.id='sxAscContinueBackdrop';overlay.hidden=true;
+ overlay.setAttribute('role','presentation');
+ overlay.innerHTML='<section id="sxAscContinueDialog" role="dialog" aria-modal="true" aria-labelledby="sxAscContinueTitle">'+
+ '<div class="sx-asc-scroll"><div class="eyebrow">ASCENSIONX × SPARTANX</div>'+
+ '<h2 id="sxAscContinueTitle">Log this workout in SpartanX?</h2>'+
+ '<p>Choose a training day. Its exact prescribed sets will load into SpartanX Workout.</p>'+
+ '<label for="sxAscContinueLift">Exercise</label><select id="sxAscContinueLift"></select>'+
+ '<div id="sxAscContinuePreview" aria-live="polite"></div>'+
+ '<p>All sets start unchecked. Completing the prescribed working sets advances your AscensionX programme.</p>'+
+ '<p id="sxAscContinueError" role="alert" hidden></p></div>'+
+ '<div class="sx-asc-actions"><button type="button" id="sxAscContinueCancel">CANCEL</button>'+
+ '<button type="button" id="sxAscContinueLoad">LOAD INTO SPARTANX</button></div></section>';
+ document.body.appendChild(overlay);
+ overlay.addEventListener('click',event=>{if(event.target===overlay)sxAscModalClose()});
+ overlay.querySelector('#sxAscContinueCancel').addEventListener('click',sxAscModalClose);
+ overlay.querySelector('#sxAscContinueLift').addEventListener('change',sxAscModalRender);
+ overlay.querySelector('#sxAscContinueLoad').addEventListener('click',sxAscModalLoad);
+ overlay.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){event.preventDefault();sxAscModalClose()}
+  if(event.key==='Tab'){
+   const items=[...overlay.querySelectorAll('select,button')];
+   if(event.shiftKey&&document.activeElement===items[0]){event.preventDefault();items.at(-1).focus()}
+   else if(!event.shiftKey&&document.activeElement===items.at(-1)){event.preventDefault();items[0].focus()}
+  }
+ });
+ sxAscModal=overlay;return overlay;
+}
+function sxAscModalClose(){
+ if(!sxAscModal||sxAscModal.hidden)return;
+ sxAscModal.hidden=true;sxAscModal.setAttribute('aria-hidden','true');
+ if(sxAscOrigin?.isConnected)sxAscOrigin.focus({preventScroll:true});
+ sxAscOrigin=null;
+}
+function sxAscModalMessage(message){
+ const node=document.getElementById('sxAscContinueError');
+ if(node){node.textContent=message;node.hidden=!message}
+}
+function sxAscModalLine(box,message,heading=false){
+ const el=document.createElement('div');el.className=heading?'sx-asc-heading':'sx-asc-line';
+ el.textContent=message;box.appendChild(el);
+}
+function sxAscModalRender(){
+ const select=document.getElementById('sxAscContinueLift'),box=document.getElementById('sxAscContinuePreview');
+ const state=window.SXAscensionPrescription?.read?.();
+ if(!select||!box||!state)return;
+ box.replaceChildren();sxAscModalMessage('');
+ const unit=state.profile.unit==='lbs'?'lbs':'kg';
+ const weight=value=>Number(Number(value)*(unit==='lbs'?2.2046226218:1)).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit;
+ if(select.value==='__ADAPTIVE_SUPPORT__'){
+  const slot=window.SXAscensionAdaptive?.pendingSupportDay?.();
+  if(!slot){sxAscModalMessage('This assistance day is no longer due.');return}
+  sxAscModalLine(box,slot.title,true);
+  for(const ex of slot.exercises||[]){
+   const reps=ex.min===ex.max?ex.min:ex.min+'–'+ex.max;
+   sxAscModalLine(box,ex.name+' · '+ex.sets+' × '+reps+' · RPE '+(ex.targetRpe??10-ex.rir));
+  }
+  return;
+ }
+ const workout=window.SXAscensionPrescription?.build?.(state,select.value);
+ if(!workout){sxAscModalMessage('Could not calculate this workout. Check your programme.');return}
+ sxAscModalLine(box,'WEEK '+workout.week+' · '+workout.weekLabel,true);
+ if(workout.recoveryBridge)sxAscModalLine(box,'RECOVERY BRIDGE · Adjusted top set '+weight(workout.recoveryBridge.adjustedTop));
+ sxAscModalLine(box,'WARM-UP · '+workout.warmupSets.length+' SETS',true);
+ workout.warmupSets.forEach((set,i)=>sxAscModalLine(box,'W'+(i+1)+' · '+weight(set.weight)+' × '+set.reps));
+ sxAscModalLine(box,'WORKING SETS · '+workout.sets.length,true);
+ workout.sets.forEach((set,i)=>sxAscModalLine(box,
+  (workout.week===6?'Deload Set '+(i+1):i===0?'Top Set':'Back Down '+i)+
+  ' · '+weight(set.weight)+' × '+set.reps));
+ if(window.SXAscensionAdaptive?.enabled?.(workout.cycleId)){
+  const items=window.SXAscensionAdaptive?.plan?.(select.value,workout.week)||[];
+  if(items.length)sxAscModalLine(box,'ADAPTIVE SUPPORT',true);
+  for(const ex of items)sxAscModalLine(box,ex.name+' · '+ex.sets+' × '+
+   (ex.min===ex.max?ex.min:ex.min+'–'+ex.max)+' · RPE '+(ex.targetRpe??10-ex.rir));
+ }
+}
+function sxAscModalOpen(preferred){
+ const cycle=readCycle(),state=window.SXAscensionPrescription?.read?.();
+ if(!cycle||!state)return false;
+ const modal=sxAscModalGet(),select=modal.querySelector('#sxAscContinueLift');
+ select.replaceChildren();
+ const lifts=(Array.isArray(state.cycle.exercises)?state.cycle.exercises:LIFTS)
+  .filter((lift,i,arr)=>LIFTS.includes(lift)&&arr.indexOf(lift)===i);
+ for(const lift of lifts){
+  const option=document.createElement('option');option.value=lift;
+  option.textContent=lift+' · Week '+(state.cycle.weeks?.[lift]||state.cycle.currentWeek||1);
+  select.appendChild(option);
+ }
+ const pending=window.SXAscensionAdaptive?.pendingSupportDay?.();
+ if(pending?.kind==='support'){
+  const option=document.createElement('option');option.value='__ADAPTIVE_SUPPORT__';
+  option.textContent=pending.title;select.appendChild(option);
+ }
+ const selected=preferred&&[...select.options].some(o=>o.value===preferred)?preferred:
+  pending?'__ADAPTIVE_SUPPORT__':cycle.upNext.lift;
+ select.value=[...select.options].some(o=>o.value===selected)?selected:lifts[0];
+ sxAscOrigin=document.activeElement;
+ modal.hidden=false;modal.setAttribute('aria-hidden','false');
+ sxAscModalRender();select.focus({preventScroll:true});
+ return true;
+}
+function sxAscModalLoad(){
+ const state=window.SXAscensionPrescription?.read?.(),select=document.getElementById('sxAscContinueLift');
+ if(!state||!select){sxAscModalMessage('Active AscensionX cycle unavailable.');return}
+ let loaded=false;
+ if(select.value==='__ADAPTIVE_SUPPORT__'){
+  const slot=window.SXAscensionAdaptive?.pendingSupportDay?.();
+  if(slot)loaded=window.SpartanXStartAscensionAdaptiveSupportSession?.({
+   cycleId:state.cycle.created,week:slot.week,day:slot.day,name:slot.title
+  })===true;
+ }else{
+  const workout=window.SXAscensionPrescription?.build?.(state,select.value);
+  loaded=!!workout&&window.spartanxImport531?.(workout)===true;
+ }
+ if(loaded){sxAscModalClose();return}
+ sxAscModalMessage('Could not load the prescribed session. Your saved cycle has not been changed.');
+}
+window.spartanxOpenAscensionWorkoutPopup=sxAscModalOpen;
+
 function readCycle(){
  let state=null;
  try{state=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');}catch(e){return null}
@@ -83,6 +231,8 @@ function refresh(){
 }
 function launch(mode,context='auto'){
  const state=readCycle();
+ // Continue uses a native popup above the real Workout page.
+ if(mode==='continue'&&state&&sxAscModalOpen(state.upNext?.lift))return true;
  if(typeof window.spartanxOpenEmbeddedAscensionX==='function'){
   // The linked cycle is read fresh from AscensionX state, not copied into a new planner.
   const destination=mode==='continue'&&state?'continue':mode==='manage'&&state?'manage':mode==='view'&&state?'view':'home';

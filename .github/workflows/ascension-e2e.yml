@@ -1,0 +1,52 @@
+name: AscensionX complete-cycle and navigation browser audit
+on:
+  pull_request:
+    paths:
+      - 'AscensionX/**'
+      - 'assets/ascension/**'
+      - 'assets/bodybuilding/ascension-companion.js'
+      - 'assets/ui/modal-viewport.*'
+      - 'tests/ascension-end-to-end.browser.test.cjs'
+      - 'tests/modal-viewport.browser.test.cjs'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/ascension-e2e.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'AscensionX/**'
+      - 'assets/ascension/**'
+      - 'assets/bodybuilding/ascension-companion.js'
+      - 'assets/ui/modal-viewport.*'
+      - 'tests/ascension-end-to-end.browser.test.cjs'
+      - 'tests/modal-viewport.browser.test.cjs'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/ascension-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium and WebKit browsers
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Run fresh-cycle, existing-cycle and route transitions on mobile browsers
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-asc-e2e.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node tests/ascension-end-to-end.browser.test.cjs
+      - name: Validate popup viewport and nested modal scroll recovery
+        run: |
+          node tests/modal-viewport.browser.test.cjs

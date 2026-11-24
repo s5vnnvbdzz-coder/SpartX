@@ -1296,6 +1296,16 @@ function logInActiveCycle(log){
  return Number.isFinite(savedAt)&&Number.isFinite(cycleStarted)&&savedAt>=cycleStarted;
 }
 function activeCycleLogs(){return state.logs.filter(logInActiveCycle);}
+// A completed Week 5 log is authoritative even if an older save left the
+// pointer at Week 5. Only advance; never alter workout history or main loads.
+function syncCompletedLiftProgress(){
+ const repaired=window.SXAscensionPrescription?.reconcileCompletedWeeks?.(state);
+ if(!repaired||repaired===state)return false;
+ const previous=state.cycle.weeks;
+ state.cycle.weeks=repaired.cycle.weeks;
+ if(!persist(false)){state.cycle.weeks=previous;return false;}
+ return true;
+}
 function openDeleteCycle(){
  if(!state.cycle.created)return;
  $('deleteCycleBackdrop').classList.add('open');
@@ -1678,6 +1688,7 @@ window.addEventListener('message',e=>{
  }
 });
 function continueAscensionTraining(){
+ syncCompletedLiftProgress();
  if((!ascensionEmbeddedBySpartanX&&!window.__sxAscNative)||!state.cycle.created){showScreen('workout');return}
  const choices=selectedLifts();
  if(!choices.length){showScreen('workout');return}
@@ -1898,7 +1909,7 @@ function processAscensionSpartanCompletionQueue(){
  if(processed.size){
   try{localStorage.setItem(ASCENSION_COMPLETION_QUEUE_KEY,JSON.stringify(pending.filter(p=>!processed.has(p?.id))))}catch(e){}
  }
- if(changed){
+ if(changed||syncCompletedLiftProgress()){
   const current=$('liftSelect').value;
   if(selectedLifts().includes(current))$('workWeek').value=currentWeekFor(current);
   renderAll();
@@ -1934,7 +1945,7 @@ function findAscSpartanRecoverySessions(){
         (String(log.sourceSessionId||'')===String(session.id)||(log.week===week&&log.setsComplete===true))))continue;
    const plan=PLAN[week-1],required=plan.deload?3:1+plan.backSets;
    const sets=(Array.isArray(exercise.sets)?exercise.sets:[])
-    .filter(set=>set?.type==='Working Set'&&set.done===true)
+    .filter(set=>['Working Set','Backdown Set','B'].includes(set?.type)&&set.done===true)
     .map(set=>({weight:Number(set.weight),reps:Number(set.reps),
       rpe:set.rpe==null||set.rpe===''?null:Number(set.rpe),done:true}));
    if(!sets.length||sets.length>12||sets.some(x=>!Number.isFinite(x.weight)||x.weight<=0||!Number.isInteger(x.reps)||x.reps<=0))continue;
@@ -2325,6 +2336,7 @@ function resetData(){if(!confirm('Delete your AscensionX profile, cycle and all 
 function init(){
  setupProfileCollapse();
  applyAscTheme();
+ syncCompletedLiftProgress();
  $('workWeek').value=currentWeekFor($('liftSelect').value);$('metricDate').value=new Date().toISOString().slice(0,10);
  renderAll();
  // Dedicated View/Manage Cycle owns a direct route. Do not initialise Home

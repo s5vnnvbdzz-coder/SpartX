@@ -2517,7 +2517,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 </style>
 <script src="./assets/cardio/cardio.js?v=304"></script>
 <script src="./assets/workouts/exercise-replacement.js?v=394"></script>
-<script src="./assets/ascension/continue-support-sync.js?v=417"></script>
+<script src="./assets/ascension/continue-support-sync.js?v=419"></script>
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/workouts/session-achievements.js?v=396"></script>
@@ -4117,13 +4117,13 @@ function ensureAscensionStrengthSizeCompanions(d){
  // Continue can reopen a main lift already present in the active workout.
  // Refresh ONLY untouched cycle-linked support, using the same live plan
  // seen in View Cycle and the Continue preview. Entered sets are protected.
+ const originalOrder=work.slice();
  const synced=window.SXAscensionContinueSupport?.reconcile?.(work,d,api,localStorage);
+ const aligned=window.SXAscensionContinueSupport?.alignLinked?.(work,d,api,localStorage);
  if(synced?.handled){
   if(synced.protected&&typeof toast==='function')toast('Previously entered assistance is preserved. New support prescriptions will apply to fresh sessions.');
-  if(synced.changed&&Array.isArray(synced.previousOrder)){
-   const positions=work.map(ex=>synced.previousOrder.indexOf(ex));
-   remapActiveExerciseTimer(positions);
-  }
+  if(synced.changed||aligned?.changed)
+   remapActiveExerciseTimer(work.map(ex=>originalOrder.indexOf(ex)));
   return Number(synced.inserted)||0;
  }
  const extras=api.forImport(d,work.map(ex=>ex.name));
@@ -4134,10 +4134,9 @@ function ensureAscensionStrengthSizeCompanions(d){
   if(work.some(ex=>String(ex.name||'').trim().toLowerCase()===normalized))continue;
   // Keep the complete fixed adaptive order immediately after its compound,
   // whether starting a new session or appending to an existing draft.
-  const sequence=d.exercise==='Deadlift'?
-   ['Romanian Deadlift','Lat Pulldown','Seated Leg Curl']:
-   d.exercise==='Back Squat'?
-   ['Hack Squat','Leg Extension','45° Back Extension','Pallof Press']:[];
+  // Read the athlete's CURRENT generated order. Static lists used here
+  // previously pushed Leg Press or Hanging Knee Raise below other exercises.
+  const sequence=api.forImport(d,[],localStorage).map(x=>x.name);
   const order=sequence.indexOf(exercise.name);
   let after=order>=0?work.findIndex(ex=>ex.ascensionLink?.cycleId===d.cycleId&&
       ex.ascensionLink?.lift===d.exercise&&Number(ex.ascensionLink.week)===Number(d.week)):-1;
@@ -5553,15 +5552,16 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
 <script src="./assets/ascension/programming-v2.js?v=408"></script><script src="./assets/ascension/classic-v2-bridge.js?v=414"></script>
-<script src="./assets/ascension/adaptive-programming.js?v=418"></script>
+<script src="./assets/ascension/adaptive-programming.js?v=419"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=388"></script>
 <script>
 (function recoverActiveAdaptiveSupportEntries(){
  // Only the on-device ACTIVE draft is eligible. Never touch saved workout
  // history, completed imported sessions or manually edited exercise sets.
  if(!sessionActive||editingSessionId!==null)return;
- // Never run old fixed-accessory draft migrations on a v2-redesigned cycle.
- if(window.SXAscensionV2Bridge?.read(localStorage))return;
+ // The 2.0 interface is paused. A stale beta bridge preference must not
+ // prevent current six-week AscensionX support from being restored in order.
+ // Only the active draft may be reconciled; logged sessions stay untouched.
  const helper=window.SpartanXExerciseReplacement;
  const restored=helper?.repairActiveIsoLateralRows(work,window.SXAscensionAdaptive)||0;
  const renamed=helper?.renameActiveAscensionPushdowns(work,window.SXAscensionAdaptive)||0;
@@ -5644,7 +5644,9 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
     week:Number(link.week),tm:link.importedTm
    },[]);
   }catch(_){return false}
-  const names=['Hack Squat','Leg Extension','45° Back Extension','Pallof Press'];
+  // The legacy squat recovery must follow the current active plan, not
+  // append retired core work or assume Hack Squat when Leg Press was selected.
+  const names=planned.map(ex=>ex.name);
   if(!Array.isArray(planned)||!names.every(name=>planned.some(ex=>ex.name===name)))return false;
   const normalize=name=>String(name||'').trim().toLowerCase();
   const used=new Set([main]);
@@ -5691,7 +5693,27 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
  }
  const migrated=reconcileActiveDeadliftDraft();
  const squatMigrated=reconcileActiveSquatDraft();
- if(restored||renamed||rearDelts||upgradedBench||refreshed||migrated||squatMigrated){
+ // Imported assistance in older active Week 5 drafts could be appended
+ // outside the prescribed sequence. Rearrange only linked support rows,
+ // keeping all set data and unrelated athlete-selected exercises intact.
+ const oldOrder=work.slice();
+ const active=window.SXAscensionAdaptive?.activeCycle?.();
+ let orderChanged=false;
+ for(const main of oldOrder.filter(ex=>ex?.ascensionLink?.cycleId===active?.id)){
+  const link=main.ascensionLink;
+  const details={source:'AscensionX',exercise:link.lift,cycleId:link.cycleId,
+   week:Number(link.week),tm:Number(link.importedTm)};
+  // Only re-prescribe when old assistance actually exists. An athlete may
+  // have deliberately removed every accessory from an active workout.
+  const hasPriorSupport=work.some(ex=>ex?.sxStrengthSizeCompanion?.cycleId===link.cycleId&&
+   ex.sxStrengthSizeCompanion.lift===link.lift&&Number(ex.sxStrengthSizeCompanion.week)===Number(link.week));
+  if(hasPriorSupport&&window.SXAscensionContinueSupport?.reconcile?.(work,details,window.SXAscensionCompanion,localStorage)?.changed)
+   orderChanged=true;
+  if(window.SXAscensionContinueSupport?.alignLinked?.(work,details,window.SXAscensionCompanion,localStorage)?.changed)
+   orderChanged=true;
+ }
+ if(orderChanged)remapActiveExerciseTimer(work.map(ex=>oldOrder.indexOf(ex)));
+ if(restored||renamed||rearDelts||upgradedBench||refreshed||migrated||squatMigrated||orderChanged){
   renderWork();updateMinimizedSession();saveDraft();
  }
 })();

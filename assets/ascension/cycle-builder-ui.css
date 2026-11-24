@@ -299,3 +299,40 @@ body.sx-asc-cycle-page #cycleEditorBackdrop .cycle-editor-actions{
  border:1px solid var(--red2)!important;color:var(--text)!important;
  box-shadow:none!important;
 }
+
+/* Adaptive Support: compact but genuinely useful 2.0-style prescriptions.
+ * The live six-week strength loads stay authoritative. Only the presentation
+ * of selected support, target effort and selection rationale changes.
+ */
+#sxAscAdaptiveCard .sx-adaptive-preview{display:grid;gap:10px}
+#sxAscAdaptiveCard .sx-adaptive-preview-day{
+ padding:12px!important;border:1px solid var(--line)!important;
+ border-radius:13px;background:var(--panel2);min-width:0
+}
+#sxAscAdaptiveCard .sx-adaptive-preview-day:last-child{border:1px solid var(--line)!important}
+#sxAscAdaptiveCard .sx-adaptive-preview-day>strong{
+ font-size:13px;letter-spacing:.015em;margin:0 0 10px;
+ color:var(--text);line-height:1.45
+}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercises{display:grid;gap:8px}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercise{
+ display:grid;grid-template-columns:minmax(0,1fr);gap:4px;
+ padding:10px 11px;border-radius:10px;border:1px solid var(--line);
+ background:var(--panel);min-width:0;line-height:1.45
+}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercise .sx-adaptive-exercise-name{
+ margin:0!important;font-size:13px;font-weight:800;line-height:1.35;
+ color:var(--text)
+}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercise .sx-adaptive-exercise-dose{
+ font-size:12px;font-weight:750;color:var(--red2);font-variant-numeric:tabular-nums;
+ overflow-wrap:anywhere
+}
+#sxAscAdaptiveCard .sx-adaptive-preview-exercise .sx-adaptive-exercise-why{
+ display:block;font-size:11px;line-height:1.5;font-weight:400;
+ color:var(--muted);overflow-wrap:anywhere
+}
+@media(max-width:520px){
+ #sxAscAdaptiveCard .sx-adaptive-preview-day{padding:10px!important}
+ #sxAscAdaptiveCard .sx-adaptive-preview-exercise{padding:9px 10px}
+}

@@ -4,7 +4,7 @@
  */
 (function(root){
  'use strict';
- const VERSION=417;
+ const VERSION=419;
  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
  const number=x=>Number.isFinite(Number(x))?Number(x):null;
  const same=(a,b)=>norm(a)===norm(b);
@@ -70,5 +70,35 @@
   return {handled:true,changed,inserted:fresh.length,removed:prior.length,
    previousOrder:before,reason:changed?'Updated untouched support from the live six-week plan':'Live support is already present'};
  }
- root.SXAscensionContinueSupport=Object.freeze({VERSION,matchedLink,untouched,reconcile});
+ // Correct ONLY cycle-linked assistance order once for each active draft.
+ // Preserve all athlete-entered weights, reps, RPE, completion and rest state.
+ // The user's subsequent manual reordering is not silently overridden.
+ const ORDER_VERSION=418;
+ function alignLinked(work,details,companion,storage=root.localStorage){
+  if(!Array.isArray(work)||details?.source!=='AscensionX'||!details.cycleId||
+     !Number.isInteger(Number(details.week)))return {changed:false};
+  const main=work.find(ex=>mainLink(ex,details));
+  if(!main||Number(main.ascensionLink.supportOrderVersion)>=ORDER_VERSION)return {changed:false};
+  const active=companion?.cycle?.(storage),prefs=companion?.preference?.(storage);
+  if(active?.id!==details.cycleId||!prefs?.enabled)return {changed:false};
+  const prior=work.filter(ex=>matchedLink(ex,details)&&!String(ex.replacementOf||'').trim());
+  if(!prior.length)return {changed:false};
+  const planned=companion.forImport(details,[],storage);
+  if(!Array.isArray(planned)||!planned.length)return {changed:false};
+  const order=new Map(planned.map((ex,i)=>[norm(ex.name),i]));
+  const original=work.slice();
+  const sortable=prior.map((ex,index)=>({ex,index})).sort((a,b)=>
+   (order.get(norm(a.ex.name))??1e6)-(order.get(norm(b.ex.name))??1e6)||a.index-b.index)
+   .map(x=>x.ex);
+  const others=original.filter(ex=>!prior.includes(ex));
+  const at=others.indexOf(main);
+  if(at<0)return {changed:false};
+  others.splice(at+1,0,...sortable);
+  const changed=others.some((ex,i)=>ex!==original[i]);
+  if(changed)work.splice(0,work.length,...others);
+  main.ascensionLink.supportOrderVersion=ORDER_VERSION;
+  return {changed,previousOrder:original,ordered:sortable.map(ex=>ex.name)};
+ }
+
+ root.SXAscensionContinueSupport=Object.freeze({VERSION,ORDER_VERSION,matchedLink,untouched,reconcile,alignLinked});
 })(typeof window!=='undefined'?window:globalThis);

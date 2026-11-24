@@ -199,6 +199,61 @@ async function run(type,device){
    'Unexpected JS exceptions in cycle workflows: '+errors.concat(runtimeErrors).join('; '));
   console.log('PASS resumed Week 3, RDL loading, preserved history and no JS exceptions '+device);
   await context2.close();
+  // Regression: an athlete opens the app with an ALREADY-STARTED Week 5
+  // squat draft containing the previous Pallof press and out-of-order rows.
+  // Existing completed sets and manually added movements must not be erased.
+  const context3=await browser.newContext({...devices[device],serviceWorkers:'block'});
+  const week5=cycleFixture();
+  await context3.addInitScript(values=>{
+   if(localStorage.getItem('ascensionx_strength_v1'))return;
+   const state=JSON.parse(values.cycle);
+   for(const lift of ['Back Squat','Bench Press','Deadlift'])state.cycle.weeks[lift]=5;
+   state.cycle.currentWeek=5;
+   localStorage.setItem('ascensionx_strength_v1',JSON.stringify(state));
+   localStorage.setItem('spartx_db',values.history);
+   localStorage.setItem('sx_ascension_adaptive_v1',
+    JSON.stringify({[values.id]:{enabled:true,days:4,focus:'strength'}}));
+   const support=(name,min)=>({name,rest:90,
+    sxStrengthSizeCompanion:{cycleId:values.id,lift:'Back Squat',week:5,
+     repsMin:min,repsMax:15,plannedSets:3},
+    sets:Array.from({length:3},()=>({weight:'',reps:String(min),rpe:'',
+     type:'Working Set',done:false}))});
+   const main={name:'Back Squat',
+    ascensionLink:{cycleId:values.id,lift:'Back Squat',week:5,
+     supportSyncVersion:417,importedTm:175,plannedSets:[{weight:162.5,reps:2}]},
+    sets:[{weight:'162.5',reps:'2',rpe:'8.5',type:'Working Set',done:true}]};
+   const draft={version:1,sessionActive:true,editingSessionId:null,
+    activeWorkoutName:'Back Squat - Week 5',elapsed:1100,sessionPaused:false,
+    work:[support('Pallof Press',10),main,support('Leg Extension',12),
+     support('45° Back Extension',10),support('Leg Press',8),
+     {name:'User Added Calf Raise',sets:[{weight:'50',reps:'12',rpe:'7',done:true}]}],
+    screen:'activeWorkout',fields:{}};
+   localStorage.setItem('spartx_draft_v1',JSON.stringify(draft));
+  },week5);
+  const page3=await context3.newPage();
+  const week5Errors=[];
+  page3.on('pageerror',e=>week5Errors.push(String(e)));
+  await page3.goto(BASE,{waitUntil:'load'});
+  await page3.waitForFunction(()=>window.SXAscensionContinueSupport&&
+   !!work.find(x=>x.ascensionLink?.lift==='Back Squat')&&sessionActive);
+  const fixed=await page3.evaluate(()=>({
+   names:work.map(ex=>ex.name),
+   main:work.find(ex=>ex.ascensionLink?.lift==='Back Squat')?.sets,
+   orderVersion:work.find(ex=>ex.ascensionLink?.lift==='Back Squat')?.ascensionLink?.supportOrderVersion,
+   cycle:JSON.parse(localStorage.getItem('ascensionx_strength_v1')).cycle.weeks['Back Squat']
+  }));
+  assert.deepEqual(fixed.names,[
+   'Back Squat','Leg Press','Leg Extension','45° Back Extension',
+   'Hanging Knee Raise','User Added Calf Raise'
+  ],'Restored Week 5 squat draft uses live adaptive sequence, not stale Pallof press');
+  assert.equal(fixed.main[0].weight,'162.5');
+  assert.equal(fixed.main[0].rpe,'8.5');
+  assert.equal(fixed.main[0].done,true);
+  assert.equal(fixed.orderVersion,418);
+  assert.equal(fixed.cycle,5);
+  fail(!week5Errors.length,'No new JavaScript exceptions when restoring Week 5 squat');
+  console.log('PASS restored existing Week 5 squat, adaptive order, hanging raises and preserved main sets '+device);
+  await context3.close();
  }finally{await browser.close();}
 }
 (async()=>{await run(chromium,'Pixel 7');await run(webkit,'iPhone 13');console.log('PASS AscensionX end-to-end mobile browser audit');})()

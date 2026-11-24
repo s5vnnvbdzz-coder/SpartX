@@ -4,12 +4,14 @@ on:
     paths:
       - 'AscensionX2/**'
       - 'tests/ascensionx2-standalone.*'
+      - 'tests/ax-athlete-assessment.*'
       - '.github/workflows/ascensionx2-standalone.yml'
   push:
     branches: [main]
     paths:
       - 'AscensionX2/**'
       - 'tests/ascensionx2-standalone.*'
+      - 'tests/ax-athlete-assessment.*'
       - '.github/workflows/ascensionx2-standalone.yml'
   workflow_dispatch:
 permissions:
@@ -28,9 +30,15 @@ jobs:
           node --check AscensionX2/engine.js
           node --check AscensionX2/app.js
           node --check AscensionX2/sw.js
+          node --check AscensionX2/assessment-core.js
+          node --check AscensionX2/assessment.js
+          node --check tests/ax-athlete-assessment.test.js
+          node --check tests/ax-athlete-assessment.browser.cjs
           node --check tests/ascensionx2-standalone.test.js
       - name: Validate PR progression, fatigue controls and independent storage
-        run: node tests/ascensionx2-standalone.test.js
+        run: |
+          node tests/ascensionx2-standalone.test.js
+          node tests/ax-athlete-assessment.test.js
   mobile:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -52,3 +60,4 @@ jobs:
             sleep 1
           done
           node tests/ascensionx2-standalone.browser.cjs
+          node tests/ax-athlete-assessment.browser.cjs

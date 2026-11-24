@@ -188,9 +188,10 @@ assert.equal(existingLive.localStorage.getItem('ascensionx_strength_v1'),oldClas
  'Replanning support never resets a started main-lift cycle');
 assert.equal(existingLive.localStorage.getItem('spartx_db'),oldHistoryJson,
  'Replanning support never edits completed workout records');
-assert.ok(ascHtml.includes('api.formatPrescription?.(ex)')&&
- ascHtml.includes('adaptive.formatPrescription?.(ex)')&&
- ascHtml.includes('SXAscensionAdaptive?.formatPrescription?.(ex)'),
+const liveCycleHtml=fs.readFileSync(path.join(__dirname,'../../AscensionX/index.html'),'utf8');
+assert.ok(liveCycleHtml.includes('api.formatPrescription?.(ex)')&&
+ liveCycleHtml.includes('adaptive.formatPrescription?.(ex)')&&
+ liveCycleHtml.includes('SXAscensionAdaptive?.formatPrescription?.(ex)'),
  'View Cycle, six-week roadmap, and Continue show the same live support prescription');
 
 // Build 310: previously saved manual Powerbuilding preferences must NOT

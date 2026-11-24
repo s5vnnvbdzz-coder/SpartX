@@ -40,7 +40,9 @@ const {chromium,webkit,devices}=require('playwright');
    await page.evaluate(()=>{document.querySelector('#qaNested').remove();window.SXModalViewport.refresh();});
    assert(!(await page.evaluate(()=>window.SXModalViewport.isOpen())));
    assert(await page.locator('#trackerNav').isVisible());
-   await page.evaluate(()=>{const e=document.querySelector('#setTypeSheet');e.classList.add('is-open');e.setAttribute('aria-hidden','false');window.SXModalViewport.refresh();});
+   // The set-type picker belongs to the Active Workout screen, not the
+   // underlying Workout/Continue screen used above. Test its real context.
+   await page.evaluate(()=>{switchScreen('activeWorkout',{instant:true});const e=document.querySelector('#setTypeSheet');e.classList.add('is-open');e.setAttribute('aria-hidden','false');window.SXModalViewport.refresh();});
    const sheet=await page.evaluate(()=>{
     const el=document.getElementById('setTypeSheet');
     const ancestors=[];for(let x=el;x&&ancestors.length<8;x=x.parentElement){

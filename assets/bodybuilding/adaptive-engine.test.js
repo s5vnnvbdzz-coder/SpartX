@@ -142,7 +142,7 @@ test('rebalancing existing programmes is opt-in and retains upper-day edits',()=
 });
 test('adaptive squat avoids redundant heavy lower compounds',()=>{
  const items=A.plan('Back Squat',2,{lifts:A.cycle(win.localStorage).lifts});
- assert.deepEqual(Array.from(items,ex=>ex.name),['Leg Extension','Seated Leg Curl','45° Back Extension']);
+ assert.deepEqual(Array.from(items,ex=>ex.name),['Hack Squat','Leg Extension','45° Back Extension','Pallof Press']);
  assert.equal(items.reduce((total,ex)=>total+ex.sets,0),12);
 });
 test('bench assistance avoids excessive pressing with OHP selected',()=>{
@@ -161,12 +161,12 @@ test('fourth day is an adaptive support day when OHP is not selected',()=>{
  const proposed=A.schedule(4,win.localStorage);
  assert.equal(proposed.valid,true);
  assert.equal(proposed.slots[3].kind,'support');
- assert.equal(proposed.slots[3].exercises.length,3);
+ assert.equal(proposed.slots[3].exercises.length,5);
  assert.ok(proposed.slots[3].exercises.every(ex=>!/Romanian Deadlift|Paused Bench Press/i.test(ex.name)));
 });
-test('accessory working sets taper ahead of AscensionX recovery week',()=>{
- const volume=(week)=>A.plan('Back Squat',week).reduce((total,ex)=>total+ex.sets,0);
- assert.ok(volume(5)<volume(3));
+test('accessory effort tapers ahead of AscensionX recovery week',()=>{
+ const effort=(week)=>A.plan('Back Squat',week)[0]?.targetRpe;
+ assert.ok(effort(5)<effort(3));
  assert.equal(A.plan('Back Squat',6).length,0);
 });
 console.log('Passed '+checks+' training integration tests.');

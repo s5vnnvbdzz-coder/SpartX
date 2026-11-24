@@ -335,8 +335,22 @@
    const base=itemFor(spec.name);
    const item={...base,...spec,rir:10-spec.targetRpe,sourceLift:'Back Squat',week};
    const loading=recommendSquatAccessory(item,week,storage);
+   // The squad-specific exercise order and three-set baseline are fixed
+   // coach rules, but review the dose against the same central evidence
+   // advisory used by other AscensionX support exercises.
+   const V=global.SXVolumeIntelligence;
+   const group=V?.classify?.(item.name);
+   const prior=V?.countExposure?.([{exercises:[{name:'Back Squat',sets:3}]}]);
+   const weekly=group?prior?.[group.primary]?.effective||0:0;
+   const advisory=V?.recommendWorkingSets?.({
+    name:item.name,goal:'powerlifting',experience:'intermediate',
+    weeklyExposure:weekly,remainingSlots:2,existingSets:item.sets,
+    afterHeavyLift:item.name==='45° Back Extension'
+   });
    return {...item,...loading,reason:loading.reason+' '+
-    (base.cue||'Contribute useful support volume without another heavy barbell squat.')};
+    (base.cue||'Contribute useful support volume without another heavy barbell squat.')+
+    (advisory?' Spartan Intelligence: '+advisory.reason+
+     ' Current cycle set allocation is a reviewable coach prescription.':'')};
   });
  }
  function dose(item,week,focus,main,cycleId,storage){

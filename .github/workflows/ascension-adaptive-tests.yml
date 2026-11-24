@@ -20,6 +20,8 @@ jobs:
       - name: Validate syntax
         run: |
           node --check assets/ascension/adaptive-programming.js
+          node --check assets/ascension/selection-quality.js
+          node --check assets/ascension/selection-quality.test.js
           node --check assets/bodybuilding/ascension-companion.js
           node --check assets/ascension/adaptive-programming.test.js
           node --check assets/ascension/continue-support-sync.js
@@ -27,4 +29,5 @@ jobs:
       - name: Run adaptive programme regression tests
         run: |
           node assets/ascension/adaptive-programming.test.js
+          node assets/ascension/selection-quality.test.js
           node assets/ascension/continue-support-sync.test.js

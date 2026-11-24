@@ -244,7 +244,7 @@ async function run(type,device){
   }));
   assert.deepEqual(fixed.names,[
    'Back Squat','Leg Press','Leg Extension','45° Back Extension',
-   'Hanging Knee Raise','User Added Calf Raise'
+   'Cable Crunch','User Added Calf Raise'
   ],'Restored Week 5 squat draft uses live adaptive sequence, not stale Pallof press');
   assert.equal(fixed.main[0].weight,'162.5');
   assert.equal(fixed.main[0].rpe,'8.5');
@@ -252,7 +252,7 @@ async function run(type,device){
   assert.equal(fixed.orderVersion,418);
   assert.equal(fixed.cycle,5);
   fail(!week5Errors.length,'No new JavaScript exceptions when restoring Week 5 squat');
-  console.log('PASS restored existing Week 5 squat, adaptive order, hanging raises and preserved main sets '+device);
+  console.log('PASS restored existing Week 5 squat, adaptive order, shoulder-friendly core and preserved main sets '+device);
   await context3.close();
  }finally{await browser.close();}
 }

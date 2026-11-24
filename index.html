@@ -2191,11 +2191,6 @@ main > #profile.screen > .spartanx-page-footer{
     <div class="sx-programme-footer" style="margin-top:12px"><span class="sx-programme-next">Build your AscensionX programme.</span><button type="button" class="sx-programme-continue" id="sxAscensionEmptySetup">SET UP ›</button></div>
    </section>
   </div>
-  <section class="card sx-programme-card" id="sxAscensionBetaPreviewCard" aria-label="AscensionX 2.0 beta programme preview" hidden aria-hidden="true" style="display:none!important">
-   <div class="sx-programme-head"><div><div class="sx-programme-kicker">ASCENSIONX 2.0 · POWERLIFTING</div><h3 class="sx-programme-title">Personalised Programming</h3></div><span class="sx-programme-tag">BETA PREVIEW</span></div>
-   <p class="sx-programme-meta">Explore personalised 8, 12 and 16-week programmes without changing your current cycle.</p>
-   <div class="sx-programme-footer"><span class="sx-programme-next">Read-only programme sandbox</span><button type="button" class="sx-programme-continue" id="sxAscensionBetaOpen">EXPLORE ›</button></div>
-  </section>
   <section class="card sx-programme-card sx-programme-upcoming" id="sxBodybuildingProgrammeCard" aria-label="Strength and Bodybuilding training system, in development">
    <div class="sx-programme-head"><div><div class="sx-programme-kicker">STRENGTH · HYPERTROPHY</div><h3 class="sx-programme-title">Strength &amp; Bodybuilding</h3></div><span class="sx-programme-tag">IN DEVELOPMENT</span></div>
    <p class="sx-programme-meta">Dedicated strength and bodybuilding programme engine</p>
@@ -5464,13 +5459,6 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  });
 })();
 </script>
-<script id="sx-ascension-beta-preview-link">
-document.getElementById('sxAscensionBetaOpen')?.addEventListener('click',()=>{
- if(typeof sessionActive!=='undefined'&&sessionActive){if(!confirm('Your active workout will be kept as a draft. Open the AscensionX beta preview?'))return;if(typeof saveDraft==='function')saveDraft();}
- location.href='./AscensionX/beta-preview.html';
-});
-if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof switchScreen==='function'&&!(typeof sessionActive!=='undefined'&&sessionActive)){window.addEventListener('load',()=>{if(!sessionActive)switchScreen('workout',{instant:true});},{once:true});}
-</script>
 <script id="sx-pwa-update-controller">
 (()=>{
  // Use an immutable build number, not the mutable Settings status label.
@@ -5554,7 +5542,6 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
 <script src="./assets/science/evidence-engine.js?v=2"></script>
 <script src="./assets/science/volume-intelligence.js?v=2"></script>
 <script src="./assets/ascension/cycle-intelligence.js?v=1"></script>
-<script src="./assets/ascension/programming-v2.js?v=408"></script><script src="./assets/ascension/classic-v2-bridge.js?v=414"></script>
 <script src="./assets/ascension/selection-quality.js?v=420"></script>
 <script src="./assets/ascension/adaptive-programming.js?v=420"></script>
 <script src="./assets/bodybuilding/ascension-companion.js?v=388"></script>
@@ -5563,9 +5550,8 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
  // Only the on-device ACTIVE draft is eligible. Never touch saved workout
  // history, completed imported sessions or manually edited exercise sets.
  if(!sessionActive||editingSessionId!==null)return;
- // The 2.0 interface is paused. A stale beta bridge preference must not
- // prevent current six-week AscensionX support from being restored in order.
- // Only the active draft may be reconciled; logged sessions stay untouched.
+ // Keep the original six-week programming and repair only untouched
+ // adaptive support in an active draft. Historical workouts stay unchanged.
  const helper=window.SpartanXExerciseReplacement;
  const restored=helper?.repairActiveIsoLateralRows(work,window.SXAscensionAdaptive)||0;
  const renamed=helper?.renameActiveAscensionPushdowns(work,window.SXAscensionAdaptive)||0;

@@ -1,8 +1,18 @@
 # AscensionX 2.0 — standalone development lab
 
-**Status: dev build 0.1 (not a finished coaching product)**
+**Status: dev build 0.3 (assessment UI, not yet a finished coaching product)**
 
 Standalone URL after GitHub Pages deployment: https://s5vnnvbdzz-coder.github.io/SpartX/AscensionX2/
+
+## Athlete-first create flow (24 November 2026)
+- Main **Create Cycle** now leads with `assessment.html`: a six-step, mobile-first athlete questionnaire based on the successful earlier four-day StrengthX design.
+- Steps: **Goal** (maximum strength or strength + size), **Athlete** (age, experience, bodyweight and height), **Strength** (current SBD records, PR goals and optional weak points), **Recovery** (sleep, job demands, activity, nutrition and readiness), **Training** (available days, sessions/week, duration, cycle length, equipment and load increments), **Review**.
+- **Measures is authoritative** for latest recorded bodyweight and (where available) height. Where height is missing, it must be entered explicitly. Classic AscensionX's stored SBD values are offered as editable prefill only. Neither source is written to by 2.0.
+- Records are read locally on the same browser origin; 2.0 does not assume the PC and iPhone have synchronised data.
+- Automatically suggests a feasible schedule (e.g. Monday/Tuesday/Thursday/Saturday for an unrestricted four-day week); high-recovery-stress athlete inputs can reduce *initial* assistance sets and a balanced focus can choose incline DB pressing.
+- Assessment drafts are held under the **separate** `ax2_athlete_assessment_draft_v1` storage key. Creating a programme archives any current standalone 2.0 cycle and **never affects classic AX or SpartanX workout history**.
+- Former standalone quick-builder form remains under a collapsible **Legacy Development Form** until the new intake flow is proven.
+- This work is the athlete-input **foundation**, not a claim that the full earlier scientific volume/selection engine or automatic future set-by-set programming has been ported. Those remain next milestones.
 
 ## Scope
 

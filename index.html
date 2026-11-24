@@ -4638,6 +4638,9 @@ if($('finishWorkoutBottom'))$('finishWorkoutBottom').onclick=()=>finishSession()
 const ASCENSION_COMPLETION_QUEUE_KEY='spartx_ascension_completion_queue_v1';
 function queueAscensionWorkoutCompletion(savedSession){
  if(!savedSession||!Array.isArray(savedSession.exercises))return;
+ // The athlete may mark prescribed back-downs as B. They still count as
+ // completed main-lift work, unlike W warm-ups or F optional failure sets.
+ const isPrescribedSet=set=>['Working Set','Backdown Set','B'].includes(set?.type);
  const packets=[];
  savedSession.exercises.forEach((exercise,index)=>{
   const link=exercise.ascensionLink;
@@ -4645,7 +4648,7 @@ function queueAscensionWorkoutCompletion(savedSession){
      !['Back Squat','Bench Press','Deadlift','Overhead Press'].includes(link.lift)||
      !Number.isInteger(link.week)||link.week<1||link.week>6||
      !Array.isArray(link.plannedSets)||!link.plannedSets.length)return;
-  const working=(exercise.sets||[]).filter(set=>set.type==='Working Set'&&set.done===true)
+  const working=(exercise.sets||[]).filter(set=>isPrescribedSet(set)&&set.done===true)
    .map(set=>({weight:Number(set.weight),reps:Number(set.reps),rpe:set.rpe==null?null:Number(set.rpe),done:true}));
   if(!working.length)return;
   const valid=working.every(set=>Number.isFinite(set.weight)&&set.weight>0&&Number.isInteger(set.reps)&&set.reps>0);
@@ -4653,7 +4656,7 @@ function queueAscensionWorkoutCompletion(savedSession){
   // Verify the original prescribed rows, not merely the number of saved rows.
   // Added or reordered sets must not falsely complete the AscensionX week.
   const original=work.find(item=>item.ascensionLink===link);
-  const prescribedRows=original?.sets.filter(set=>set.type==='Working Set').slice(0,link.plannedSets.length)||[];
+  const prescribedRows=original?.sets.filter(isPrescribedSet).slice(0,link.plannedSets.length)||[];
   const setsComplete=working.length===link.plannedSets.length&&prescribedRows.length===link.plannedSets.length&&
    prescribedRows.every((set,i)=>set.done===true&&Number(set.weight)>=Number(link.plannedSets[i].weight)-0.01&&Number(set.reps)>=Number(link.plannedSets[i].reps));
   packets.push({

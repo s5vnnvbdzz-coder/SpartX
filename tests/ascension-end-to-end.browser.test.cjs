@@ -172,6 +172,29 @@ async function run(type,device){
   assert.equal(existing.rdl?.length,3);
   assert.equal(existing.cycle,fixture.cycle);
   assert.equal(existing.history,fixture.history);
+  // Editing an existing cycle cannot accidentally reset previous lift weeks
+  // or discard a draft workout. Only the explicitly added fourth lift is new.
+  await page2.evaluate(()=>switchScreen('workout',{instant:true}));
+  await page2.locator('#sxAscensionOptions').click();
+  await page2.locator('#sxAscensionManage').click();
+  await page2.waitForFunction(()=>document.getElementById('cycleEditorBackdrop')?.classList.contains('open'));
+  await page2.locator('#cycleExerciseOptions input[value="Overhead Press"]').check();
+  await page2.locator('#saveCycleSelectionBtn').click();
+  await page2.waitForFunction(()=>document.getElementById('cycleConfirmBackdrop')?.classList.contains('open'));
+  await page2.locator('#cycleConfirmAction').click();
+  await page2.waitForFunction(()=>location.pathname==='/'&&document.querySelector('.screen.active')?.id==='workout');
+  const edited=await page2.evaluate(()=>{
+   const data=JSON.parse(localStorage.getItem('ascensionx_strength_v1'));
+   return {weeks:data.cycle.weeks,currentWeek:data.cycle.currentWeek,
+    history:localStorage.getItem('spartx_db'),
+    draft:JSON.parse(localStorage.getItem('spartx_draft_v1')||'null')};
+  });
+  assert.equal(edited.currentWeek,3);
+  assert.deepEqual(edited.weeks,{'Back Squat':3,'Bench Press':3,Deadlift:3,'Overhead Press':1});
+  assert.equal(edited.history,fixture.history);
+  fail(edited.draft?.work?.some(x=>x.ascensionLink?.lift==='Deadlift'),
+   'Editing a cycle does not delete an existing active workout draft');
+  console.log('PASS existing-cycle editor adds new lift without resetting prior weeks or active workout '+device);
   fail(!errors.length&&!runtimeErrors.length,
    'Unexpected JS exceptions in cycle workflows: '+errors.concat(runtimeErrors).join('; '));
   console.log('PASS resumed Week 3, RDL loading, preserved history and no JS exceptions '+device);

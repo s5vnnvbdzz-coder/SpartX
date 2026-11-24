@@ -1,6 +1,6 @@
 /* Independently scoped service worker: NEVER unregister or delete SpartanX caches. */
-const CACHE='ascensionx2-dev-v2';
-const SHELL=['./','./index.html','./engine.js?v=2','./app.js?v=2','./style.css?v=2','./manifest.webmanifest','./icon.svg'];
+const CACHE='ascensionx2-dev-v3';
+const SHELL=['./','./index.html','./assessment.html','./engine.js?v=3','./app.js?v=3','./style.css?v=3','./assessment-core.js?v=3','./assessment.js?v=3','./assessment.css?v=3','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));
 });

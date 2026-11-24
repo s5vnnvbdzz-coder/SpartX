@@ -4,7 +4,7 @@
  */
 (function(root){
 'use strict';
-const VERSION='2.0-dev.1';
+const VERSION='2.0-dev.3';
 const LIFTS=['Back Squat','Bench Press','Deadlift'];
 const DAYS=['Squat','Bench Press','Deadlift','Secondary Squat & Bench','Upper Assistance'];
 const round=(n,step=2.5)=>Math.max(step,Math.round(n/step)*step);
@@ -39,7 +39,24 @@ function normalize(raw){
   weakPoints[lift]=(Array.isArray(raw.weakPoints&&raw.weakPoints[lift])?raw.weakPoints[lift]:[])
    .filter((v,i,a)=>choices[lift].includes(v)&&a.indexOf(v)===i);
  }
- return {weeks,days,maxes,goals,step,minutes:weekMinutes,sleep,recovery,equipment,weakPoints};
+ const optional=(value,min,max,label)=>value==null||value===''?null:number(value,min,max,label);
+ const choice=(value,values,fallback)=>values.includes(value)?value:fallback;
+ const age=optional(raw.age,18,90,'Age');
+ const bodyweight=optional(raw.bodyweight,30,350,'Bodyweight');
+ const height=optional(raw.height,100,250,'Height');
+ const experience=choice(raw.experience,['beginner','intermediate','advanced'],'intermediate');
+ const job=choice(raw.job,['low','moderate','high'],'moderate');
+ const nutrition=choice(raw.nutrition,['deficit','maintenance','surplus'],'maintenance');
+ const activity=choice(raw.activity,['low','moderate','high'],'low');
+ const focus=choice(raw.focus,['strength','balanced'],'strength');
+ const allowed=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+ const availability=Array.isArray(raw.availability)?allowed.filter(x=>raw.availability.includes(x)):[];
+ const trainingDays=Array.isArray(raw.trainingDays)?raw.trainingDays.filter(x=>allowed.includes(x)):[];
+ if(trainingDays.length&&
+   (trainingDays.length!==days||new Set(trainingDays).size!==days||trainingDays.some(x=>!availability.includes(x))))
+  throw Error('Training-day schedule must use '+days+' distinct available days.');
+ return {weeks,days,maxes,goals,step,minutes:weekMinutes,sleep,recovery,equipment,weakPoints,
+  age,bodyweight,height,experience,job,nutrition,activity,focus,availability,trainingDays};
 }
 function makeSet(type,kg,reps,rpe){return {type,kg,reps,rpe};}
 function main(lift,p,cfg,week){
@@ -64,7 +81,11 @@ function variant(name,kg,sets,reps){
 function addDay(label,items){return {name:label,exercises:items};}
 function workload(cfg,p){
  const recovering=['Deload','Recovery','Taper','Assessment'].includes(cfg.phase);
- const lower=p.recovery==='limited'||p.sleep<6?1:0;
+ // A high-activity job, high training-adjacent activity, or calorie deficit
+ // warrants a conservative initial assistance dose. Normal recovery does not
+ // lose sets solely because the athlete has a moderately physical job.
+ const lower=p.recovery==='limited'||p.sleep<6||p.job==='high'||
+  p.activity==='high'||p.nutrition==='deficit'||p.experience==='beginner';
  return recovering?1:lower?2:3;
 }
 function weekPlan(p,index){
@@ -92,7 +113,9 @@ function weekPlan(p,index){
  const squatWeak=p.weakPoints['Back Squat'];
  const benchWeak=p.weakPoints['Bench Press'];
  const quad=p.equipment==='full'?(squatWeak.includes('out-of-hole')?'Leg Press':'Hack Squat'):'Bulgarian Split Squat';
- const chest=p.equipment==='full'?'Machine Chest Press':'Neutral-Grip Dumbbell Press';
+ const chest=p.equipment==='full'?
+  (p.focus==='balanced'?'Incline Dumbbell Press':'Machine Chest Press'):
+  'Neutral-Grip Dumbbell Press';
  const core=p.equipment==='full'?'Cable Crunch':'Dead Bug';
  const arm=p.equipment==='full'?'Triceps Pushdown':'Dumbbell Triceps Extension';
  const rows=p.equipment==='full'?'Chest-Supported Row':'Dumbbell Row';
@@ -146,6 +169,8 @@ function weekPlan(p,index){
   ]));
  }
  if(lean)for(const d of days)d.exercises=d.exercises.filter(e=>e.role!=='accessory'||['45° Back Extension','Cable Crunch','Dead Bug','Chest-Supported Row','Dumbbell Row','Lat Pulldown','Pull-Up'].includes(e.name));
+ if(p.trainingDays?.length===days.length)
+  days.forEach((session,index)=>{session.day=p.trainingDays[index];});
  const warnings=[];
  for(const d of days){
   const names=d.exercises.map(e=>e.name);

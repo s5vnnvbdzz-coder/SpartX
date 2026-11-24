@@ -8,15 +8,15 @@
 <title>AscensionX 2.0 · Powerlifting Lab</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
-<link rel="stylesheet" href="./style.css?v=2">
-<script defer src="./engine.js?v=2"></script>
-<script defer src="./app.js?v=2"></script>
+<link rel="stylesheet" href="./style.css?v=3">
+<script defer src="./engine.js?v=3"></script>
+<script defer src="./app.js?v=3"></script>
 </head>
 <body>
 <div class="shell">
 <header class="masthead">
  <div class="wordmark"><span class="emblem" aria-hidden="true">AX</span><div><span class="eyebrow">POWERLIFTING DEVELOPMENT LAB</span><h1>ASCENSION<span>X</span> <b>2.0</b></h1></div></div>
- <span class="devtag">STANDALONE · DEV 0.2</span>
+ <span class="devtag">STANDALONE · DEV 0.3</span>
 </header>
 <div class="intro">
  <div><p class="eyebrow">INDEPENDENT WORKSPACE</p><h2>Build towards the next PR.</h2><p>Create and test periodised 4-, 8- or 12-week programmes, review performance and track proposed load adjustments.</p></div>
@@ -29,6 +29,15 @@
 </nav>
 <main>
 <section id="builder" class="panel-section">
+ <div class="card ax-assessment-entry">
+  <p class="eyebrow">NEW · ATHLETE-FIRST PROGRAMME BUILDER</p>
+  <h3>Build your next AX programme.</h3>
+  <p class="hint">Use the six-step assessment to choose your goal, confirm your Measures and strength records, tell AX about sleep and recovery, and let it recommend a sensible training schedule.</p>
+  <div class="ax-assessment-actions"><a href="./assessment.html" class="primary ax-assessment-link">START ATHLETE ASSESSMENT →</a><span>About 2–3 minutes · Save your answers as you go</span></div>
+  <p class="hint">The assessment saves a separate 2.0 development cycle. Your active six-week original AscensionX and SpartanX workout history are never changed.</p>
+ </div>
+ <details id="axLegacyQuickBuilder" class="ax-quick-legacy"><summary>QUICK BUILDER · LEGACY DEVELOPMENT FORM</summary>
+  <p class="hint">Simpler 2.0 inputs for comparison and testing. For the full athlete questionnaire use Start Athlete Assessment above.</p>
  <form id="builderForm">
  <div class="card">
  <div class="sectionhead"><div><p class="eyebrow">01 · CYCLE STRUCTURE</p><h3>Choose your development block</h3></div></div>
@@ -86,6 +95,7 @@
  </div>
  <div class="actions"><button class="primary" type="submit">GENERATE PR-FOCUSED PROGRAMME</button><p class="hint">Generation saves a separate 2.0 cycle to this browser. Any previous 2.0 cycle is archived. Classic AscensionX is unaffected.</p></div>
  </form>
+ </details>
 </section>
 <section id="programme" class="panel-section" hidden>
  <div id="programmeView" aria-live="polite"></div>

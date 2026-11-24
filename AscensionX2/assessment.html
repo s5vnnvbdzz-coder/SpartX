@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#0b0c0f">
+ <meta name="description" content="AX athlete assessment for personalised powerlifting programme generation.">
+ <title>AX · Athlete Assessment</title>
+ <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/svg+xml" href="./icon.svg">
+ <link rel="stylesheet" href="./style.css?v=3"><link rel="stylesheet" href="./assessment.css?v=3">
+ <script defer src="./engine.js?v=3"></script>
+ <script defer src="./assessment-core.js?v=3"></script>
+ <script defer src="./assessment.js?v=3"></script>
+</head>
+<body>
+<div class="shell ax-assess">
+ <header class="masthead">
+  <div class="wordmark"><span class="emblem" aria-hidden="true">AX</span><div><span class="eyebrow">ASCENSIONX 2.0 · DEVELOPMENT</span><h1>ATHLETE <span>ASSESSMENT</span></h1></div></div>
+  <a class="ax-close" href="./index.html" aria-label="Return to AX programme">✕ <span>EXIT</span></a>
+ </header>
+ <div class="ax-header">
+  <div><p class="eyebrow">INTELLIGENT PROGRAMME BUILDER</p><h2 id="stepHeading">Let's build your next PR.</h2><p id="stepIntro">Tell AX what you're training for. We'll use your strength and recovery details to structure your next programme.</p></div>
+  <span class="ax-step-pill" id="stepCounter">01 / 06</span>
+ </div>
+ <div class="ax-progress" aria-label="Assessment progress"><div id="axProgressBar"></div></div>
+ <div class="ax-steps" id="axStepDots" aria-label="Assessment steps">
+  <span class="current">GOAL</span><span>ATHLETE</span><span>STRENGTH</span><span>RECOVERY</span><span>TRAINING</span><span>REVIEW</span>
+ </div>
+ <div class="safety ax-intro-note"><strong><span class="ax-dot"></span> YOUR EXISTING DATA IS SAFE</strong>
+  <small>AX can read saved SpartanX measurements and existing AscensionX 1RMs on this device to fill fields. It never edits those records. This development builder saves only to the separate AscensionX 2.0 workspace.</small>
+ </div>
+ <form id="axAssessmentForm" novalidate>
+  <section data-ax-step="0" class="ax-panel" aria-labelledby="goalTitle">
+   <p class="eyebrow">01 · THE OBJECTIVE</p><h3 id="goalTitle">What are we building towards?</h3>
+   <p class="ax-note">Your main objective sets the priority for exercise selection, progression and fatigue management.</p>
+   <div class="ax-choice-grid two" role="radiogroup" aria-label="Training focus">
+    <label class="ax-choice"><input type="radio" name="focus" value="strength" checked><span class="ax-choice-icon">🏋️</span><span><strong>MAXIMUM STRENGTH</strong><small>Push squat, bench and deadlift personal records. Bodybuilding work supports the three lifts.</small></span></label>
+    <label class="ax-choice"><input type="radio" name="focus" value="balanced"><span class="ax-choice-icon">⚡</span><span><strong>STRENGTH + SIZE</strong><small>Prioritise SBD progression while allowing more chest, back, shoulder and arm work.</small></span></label>
+   </div>
+   <div class="ax-guidance"><strong>THE AX APPROACH</strong><p>Build strength with quality volume, add heavier exposures, manage fatigue and prepare for optional PR attempts. Targets are goals, not guarantees.</p></div>
+  </section>
+  <section data-ax-step="1" class="ax-panel" aria-labelledby="athleteTitle" hidden>
+   <p class="eyebrow">02 · ATHLETE PROFILE</p><h3 id="athleteTitle">Tell us about the athlete.</h3>
+   <p class="ax-note">We don't need you to enter measurements twice. Where records exist, AX imports them as editable starting values.</p>
+   <div id="measurePrefillMessage" class="ax-import-status" role="status">Checking local SpartanX measurements…</div>
+   <div class="ax-fields">
+    <label>Age <span class="ax-required">REQUIRED</span><input name="age" type="number" inputmode="numeric" min="18" max="90" placeholder="e.g. 36" required><small>Years</small></label>
+    <label>Training experience <span class="ax-required">REQUIRED</span><select name="experience" required><option value="beginner">Beginner — learning technique</option><option value="intermediate">Intermediate — established training</option><option value="advanced" selected>Advanced — experienced lifter</option></select></label>
+    <label>Bodyweight <span class="ax-required">REQUIRED</span><input name="weight" type="number" inputmode="decimal" min="30" max="350" step="0.1" placeholder="kg" required><small>kg · editable</small></label>
+    <label>Height <span class="ax-required">REQUIRED</span><input name="height" type="number" inputmode="decimal" min="100" max="250" step="0.1" placeholder="cm" required><small>cm · editable</small></label>
+   </div>
+   <p class="ax-small">Measurements are used as athlete context; AX doesn't multiply target strength by bodyweight or height. Missing measurements need confirmation.</p>
+  </section>
+  <section data-ax-step="2" class="ax-panel" aria-labelledby="strengthTitle" hidden>
+   <p class="eyebrow">03 · CURRENT STRENGTH</p><h3 id="strengthTitle">Establish your strength baseline.</h3>
+   <p class="ax-note">Enter your real or conservative estimated one-rep max and the PR you'd like to work towards. All numbers in kilograms.</p>
+   <div class="ax-strength-grid">
+    <div class="ax-lift"><div class="ax-lift-head"><span>01</span><strong>BACK SQUAT</strong></div><div class="ax-fields two"><label>Current 1RM (kg)<input name="squatMax" type="number" min="30" max="500" step="any" placeholder="Current record" required></label><label>Target PR (kg)<input name="squatGoal" type="number" min="30" max="550" step="any" placeholder="Goal" required></label></div></div>
+    <div class="ax-lift"><div class="ax-lift-head"><span>02</span><strong>BENCH PRESS</strong></div><div class="ax-fields two"><label>Current 1RM (kg)<input name="benchMax" type="number" min="30" max="500" step="any" placeholder="Current record" required></label><label>Target PR (kg)<input name="benchGoal" type="number" min="30" max="550" step="any" placeholder="Goal" required></label></div></div>
+    <div class="ax-lift"><div class="ax-lift-head"><span>03</span><strong>DEADLIFT</strong></div><div class="ax-fields two"><label>Current 1RM (kg)<input name="deadliftMax" type="number" min="30" max="500" step="any" placeholder="Current record" required></label><label>Target PR (kg)<input name="deadliftGoal" type="number" min="30" max="550" step="any" placeholder="Goal" required></label></div></div>
+   </div>
+   <details class="ax-expand"><summary>TECHNIQUE PRIORITIES <span>Optional · select as many as apply</span></summary>
+    <p class="ax-small">A sticking point suggests useful practice, but doesn't prove a particular muscle is weak. Leave blank if unsure.</p>
+    <div class="ax-fields three">
+     <fieldset><legend>BACK SQUAT</legend><label class="check"><input name="weakSquat" type="checkbox" value="out-of-hole"> Out of the hole</label><label class="check"><input name="weakSquat" type="checkbox" value="hips-first"> Hips rise first</label><label class="check"><input name="weakSquat" type="checkbox" value="torso"> Torso position</label><label class="check"><input name="weakSquat" type="checkbox" value="knees"> Knees cave</label><label class="check"><input name="weakSquat" type="checkbox" value="depth"> Depth consistency</label></fieldset>
+     <fieldset><legend>BENCH PRESS</legend><label class="check"><input name="weakBench" type="checkbox" value="off-chest"> Off the chest</label><label class="check"><input name="weakBench" type="checkbox" value="midpoint"> Mid-range</label><label class="check"><input name="weakBench" type="checkbox" value="lockout"> Lockout</label><label class="check"><input name="weakBench" type="checkbox" value="bar-path"> Bar path</label><label class="check"><input name="weakBench" type="checkbox" value="tightness"> Tightness</label></fieldset>
+     <fieldset><legend>DEADLIFT</legend><label class="check"><input name="weakDeadlift" type="checkbox" value="off-floor"> Breaking the floor</label><label class="check"><input name="weakDeadlift" type="checkbox" value="knees"> Around the knees</label><label class="check"><input name="weakDeadlift" type="checkbox" value="lockout"> Lockout</label><label class="check"><input name="weakDeadlift" type="checkbox" value="back-position"> Back position</label><label class="check"><input name="weakDeadlift" type="checkbox" value="tension"> Starting tension</label></fieldset>
+    </div>
+   </details>
+  </section>
+  <section data-ax-step="3" class="ax-panel" aria-labelledby="recoveryTitle" hidden>
+   <p class="eyebrow">04 · RECOVERY AND LIFESTYLE</p><h3 id="recoveryTitle">How much training can you recover from?</h3>
+   <p class="ax-note">These answers help AX avoid prescribing the same assistance load to an athlete doing physical shifts and one with an office job.</p>
+   <div class="ax-fields two">
+    <label>Typical sleep each night <select name="sleep" required><option value="4.5">Under 5 hours</option><option value="5.5">5–6 hours</option><option value="6" selected>About 6 hours</option><option value="6.5">6–7 hours</option><option value="7.5">7–8 hours</option><option value="8.5">8+ hours</option></select></label>
+    <label>Physical demands at work <select name="job"><option value="low">Low — mostly seated</option><option value="moderate" selected>Moderate — mixed/active</option><option value="high">High — manual or demanding</option></select></label>
+    <label>Daily activity outside training <select name="activity"><option value="low" selected>Low</option><option value="moderate">Moderate</option><option value="high">High</option></select></label>
+    <label>Current nutrition <select name="nutrition"><option value="deficit">Calorie deficit / cutting</option><option value="maintenance" selected>Maintenance</option><option value="surplus">Calorie surplus / gaining</option></select></label>
+    <label>Recovery recently <select name="recovery"><option value="good">Good — recovering well</option><option value="normal" selected>Normal — manageable fatigue</option><option value="limited">Limited — struggling to recover</option></select></label>
+   </div>
+   <div class="ax-guidance"><strong>WHY WE ASK</strong><p>Sleep, training experience, high daily demands and nutrition influence how conservatively assistance volume should start. Your actual RPE and training response still matter more than any single questionnaire answer.</p></div>
+  </section>
+  <section data-ax-step="4" class="ax-panel" aria-labelledby="scheduleTitle" hidden>
+   <p class="eyebrow">05 · YOUR TRAINING WEEK</p><h3 id="scheduleTitle">Build training around your life.</h3>
+   <p class="ax-note">Select every day you could reasonably train. AX will suggest a schedule with room between demanding squat and deadlift sessions.</p>
+   <fieldset class="ax-days"><legend>AVAILABLE TRAINING DAYS</legend><div class="ax-days-grid">
+    <label><input type="checkbox" name="availability" value="Mon" checked><span>MON</span></label>
+    <label><input type="checkbox" name="availability" value="Tue" checked><span>TUE</span></label>
+    <label><input type="checkbox" name="availability" value="Wed" checked><span>WED</span></label>
+    <label><input type="checkbox" name="availability" value="Thu" checked><span>THU</span></label>
+    <label><input type="checkbox" name="availability" value="Fri" checked><span>FRI</span></label>
+    <label><input type="checkbox" name="availability" value="Sat" checked><span>SAT</span></label>
+    <label><input type="checkbox" name="availability" value="Sun" checked><span>SUN</span></label>
+   </div></fieldset>
+   <div class="ax-fields two">
+    <label>Training days each week <select name="days"><option value="3">3 sessions</option><option value="4" selected>4 sessions</option><option value="5">5 sessions</option></select></label>
+    <label>Time per session <select name="minutes"><option value="75">75 minutes</option><option value="90">90 minutes</option><option value="105">105 minutes</option><option value="120" selected>120 minutes</option><option value="150">150 minutes</option></select></label>
+    <label>Programme length <select name="weeks"><option value="4">4 weeks · focused</option><option value="8" selected>8 weeks · strength block</option><option value="12">12 weeks · full peak</option></select></label>
+    <label>Gym equipment <select name="equipment"><option value="full" selected>Full gym — machines, racks and cables</option><option value="basic">Basic — barbells and dumbbells</option></select></label>
+    <label>Load increment <select name="step"><option value="1.25">1.25 kg</option><option value="2.5" selected>2.5 kg</option><option value="5">5 kg</option></select></label>
+   </div>
+   <div class="ax-schedule-preview"><strong>SUGGESTED TRAINING DAYS</strong><div id="schedulePreview">MON · TUE · THU · SAT</div><p id="scheduleReason">Four focused sessions with recovery between demanding lower-body days.</p></div>
+  </section>
+  <section data-ax-step="5" class="ax-panel" aria-labelledby="reviewTitle" hidden>
+   <p class="eyebrow">06 · REVIEW YOUR ASSESSMENT</p><h3 id="reviewTitle">Ready to build your programme?</h3>
+   <p class="ax-note">Confirm the answers below. You can go back and edit anything before generating.</p>
+   <div id="assessmentSummary" aria-live="polite"></div>
+   <div class="ax-guidance"><strong>BEFORE YOU GENERATE</strong><p>Your programme will use the current 2.0 PR-focused prescription engine. This assessment now controls training availability and uses lifestyle context for initial assistance volume. More sophisticated volume optimisation, complete exercise logging and automatic future load updates are still in development.</p></div>
+   <div class="ax-warning" id="assessmentReplaceWarning" hidden>You already have an active standalone 2.0 cycle. Generating a new one will archive it, including existing top-set logs. Your original six-week AX is untouched.</div>
+  </section>
+  <div id="assessmentError" role="alert" class="ax-error" hidden></div>
+  <div class="ax-footer-actions">
+   <button type="button" id="axBack" class="secondary" hidden>BACK</button>
+   <button type="button" id="axNext" class="primary">CONTINUE <span aria-hidden="true">→</span></button>
+   <button type="submit" id="axGenerate" class="primary" hidden>GENERATE MY AX PROGRAMME</button>
+  </div>
+ </form>
+ <footer><span>ASCENSIONX 2.0 · ATHLETE ASSESSMENT</span><span>Your original AX cycle and SpartanX workouts are not modified.</span></footer>
+</div>
+</body>
+</html>

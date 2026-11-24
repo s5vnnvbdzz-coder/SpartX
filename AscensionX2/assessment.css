@@ -1,0 +1,82 @@
+/* AX athlete assessment — spacious Obsidian questionnaire, mobile-first. */
+.ax-assess{max-width:930px;min-height:100dvh}
+.ax-assess .masthead{margin-bottom:28px}
+.ax-close{flex:none;display:inline-flex;align-items:center;gap:9px;color:#f2dfe2;text-decoration:none;font-weight:800;font-size:11px;border:1px solid #4a363b;background:#251b20;padding:10px 14px;border-radius:10px}
+.ax-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:19px}
+.ax-header h2{font-size:clamp(27px,5vw,42px);line-height:1.14;letter-spacing:-1.3px;margin:0 0 9px}
+.ax-header p:not(.eyebrow){color:var(--muted);line-height:1.65;max-width:630px;margin:0}
+.ax-step-pill{flex:none;white-space:nowrap;border:1px solid #6a3a41;background:#271a20;color:#f4c7cb;font-size:13px;font-weight:900;padding:9px 12px;border-radius:10px;font-variant-numeric:tabular-nums}
+.ax-progress{width:100%;height:5px;background:#262830;border-radius:20px;overflow:hidden;margin-top:12px}
+.ax-progress>div{height:100%;width:16.66%;background:linear-gradient(90deg,#9f2d39,#f4757f);border-radius:20px;transition:width .23s ease}
+.ax-steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin-top:11px;margin-bottom:23px}
+.ax-steps span{font-size:10px;letter-spacing:.7px;text-align:center;color:#717783;font-weight:800;padding:8px 2px;border-bottom:1px solid #34363f}
+.ax-steps span.current{color:#ff8790;border-color:#df5360}
+.ax-steps span.done{color:#91d7b1;border-color:#557d66}
+.ax-intro-note{margin-bottom:16px;display:flex;flex-direction:column;gap:2px}
+.ax-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#95d9b1;margin-right:6px}
+.ax-panel{background:linear-gradient(220deg,#21212a,#15171c 66%);border:1px solid #353944;border-radius:19px;padding:25px;animation:ax-appear .17s ease}
+@keyframes ax-appear{from{opacity:.55;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ax-panel[hidden]{display:none}
+.ax-panel h3{font-size:25px;letter-spacing:-.6px;margin:0 0 10px;line-height:1.2}
+.ax-note{font-size:13px;color:#b5b9c3;line-height:1.65;margin:0 0 22px;max-width:750px}
+.ax-small{font-size:12px;color:var(--muted);margin:12px 0 0;line-height:1.65}
+.ax-choice-grid{display:grid;gap:11px}
+.ax-choice-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ax-choice{position:relative;display:flex;gap:13px;align-items:flex-start;min-height:155px;border:1px solid #41444c;background:#15171d;padding:21px 16px;border-radius:15px;cursor:pointer}
+.ax-choice:has(input:checked){border-color:#dd5460;background:linear-gradient(145deg,#402128,#1a181e);box-shadow:inset 0 0 0 1px #ba4c56}
+.ax-choice:has(input:focus-visible){outline:2px solid #ff9098;outline-offset:3px}
+.ax-choice input{position:absolute;right:13px;top:13px;accent-color:var(--accent);width:18px;height:18px}
+.ax-choice-icon{display:grid;place-items:center;width:41px;height:41px;flex:none;background:#36252c;border-radius:12px;font-size:22px}
+.ax-choice strong{font-size:13px;font-weight:900;letter-spacing:.35px;display:block;margin:5px 22px 7px 0}
+.ax-choice small{display:block;font-size:12px;line-height:1.65;color:#b1b6c0;font-weight:500}
+.ax-guidance,.ax-schedule-preview{border:1px solid #6a4548;border-radius:13px;background:linear-gradient(135deg,#2e2025,#1c1c23);padding:16px;margin-top:20px}
+.ax-guidance strong,.ax-schedule-preview strong{font-size:11px;font-weight:900;letter-spacing:1px;color:#f1a1a8}
+.ax-guidance p,.ax-schedule-preview p{font-size:12px;line-height:1.65;color:#c3bcc0;margin:7px 0 0}
+.ax-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.ax-fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ax-fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ax-fields>label{font-size:12px;font-weight:800;color:#e5e6ed}
+.ax-fields>label small{display:block;margin-top:6px;color:#8c929d;font-size:11px;font-weight:500}
+.ax-assess label input:not([type=checkbox]):not([type=radio]),.ax-assess label select{display:block;width:100%;border:1px solid #4c505d;border-radius:10px;background:#101217;color:#fff;padding:13px 12px;min-height:48px;margin-top:7px;font-size:15px;outline-offset:3px}
+.ax-assess label input:focus-visible,.ax-assess label select:focus-visible{outline:2px solid #eb737b}
+.ax-assess input:invalid.ax-touched,.ax-assess select:invalid.ax-touched{border-color:#fd838f!important}
+.ax-required{font-size:9px;color:#e6acb1;font-weight:850;letter-spacing:.5px;margin-left:3px}
+.ax-import-status{display:block;padding:12px;border:1px solid #476355;border-radius:11px;background:#202b25;color:#b6e2c4;font-size:12px;line-height:1.5;margin-bottom:19px}
+.ax-strength-grid{display:grid;gap:12px}
+.ax-lift{padding:16px;border-radius:13px;border:1px solid #41444e;background:#121419}
+.ax-lift-head{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.ax-lift-head span{border-radius:7px;background:#56252b;color:#ffafb5;padding:5px 7px;font-weight:900;font-size:10px}
+.ax-lift-head strong{letter-spacing:.6px;font-size:13px}
+.ax-expand{border:1px solid #3f414a;background:#191b21;border-radius:13px;margin-top:16px;padding:14px}
+.ax-expand>summary{cursor:pointer;font-weight:850;font-size:12px;letter-spacing:.7px;list-style:none}
+.ax-expand>summary::-webkit-details-marker{display:none}
+.ax-expand>summary:after{content:'▾';float:right;color:#ef6a75}
+.ax-expand[open]>summary:after{content:'▴'}
+.ax-expand>summary span{display:block;color:#9399a5;font-weight:500;font-size:11px;letter-spacing:0;margin-top:4px}
+.ax-expand .ax-fields{margin-top:15px}
+.ax-expand fieldset{min-width:0}
+.ax-expand .check{padding:6px 0;display:flex;align-items:center;font-size:12px;font-weight:600}
+.ax-expand .check input{flex:none}
+.ax-days{border:1px solid #41464d;background:#12151a;border-radius:14px;padding:14px 10px;margin:0 0 21px}
+.ax-days legend{font-size:12px;letter-spacing:.8px;font-weight:900}
+.ax-days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.ax-days-grid label{cursor:pointer;position:relative}
+.ax-days-grid input{position:absolute;opacity:0;pointer-events:none}
+.ax-days-grid span{display:grid;place-items:center;border-radius:9px;border:1px solid #464850;background:#1e2026;min-height:47px;color:#b6bbc3;font-size:11px;font-weight:850}
+.ax-days-grid input:checked+span{background:linear-gradient(130deg,#7d2d37,#4f252c);color:#fff;border-color:#cd5661}
+.ax-days-grid input:focus-visible+span{outline:2px solid #ffa2ab;outline-offset:2px}
+#schedulePreview{font-weight:900;font-size:19px;letter-spacing:1px;margin:10px 0;color:#fff}
+.ax-warning{padding:13px 15px;background:#2a251a;border:1px solid #725a33;border-radius:11px;color:#ffdfac;font-size:12px;line-height:1.55;margin-top:15px}
+.ax-error{padding:13px 15px;border:1px solid #a74e57;color:#ffc3c8;background:#311e23;border-radius:11px;margin-top:14px;font-size:13px}
+.ax-footer-actions{display:flex;gap:11px;justify-content:flex-end;margin:20px 0}
+.ax-footer-actions button{min-height:52px;min-width:150px}
+.ax-footer-actions .primary{min-width:min(100%,290px)}
+.ax-footer-actions button:disabled{opacity:.55;cursor:default}
+.ax-summary-card{border:1px solid #3e424a;background:#14161b;border-radius:13px;margin:10px 0;padding:15px 16px}
+.ax-summary-card h4{font-size:12px;letter-spacing:.8px;color:#ffa5ae;margin:0 0 10px}
+.ax-summary-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #32353d;font-size:12px}
+.ax-summary-row:last-child{border-bottom:0}
+.ax-summary-row span{color:#aeb3be}
+.ax-summary-row strong{text-align:right;font-weight:800}
+@media(max-width:620px){.ax-panel{padding:16px}.ax-choice-grid.two,.ax-fields,.ax-fields.two,.ax-fields.three{grid-template-columns:1fr}.ax-choice{min-height:118px}.ax-header h2{font-size:28px}.ax-days-grid{gap:4px}.ax-days-grid span{min-height:44px;font-size:10px}.ax-steps span{font-size:8px;letter-spacing:0}.ax-footer-actions{position:sticky;bottom:0;background:#121317;padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));margin:14px 0 0;z-index:2}.ax-footer-actions button{min-width:0;flex:1}.ax-footer-actions .primary{flex:2}.ax-close span{display:none}.ax-intro-note small{line-height:1.5}}
+@media(max-width:360px){.ax-days-grid{grid-template-columns:repeat(4,1fr)}.ax-header{flex-wrap:wrap}.ax-steps{grid-template-columns:repeat(3,1fr)}}

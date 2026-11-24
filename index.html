@@ -4775,8 +4775,17 @@ restoreDraft();if(recoverAscensionWorkoutTitle())saveDraft();
   if(raw){const parsed=JSON.parse(raw);if(parsed?.at&&Date.now()-parsed.at<3600000)context=parsed}
  }catch(_){}
  const query=new URLSearchParams(location.search);
- const fromModule=['intelligence','ascension'].includes(query.get('sxReturn'));
- const sourceHint=query.get('sxFrom');
+ let freshAscensionReturn=null;
+ try{
+  const saved=JSON.parse(sessionStorage.getItem('sx_ascension_post_create_v1')||'null');
+  sessionStorage.removeItem('sx_ascension_post_create_v1');
+  if(saved?.screen==='workout'&&Number.isFinite(saved.at)&&
+    Date.now()-saved.at>=0&&Date.now()-saved.at<120000)
+   freshAscensionReturn='workout';
+ }catch(_){}
+ const fromModule=['intelligence','ascension'].includes(query.get('sxReturn'))||
+  freshAscensionReturn==='workout';
+ const sourceHint=query.get('sxFrom')||freshAscensionReturn;
  const source=fromModule&&['home','workout','activeWorkout','profile','tools'].includes(sourceHint)?sourceHint:null;
  if(!fromModule&&!context)return;
  // The launching tab and its scroll position survive navigation to either

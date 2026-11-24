@@ -91,7 +91,7 @@ async function run(browserType,device){
   await page.locator('button[data-tab="review"]').click();
   assert.match(await page.locator('#reviewView').innerText(),/122.5 kg × 5/,'Top-set history visible');
   await page.locator('button[data-tab="builder"]').click();
-  await page.locator('select[name="weeks"]').selectOption('8');
+  await page.locator('#builderForm select[name="weeks"]').selectOption('8');
   await page.locator('#builderForm button[type=submit]').click();
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('ascensionx2_standalone_workspace_v1')).active.plan.profile.weeks===8);
   await page.locator('button[data-tab="review"]').click();

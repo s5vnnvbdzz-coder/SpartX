@@ -60,9 +60,13 @@ async function run(type,device){
    return {cycleId:x.cycle.created,weeks:x.cycle.weeks,currentWeek:x.cycle.currentWeek,
     trainingMax:x.profile.max['Back Squat']*x.profile.tmPct/100,enabled:adaptive.enabled,days:adaptive.days,
     top:w.sets[0],back:w.sets[1],supports:window.SXAscensionAdaptive.plan('Back Squat',1).map(x=>x.name),
-    screen:document.querySelector('.screen.active')?.id,raw};
+    screen:document.querySelector('.screen.active')?.id,raw,landingUrl:location.href,
+    returnHint:sessionStorage.getItem('sx_ascension_post_create_v1'),
+    storedScreen:localStorage.getItem('spartx_last_screen'),
+    activeScreens:[...document.querySelectorAll('.screen.active')].map(x=>x.id)};
   });
   fail(fresh.cycleId&&fresh.enabled&&fresh.days===4,'Fresh cycle persists adaptive support');
+  console.log('FRESH CYCLE RETURN STATE',device,JSON.stringify({url:fresh.landingUrl,screen:fresh.screen,hint:fresh.returnHint,last:fresh.storedScreen,active:fresh.activeScreens}));
   assert.equal(fresh.screen,'workout','Cycle creation lands on SpartanX Workout');
   assert.equal(fresh.currentWeek,1);
   assert.equal(fresh.top.weight,127.5);

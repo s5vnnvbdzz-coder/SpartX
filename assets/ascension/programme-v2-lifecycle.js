@@ -59,15 +59,16 @@ function prescribe(entry,slot,history,readiness="unknown"){
     const easy=x=>x.actual.every(y=>Number(y.actual.reps)>=y.planned.reps&&Number(y.actual.rpe)<=y.planned.rpe-1);
     const hard=x=>x.actual.some(y=>Number(y.actual.reps)<y.planned.reps||Number(y.actual.rpe)>=9.5);
     const increment=["Dumbbell Curl","Dumbbell Lateral Raise","Dumbbell Triceps Extension"].includes(e.name)?1:step;
-    if(prev&&easy(prev)&&easy(last)&&prev.actual.every(y=>Math.abs(Number(y.actual.weight)-kg)<.001)){kg+=increment;decision="Two comparable easy exposures: small load increase suggested.";}
+    if(readiness!=="poor"&&prev&&easy(prev)&&easy(last)&&prev.actual.every(y=>Math.abs(Number(y.actual.weight)-kg)<.001)){kg+=increment;decision="Two comparable easy exposures: small load increase suggested.";}
     else if(prev&&hard(prev)&&hard(last)){kg=Math.min(kg,down(kg*.95,increment));decision="Two difficult exposures: reduce load and review recovery.";}
     e.sets.forEach(z=>z.kg=kg);e.reason+=" "+decision;
     const third=past.at(-3),onTarget=x=>x.actual.every(y=>Number(y.actual.reps)===y.planned.reps&&Math.abs(Number(y.actual.rpe)-y.planned.rpe)<=.5&&Math.abs(Number(y.actual.weight)-weights[0])<.001);
-    if(!volumeChange&&prev&&hard(prev)&&hard(last)&&e.sets.length>2){e.sets.pop();volumeChange=true;e.reason+=" Reduce one accessory set after repeated excessive effort; not a diagnosis of under-recovery.";}
-    else if(!volumeChange&&readiness==="good"&&third&&prev&&[third,prev,last].every(onTarget)&&["Accumulation","Strength"].includes(slot.phase)&&e.sets.length===3&& !/deadlift|extension|squat|press/i.test(e.name)&&copy.estimatedMinutes+1+e.restSeconds/60<=entry.plan.profile.minutes){
+    if(!volumeChange&&prev&&hard(prev)&&hard(last)&&e.sets.length>2){e.sets.pop();copy.estimatedMinutes=Math.max(0,copy.estimatedMinutes-Math.floor(1+e.restSeconds/60));volumeChange=true;e.reason+=" Reduce one accessory set after repeated excessive effort; not a diagnosis of under-recovery.";}
+    else if(!volumeChange&&readiness==="good"&&third&&prev&&[third,prev,last].every(onTarget)&&["Accumulation","Strength"].includes(slot.phase)&&e.sets.length===3&& !/deadlift|extension|squat|press/i.test(e.name)&&copy.estimatedMinutes+Math.ceil(1+e.restSeconds/60)<=entry.plan.profile.minutes){
      const muscle=/curl/i.test(e.name)?"Biceps":/row|pulldown|pull up/i.test(e.name)?"Back":/lateral/i.test(e.name)?"Shoulders":/calf/i.test(e.name)?"Calves":null;
      const exposure=entry.plan.weeks.find(w=>w.week===slot.week)?.exposure?.[muscle]?.effective;
-     if(Number.isFinite(exposure)&&exposure<=8){e.sets.push({...e.sets.at(-1)});copy.estimatedMinutes+=Math.ceil(1+e.restSeconds/60);volumeChange=true;e.reason+=" Three stable exposures plus good reported recovery: trial one extra set. Monitor next exposure.";}
+     const extra=slots(entry).filter(s=>s.week===slot.week&&s.id!==slot.id&&entry.prescriptions?.[s.id]).reduce((sum,s)=>{const approved=entry.prescriptions[s.id];return sum+approved.exercises.reduce((n,e,i)=>n+Math.max(0,e.sets.length-(s.exercises[i]?.sets.length||0)),0)},0);
+     if(Number.isFinite(exposure)&&exposure+extra<=8&&extra===0){e.sets.push({...e.sets.at(-1)});copy.estimatedMinutes+=Math.ceil(1+e.restSeconds/60);volumeChange=true;e.reason+=" Three stable exposures plus good reported recovery: trial one extra set. Monitor next exposure.";}
     }
    }
   }else if(e.role==="primary"&&prev){

@@ -26,8 +26,11 @@ function refreshSaved(){
  }
  const next=life.prescribe(entry,status.next,history);
  add(saved,'h3','Next: Week '+next.week+' · '+next.day+' · '+next.phase);
- for(const e of next.exercises)add(saved,'p',e.name+' · '+e.sets.filter(z=>z.type!=='warmup').map(z=>(z.kg==null?'Choose load':z.kg+' kg')+' × '+z.reps+' @ RPE '+z.rpe).join(' | '),'small');
+ const targets=add(saved,'div');
+ function renderTargets(readiness){targets.replaceChildren();const draft=life.prescribe(entry,status.next,history,readiness);for(const e of draft.exercises){add(targets,'p',e.name+' · '+e.sets.filter(z=>z.type!=='warmup').map(z=>(z.kg==null?'Choose load':z.kg+' kg')+' × '+z.reps+' @ RPE '+z.rpe).join(' | '),'small');add(targets,'p',e.reason,'small');}}
+ renderTargets('unknown');
  const label=add(saved,'label','Recent recovery');const recovery=add(label,'select');for(const [v,t] of [['unknown','Not reported'],['good','Good — recovering normally'],['poor','Poor — fatigue or soreness']]){const op=add(recovery,'option',t);op.value=v;}
+ recovery.onchange=()=>renderTargets(recovery.value);
  const button=add(saved,'button','LOAD NEXT SESSION INTO SPARTANX');
  button.onclick=()=>{try{sessionStorage.setItem(life.HANDOFF,JSON.stringify({programmeId:entry.id,slotId:next.id,readiness:recovery.value}));location.href='../index.html';}catch(e){add(saved,'p',e.message,'error');}};
  }catch(e){add(saved,'p',e.message,'error');}

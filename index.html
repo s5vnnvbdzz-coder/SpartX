@@ -2517,7 +2517,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 </style>
 <script src="./assets/cardio/cardio.js?v=304"></script>
 <script src="./assets/workouts/exercise-replacement.js?v=394"></script>
-<script src="./assets/ascension/continue-support-sync.js?v=418"></script>
+<script src="./assets/ascension/continue-support-sync.js?v=419"></script>
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/workouts/session-achievements.js?v=396"></script>
@@ -5643,7 +5643,9 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
     week:Number(link.week),tm:link.importedTm
    },[]);
   }catch(_){return false}
-  const names=['Hack Squat','Leg Extension','45° Back Extension','Pallof Press'];
+  // The legacy squat recovery must follow the current active plan, not
+  // append retired core work or assume Hack Squat when Leg Press was selected.
+  const names=planned.map(ex=>ex.name);
   if(!Array.isArray(planned)||!names.every(name=>planned.some(ex=>ex.name===name)))return false;
   const normalize=name=>String(name||'').trim().toLowerCase();
   const used=new Set([main]);
@@ -5698,11 +5700,16 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
  let orderChanged=false;
  for(const main of oldOrder.filter(ex=>ex?.ascensionLink?.cycleId===active?.id)){
   const link=main.ascensionLink;
-  const result=window.SXAscensionContinueSupport?.alignLinked?.(work,{
-   source:'AscensionX',exercise:link.lift,cycleId:link.cycleId,
-   week:Number(link.week),tm:Number(link.importedTm)
-  },window.SXAscensionCompanion,localStorage);
-  if(result?.changed)orderChanged=true;
+  const details={source:'AscensionX',exercise:link.lift,cycleId:link.cycleId,
+   week:Number(link.week),tm:Number(link.importedTm)};
+  // Only re-prescribe when old assistance actually exists. An athlete may
+  // have deliberately removed every accessory from an active workout.
+  const hasPriorSupport=work.some(ex=>ex?.sxStrengthSizeCompanion?.cycleId===link.cycleId&&
+   ex.sxStrengthSizeCompanion.lift===link.lift&&Number(ex.sxStrengthSizeCompanion.week)===Number(link.week));
+  if(hasPriorSupport&&window.SXAscensionContinueSupport?.reconcile?.(work,details,window.SXAscensionCompanion,localStorage)?.changed)
+   orderChanged=true;
+  if(window.SXAscensionContinueSupport?.alignLinked?.(work,details,window.SXAscensionCompanion,localStorage)?.changed)
+   orderChanged=true;
  }
  if(orderChanged)remapActiveExerciseTimer(work.map(ex=>oldOrder.indexOf(ex)));
  if(restored||renamed||rearDelts||upgradedBench||refreshed||migrated||squatMigrated||orderChanged){

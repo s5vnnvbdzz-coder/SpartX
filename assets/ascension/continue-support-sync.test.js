@@ -46,7 +46,7 @@ check('fresh Continue import uses active six-week assistance without a new 2.0 p
  const response=t.sync.reconcile(work,d,t.companion,t.storage);
  assert.equal(response.handled,true);assert.equal(response.changed,true);
  assert.equal(work[0],m);assert.equal(JSON.stringify(m.sets),originalMain);
- assert.equal(m.ascensionLink.supportSyncVersion,417);
+ assert.equal(m.ascensionLink.supportSyncVersion,419);
  const plan=t.api.plan(d.exercise,d.week,{},t.storage);
  assert.deepEqual(work.slice(1).map(e=>e.name),Array.from(plan,e=>e.name));
  assert.equal(work[1].name,'Leg Press');
@@ -88,6 +88,32 @@ check('tagged prescribed weights are safe to update while arbitrary prefilled we
  old2.sets[0].weight='999';
  assert.equal(t.sync.reconcile([main(d),old2],d,t.companion,t.storage).protected,true);
 });
+check('Week 5 existing squat is automatically re-ordered without changing a single logged or entered set',()=>{
+ const t=boot();t.api.save({enabled:true,days:4,focus:'strength'},t.storage);
+ const d={...details(),week:5},m=main(d);
+ const planned=t.companion.forImport(d,[],t.storage);
+ const names=planned.map(ex=>ex.name);
+ assert.deepEqual(names,['Leg Press','Leg Extension','45° Back Extension','Hanging Knee Raise']);
+ const rows=planned.slice().reverse();
+ rows[0].sets[0].done=true;rows[0].sets[0].rpe='8';
+ const owned=rows.map(ex=>[ex,JSON.stringify(ex.sets)]);
+ const athlete={name:'Manual Lat Raise',sets:[{weight:'16',reps:'12',done:true}]};
+ const work=[athlete,rows[0],m,rows[1],rows[2],rows[3]];
+ m.ascensionLink.supportSyncVersion=419; // current Continue used to skip all ordering corrections
+ const original=JSON.stringify(m.sets);
+ const aligned=t.sync.alignLinked(work,d,t.companion,t.storage);
+ assert.equal(aligned.changed,true);
+ assert.equal(work[0],athlete);
+ assert.equal(work[1],m);
+ assert.deepEqual(work.slice(2).map(ex=>ex.name),names);
+ assert.equal(JSON.stringify(m.sets),original);
+ for(const [ex,sets] of owned)assert.equal(JSON.stringify(ex.sets),sets);
+ assert.equal(m.ascensionLink.supportOrderVersion,418);
+ assert.equal(t.sync.alignLinked(work,d,t.companion,t.storage).changed,false,
+  'Do not keep overwriting later manual workout ordering');
+ assert.equal(t.storage.getItem('ascensionx_strength_v1'),originalCycle);
+ assert.equal(t.storage.getItem('spartx_db'),originalSessions);
+});
 check('inactive support and unrelated programme links are not rewritten',()=>{
  const t=boot(),d=details(),m=main(d),legacy=untouched(),work=[m,legacy];
  const saved=JSON.stringify(work);
@@ -103,7 +129,7 @@ check('production Continue Training calls the live reconciliation before old nam
   html.indexOf('function import531IntoWorkout('));
  assert.ok(body.includes('SXAscensionContinueSupport?.reconcile?.(work,d,api,localStorage)'));
  assert.ok(body.indexOf('SXAscensionContinueSupport')<body.indexOf('const extras=api.forImport'));
- assert.ok(html.includes('continue-support-sync.js?v=417'));
+ assert.ok(html.includes('continue-support-sync.js?v=419'));
  assert.ok(html.includes('if(linked||existingUnlinked){'));
  assert.ok(html.includes('if(source===\'AscensionX\')ensureAscensionStrengthSizeCompanions(d)'));
  const classic=fs.readFileSync(path.join(dir,'workout-prescription.js'),'utf8');

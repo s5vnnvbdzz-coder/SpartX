@@ -26,7 +26,9 @@ async function run(browserType,device){
   let text=await page.locator('#programmeView').innerText();
   assert.match(text,/Week 9 · Intensification/);
   assert.match(text,/Deadlift/);
-  assert.match(text,/SECONDARY/);
+  await page.locator('.session details').last().locator('summary').click();
+  text=await page.locator('#programmeView').innerText();
+  assert.match(text,/SECONDARY/,'Opening Day 4 reveals secondary squat and bench prescriptions');
   await page.locator('#weekSelector').selectOption('1');
   const bench=page.locator('form[data-top-form="Bench Press"]');
   await bench.locator('input[name="kg"]').fill('122.5');

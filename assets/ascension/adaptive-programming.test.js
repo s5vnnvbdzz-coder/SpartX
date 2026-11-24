@@ -164,8 +164,9 @@ assert.equal(hostHtml.includes('ensureAscensionPausedBench'),false,'No automatic
 assert.equal(hostHtml.includes('ensureAscensionRomanianDeadlift'),false,'No automatic RDL workout injection');
 assert.equal(hostHtml.includes('backfillActiveAscensionWeek2PausedBench'),false,'No old paused bench draft backfill');
 assert.equal(hostHtml.includes('backfillActiveAscensionWeek2RomanianDeadlift'),false,'No old RDL draft backfill');
-assert.ok(ascHtml.includes("cycleEditorOpenedFromWorkout=document.body.classList.contains('sx-asc-workout-manage')"),
- 'Tools and Workout entrances share the same full-page editor formatting');
+assert.ok(ascHtml.includes('cycleEditorOpenedFromWorkout=!!workoutCycleReturnSource()')&&
+ ascHtml.includes("if(!cycleEditorOpenedFromWorkout&&history.state?.screen!=='programme')"),
+ 'Native Manage Cycle recognises Workout as its origin before creating any editor history');
 assert.ok(ascHtml.includes("document.body.classList.add('sx-asc-workout-manage','sx-asc-cycle-page')"),
  'Tools Edit Programme activates the same dedicated page as Manage Cycle');
 assert.ok(ascHtml.includes('const returnToSpartanX=cycleEditorOpenedFromWorkout,returnScreen=cycleEditorReturnScreen;'),
@@ -344,6 +345,24 @@ assert.ok(hostHtml.includes('sx-profile-scroll-end-parity')&&
  hostHtml.includes('main > #profile.screen > .spartanx-page-footer'),
  'Profile removes its excess bottom runway without touching other tabs');
 
+// Workout > 3 dots > View Cycle / Manage Cycle: both Back controls return to
+// SpartanX Workout without first exposing the AscensionX Home dashboard.
+assert.ok(ascHtml.includes("function workoutCycleReturnSource()")&&
+ ascHtml.includes("function returnFromWorkoutCycle(forceReplace=false)")&&
+ ascHtml.includes("fallback.searchParams.set('sxReturn','ascension')")&&
+ ascHtml.includes("fallback.searchParams.set('sxFrom',source)"),
+ 'Both focused cycle screens target their original SpartanX Workout page');
+assert.ok(ascHtml.includes('if(returnFromWorkoutCycle())return;')&&
+ ascHtml.includes('if(returnFromWorkoutCycle(fromPopState))return;')&&
+ ascHtml.includes('if(workoutCycleReturnSource()){\n  returnFromWorkoutCycle(true);'),
+ 'View, Manage and browser Back navigate before revealing AscensionX Home');
+assert.ok(ascHtml.includes("if(!workoutCycleReturnSource()){\n  showScreen('home',false);")&&
+ !ascHtml.includes("renderAll();showScreen('home',false);history.replaceState"),
+ 'Focused native routes do not initialize a Home navigation history entry');
+assert.ok(ascHtml.includes("window.__sxAscNative=q.get('sxIntegrated')==='1'")&&
+ ascHtml.includes("cycleEditorOpenedFromWorkout=!!workoutCycleReturnSource()"),
+ 'Native routing metadata is available before the original AscensionX init runs');
+
 // A completed support workout must not be invalidated by new prescription
 // sizes after an engine update (old Week 5 was one set).
 const oneSetLegacy=['Machine Chest Press','Iso-Lateral Row'].map(name=>({
@@ -381,7 +400,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v116')&&embeddedSw.includes('adaptive-programming.js?v=394'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v117')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&

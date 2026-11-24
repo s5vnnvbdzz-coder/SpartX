@@ -975,7 +975,7 @@ function sxBuildAdaptiveCycleRoster(){
   // The weekday shorthand is scheduling metadata, not the athlete-facing
   // session name. Use stable day order and the correct independent week.
   const sessionName=slot.kind==='support'?
-   String(slot.title||'Assistance').replace(/\\s*[-–]\\s*Week\\s*\\d+\\s*$/i,''):
+   String(slot.title||'Assistance').replace(/\s*[-–]\s*Week\s*\d+\s*$/i,''):
    slot.lift;
   title.textContent=sessionName+' - Day '+(index+1)+' Week '+slot.week;
   day.appendChild(title);

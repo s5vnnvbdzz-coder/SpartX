@@ -1909,7 +1909,8 @@ function processAscensionSpartanCompletionQueue(){
  if(processed.size){
   try{localStorage.setItem(ASCENSION_COMPLETION_QUEUE_KEY,JSON.stringify(pending.filter(p=>!processed.has(p?.id))))}catch(e){}
  }
- if(changed||syncCompletedLiftProgress()){
+ const reconciled=syncCompletedLiftProgress();
+ if(changed||reconciled){
   const current=$('liftSelect').value;
   if(selectedLifts().includes(current))$('workWeek').value=currentWeekFor(current);
   renderAll();

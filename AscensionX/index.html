@@ -1382,7 +1382,7 @@ function applyCycleSelection(chosen,existing){
  const weeks={...(state.cycle.weeks||{})};
  chosen.forEach(x=>{if(!weeks[x])weeks[x]=1});
  state.cycle={...state.cycle,created:state.cycle.created||new Date().toISOString(),
-  currentWeek:1,exercises:chosen,weeks};
+  currentWeek:existing?(Number(state.cycle.currentWeek)||1):1,exercises:chosen,weeks};
  if(state.draft&&!chosen.includes(state.draft.lift))state.draft=null;
  const current=$('liftSelect').value;
  const next=chosen.includes(current)?current:chosen[0];

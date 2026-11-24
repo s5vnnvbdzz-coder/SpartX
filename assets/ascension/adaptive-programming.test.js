@@ -391,7 +391,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=411'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=412'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -401,7 +401,7 @@ assert.ok(!ascHtml.includes('<div id="sxCycleManageLiveSnapshot"')&&
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v120')&&embeddedSw.includes('adaptive-programming.js?v=411'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v121')&&embeddedSw.includes('adaptive-programming.js?v=412'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 
@@ -638,3 +638,31 @@ function check(api,store,assert){
  assert(api.pendingSupportDay(c,store)===null,'linked day recognised');
 }
 {const recovery=boot({});check(recovery.api,recovery.localStorage,(value,message)=>assert.ok(value,message));}
+
+// Separate selectable support from the automatic next-workout recommendation.
+function testSelectableSupport(api,store,assert){
+ const id="2026-11-01T10:00:00.000Z",lifts=["Back Squat","Bench Press","Deadlift"];
+ const state={cycle:{created:id,exercises:lifts,weeks:Object.fromEntries(lifts.map(l=>[l,5])),currentWeek:5},logs:lifts.map(lift=>({cycleId:id,lift,week:4,setsComplete:true,date:"2026-11-20T10:00:00Z"}))};
+ const write=()=>store.setItem("ascensionx_strength_v1",JSON.stringify(state));
+ write();api.save({enabled:true,days:4,focus:"strength"},store);
+ const due=api.selectableSupportDay(null,store);
+ assert(due?.week===4&&due.ready,"Week 4 is selectable when genuinely due");
+ const record=(slot,n)=>({id:n,date:"2026-11-21T12:00:00Z",name:slot.title,exercises:slot.exercises.map(e=>({name:e.name,sxPowerbuildingSupport:{cycleId:id,week:slot.week,day:slot.day,plannedSets:e.sets,plannedExerciseCount:slot.exercises.length},sets:Array.from({length:e.sets},()=>({done:true,reps:10,weight:30,type:"Working Set"}))}))});
+ const done4=record(due,1);store.setItem("spartx_db",JSON.stringify({sessions:[done4]}));
+ const savedCycle=store.getItem("ascensionx_strength_v1");
+ assert(api.pendingSupportDay(null,store)===null,"Week 4 no longer auto suggested");
+ const upcoming=api.selectableSupportDay(null,store);
+ assert(upcoming?.week===5&&upcoming.ready===false&&upcoming.day==="SAT","Week 5 assistance remains selectable");
+ assert(upcoming.title.includes("Week 5"),"correct dropdown label");
+ assert(store.getItem("ascensionx_strength_v1")===savedCycle,"selecting upcoming support does not alter progression");
+ const done5=record(upcoming,2);
+ store.setItem("spartx_db",JSON.stringify({sessions:[done5,done4]}));
+ assert(api.selectableSupportDay(null,store)===null,"early completed Week 5 cannot load twice");
+ state.cycle.weeks=Object.fromEntries(lifts.map(l=>[l,6]));state.cycle.currentWeek=6;state.logs.push(...lifts.map(lift=>({cycleId:id,lift,week:5,setsComplete:true,date:"2026-11-22T10:00:00Z"})));write();
+ assert(api.pendingSupportDay(null,store)===null,"early completed support is not re-suggested after compounds");
+ assert(api.selectableSupportDay(null,store)===null,"no assistance during deload");
+ store.setItem("spartx_db",JSON.stringify({sessions:[done4]}));
+ assert(api.selectableSupportDay(null,store)?.week===5&&api.selectableSupportDay(null,store)?.ready===true,"unfinished Week 5 still due before deload");
+ api.save({enabled:false},store);assert(api.selectableSupportDay(null,store)===null,"disabled adaptive has no selectable support");
+}
+{const fixture=boot({});testSelectableSupport(fixture.api,fixture.localStorage,(value,message)=>assert.ok(value,message));}

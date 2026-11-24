@@ -595,6 +595,20 @@
   });
   return {valid:true,message:'Suggested layout, not guaranteed recovery. Main sets stay owned by AscensionX; reschedule around sleep, soreness and performance.',week,slots};
  }
+ // Keep the next unfinished assistance session available to select even
+ // before the primary lifts are complete. Only pendingSupportDay determines
+ // automatic Continue order. Manual scheduling never changes main counters.
+ function selectableSupportDay(cycleArg,storage=global.localStorage){
+  const c=cycleArg||activeCycle(storage);
+  if(!c||!read(c.id,storage).enabled)return null;
+  const pending=pendingSupportDay(c,storage);
+  if(pending)return {...pending,ready:true};
+  const layout=schedule(c,storage);
+  if(!layout.valid)return null;
+  const slot=layout.slots.find(x=>x.kind==='support'&&x.week<6&&x.exercises?.length&&
+    !completedSupportDay(c,x.day,x.week,x.exercises,storage));
+  return slot?{...slot,ready:false}:null;
+ }
  // This is the SAME planner used by the new-cycle editor. Previously it
  // rendered LIB[lift].slice(0,3) and FOURTH[..].slice(...), so changing
  // priority only changed a label, and day five repeated day four.
@@ -809,7 +823,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,supportCandidates,confirmSavedSupport,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

@@ -107,20 +107,23 @@ function sxAscModalRender(){
  const state=window.SXAscensionPrescription?.read?.();
  if(!select||!box||!state)return;
  box.replaceChildren();sxAscModalMessage('');
+ const load=byId('sxAscContinueLoad');if(load)load.disabled=false;
  const recovery=byId('sxAscSupportRecovery');if(recovery){recovery.replaceChildren();recovery.hidden=true;}
  const unit=state.profile.unit==='lbs'?'lbs':'kg';
  const weight=value=>Number(Number(value)*(unit==='lbs'?2.2046226218:1)).toLocaleString(undefined,{maximumFractionDigits:1})+' '+unit;
  if(select.value==='__ADAPTIVE_SUPPORT__'){
-  const slot=window.SXAscensionAdaptive?.pendingSupportDay?.();
-  if(!slot){sxAscModalMessage('This assistance day is no longer due.');return}
+  const slot=window.SXAscensionAdaptive?.selectableSupportDay?.();
+  const selected=select.selectedOptions[0];
+  if(!slot||String(slot.week)!==selected?.dataset.week||slot.day!==selected?.dataset.day){if(load)load.disabled=true;sxAscModalMessage('This assistance session has changed. Reopen Continue.');return}
   sxAscModalLine(box,slot.title,true);
+  if(!slot.ready)sxAscModalLine(box,'Upcoming assistance · You can preview or manually reschedule this session. The primary lifts remain the recommended next workout.');
   for(const ex of slot.exercises||[]){
    const reps=ex.min===ex.max?ex.min:ex.min+'–'+ex.max;
    sxAscModalLine(box,ex.name+' · '+ex.sets+' × '+reps+' · RPE '+(ex.targetRpe??10-ex.rir));
   }
   const api=window.SXAscensionAdaptive,c=api?.activeCycle?.();
   const candidates=c?api.supportCandidates?.(c,slot.day,slot.week)||[]:[];
-  if(recovery&&candidates.length){
+  if(slot.ready&&recovery&&candidates.length){
    recovery.hidden=false;
    const label=document.createElement('p');label.textContent='Already completed this assistance day? Confirm your saved workout without logging it again.';recovery.appendChild(label);
    for(const saved of candidates){
@@ -162,9 +165,10 @@ function sxAscModalOpen(preferred){
   select.appendChild(option);
  }
  const pending=window.SXAscensionAdaptive?.pendingSupportDay?.();
- if(pending?.kind==='support'){
+ const assistance=window.SXAscensionAdaptive?.selectableSupportDay?.();
+ if(assistance?.kind==='support'){
   const option=document.createElement('option');option.value='__ADAPTIVE_SUPPORT__';
-  option.textContent=pending.title;select.appendChild(option);
+  option.textContent=assistance.title;option.dataset.week=String(assistance.week);option.dataset.day=assistance.day;select.appendChild(option);
  }
  const selected=preferred&&[...select.options].some(o=>o.value===preferred)?preferred:
   pending?'__ADAPTIVE_SUPPORT__':cycle.upNext.lift;
@@ -179,9 +183,11 @@ function sxAscModalLoad(){
  if(!state||!select){sxAscModalMessage('Active AscensionX cycle unavailable.');return}
  let loaded=false;
  if(select.value==='__ADAPTIVE_SUPPORT__'){
-  const slot=window.SXAscensionAdaptive?.pendingSupportDay?.();
-  if(slot)loaded=window.SpartanXStartAscensionAdaptiveSupportSession?.({
-   cycleId:state.cycle.created,week:slot.week,day:slot.day,name:slot.title
+  const slot=window.SXAscensionAdaptive?.selectableSupportDay?.(),selected=select.selectedOptions[0];
+  if(!slot||String(slot.week)!==selected?.dataset.week||slot.day!==selected?.dataset.day){sxAscModalMessage('This assistance session has changed. Reopen Continue.');return;}
+  if(!slot.ready&&!confirm('Load '+slot.title+' before the remaining primary lifts? This changes workout order, not the primary lift progression.'))return;
+  loaded=window.SpartanXStartAscensionAdaptiveSupportSession?.({
+   cycleId:state.cycle.created,week:slot.week,day:slot.day,name:slot.title,allowEarly:!slot.ready
   })===true;
  }else{
   const workout=window.SXAscensionPrescription?.build?.(state,select.value);

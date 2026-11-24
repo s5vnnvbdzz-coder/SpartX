@@ -2053,6 +2053,30 @@ html body #calendarDayDetails.sx-calendar-day-details button.sx-calendar-workout
  display:none!important;
 }
 </style>
+<style id="sx-profile-scroll-end-parity">
+/* Profile is a regular main tab, not a full-height secondary document.
+   Use the same bottom-navigation clearance as the other main tabs and avoid
+   an extra scroll runway beneath its final card and footer. */
+body:has(> main > #profile.screen.active):not(:has(#minimizedSession:not(.hidden))){
+ padding-bottom:calc(var(--sx-nav-live-height) + 4px)!important;
+}
+@media(max-width:767px){
+ body:has(> main > #profile.screen.active):not(:has(#minimizedSession:not(.hidden))){
+  padding-bottom:calc(var(--sx-nav-live-height) + 4px)!important;
+ }
+}
+main > #profile.screen{
+ min-height:0!important;
+ height:auto!important;
+ padding-bottom:0!important;
+ margin-bottom:0!important;
+}
+main > #profile.screen > .spartanx-page-footer{
+ margin-top:10px!important;
+ padding-top:6px!important;
+ margin-bottom:0!important;
+}
+</style>
 <link rel="stylesheet" href="./assets/profile/feed-card-refinements.css?v=342">
 <link rel="stylesheet" href="./assets/ranks/prestige-visuals.css?v=383">
 <link rel="stylesheet" href="./assets/profile/feed-gaming-card-compact.css?v=378">

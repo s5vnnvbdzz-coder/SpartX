@@ -16,12 +16,33 @@
  const LIFTS=['Back Squat','Bench Press','Deadlift','Overhead Press'];
  const key='ascensionx_strength_v1';
  const round=(n,step)=>Math.round(n/step)*step;
+ // Repair a stale per-lift pointer only when a completed, cycle-linked log
+ // already proves the next week. Preserve all logged sets, RPE and training maxes.
+ function reconcileCompletedWeeks(state){
+  const c=state?.cycle;
+  if(!c?.created||!Array.isArray(state.logs))return state;
+  const lifts=(Array.isArray(c.exercises)?c.exercises:LIFTS).filter(x=>LIFTS.includes(x));
+  const logs=activeLogs(state);
+  const weeks={...(c.weeks||{})};
+  let changed=false;
+  for(const lift of lifts){
+   const current=Math.min(6,Math.max(1,Number(weeks[lift]||c.currentWeek)||1));
+   const completed=Math.max(0,...logs.filter(x=>x.lift===lift&&x.setsComplete===true&&
+    Number.isInteger(Number(x.week))&&Number(x.week)>=1&&Number(x.week)<=5)
+    .map(x=>Number(x.week)));
+   const next=Math.min(6,completed+1);
+   if(next>current){weeks[lift]=next;changed=true;}
+  }
+  return changed?{...state,cycle:{...c,weeks}}:state;
+ }
  function read(storage=global.localStorage){
   try{
    const state=JSON.parse(storage.getItem(key)||'null');
    if(!state?.cycle?.created||!Array.isArray(state.logs)||!state.profile?.max)return null;
    if(!Number.isFinite(Date.parse(state.cycle.created)))return null;
-   return state;
+   const reconciled=reconcileCompletedWeeks(state);
+   if(reconciled!==state)try{storage.setItem(key,JSON.stringify(reconciled))}catch(_){}
+   return reconciled;
   }catch(_){return null}
  }
  function activeLogs(state){
@@ -74,5 +95,5 @@
     nominalTop:safe.nominalTop,adjustedTop:top
    }:null};
  }
- global.SXAscensionPrescription=Object.freeze({PLAN,LIFTS,read,build});
+ global.SXAscensionPrescription=Object.freeze({PLAN,LIFTS,read,build,reconcileCompletedWeeks});
 })(window);

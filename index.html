@@ -2190,6 +2190,11 @@ main > #profile.screen > .spartanx-page-footer{
     <div class="sx-programme-footer" style="margin-top:12px"><span class="sx-programme-next">Build your AscensionX programme.</span><button type="button" class="sx-programme-continue" id="sxAscensionEmptySetup">SET UP ›</button></div>
    </section>
   </div>
+  <section class="card sx-programme-card" id="sxAscensionV2Card" aria-label="Experimental AscensionX 2.0">
+   <div class="sx-programme-head"><div><div class="sx-programme-kicker">ASCENSIONX 2.0 · POWERLIFTING</div><h3 class="sx-programme-title">Personalised Programming</h3></div><span class="sx-programme-tag">PREVIEW</span></div>
+   <p class="sx-programme-meta" id="sxAscensionV2Status">Build an 8, 12 or 16-week draft without changing your current cycle.</p>
+   <div class="sx-programme-footer"><span class="sx-programme-next" id="sxAscensionV2Next">Experimental programme</span><button type="button" class="sx-programme-continue" id="sxAscensionV2Open">OPEN ›</button></div>
+  </section>
   <section class="card sx-programme-card sx-programme-upcoming" id="sxBodybuildingProgrammeCard" aria-label="Strength and Bodybuilding training system, in development">
    <div class="sx-programme-head"><div><div class="sx-programme-kicker">STRENGTH · HYPERTROPHY</div><h3 class="sx-programme-title">Strength &amp; Bodybuilding</h3></div><span class="sx-programme-tag">IN DEVELOPMENT</span></div>
    <p class="sx-programme-meta">Dedicated strength and bodybuilding programme engine</p>
@@ -3128,7 +3133,7 @@ function supersetBannerFor(index){
 function isCycleRpeEligible(exercise){
  return editingSessionId===null&&!!(activeCycle||exercise?.ascensionLink||
   exercise?.sxStrengthSizeCompanion||exercise?.sxPowerbuildingSupport||
-  exercise?.bodybuildingLink||
+  exercise?.bodybuildingLink||exercise?.sxAscensionV2||
   /(?:SpartanX cycle:|Imported from (?:AscensionX|5\/3\/1|SpartanX Tools))/i.test(exercise?.notes||''));
 }
 
@@ -3179,6 +3184,7 @@ document.addEventListener('keydown',event=>{
  if(event.key==='Escape'&&!$('prOverlay').classList.contains('hidden'))
   $('prOverlay').classList.add('hidden');
 });
+window.sxAscensionV2LiveReview=function(i){if(!sessionActive||editingSessionId!==null)return;const ex=work[i],api=window.SXAscensionV2Lifecycle;if(!ex?.sxAscensionV2||!api)return;const d=api.liveReview(ex,api.read(localStorage)?.plan.profile.step||2.5);if(d.decision!=='reduce'){alert(d.reason||'Complete the top set and record RPE first.');return;}if(!confirm(d.reason+'\n\nApply '+d.changes.map(z=>z.kg+' kg').join(', ')+' to unchecked back-down sets?'))return;for(const z of ex.sets){const change=d.changes.find(x=>x.id===z.sxAscensionV2SetId);if(change&&!z.done)z.weight=String(change.kg);}renderWork();saveDraft();};
 function renderWork(){
  // An indexed snapshot keeps per-set comparisons quick even with long workout histories.
  const rpeHistory=window.SpartanXRpeTrend?.historyIndex(db.sessions||[]);
@@ -3208,7 +3214,7 @@ function renderWork(){
    const normalNumber=e.sets.slice(0,j+1).filter(x=>!['Warm-up','Backdown Set','Failure Set'].includes(x.type)).length;
    return '<div class="set-entry '+(s.done?'is-complete':'')+'"><div class="set-row"><span class="set-type-wrap"><button type="button" class="set-number set-type-picker set-type-trigger" aria-label="Choose set type" onclick="openSetTypeSheet('+i+','+j+')">'+(marker||normalNumber)+'</button><span class="set-type-display">'+(marker||normalNumber)+'</span></span><span class="previous-value">'+esc(previousText)+'</span><button type="button" class="set-number-pad-trigger" aria-label="Edit weight" onclick="openNumberPad('+i+','+j+',0)">'+esc(weightValueFromKg(+s.weight||0)||'—')+'</button><button type="button" class="set-number-pad-trigger" aria-label="Edit reps" onclick="openNumberPad('+i+','+j+',1)">'+esc(s.reps||'—')+'</button><button type="button" class="set-rpe-trigger'+trendAttrs+' onclick="openRpeSheet('+i+','+j+')"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 17a9 9 0 1 1 15.6 0"/><path d="M12 14.5 16.5 8"/><circle cx="12" cy="14.5" r="1.5"/></svg><span>'+(s.rpe!==''&&s.rpe!=null?esc(s.rpe):'')+'</span></button><input class="done" type="checkbox" '+(s.done?'checked':'')+' aria-label="Complete set" onchange="completeSet('+i+','+j+',this.checked)"></div></div>';
   }).join('');
-  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><button type="button" class="exercise-title sx-exercise-stats-link" data-live-exercise-link="'+esc(e.name)+'" aria-label="View statistics for '+esc(e.name)+'">'+esc(e.name)+'</button><span class="sx-live-pr-slot" data-sx-live-pr-slot>'+sxLiveAchievementButton(i,e.name,newRecords)+'</span><button type="button" class="exercise-menu secondary small sx-exercise-menu-trigger" onclick="openExerciseActions('+i+')" aria-label="Options for '+esc(e.name)+'" aria-haspopup="dialog">⋮</button></div>'+supersetBannerFor(i)+'<textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-duration-setting"><label for="restDuration-'+i+'">BASE REST INTERVAL'+(ascensionRestPlan(i,e.sets.findIndex(s=>isNumberedWorkoutSet(s))).seconds>displayRest?' · MAIN SETS +1:00':'')+'</label><select id="restDuration-'+i+'" aria-label="Rest interval for '+esc(e.name)+'" onchange="setRest('+i+',this.value)">'+Array.from(new Set([...Array.from({length:20},(_,k)=>(k+1)*15),...Array.from({length:14},(_,k)=>330+k*30),displayRest])).sort((a,b)=>a-b).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div><button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
+  return '<article class="exercise-card"><div class="exercise-title-row"><div class="exercise-avatar">🏋️</div><button type="button" class="exercise-title sx-exercise-stats-link" data-live-exercise-link="'+esc(e.name)+'" aria-label="View statistics for '+esc(e.name)+'">'+esc(e.name)+'</button><span class="sx-live-pr-slot" data-sx-live-pr-slot>'+sxLiveAchievementButton(i,e.name,newRecords)+'</span><button type="button" class="exercise-menu secondary small sx-exercise-menu-trigger" onclick="openExerciseActions('+i+')" aria-label="Options for '+esc(e.name)+'" aria-haspopup="dialog">⋮</button></div>'+supersetBannerFor(i)+'<textarea class="exercise-notes" placeholder="Add notes here..." oninput="setNotes('+i+',this.value)">'+esc(e.notes||'')+'</textarea><div class="rest-duration-setting"><label for="restDuration-'+i+'">BASE REST INTERVAL'+(ascensionRestPlan(i,e.sets.findIndex(s=>isNumberedWorkoutSet(s))).seconds>displayRest?' · MAIN SETS +1:00':'')+'</label><select id="restDuration-'+i+'" aria-label="Rest interval for '+esc(e.name)+'" onchange="setRest('+i+',this.value)">'+Array.from(new Set([...Array.from({length:20},(_,k)=>(k+1)*15),...Array.from({length:14},(_,k)=>330+k*30),displayRest])).sort((a,b)=>a-b).map(v=>'<option value="'+v+'" '+(displayRest===v?'selected':'')+'>'+fmtTime(v)+'</option>').join('')+'</select></div><div class="set-table"><div class="set-head"><span>SET</span><span>PREV</span><span>KG</span><span>REPS</span><span>RPE</span><span>✓</span></div>'+rows+'</div>'+(e.sxAscensionV2&&e.sets.some(z=>z.sxV2Target?.role==='top')?'<button type="button" class="secondary" style="width:100%;margin:8px 0" onclick="sxAscensionV2LiveReview('+i+')">REVIEW REMAINING LOADS</button>':'')+'<button class="add-set-button secondary" onclick="addSet('+i+')">＋ Add Set</button></article>';
  }).join('');
  updateLiveStats();
 }
@@ -3269,7 +3275,7 @@ window.removeEx=i=>{
  if(!Number.isInteger(i)||!work[i])return false;
  const item=work[i];
  const logged=window.SpartanXExerciseReplacement?.hasRecordedData(item);
- const tracked=!!(item.ascensionLink||item.bodybuildingLink||item.sxPowerbuildingSupport||item.sxStrengthSizeCompanion);
+ const tracked=!!(item.ascensionLink||item.bodybuildingLink||item.sxPowerbuildingSupport||item.sxStrengthSizeCompanion||item.sxAscensionV2);
  const cycleMain=!!activeCycle&&/(?:SpartanX cycle:|Imported from SpartanX Tools)/i.test(item.notes||'');
  if((logged||tracked||cycleMain)&&!confirm('Remove '+item.name+' from this workout?'+
   (logged?'\\n\\nIts entered and completed sets will be lost.':'')+
@@ -4045,6 +4051,26 @@ window.SpartanXStartAscensionAdaptiveSupportSession=function(payload){
  $('sessionClock').textContent='00:00:00';
  switchScreen('activeWorkout',{instant:true});
  renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
+ return true;
+};
+window.SpartanXStartAscensionV2Session=function(payload){
+ const api=window.SXAscensionV2Lifecycle;let entry=api?.read(localStorage);
+ if(!entry||entry.id!==payload?.programmeId)return false;
+ if(sessionActive||editingSessionId!==null){alert('Finish or discard the current workout before loading AscensionX 2.0.');return false;}
+ // Do not silently run competing strength programmes.
+ if(window.SXAscensionAdaptive?.activeCycle?.()){alert('A legacy AscensionX programme is present. Keep it intact; use the experimental preview until you are ready to switch.');return false;}
+ const progress=api.progress(entry,db.sessions||[]),slot=progress.next;
+ if(!slot||slot.id!==payload.slotId)return false;
+ if(!confirm('Load AscensionX 2.0 · Week '+slot.week+' · '+slot.day+'? All sets start unchecked. Review the suggested targets before training.'))return false;
+ try{entry=api.prepare(localStorage,entry,slot,db.sessions||[],payload.readiness==='good'?'good':payload.readiness==='poor'?'poor':'unknown');}catch(e){alert(e.message);return false;}
+ work=api.makeWorkout(entry,slot,db.sessions||[]);
+ if(!work.length)return false;
+ libraryMode='workout';activeCycle=null;
+ window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;
+ clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;
+ const title='AscensionX 2.0 - '+slot.day+' - Week '+slot.week;
+ $('activeWorkoutName').textContent=title;$('workoutName').value=title;$('sessionClock').textContent='00:00:00';
+ switchScreen('activeWorkout',{instant:true});renderWork();beginSessionClock();updateMinimizedSession();saveDraft();
  return true;
 };
 function startSession(){libraryMode='workout';if(sessionActive){switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();return;}window.sxManualWorkoutDate=null;window.sxMissedWorkoutMode=false;work=[];clearInterval(sessionTicker);sessionTicker=null;sessionStarted=null;sessionPausedAt=null;sessionActive=true;$('sessionClock').textContent='00:00:00';const enteredName=$('workoutName').value.trim();$('activeWorkoutName').textContent=enteredName||defaultWorkoutName();switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
@@ -5661,6 +5687,15 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
 <script src="./assets/bodybuilding/programme-builder.js?v=367"></script>
 <script src="./assets/ranks/prestige-showcase.js?v=383"></script>
+<script src="./assets/ascension/programme-v2-lifecycle.js?v=3"></script>
+<script id="sx-ascension-v2-handoff">
+(function(){
+ function refresh(){try{const api=window.SXAscensionV2Lifecycle,e=api.read(localStorage);if(!e)return;const p=api.progress(e,api.sessions(localStorage));document.getElementById('sxAscensionV2Status').textContent=e.plan.profile.weeks+' weeks · '+p.completed+' / '+p.total+' sessions completed';document.getElementById('sxAscensionV2Next').textContent=p.next?'Week '+p.next.week+' · '+p.next.day:'Programme complete';document.getElementById('sxAscensionV2Open').textContent='CONTINUE ›';}catch(_){}}
+ const button=document.getElementById('sxAscensionV2Open');if(button)button.onclick=()=>{location.href='./AscensionX/programme-preview.html';};
+ window.addEventListener('load',refresh,{once:true});window.addEventListener('focus',refresh);window.addEventListener('spartx:ascensionCycleUpdated',refresh);
+})();
+window.addEventListener('load',()=>{try{const key=window.SXAscensionV2Lifecycle.HANDOFF,raw=sessionStorage.getItem(key);if(!raw)return;sessionStorage.removeItem(key);const item=JSON.parse(raw);if(!window.SpartanXStartAscensionV2Session(item))alert('Experimental programme session not loaded. Your workout history and legacy programme are unchanged.');}catch(e){alert('Experimental programme session not loaded.');}},{once:true});
+</script>
 <script id="sx-ascension-native-workout-handoff">
 (function(){
  'use strict';

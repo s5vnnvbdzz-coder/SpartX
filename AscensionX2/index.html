@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c0f">
+<meta name="description" content="AscensionX 2.0 standalone development lab for PR-first powerlifting programmes.">
+<title>AscensionX 2.0 · Powerlifting Lab</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="stylesheet" href="./style.css?v=1">
+<script defer src="./engine.js?v=1"></script>
+<script defer src="./app.js?v=1"></script>
+</head>
+<body>
+<div class="shell">
+<header class="masthead">
+ <div class="wordmark"><span class="emblem" aria-hidden="true">AX</span><div><span class="eyebrow">POWERLIFTING DEVELOPMENT LAB</span><h1>ASCENSION<span>X</span> <b>2.0</b></h1></div></div>
+ <span class="devtag">STANDALONE · DEV 0.1</span>
+</header>
+<div class="intro">
+ <div><p class="eyebrow">INDEPENDENT WORKSPACE</p><h2>Build towards the next PR.</h2><p>Create and test periodised 4-, 8- or 12-week programmes, review performance and track proposed load adjustments.</p></div>
+ <div class="safety"><strong>Separate from SpartanX</strong><small>This lab uses its own saved data. It cannot alter your current six-week AscensionX cycle, workouts or training maxes.</small></div>
+</div>
+<nav class="tabs" aria-label="AscensionX 2.0 sections">
+ <button type="button" data-tab="builder" class="active">CREATE CYCLE</button>
+ <button type="button" data-tab="programme">PROGRAMME</button>
+ <button type="button" data-tab="review">INTELLIGENCE</button>
+</nav>
+<main>
+<section id="builder" class="panel-section">
+ <form id="builderForm">
+ <div class="card">
+ <div class="sectionhead"><div><p class="eyebrow">01 · CYCLE STRUCTURE</p><h3>Choose your development block</h3></div></div>
+ <div class="grid three">
+  <label>Length <select name="weeks" required><option value="4">4 weeks · focused</option><option value="8">8 weeks · balanced</option><option value="12" selected>12 weeks · full peak</option></select></label>
+  <label>Training days <select name="days" required><option value="3">3 days</option><option value="4" selected>4 days</option><option value="5">5 days</option></select></label>
+  <label>Session duration <select name="minutes"><option value="75">75 minutes</option><option value="90">90 minutes</option><option value="105" selected>105 minutes</option><option value="120">120 minutes</option><option value="150">150 minutes</option></select></label>
+ </div>
+ <p class="hint">Primary days: squat, bench, deadlift. A 4-day cycle adds secondary squat + bench; a 5-day cycle adds upper assistance.</p>
+ </div>
+ <div class="card">
+ <p class="eyebrow">02 · RECORDS AND TARGETS</p><h3>Start from real strength, not guessed training maxes</h3>
+ <div class="grid three">
+  <div class="liftInput"><strong>Back Squat</strong><label>Current 1RM (kg)<input name="squatMax" type="number" min="30" max="500" step="2.5" value="185" required></label><label>Target PR (kg)<input name="squatGoal" type="number" min="30" max="550" step="2.5" value="190" required></label></div>
+  <div class="liftInput"><strong>Bench Press</strong><label>Current 1RM (kg)<input name="benchMax" type="number" min="30" max="500" step="2.5" value="160" required></label><label>Target PR (kg)<input name="benchGoal" type="number" min="30" max="550" step="2.5" value="165" required></label></div>
+  <div class="liftInput"><strong>Deadlift</strong><label>Current 1RM (kg)<input name="deadliftMax" type="number" min="30" max="500" step="2.5" value="215" required></label><label>Target PR (kg)<input name="deadliftGoal" type="number" min="30" max="550" step="2.5" value="220" required></label></div>
+ </div>
+ <p class="hint">These starting values are editable examples. This app does not read your existing SpartanX records.</p>
+ </div>
+ <div class="card">
+ <p class="eyebrow">03 · ATHLETE READINESS</p><h3>Recovery and equipment</h3>
+ <div class="grid four">
+  <label>Average sleep (hours)<input name="sleep" type="number" min="3" max="12" step="0.5" value="7" required></label>
+  <label>Recovery <select name="recovery"><option value="good">Good</option><option value="normal" selected>Normal</option><option value="limited">Limited</option></select></label>
+  <label>Equipment <select name="equipment"><option value="full" selected>Full gym</option><option value="basic">Basic gym</option></select></label>
+  <label>Load increment <select name="step"><option value="1.25">1.25 kg</option><option value="2.5" selected>2.5 kg</option><option value="5">5 kg</option></select></label>
+ </div>
+ </div>
+ <div class="card">
+ <p class="eyebrow">04 · TECHNIQUE PRIORITIES</p><h3>Identify where the lifts break down</h3>
+ <p class="hint">Select any that apply. Sticking points guide technique and exercise selection, but do not diagnose a weak muscle.</p>
+ <div class="grid three" id="weakChoices">
+  <fieldset><legend>Back Squat</legend>
+   <label class="check"><input type="checkbox" name="weakSquat" value="out-of-hole"> Out of the hole</label>
+   <label class="check"><input type="checkbox" name="weakSquat" value="hips-first"> Hips rise before chest</label>
+   <label class="check"><input type="checkbox" name="weakSquat" value="torso"> Lose torso position</label>
+   <label class="check"><input type="checkbox" name="weakSquat" value="knees"> Knees cave</label>
+   <label class="check"><input type="checkbox" name="weakSquat" value="depth"> Depth consistency</label>
+  </fieldset>
+  <fieldset><legend>Bench Press</legend>
+   <label class="check"><input type="checkbox" name="weakBench" value="off-chest"> Off the chest</label>
+   <label class="check"><input type="checkbox" name="weakBench" value="midpoint"> Mid-range</label>
+   <label class="check"><input type="checkbox" name="weakBench" value="lockout"> Lockout</label>
+   <label class="check"><input type="checkbox" name="weakBench" value="bar-path"> Bar path</label>
+   <label class="check"><input type="checkbox" name="weakBench" value="tightness"> Tightness</label>
+  </fieldset>
+  <fieldset><legend>Deadlift</legend>
+   <label class="check"><input type="checkbox" name="weakDeadlift" value="off-floor"> Breaking the floor</label>
+   <label class="check"><input type="checkbox" name="weakDeadlift" value="knees"> Around the knees</label>
+   <label class="check"><input type="checkbox" name="weakDeadlift" value="lockout"> Lockout</label>
+   <label class="check"><input type="checkbox" name="weakDeadlift" value="back-position"> Back position</label>
+   <label class="check"><input type="checkbox" name="weakDeadlift" value="tension"> Starting tension</label>
+  </fieldset>
+ </div>
+ </div>
+ <div class="actions"><button class="primary" type="submit">GENERATE PR-FOCUSED PROGRAMME</button><p class="hint">Generation saves a separate 2.0 cycle to this browser. Any previous 2.0 cycle is archived. Classic AscensionX is unaffected.</p></div>
+ </form>
+</section>
+<section id="programme" class="panel-section" hidden>
+ <div id="programmeView" aria-live="polite"></div>
+</section>
+<section id="review" class="panel-section" hidden>
+ <div id="reviewView" aria-live="polite"></div>
+</section>
+</main>
+<div class="footer-actions"><button type="button" id="exportData">EXPORT 2.0 BACKUP</button><label class="filebtn">IMPORT 2.0 BACKUP<input type="file" id="importData" accept=".json,application/json" hidden></label><button type="button" id="resetData" class="danger">RESET 2.0 ONLY</button></div>
+<footer><span>ASCENSIONX 2.0 · DEVELOPMENT BUILD</span><span>No automatic changes to SpartanX or live AscensionX.</span></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body></html>

@@ -322,6 +322,7 @@
 
  // Squat strength is the priority: a knee-dominant compound immediately after
  // the barbell squat, followed by rectus-femoris, posterior-chain and core work.
+ // If hanging aggravates a shoulder, substitute Cable Crunch without touching the main lift.
  // During Weeks 4–5 sets/intensity taper; Week 6 has no accessories.
  function squatAdaptivePlan(week,storage=global.localStorage){
   if(week>=6)return [];
@@ -329,7 +330,7 @@
    {name:preferredQuadAccessory(storage),sets:3,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
    {name:'Leg Extension',sets:3,min:12,max:15,targetRpe:week<=3?8:7},
    {name:'45° Back Extension',sets:3,min:10,max:12,targetRpe:7},
-   {name:'Pallof Press',sets:3,min:10,max:15,targetRpe:7}
+   {name:'Hanging Knee Raise',sets:3,min:10,max:15,targetRpe:7}
   ];
   return prescriptions.map(spec=>{
    const base=itemFor(spec.name);
@@ -347,7 +348,8 @@
     weeklyExposure:weekly,remainingSlots:2,existingSets:item.sets,
     afterHeavyLift:item.name==='45° Back Extension'
    });
-   return {...item,...loading,reason:loading.reason+' '+
+   return {...item,...loading,reason:(item.name==='Hanging Knee Raise'?
+    'Controlled trunk flexion, raise the pelvis without swinging. If hanging irritates a shoulder, swap for Cable Crunch. ':'')+loading.reason+' '+
     (base.cue||'Contribute useful support volume without another heavy barbell squat.')+
     (advisory?' Spartan Intelligence: '+advisory.reason+
      ' Current cycle set allocation is a reviewable coach prescription.':'')};
@@ -850,9 +852,17 @@
     }else for(const ex of slot.exercises){
      const line=document.createElement('div');
      line.className='sx-adaptive-preview-exercise';
-     const reps=ex.min===ex.max?String(ex.min):ex.min+'–'+ex.max;
-     const target=ex.targetRpe??(10-ex.rir);
-     line.textContent=formatPrescription(ex);
+     const headline=document.createElement('strong');
+     headline.className='sx-adaptive-exercise-name';
+     headline.textContent=ex.name;
+     const prescription=document.createElement('span');
+     prescription.className='sx-adaptive-exercise-dose';
+     prescription.textContent=formatPrescription(ex).split(' · ').slice(1).join(' · ');
+     const context=document.createElement('small');
+     context.className='sx-adaptive-exercise-why';
+     // Show exercise rationale without inventing readiness scores.
+     context.textContent=String(ex.reason||'Assistance selected for your strength priority.');
+     line.append(headline,prescription,context);
      details.appendChild(line);
     }
     box.appendChild(details);

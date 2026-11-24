@@ -159,6 +159,41 @@ const fresh='2026-11-10T11:00:00.000Z';
 localStorage.setItem('ascensionx_strength_v1',JSON.stringify({cycle:{created:fresh,exercises:['Bench Press'],weeks:{'Bench Press':1}},logs:[]}));
 assert.equal(api.enabled(fresh),false,'New cycle must opt in independently');
 
+// An existing four-day AscensionX cycle, already on Week 4, must use the
+// updated support prescription WITHOUT creation or cycle reset.
+const savedClassic=JSON.parse(cycle(['Back Squat','Bench Press','Deadlift'],4));
+savedClassic.profile={max:{'Back Squat':185,'Bench Press':160,'Deadlift':215},rounding:2.5,tmPct:95};
+savedClassic.cycle.trainingMaxes={'Bench Press':150};
+const oldClassicJson=JSON.stringify(savedClassic);
+const oldHistoryJson=JSON.stringify({sessions:[{date:'2026-11-15T12:00:00Z',
+ exercises:[{name:'Leg Press',sets:[
+ {weight:'140',reps:'10',rpe:'7',done:true,type:'Working Set'},
+ {weight:'140',reps:'10',rpe:'7',done:true,type:'Working Set'}]}]}]});
+const existingLive=boot({
+ 'ascensionx_strength_v1':oldClassicJson,
+ 'spartx_db':oldHistoryJson,
+ 'sx_ascension_adaptive_v1':JSON.stringify({[id]:{enabled:true,focus:'strength',days:4}})
+});
+const activeSupport=existingLive.api.schedule().slots[3];
+assert.equal(activeSupport.title,'Upper Assistance - Week 4');
+assert.equal(activeSupport.exercises[0].name,'Bench Press');
+assert.equal(activeSupport.exercises[0].sets,3);
+assert.equal(activeSupport.exercises[0].suggestedKg,90,
+ 'Upper assistance bench is derived conservatively from its existing 150 kg TM');
+assert.ok(existingLive.api.formatPrescription(activeSupport.exercises[0]).includes('90 kg × 8 reps'),
+ 'Live cycle exposes the prescribed load and reps');
+assert.equal(existingLive.api.plan('Back Squat',4)[0].name,'Leg Press',
+ 'Active cycle uses logged machine history to select a familiar quad support exercise');
+assert.equal(existingLive.localStorage.getItem('ascensionx_strength_v1'),oldClassicJson,
+ 'Replanning support never resets a started main-lift cycle');
+assert.equal(existingLive.localStorage.getItem('spartx_db'),oldHistoryJson,
+ 'Replanning support never edits completed workout records');
+const liveCycleHtml=fs.readFileSync(path.join(__dirname,'../../AscensionX/index.html'),'utf8');
+assert.ok(liveCycleHtml.includes('api.formatPrescription?.(ex)')&&
+ liveCycleHtml.includes('adaptive.formatPrescription?.(ex)')&&
+ liveCycleHtml.includes('SXAscensionAdaptive?.formatPrescription?.(ex)'),
+ 'View Cycle, six-week roadmap, and Continue show the same live support prescription');
+
 // Build 310: previously saved manual Powerbuilding preferences must NOT
 // silently re-enable the retired RDL / paused-bench accessory programmes.
 const oldPrefs={ [id]:{enabled:true,powerbuilding:true,trainingDays:4,volume:'balanced'} };
@@ -425,7 +460,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=415'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=416'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -435,7 +470,7 @@ assert.ok(!ascHtml.includes('<div id="sxCycleManageLiveSnapshot"')&&
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v124')&&embeddedSw.includes('adaptive-programming.js?v=415'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v125')&&embeddedSw.includes('adaptive-programming.js?v=416'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 
@@ -551,7 +586,7 @@ fatigueCase.localStorage.setItem('spartx_db',stress(2));
 assert.equal(fatigueCase.api.schedule().slots[3].role,'balanced');
 const adaptiveSource=fs.readFileSync(path.join(__dirname,'adaptive-programming.js'),'utf8');
 assert.ok(adaptiveSource.includes("slot.kind==='support'?slot.title:slot.day+' · '+slot.title"));
-assert.ok(adaptiveSource.includes("line.textContent=ex.name+' '+ex.sets+' × '+reps+' - RPE '+target"));
+assert.ok(adaptiveSource.includes("line.textContent=formatPrescription(ex)"));
 assert.ok(ascHtml.includes("title.textContent=sessionName+' - Day '+(index+1)+' Week '+slot.week"));
 assert.ok(ascHtml.includes('function nextAscensionSupportSlot(){'));
 

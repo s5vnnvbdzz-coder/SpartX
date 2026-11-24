@@ -1,0 +1,54 @@
+name: AscensionX 2.0 standalone development checks
+on:
+  pull_request:
+    paths:
+      - 'AscensionX2/**'
+      - 'tests/ascensionx2-standalone.*'
+      - '.github/workflows/ascensionx2-standalone.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'AscensionX2/**'
+      - 'tests/ascensionx2-standalone.*'
+      - '.github/workflows/ascensionx2-standalone.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check AscensionX2/engine.js
+          node --check AscensionX2/app.js
+          node --check AscensionX2/sw.js
+          node --check tests/ascensionx2-standalone.test.js
+      - name: Validate PR progression, fatigue controls and independent storage
+        run: node tests/ascensionx2-standalone.test.js
+  mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium and WebKit
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Run standalone create/resume and isolation checks
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/ascensionx2-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/AscensionX2/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node tests/ascensionx2-standalone.browser.cjs

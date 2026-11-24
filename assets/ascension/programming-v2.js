@@ -49,6 +49,12 @@ function scheme(w,weeks,phase,beginner){
  return [.78+(w-1)*.025, w===3?3:4,.73+(w-1)*.025,w===1?5:4,3,7.5];
 }
 function generate(input,volume){
+ if(volume?.classify&&volume?.countExposure){
+  const original=volume;
+  // Shared v0.2 catalogue does not yet recognise "Paused Bench Press".
+  // Use the known equivalent for muscle exposure only, not as an exercise replacement.
+  volume={...original,classify:name=>original.classify(name==="Paused Bench Press"?"Bench Press":name),countExposure:days=>original.countExposure(days.map(d=>({...d,exercises:d.exercises.map(e=>({...e,name:e.name==="Paused Bench Press"?"Bench Press":e.name}))})))};
+ }
  const p=normalize(input),beginner=p.experience==="beginner",risk=(p.sleep<7?1:0)+(p.sleep<6?1:0)+(p.job==="high"?2:p.job==="moderate"?1:0)+(p.nutrition==="deficit"?1:0)+(p.activity==="high"?2:p.activity==="moderate"?1:0);
  const count=p.availability.length>=4&&!beginner&&risk<4&&p.minutes>=60?4:3, days=schedule(p,count), warnings=[], reasons=[count+" sessions selected from "+p.availability.length+" available days; availability is not a training target.",risk>=2?"Conservative initial volume because of reported recovery demands.":"Normal initial workload; monitor actual response.",beginner?"Simplified practice and conservative loading.":"Primary and secondary lift exposures with progressive loading.","Bodyweight, age and height are recorded for context, not used as arbitrary strength multipliers.","Exact percentages, dose thresholds and phase boundaries are coaching heuristics, not validated individual optima."];
  const dayNums=days.map(d=>DAYS.indexOf(d));

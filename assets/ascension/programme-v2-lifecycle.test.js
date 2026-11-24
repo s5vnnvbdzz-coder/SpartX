@@ -4,10 +4,12 @@ const checks=function checks(api,v,l,base){
  let n=0;function check(a,msg){n++;if(!a)throw Error(msg);}
  const plan=api.generate(base,v),mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,x)=>mem.set(k,x)};
  storage.setItem("ascensionx_strength_v1","legacy-sentinel");storage.setItem("spartx_db",'{"sessions":[]}');
+ check(plan.weeks[0].exposure.Chest.direct===13,"paused bench volume included");
  const saved=l.save(storage,plan,"test"),entry=l.read(storage);check(entry.id==="test","save/read");check(storage.getItem("ascensionx_strength_v1")==="legacy-sentinel","legacy untouched");check(storage.getItem("spartx_db")==='{"sessions":[]}',"history untouched");
  const first=l.progress(entry,[]).next,work=l.makeWorkout(entry,first,[]);
  check(work.every(e=>e.sets.every(s=>!s.done&&s.rpe==="")),"unchecked");
  const record={exercises:work.map(e=>({...e,sets:e.sets.filter(s=>s.type!=="Warm-up").map(s=>({...s,weight:s.weight||"40",rpe:8,done:true}))}))};
+ const zero=JSON.parse(JSON.stringify(record));zero.exercises[0].sets[0].weight=0;check(l.progress(entry,[zero]).completed===0,"zero loaded set rejected");
  const partial=JSON.parse(JSON.stringify(record));partial.exercises[0].sets.pop();check(l.progress(entry,[partial]).completed===0,"partial");
  check(l.progress(entry,[record]).completed===1,"complete");check(l.progress(entry,[record]).next.id!==first.id,"advance");check(l.progress(entry,[record,record]).completed===1,"idempotent");
  const renamed=JSON.parse(JSON.stringify(record));renamed.exercises[0].name="Other";check(l.progress(entry,[renamed]).completed===0,"replacement not credited");

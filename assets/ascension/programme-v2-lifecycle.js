@@ -21,7 +21,7 @@ function doneSet(ex,id){
 function completion(entry,slot,record){
  return slot.exercises.every((e,i)=>{
   const ex=linkedExercise(record,entry,slot,e,i);
-  return e.sets.every((s,j)=>s.type==="warmup"||!!doneSet(ex,slot.id+"-e"+i+"-s"+j));
+  return e.sets.every((s,j)=>{if(s.type==="warmup")return true;const z=doneSet(ex,slot.id+"-e"+i+"-s"+j);return !!z&&(s.kg==null||Number(z.weight)>0);});
  });
 }
 function progress(entry,history){

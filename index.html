@@ -2190,6 +2190,11 @@ main > #profile.screen > .spartanx-page-footer{
     <div class="sx-programme-footer" style="margin-top:12px"><span class="sx-programme-next">Build your AscensionX programme.</span><button type="button" class="sx-programme-continue" id="sxAscensionEmptySetup">SET UP ›</button></div>
    </section>
   </div>
+  <section class="card sx-programme-card" id="sxAscensionV2Card" aria-label="Experimental AscensionX 2.0">
+   <div class="sx-programme-head"><div><div class="sx-programme-kicker">ASCENSIONX 2.0 · POWERLIFTING</div><h3 class="sx-programme-title">Personalised Programming</h3></div><span class="sx-programme-tag">PREVIEW</span></div>
+   <p class="sx-programme-meta" id="sxAscensionV2Status">Build an 8, 12 or 16-week draft without changing your current cycle.</p>
+   <div class="sx-programme-footer"><span class="sx-programme-next" id="sxAscensionV2Next">Experimental programme</span><button type="button" class="sx-programme-continue" id="sxAscensionV2Open">OPEN ›</button></div>
+  </section>
   <section class="card sx-programme-card sx-programme-upcoming" id="sxBodybuildingProgrammeCard" aria-label="Strength and Bodybuilding training system, in development">
    <div class="sx-programme-head"><div><div class="sx-programme-kicker">STRENGTH · HYPERTROPHY</div><h3 class="sx-programme-title">Strength &amp; Bodybuilding</h3></div><span class="sx-programme-tag">IN DEVELOPMENT</span></div>
    <p class="sx-programme-meta">Dedicated strength and bodybuilding programme engine</p>
@@ -5682,6 +5687,11 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/ranks/prestige-showcase.js?v=383"></script>
 <script src="./assets/ascension/programme-v2-lifecycle.js?v=2"></script>
 <script id="sx-ascension-v2-handoff">
+(function(){
+ function refresh(){try{const api=window.SXAscensionV2Lifecycle,e=api.read(localStorage);if(!e)return;const p=api.progress(e,api.sessions(localStorage));document.getElementById('sxAscensionV2Status').textContent=e.plan.profile.weeks+' weeks · '+p.completed+' / '+p.total+' sessions completed';document.getElementById('sxAscensionV2Next').textContent=p.next?'Week '+p.next.week+' · '+p.next.day:'Programme complete';document.getElementById('sxAscensionV2Open').textContent='CONTINUE ›';}catch(_){}}
+ const button=document.getElementById('sxAscensionV2Open');if(button)button.onclick=()=>{location.href='./AscensionX/programme-preview.html';};
+ window.addEventListener('load',refresh,{once:true});window.addEventListener('focus',refresh);window.addEventListener('spartx:ascensionCycleUpdated',refresh);
+})();
 window.addEventListener('load',()=>{try{const key=window.SXAscensionV2Lifecycle.HANDOFF,raw=sessionStorage.getItem(key);if(!raw)return;sessionStorage.removeItem(key);const item=JSON.parse(raw);if(!window.SpartanXStartAscensionV2Session(item))alert('Experimental programme session not loaded. Your workout history and legacy programme are unchanged.');}catch(e){alert('Experimental programme session not loaded.');}},{once:true});
 </script>
 <script id="sx-ascension-native-workout-handoff">

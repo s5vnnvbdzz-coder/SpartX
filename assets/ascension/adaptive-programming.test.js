@@ -54,7 +54,7 @@ assert.equal(deadlift[0].min,8,'RDLs use eight reps');
 assert.equal(deadlift[0].targetRpe,7,'RDL target RPE is seven');
 assert.equal(deadlift[0].tmPercent,45,'RDLs use 45% of deadlift training max');
 assert.deepEqual(Array.from(api.plan('Back Squat',2).map(e=>e.name)),
- ['Hack Squat','Leg Extension','45° Back Extension','Pallof Press'],
+ ['Hack Squat','Leg Extension','45° Back Extension','Hanging Knee Raise'],
  'Squat support follows requested order');
 assert.ok(api.plan('Bench Press',2).every(e=>e.sets>=3),'Bench support retains recoverable volume');
 assert.ok(deadlift.reduce((n,e)=>n+e.sets,0)<=9,'Deadlift accessories stay within nine sets');
@@ -586,9 +586,25 @@ fatigueCase.localStorage.setItem('spartx_db',stress(2));
 assert.equal(fatigueCase.api.schedule().slots[3].role,'balanced');
 const adaptiveSource=fs.readFileSync(path.join(__dirname,'adaptive-programming.js'),'utf8');
 assert.ok(adaptiveSource.includes("slot.kind==='support'?slot.title:slot.day+' · '+slot.title"));
-assert.ok(adaptiveSource.includes("line.textContent=formatPrescription(ex)"));
+assert.ok(adaptiveSource.includes("prescription.textContent=formatPrescription(ex)"));
+assert.ok(adaptiveSource.includes("context.textContent=String(ex.reason"));
+assert.ok(adaptiveSource.includes("If hanging irritates a shoulder, swap for Cable Crunch"));
+
 assert.ok(ascHtml.includes("title.textContent=sessionName+' - Day '+(index+1)+' Week '+slot.week"));
 assert.ok(ascHtml.includes('function nextAscensionSupportSlot(){'));
+
+// Week 5 squat work must remain fixed in exactly the same exercise order
+// throughout plan, live schedule, and Continue's imported prescription.
+const week5Order=boot({'ascensionx_strength_v1':cycle(['Back Squat','Bench Press','Deadlift'],5)});
+week5Order.api.save({enabled:true,focus:'strength',days:4});
+const correctOrder=['Hack Squat','Leg Extension','45° Back Extension','Hanging Knee Raise'];
+assert.deepEqual(Array.from(week5Order.api.plan('Back Squat',5),ex=>ex.name),correctOrder);
+assert.deepEqual(Array.from(week5Order.api.schedule().slots[0].exercises,ex=>ex.name),correctOrder);
+assert.ok(!week5Order.api.plan('Back Squat',5).some(ex=>ex.name==='Pallof Press'));
+assert.equal(week5Order.api.plan('Back Squat',5).at(-1).sets,3);
+assert.ok(fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8').includes(
+ 'const sequence=api.forImport(d,[],localStorage).map(x=>x.name)'),
+ 'SpartanX should use the live prescription order rather than a hard-coded squat sequence');
 
 // Lock the four-day programme to three working sets in every loading
 // week, without mutating historical workout records.
@@ -605,7 +621,7 @@ for(const focus of ['strength','balanced','hypertrophy']){
    assert.equal(supportPlan.length,0);
   }else{
    assert.deepEqual(Array.from(squatPlan.map(e=>e.name)),
-    ['Hack Squat','Leg Extension','45° Back Extension','Pallof Press']);
+    ['Hack Squat','Leg Extension','45° Back Extension','Hanging Knee Raise']);
    assert.deepEqual(Array.from(deadliftPlan.map(e=>e.name)),
     ['Romanian Deadlift','Lat Pulldown','Seated Leg Curl']);
    for(const [label,exercises] of [['squat',squatPlan],['deadlift',deadliftPlan],['assistance',supportPlan]])

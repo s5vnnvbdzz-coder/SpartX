@@ -30,6 +30,7 @@ async function run(browserType,device){
   text=await page.locator('#programmeView').innerText();
   assert.match(text,/SECONDARY/,'Opening Day 4 reveals secondary squat and bench prescriptions');
   await page.locator('#weekSelector').selectOption('1');
+  await page.locator('.session details').nth(1).locator('summary').click();
   const bench=page.locator('form[data-top-form="Bench Press"]');
   await bench.locator('input[name="kg"]').fill('122.5');
   await bench.locator('input[name="reps"]').fill('5');
@@ -52,6 +53,7 @@ async function run(browserType,device){
   assert.equal(stored.active.logs.length,1);
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>!document.getElementById('programme').hidden);
+  await page.locator('.session details').nth(1).locator('summary').click();
   assert.match(await page.locator('form[data-top-form="Bench Press"]').innerText(),/UPDATE LOG/,'Saved top set survives reload');
   await page.locator('button[data-tab="review"]').click();
   assert.match(await page.locator('#reviewView').innerText(),/122.5 kg × 5/,'Top-set history visible');

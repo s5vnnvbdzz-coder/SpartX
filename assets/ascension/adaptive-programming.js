@@ -72,7 +72,15 @@
   'Leg Press':{name:'Leg Press',sets:4,min:10,max:15,rir:3,rest:120,muscles:'quadriceps',cost:2},
   'Hack Squat':{name:'Hack Squat',sets:3,min:8,max:10,rir:2,rest:150,muscles:'quadriceps and glutes',cost:2,
    cue:'Controlled deep knee bend with a stable torso; use the machine range that feels comfortable.'},
-  'Cable Curl':{name:'Cable Curl',sets:4,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1}
+  'Cable Curl':{name:'Cable Curl',sets:4,min:10,max:15,rir:3,rest:75,muscles:'biceps',cost:1},
+  'Bulgarian Split Squat':{name:'Bulgarian Split Squat',sets:3,min:8,max:10,rir:3,rest:120,
+   muscles:'quadriceps and glutes',cost:2,
+   cue:'Controlled unilateral knee-dominant work for quad and hip development. Each side counts as one set.'},
+  'Cable Crunch':{name:'Cable Crunch',sets:3,min:12,max:15,rir:3,rest:75,
+   muscles:'abdominals',cost:1,cue:'Direct trunk training without hanging from an irritated shoulder.'},
+  'Pause Squat':{name:'Pause Squat',sets:3,min:4,max:4,rir:4,rest:180,
+   muscles:'quadriceps, glutes and trunk',cost:2,
+   cue:'Submaximal, controlled pause squat for technique. Do not treat these as competition top sets.'}
  };
  const itemFor=name=>{
   const found=LOOKUP.find(x=>x.name===name)||ADDITIONAL[name];
@@ -252,7 +260,7 @@
    reason:'Select a comfortable first working weight on this machine. Log actual reps and RPE so SpartanX can prescribe the next session.'};
   // Cable/core work stays athlete-selected; machine weights are only compared
   // against the exact same exercise, not a different machine or squat 1RM.
-  if(!['Hack Squat','Leg Extension','45° Back Extension','Leg Press'].includes(item.name))
+  if(!['Hack Squat','Leg Extension','45° Back Extension','Leg Press','Bulgarian Split Squat','Cable Crunch'].includes(item.name))
    return first;
   const history=latestSquatAccessoryHistory(item.name,storage);
   if(!history)return first;
@@ -326,8 +334,18 @@
  // During Weeks 4–5 sets/intensity taper; Week 6 has no accessories.
  function squatAdaptivePlan(week,storage=global.localStorage){
   if(week>=6)return [];
-  const prescriptions=[
-   {name:preferredQuadAccessory(storage),sets:3,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
+  const quad=preferredQuadAccessory(storage);
+  const selection=global.SXAscensionSelection?.squat?.(week,quad);
+  const prescriptions=selection?.length?selection.map(name=>{
+   const quadMachine=name==='Hack Squat'||name==='Leg Press';
+   const singleLeg=name==='Bulgarian Split Squat';
+   const extension=name==='Leg Extension';
+   return {name,sets:3,min:quadMachine||singleLeg?8:extension||name==='Cable Crunch'?12:10,
+    max:quadMachine||singleLeg?10:extension||name==='Cable Crunch'?15:12,
+    targetRpe:name==='45° Back Extension'||name==='Cable Crunch'?7:
+     week<=3?8:week===4?7:6.5};
+  }):[
+   {name:quad,sets:3,min:8,max:10,targetRpe:week<=3?8:week===4?7:6.5},
    {name:'Leg Extension',sets:3,min:12,max:15,targetRpe:week<=3?8:7},
    {name:'45° Back Extension',sets:3,min:10,max:12,targetRpe:7},
    {name:'Hanging Knee Raise',sets:3,min:10,max:15,targetRpe:7}
@@ -349,7 +367,9 @@
     afterHeavyLift:item.name==='45° Back Extension'
    });
    return {...item,...loading,reason:(item.name==='Hanging Knee Raise'?
-    'Controlled trunk flexion, raise the pelvis without swinging. If hanging irritates a shoulder, swap for Cable Crunch. ':'')+loading.reason+' '+
+    'Controlled trunk flexion, raise the pelvis without swinging. If hanging irritates a shoulder, swap for Cable Crunch. ':item.name==='Bulgarian Split Squat'?
+    'Unilateral quad development without a second heavy barbell squat. ':item.name==='Cable Crunch'?
+    'Trunk strength without requiring a painful overhead hang. ':'')+loading.reason+' '+
     (base.cue||'Contribute useful support volume without another heavy barbell squat.')+
     (advisory?' Spartan Intelligence: '+advisory.reason+
      ' Current cycle set allocation is a reviewable coach prescription.':'')};
@@ -428,7 +448,9 @@
    return [fixedRdl,...tail];
   }
   if(lift==='Back Squat')return squatAdaptivePlan(w,storage);
-  const candidates=pickItems(chosen[lift]||FOCUS_LIFTS.strength[lift])
+  const chosenNames=lift==='Bench Press'&&global.SXAscensionSelection?.bench?
+   global.SXAscensionSelection.bench(focus):(chosen[lift]||FOCUS_LIFTS.strength[lift]);
+  const candidates=pickItems(chosenNames)
    .filter(item=>item.name!=='Romanian Deadlift');
   const cap=16;
   const maxExercises=4;
@@ -522,6 +544,13 @@
   const roles=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
   let names=profile.shortNext&&profile.role==='balanced'?roles.recovery:
    roles[profile.role]||roles.balanced;
+  // The standard SBD four-day cycle has a low-RPE secondary squat/bench
+  // exposure and direct pulling, delts and arm work. This never changes
+  // the three competition-lift prescriptions or already logged sessions.
+  const selected=global.SXAscensionSelection?.fourth?.({
+   days:prefs.days,lifts:c.lifts,role:profile.role,week,fatigue:profile.fatigue
+  });
+  if(selected?.length)names=selected;
   // In five-day programmes Saturday and Sunday are consecutive. Do not
   // prescribe the same accessories on both days. Fill with low-fatigue
   // alternatives, maintaining the last-day two-set recovery cap.
@@ -549,17 +578,25 @@
      Math.max(1,Math.min(3,item.sets,profile.guarded||stressed?2:3));
     const directArms=item.name==='Dumbbell Curl'||item.name==='Triceps Pushdown (Bar)';
     const supportBench=item.name==='Bench Press';
+    const supportSquat=item.name==='Pause Squat';
     const easyRir=week>=4||profile.shortNext||stressed?4:3;
     // Bench assistance is controlled technique/volume work, never a second
     // heavy top-set day. Three working sets in a four-day plan; RPE 7 in
     // normal weeks, easing to RPE 6 when recovery is limited.
-    const rir=directArms||supportBench?easyRir:Math.max(item.rir,easyRir);
+    const rir=supportSquat?week>=4?5:4:
+     directArms||supportBench?easyRir:Math.max(item.rir,easyRir);
     // dose() ran before the final day-specific RPE adjustment. Recalculate
     // the accessory recommendation using the actual prescribed effort.
     const final={...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
      ...(directArms?{min:10,max:15,targetReps:10}:{}),
      reason:item.reason+' Low-fatigue '+profile.role+' assistance, adjusted to selected compounds and recent main-lift effort.'};
-    if(supportBench){
+    if(supportSquat){
+     const tm=currentTrainingMax('Back Squat',storage);
+     const pct=week<=3?.60:week===4?.55:.50;
+     final.suggestedKg=tm===null?null:Math.max(2.5,Math.round(tm*pct/2.5)*2.5);
+     final.targetReps=4;
+     final.reason+=' Low-RPE squat practice only; do not grind reps or alter main-lift progression.';
+    }else if(supportBench){
      const benchKg=secondaryBenchSuggestion(week,storage);
      const previous=Number(item.suggestedKg)>0?Number(item.suggestedKg):null;
      final.suggestedKg=benchKg===null?null:previous===null?benchKg:Math.min(benchKg,previous);
@@ -574,7 +611,13 @@
    });
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
-  const role=supportProfile(c,prefs,index,week,storage).role;
+  const profile=supportProfile(c,prefs,index,week,storage);
+  const selected=global.SXAscensionSelection?.fourth?.({
+   days:prefs.days,lifts:c.lifts,role:profile.role,week,fatigue:profile.fatigue
+  });
+  if(selected?.includes('Pause Squat')&&selected.includes('Bench Press'))
+   return 'Secondary Squat & Bench - Week '+week;
+  const role=profile.role;
   return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance - Week '+week;
  }
  const SUPPORT_CONFIRM_KEY='sx_ascension_support_confirm_v1';

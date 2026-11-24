@@ -41,7 +41,17 @@ const {chromium,webkit,devices}=require('playwright');
    assert(!(await page.evaluate(()=>window.SXModalViewport.isOpen())));
    assert(await page.locator('#trackerNav').isVisible());
    await page.evaluate(()=>{const e=document.querySelector('#setTypeSheet');e.classList.add('is-open');e.setAttribute('aria-hidden','false');window.SXModalViewport.refresh();});
-   assert(await page.evaluate(()=>window.SXModalViewport.isOpen()));
+   const sheet=await page.evaluate(()=>{
+    const el=document.getElementById('setTypeSheet');
+    const ancestors=[];for(let x=el;x&&ancestors.length<8;x=x.parentElement){
+     ancestors.push({id:x.id,tag:x.tagName,hidden:x.hidden,aria:x.getAttribute('aria-hidden'),
+      display:getComputedStyle(x).display,visibility:getComputedStyle(x).visibility});
+    }
+    return {rects:el.getClientRects().length,open:window.SXModalViewport.isOpen(),
+     ancestors,documentLocked:document.documentElement.classList.contains('sx-modal-open')};
+   });
+   console.log('SET TYPE SHEET STATE',device,JSON.stringify(sheet));
+   assert(sheet.open,'Set type sheet must claim modal viewport ownership: '+JSON.stringify(sheet));
    assert(!(await page.locator('#trackerNav').isVisible()));
    await page.evaluate(()=>{const e=document.querySelector('#setTypeSheet');e.classList.remove('is-open');e.setAttribute('aria-hidden','true');window.SXModalViewport.refresh();});
    assert(!(await page.evaluate(()=>window.SXModalViewport.isOpen())));

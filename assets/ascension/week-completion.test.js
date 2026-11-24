@@ -36,6 +36,6 @@ const unchanged=api.read(storage);
 assert.deepEqual(JSON.parse(JSON.stringify(unchanged)),JSON.parse(JSON.stringify(restored)),'Repair is idempotent');
 const sourceMain=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
 const sourceAsc=fs.readFileSync(path.join(__dirname,'../../AscensionX/index.html'),'utf8');
-assert.match(sourceMain,/function queueAscensionWorkoutCompletion[\\s\\S]*?'Backdown Set'/,'SpartanX includes B-labelled backdown sets in completion packet');
-assert.match(sourceAsc,/function findAscSpartanRecoverySessions[\\s\\S]*?'Backdown Set'/,'Recover Previous Workouts accepts saved backdown rows');
+assert.ok(sourceMain.slice(sourceMain.indexOf('function queueAscensionWorkoutCompletion')).includes("'Backdown Set'"),'SpartanX accepts B-labelled backdown sets in linked completion');
+assert.ok(sourceAsc.slice(sourceAsc.indexOf('function findAscSpartanRecoverySessions')).includes("'Backdown Set'"),'Recover Previous Workouts accepts saved backdown rows');
 console.log('AscensionX Week 5 -> 6 completion and B-backdown regression checks passed');

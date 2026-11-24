@@ -105,7 +105,7 @@ test('Adaptive Programming alone enables cycle-scoped accessories',()=>{
  assert.equal(p.trainingDays,5);
  const items=A.forImport({source:'AscensionX',cycleId:p.cycleId,exercise:'Back Squat',week:2},
   ['Leg Press'],win.localStorage);
- assert(items.some(x=>x.name==='Seated Leg Curl'));
+ assert(items.some(x=>x.name==='Hack Squat'));
  assert(items.some(x=>x.name==='Leg Extension'));
  assert(!items.some(x=>x.name==='Leg Press'));
  assert(!items.some(x=>/Back Squat|Romanian Deadlift|Paused Bench Press/i.test(x.name)));

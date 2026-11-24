@@ -147,6 +147,11 @@ window.spartanxOpenEmbeddedAscensionX=(mode='home',lift=null,context='auto')=>{
  if(shadow.querySelector('main')?.classList.contains('reorder-mode'))return false;
  const allowed=new Set(['home','continue','setup','view','manage']);
  const option=allowed.has(mode)?mode:'home';
+ // Quick access, Active Session and other callers share the native
+ // SpartanX Continue confirmation instead of navigating to the old
+ // AscensionX dashboard for this one action.
+ if(option==='continue'&&typeof window.spartanxOpenAscensionWorkoutPopup==='function')
+  return window.spartanxOpenAscensionWorkoutPopup(lift);
  const current=document.querySelector('main > .screen.active')?.id||'tools';
  const from=['tools','home','workout','activeWorkout','profile'].includes(current)?current:'tools';
  const url=new URL('./AscensionX/',window.location.href);

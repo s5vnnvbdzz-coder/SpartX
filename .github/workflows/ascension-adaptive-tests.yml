@@ -5,6 +5,9 @@ on:
       - 'assets/ascension/**'
       - 'assets/bodybuilding/ascension-companion.js'
       - 'AscensionX/index.html'
+      - 'AscensionX/sw.js'
+      - 'AscensionX/beta-preview.html'
+      - 'tests/ascension-classic-restoration.test.js'
       - 'index.html'
       - '.github/workflows/ascension-adaptive-tests.yml'
   push:
@@ -27,9 +30,11 @@ jobs:
           node --check assets/ascension/adaptive-programming.test.js
           node --check assets/ascension/continue-support-sync.js
           node --check assets/ascension/continue-support-sync.test.js
+          node --check tests/ascension-classic-restoration.test.js
       - name: Run adaptive programme regression tests
         run: |
           node assets/ascension/adaptive-programming.test.js
           node assets/ascension/selection-quality.test.js
           node assets/ascension/week-completion.test.js
           node assets/ascension/continue-support-sync.test.js
+          node tests/ascension-classic-restoration.test.js

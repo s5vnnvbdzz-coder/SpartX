@@ -1370,12 +1370,14 @@ function confirmCycleStart(){
   try{window.parent.postMessage({type:'spartx:ascensionCycleCreated',
    cycleId:state.cycle.created},location.origin)}catch(_){}
  }
- closeCycleEditor();
  if(!existing&&window.__sxAscNative){
-  // Return to the shared SpartanX workout list after creating the first cycle.
-  window.location.assign('../?sxReturn=ascension&sxFrom=workout');
+  // Return once. Calling closeCycleEditor() here would start a competing
+  // history.back()/redirect before this navigation, creating a possible
+  // flicker or failed landing after fresh cycle creation on iOS.
+  window.location.replace('../?sxReturn=ascension&sxFrom=workout');
   return;
  }
+ closeCycleEditor();
  if(!existing&&!returnToSpartanX)showScreen('workout');
 }
 function applyCycleSelection(chosen,existing){

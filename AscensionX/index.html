@@ -1867,7 +1867,7 @@ function processAscensionSpartanCompletionQueue(){
      !packet.sets.every(x=>Number.isFinite(Number(x.weight))&&Number(x.weight)>0&&Number.isInteger(Number(x.reps))&&Number(x.reps)>0)){
    processed.add(packet.id);continue;
   }
-  if(state.logs.some(log=>String(log.sourceSessionId||'')===String(packet.sourceSessionId)&&log.cycleId===packet.cycleId&&log.lift===packet.lift)){
+  if(state.logs.some(log=>String(log.sourceSessionId||'')===String(packet.sourceSessionId)&&log.cycleId===packet.cycleId&&log.lift===packet.lift&&log.setsComplete===true)){
    processed.add(packet.id);continue;
   }
   const existing=activeCycleLogs().find(x=>x.lift===packet.lift&&x.week===packet.week);
@@ -1943,7 +1943,7 @@ function findAscSpartanRecoverySessions(){
    const week=link&&link.cycleId===state.cycle.created?Number(link.week):mentioned?Number(mentioned[1]):0;
    if(!Number.isInteger(week)||week<1||week>PLAN.length)continue;
    if(state.logs.some(log=>log.cycleId===state.cycle.created&&log.lift===exercise.name&&
-        (String(log.sourceSessionId||'')===String(session.id)||(log.week===week&&log.setsComplete===true))))continue;
+        ((String(log.sourceSessionId||'')===String(session.id)&&log.setsComplete===true)||(log.week===week&&log.setsComplete===true))))continue;
    const plan=PLAN[week-1],required=plan.deload?3:1+plan.backSets;
    const sets=(Array.isArray(exercise.sets)?exercise.sets:[])
     .filter(set=>['Working Set','Backdown Set','B'].includes(set?.type)&&set.done===true)

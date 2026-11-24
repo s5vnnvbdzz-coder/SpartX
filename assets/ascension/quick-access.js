@@ -208,8 +208,9 @@ function sxAscModalLoad(){
 window.spartanxOpenAscensionWorkoutPopup=sxAscModalOpen;
 
 function readCycle(){
- let state=null;
- try{state=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');}catch(e){return null}
+ // The shared prescription reader repairs stale per-lift week pointers from
+ // qualifying completed logs before the Workout card and Continue can disagree.
+ const state=window.SXAscensionPrescription?.read?.()||null;
  const cycle=state?.cycle;
  if(!cycle||typeof cycle.created!=='string'||!Number.isFinite(Date.parse(cycle.created)))return null;
  const lifts=(Array.isArray(cycle.exercises)?cycle.exercises:LIFTS).filter((lift,i,arr)=>LIFTS.includes(lift)&&arr.indexOf(lift)===i);

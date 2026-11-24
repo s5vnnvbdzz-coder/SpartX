@@ -2320,7 +2320,7 @@ function init(){
   history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  }
  processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=118').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=119').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.
@@ -2333,7 +2333,8 @@ init();
 </script>
 <script src="../assets/science/evidence-engine.js?v=2"></script>
 <script src="../assets/science/volume-intelligence.js?v=2"></script>
-<script src="../assets/ascension/adaptive-programming.js?v=394"></script>
+<script src="../assets/ascension/programming-v2.js?v=408"></script><script src="../assets/ascension/classic-v2-bridge.js?v=408"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=408"></script>
 
 <script id="sx-ascension-first-party-route">
 /* First-party AscensionX programme page — no iframe or duplicate cycle. */

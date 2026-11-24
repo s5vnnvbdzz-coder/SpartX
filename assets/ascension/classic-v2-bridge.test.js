@@ -1,0 +1,33 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');const window={addEventListener(){}};
+for(const f of ['../science/evidence-engine.js','../science/volume-intelligence.js','load-guard.js','workout-prescription.js','programming-v2.js','classic-v2-bridge.js','adaptive-programming.js','../bodybuilding/ascension-companion.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,f),'utf8'),{window});
+function test(api,root){
+ let n=0;const ok=(x,m)=>{n++;if(!x)throw Error(m);};
+ const id="2026-11-01T10:00:00.000Z",lifts=["Back Squat","Bench Press","Deadlift"],maxes={"Back Squat":185,"Bench Press":160,"Deadlift":215};
+ const state={profile:{max:maxes,tmPct:95,rounding:2.5},cycle:{created:id,exercises:lifts,weeks:Object.fromEntries(lifts.map(l=>[l,3])),currentWeek:3},logs:lifts.flatMap(l=>[1,2].map(week=>({cycleId:id,lift:l,week,setsComplete:true,topWeight:l==="Deadlift"&&week===2?160:undefined})))};
+ const map=new Map([["ascensionx_strength_v1",JSON.stringify(state)],["sx_ascension_adaptive_v1",JSON.stringify({[id]:{enabled:true,days:4,focus:"strength"}})],["spartx_db",'{"sessions":[]}']]);
+ const storage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};root.localStorage=storage;
+ const before=map.get("ascensionx_strength_v1"),prefs=map.get("sx_ascension_adaptive_v1"),db=map.get("spartx_db");
+ const p={age:36,bodyweight:92,height:175,experience:"advanced",sleep:6,job:"moderate",nutrition:"maintenance",activity:"low",minutes:120,equipment:"full",weeks:8,availability:["Mon","Tue","Thu","Sat"],maxes};
+ const s=api.snapshot(storage);ok(s.ok&&s.startWeek===3,"start at week 3");
+ const classic=root.SXAscensionAdaptive.plan("Deadlift",3,{},storage),main=s.main.map(x=>x.sets);
+ const draft=api.proposal(p,storage);ok(draft.slots.length===4,"4 days");ok(draft.slots[3].exercises.some(e=>e.name==="Paused Squat"),"secondary squat");
+ ok(draft.slots[2].exercises[0].name==="Romanian Deadlift","RDL first");
+ ok(root.SXAscensionAdaptive.plan("Deadlift",3,{},storage).length===classic.length,"preview not active");
+ api.apply(draft,storage);
+ ok(map.get("ascensionx_strength_v1")===before&&map.get("sx_ascension_adaptive_v1")===prefs&&map.get("spartx_db")===db,"only isolated setting");
+ ok(JSON.stringify(api.snapshot(storage).main.map(x=>x.sets))===JSON.stringify(main),"main and load guard unchanged");
+ ok(root.SXAscensionAdaptive.plan("Deadlift",3,{},storage).every(e=>e.sxV2Bridge),"new adaptive active");
+ ok(root.SXAscensionAdaptive.plan("Deadlift",2,{},storage).every(e=>!e.sxV2Bridge),"previous week unchanged");
+ ok(root.SXAscensionAdaptive.plan("Deadlift",6,{},storage).length===0,"deload");
+ const imported=root.SXAscensionCompanion.forImport({source:"AscensionX",exercise:"Deadlift",cycleId:id,week:3,tm:202.5},[],storage);
+ ok(imported.length===draft.slots[2].exercises.length&&imported.every(e=>!e.ascensionLink&&e.sets.every(z=>!z.done)),"same logger import");
+ const pending=root.SXAscensionAdaptive.pendingSupportDay(null,storage);ok(pending?.week===2&&pending.exercises.every(e=>!e.sxV2Bridge),"pending old fourth day preserved");
+ api.disable(storage);ok(JSON.stringify(root.SXAscensionAdaptive.plan("Deadlift",3,{},storage))===JSON.stringify(classic),"classic restored");
+ storage.setItem("spartx_draft_v1",'{"sessionActive":true}');let blocked=false;try{api.apply(draft,storage)}catch{blocked=true}ok(blocked,"active workout guard");
+ storage.removeItem("spartx_draft_v1");storage.setItem("spartx_ascension_completion_queue_v1",JSON.stringify([{cycleId:id}]));blocked=false;try{api.apply(draft,storage)}catch{blocked=true}ok(blocked,"pending completion guard");
+ storage.removeItem("spartx_ascension_completion_queue_v1");state.cycle.weeks["Back Squat"]=4;storage.setItem("ascensionx_strength_v1",JSON.stringify(state));blocked=false;try{api.apply(draft,storage)}catch{blocked=true}ok(blocked,"stale approval");
+ ok(api.proposal(p,storage).startWeek===4,"mixed weeks starts next shared week");
+ state.cycle.weeks["Deadlift"]=6;storage.setItem("ascensionx_strength_v1",JSON.stringify(state));blocked=false;try{api.proposal(p,storage)}catch{blocked=true}ok(blocked,"no redesign in deload");
+ return n;
+}
+console.log('Classic transition: '+test(window.SXAscensionV2Bridge,window)+' assertions passed');

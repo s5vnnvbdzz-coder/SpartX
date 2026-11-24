@@ -336,6 +336,8 @@
  function buildLiftPlan(lift,week,focus,cycleId,storage=global.localStorage){
   const w=Number(week);
   if(!LIFTS.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
+  const redesigned=global.SXAscensionV2Bridge?.plan(lift,w,cycleId,storage);
+  if(Array.isArray(redesigned))return redesigned;
   const chosen=FOCUS_LIFTS[focus]||FOCUS_LIFTS.strength;
   // A requested, fixed RDL block takes first position after the main Deadlift,
   // in every working week. Week 6 retains AscensionX's no-accessory recovery
@@ -449,6 +451,7 @@
  }
  function supportExercises(c,prefs,index,week,storage=global.localStorage){
   if(week>=6||!c?.lifts||index<c.lifts.length)return [];
+  if(index===3&&prefs.days===4){const redesigned=global.SXAscensionV2Bridge?.plan('Support',week,c.id,storage);if(Array.isArray(redesigned))return redesigned;}
   const profile=supportProfile(c,prefs,index,week,storage);
   const roles=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
   const names=profile.shortNext&&profile.role==='balanced'?roles.recovery:
@@ -477,6 +480,7 @@
    });
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
+  if(index===3&&prefs.days===4&&global.SXAscensionV2Bridge?.plan('Support',week,c.id,storage))return 'Secondary Squat & Bench - Week '+week;
   const role=supportProfile(c,prefs,index,week,storage).role;
   return role.charAt(0).toUpperCase()+role.slice(1)+' Assistance - Week '+week;
  }

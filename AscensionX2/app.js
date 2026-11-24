@@ -35,8 +35,8 @@ function tab(next){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>tab(button.dataset.tab)));
-function getInput(){
- const f=new FormData($('builderForm'));
+function getInput(form=$('builderForm')){
+ const f=new FormData(form);
  return {
   weeks:Number(f.get('weeks')),days:Number(f.get('days')),minutes:Number(f.get('minutes')),
   sleep:Number(f.get('sleep')),recovery:f.get('recovery'),equipment:f.get('equipment'),step:Number(f.get('step')),
@@ -45,9 +45,9 @@ function getInput(){
   weakPoints:{'Back Squat':f.getAll('weakSquat'),'Bench Press':f.getAll('weakBench'),Deadlift:f.getAll('weakDeadlift')}
  };
 }
-function populate(profile){
+function populateInto(form,profile){
  if(!profile)return;
- const e=$('builderForm').elements;
+ const e=form.elements;
  const values={
   weeks:profile.weeks,days:profile.days,minutes:profile.minutes,sleep:profile.sleep,
   recovery:profile.recovery,equipment:profile.equipment,step:profile.step,
@@ -56,9 +56,58 @@ function populate(profile){
  };
  for(const [name,value] of Object.entries(values))if(e[name]&&value!=null)e[name].value=value;
  const names={'Back Squat':'weakSquat','Bench Press':'weakBench','Deadlift':'weakDeadlift'};
- for(const [lift,name] of Object.entries(names))for(const el of document.querySelectorAll('input[name="'+name+'"]'))
+ for(const [lift,name] of Object.entries(names))for(const el of form.querySelectorAll('input[name="'+name+'"]'))
   el.checked=(profile.weakPoints?.[lift]||[]).includes(el.value);
 }
+function populate(profile){populateInto($('builderForm'),profile);}
+
+// Current-cycle edit path: preserve the programme identity and every logged
+// top set. Rebuild unlogged future weeks only, never a completed week.
+const manageDialog=$('manageDialog'),manageForm=$('manageForm');
+let previousPageOverflow='';
+function closeManageDialog(){
+ if(manageDialog.open)manageDialog.close();
+ document.documentElement.style.overflow=previousPageOverflow;
+}
+function openManageDialog(){
+ if(!state.active)return;
+ populateInto(manageForm,state.active.plan.profile);
+ const locked=(state.active.logs||[]).some(x=>Number.isInteger(Number(x.week))&&Number(x.week)>0);
+ for(const name of ['weeks','days'])manageForm.elements[name].disabled=locked;
+ $('manageStructureHint').textContent=locked?
+  'Cycle length and number of days are locked because you have top-set history. Other changes regenerate only weeks after your last logged week.':
+  'All fields are editable before you log any top sets. This updates the existing cycle rather than archiving it.';
+ previousPageOverflow=document.documentElement.style.overflow;
+ manageDialog.showModal();
+ document.documentElement.style.overflow='hidden';
+ manageForm.elements.squatGoal.focus({preventScroll:true});
+}
+$('manageClose').addEventListener('click',closeManageDialog);
+$('manageCancel').addEventListener('click',closeManageDialog);
+manageDialog.addEventListener('close',()=>{document.documentElement.style.overflow=previousPageOverflow;});
+manageDialog.addEventListener('cancel',event=>{event.preventDefault();closeManageDialog();});
+manageDialog.addEventListener('click',event=>{if(event.target===manageDialog)closeManageDialog();});
+manageForm.addEventListener('submit',event=>{
+ event.preventDefault();
+ if(!state.active)return;
+ try{
+  const source=state.active.plan.profile;
+  const input=getInput(manageForm);
+  // Disabled structure inputs are absent from FormData once logging starts.
+  if(manageForm.elements.weeks.disabled)input.weeks=source.weeks;
+  if(manageForm.elements.days.disabled)input.days=source.days;
+  const result=engine.revise(state.active,input);
+  const old=state.active;
+  state.active={...old,plan:result.plan,updated:new Date().toISOString()};
+  if(!persist()){state.active=old;return;}
+  populate(state.active.plan.profile);
+  viewWeek=Math.min(viewWeek,result.plan.profile.weeks);
+  closeManageDialog();renderAll();
+  toast(result.preservedThrough?
+   'Cycle updated · logged Weeks 1–'+result.preservedThrough+' preserved':
+   'Current cycle updated without creating a new one');
+ }catch(error){alert(error?.message||'Unable to save cycle changes.');}
+});
 $('builderForm').addEventListener('submit',event=>{
  event.preventDefault();
  try{
@@ -124,7 +173,7 @@ function renderProgramme(){
   '<div class="stats">'+goals+'</div>'+
   '<p class="hint">'+p.days+' training days · '+p.minutes+' minute target · Created '+new Date(active.created).toLocaleDateString()+' · Separate storage</p>'+
   '<div class="phaseStrip">'+weeks.map(x=>phaseChip(x,viewWeek,active.logs)).join('')+'</div>'+
-  '<div class="actionrow"><button type="button" class="secondary" data-go-review>OPEN INTELLIGENCE</button><button type="button" class="subtle" data-edit-cycle>EDIT PARAMETERS FOR NEXT CYCLE</button></div>'+
+  '<div class="actionrow"><button type="button" class="secondary" data-go-review>OPEN INTELLIGENCE</button><button type="button" class="subtle" data-edit-cycle>EDIT CURRENT CYCLE</button></div>'+
   warnings+'</div>'+
   '<div class="card"><p class="eyebrow">WEEKLY PRESCRIPTION</p><h3>Week '+w.week+' · '+esc(w.phase)+'</h3>'+
   '<label>Select programme week<select id="weekSelector" class="weekselect">'+available+'</select></label>'+
@@ -174,7 +223,7 @@ $('programmeView').addEventListener('submit',e=>{
 $('programmeView').addEventListener('click',e=>{
  if(e.target.closest('[data-go-builder]'))tab('builder');
  if(e.target.closest('[data-go-review]'))tab('review');
- if(e.target.closest('[data-edit-cycle]')){populate(state.active?.plan.profile);tab('builder');toast('Change parameters and generate a new cycle; your active plan remains saved until then.');}
+ if(e.target.closest('[data-edit-cycle]'))openManageDialog();
 });
 $('reviewView').addEventListener('click',e=>{
  const remove=e.target.closest('[data-delete-log]');
@@ -225,5 +274,5 @@ if(state.active?.plan?.profile)populate(state.active.plan.profile);
 renderAll();
 if(state.active)tab('programme');
 if('serviceWorker' in navigator&&location.protocol==='https:')
- navigator.serviceWorker.register('./sw.js?v=1',{scope:'./'}).catch(()=>{});
+ navigator.serviceWorker.register('./sw.js?v=2',{scope:'./'}).catch(()=>{});
 })();

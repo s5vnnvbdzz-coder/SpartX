@@ -5559,8 +5559,9 @@ if(new URLSearchParams(location.search).get('sx_beta_return')==='1'&&typeof swit
  // Only the on-device ACTIVE draft is eligible. Never touch saved workout
  // history, completed imported sessions or manually edited exercise sets.
  if(!sessionActive||editingSessionId!==null)return;
- // Never run old fixed-accessory draft migrations on a v2-redesigned cycle.
- if(window.SXAscensionV2Bridge?.read(localStorage))return;
+ // The 2.0 interface is paused. A stale beta bridge preference must not
+ // prevent current six-week AscensionX support from being restored in order.
+ // Only the active draft may be reconciled; logged sessions stay untouched.
  const helper=window.SpartanXExerciseReplacement;
  const restored=helper?.repairActiveIsoLateralRows(work,window.SXAscensionAdaptive)||0;
  const renamed=helper?.renameActiveAscensionPushdowns(work,window.SXAscensionAdaptive)||0;

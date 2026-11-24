@@ -1,7 +1,7 @@
 /* AscensionX 2.0: isolated, read-only powerlifting preview. No storage or live cycle writes. */
 (function(root){const api=(function factory(){
 "use strict";
-const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], LIFTS=["Back Squat","Bench Press","Deadlift"], VERSION="2.0-preview.2";
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], LIFTS=["Back Squat","Bench Press","Deadlift"], VERSION="2.0-preview.3";
 const CATALOG={
 quad:[["Hack Squat","full"],["Leg Press","full"],["Bulgarian Split Squat","basic"]],
 curl:[["Seated Leg Curl","full"],["Sliding Leg Curl","basic"]],
@@ -23,6 +23,7 @@ function normalize(input){
  for(const [key,values] of Object.entries({experience:["beginner","intermediate","advanced"],job:["low","moderate","high"],nutrition:["deficit","maintenance","surplus"],activity:["low","moderate","high"],equipment:["full","basic"]}))if(!values.includes(p[key]))throw Error("Choose a valid "+key+".");
  if(p.availability.length<3)throw Error("This preview requires at least three available training days.");
  for(const lift of LIFTS)p.maxes[lift]=finite(input.maxes?.[lift],20,500,lift+" recent 1RM in kg");
+ p.weakPoints={squat:["none","bottom","position"].includes(input.weakPoints?.squat)?input.weakPoints.squat:"none",bench:["none","chest","lockout"].includes(input.weakPoints?.bench)?input.weakPoints.bench:"none",deadlift:["none","floor","lockout"].includes(input.weakPoints?.deadlift)?input.weakPoints.deadlift:"none"};
  return p;
 }
 function schedule(p,count){
@@ -53,7 +54,7 @@ function generate(input,volume){
   const original=volume;
   // Shared v0.2 catalogue does not yet recognise "Paused Bench Press".
   // Use the known equivalent for muscle exposure only, not as an exercise replacement.
-  volume={...original,classify:name=>original.classify(name==="Paused Bench Press"?"Bench Press":name),countExposure:days=>original.countExposure(days.map(d=>({...d,exercises:d.exercises.map(e=>({...e,name:e.name==="Paused Bench Press"?"Bench Press":e.name}))})))};
+  volume={...original,classify:name=>original.classify(["Paused Bench Press","Close-Grip Bench Press"].includes(name)?"Bench Press":["Tempo Squat"].includes(name)?"Paused Squat":name),countExposure:days=>original.countExposure(days.map(d=>({...d,exercises:d.exercises.map(e=>({...e,name:["Paused Bench Press","Close-Grip Bench Press"].includes(e.name)?"Bench Press":e.name==="Tempo Squat"?"Paused Squat":e.name}))})))};
  }
  const p=normalize(input),beginner=p.experience==="beginner",risk=(p.sleep<7?1:0)+(p.sleep<6?1:0)+(p.job==="high"?2:p.job==="moderate"?1:0)+(p.nutrition==="deficit"?1:0)+(p.activity==="high"?2:p.activity==="moderate"?1:0);
  const count=p.availability.length>=4&&!beginner&&risk<4&&p.minutes>=60?4:3, days=schedule(p,count), warnings=[], reasons=[count+" sessions selected from "+p.availability.length+" available days; availability is not a training target.",risk>=2?"Conservative initial volume because of reported recovery demands.":"Normal initial workload; monitor actual response.",beginner?"Simplified practice and conservative loading.":"Primary and secondary lift exposures with progressive loading.","Bodyweight, age and height are recorded for context, not used as arbitrary strength multipliers.","Exact percentages, dose thresholds and phase boundaries are coaching heuristics, not validated individual optima."];
@@ -80,7 +81,7 @@ function generate(input,volume){
   add(s,name,"secondary",Array.from({length:n},()=>({type:"work",kg,reps:recovery?3:phase==="Intensification"?3:5,rpe:recovery?6:7})),180,"Additional submaximal technical or volume exposure.");
  }
  function accessory(s,role,reps,why){
-  const option=CATALOG[role].find(x=>p.equipment==="full"||x[1]==="basic");if(!option)return;
+  const option=(role==="quad"&&p.weakPoints.squat==="bottom"&&p.equipment==="full"?["Leg Press","full"]:CATALOG[role].find(x=>p.equipment==="full"||x[1]==="basic"));if(!option)return;
   let n=phase==="Taper"?1:phase==="Deload"?1:phase==="Intensification"?2:beginner||risk>=4?2:3;
   if(role==="hinge")n=Math.min(n,2);
   if(volume?.countExposure&&volume?.recommendWorkingSets&&!recovery&&role!=="hinge"){
@@ -97,12 +98,16 @@ function generate(input,volume){
   sessions.splice(1,sessions.length-2);
  }else{
  main(sessions[0],LIFTS[0]);main(sessions[1],LIFTS[1]);main(sessions[2],LIFTS[2]);
- if(count===4){secondary(sessions[2],LIFTS[1],"Paused Bench Press",.66);secondary(sessions[3],LIFTS[0],"Paused Squat",.675);secondary(sessions[3],LIFTS[1],"Bench Press",.70);}
- else {secondary(sessions[1],LIFTS[0],"Paused Squat",.60);secondary(sessions[2],LIFTS[1],"Paused Bench Press",.65);}
+ const squatVariation=!beginner&&p.weakPoints.squat==="position"&&!recovery?"Tempo Squat":"Paused Squat";
+ const benchVariation=!beginner&&p.weakPoints.bench==="lockout"&&!recovery?"Close-Grip Bench Press":"Paused Bench Press";
+ if(count===4){secondary(sessions[2],LIFTS[1],benchVariation,benchVariation==="Close-Grip Bench Press"?.62:.66);secondary(sessions[3],LIFTS[0],squatVariation,squatVariation==="Tempo Squat"?.60:.675);secondary(sessions[3],LIFTS[1],"Bench Press",.70);}
+ else {secondary(sessions[1],LIFTS[0],squatVariation,.60);secondary(sessions[2],LIFTS[1],benchVariation,.62);}
+ for(const s of sessions)for(const e of s.exercises){if(e.name===squatVariation&&p.weakPoints.squat!=="none")e.reason+=" Selected to practise the reported squat difficulty; not a diagnosis of weak muscles.";if(e.name===benchVariation&&p.weakPoints.bench!=="none")e.reason+=" Selected to practise the reported bench difficulty; verify technique and comfort.";}
+ if(p.weakPoints.deadlift!=="none"&&!recovery&&!beginner) sessions[2].exercises[0].reason+=" Reported "+p.weakPoints.deadlift+" difficulty: review start position, bracing and bar path; do not infer a weak muscle from a sticking point.";
  accessory(sessions[0],"quad",10,"Additional knee-dominant work with lower axial demand.");accessory(sessions[0],"curl",12,"Hamstring coverage.");accessory(sessions[0],"core",12,"Trunk work.");
  accessory(sessions[1],"row",10,"Upper-back support.");accessory(sessions[1],"chest",10,"Supplemental pressing.");accessory(sessions[1],"triceps",12,"Elbow extension support.");accessory(sessions[1],"side",15,"Shoulder coverage.");
  accessory(sessions[2],"pull",10,"Vertical pulling.");accessory(sessions[2],"curl",12,"Knee-flexion work without another demanding hinge.");
- if(!recovery&&risk<=2&&p.experience!=="beginner"&&phase!=="Intensification")accessory(sessions[2],"hinge",8,"Optional controlled hinge; omit if deadlift effort or lower-back recovery is poor.");
+ if(!recovery&&risk<=2&&p.experience!=="beginner"&&phase!=="Intensification")accessory(sessions[2],"hinge",8,p.weakPoints.deadlift==="lockout"?"Controlled hip extension practice for reported lockout difficulty; not a diagnosis.":"Optional controlled hinge; omit if deadlift effort or lower-back recovery is poor.");
  if(count===4){accessory(sessions[3],"row",10,"Upper-back coverage.");accessory(sessions[3],"biceps",12,"Elbow flexion.");accessory(sessions[3],"triceps",12,"Elbow extension.");accessory(sessions[3],"calf",15,"Lower-leg coverage.");}
  }
  function duration(s){return 8+s.exercises.reduce((n,e)=>n+3+((e.role==="secondary"||e.role==="assessment")?6:0)+e.sets.reduce((t,z)=>t+(z.type==="warmup"?2:1+e.restSeconds/60),0),0);}

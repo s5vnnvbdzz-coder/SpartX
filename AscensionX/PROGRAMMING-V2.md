@@ -9,3 +9,7 @@ Evidence: https://pubmed.ncbi.nlm.nih.gov/41843416/ and https://pubmed.ncbi.nlm.
 ## Preview 2
 
 Explicit local saved-programme support, next-session progression derived from original SpartanX saved sets, and a first-party workout handoff. A legacy AscensionX cycle or active workout blocks import. No automatic overwriting of legacy cycles. The next session is complete only when all prescribed working set IDs appear in one saved workout with valid logged reps; partial saves do not advance. Repeated comparable RPE observations inform conservative load suggestions; missing RPE never triggers automatic progression. Three sets are the ordinary accessory starting baseline, with lower doses for high exposure, recovery phases or limited time. These changes require browser, mobile, sync, and regression testing before deployment.
+
+## Preview 3
+
+Optional reported sticking points influence secondary squat and bench selection; deadlift cues and limited hinge support are not a muscle diagnosis. Adaptive volume trials at most one change per session; snapshots preserve the exact approved prescription and completion identifiers. Live back-down review changes only unchecked prescribed sets after explicit confirmation. Completed assessment singles with RPE 7–9 inform bounded estimated baselines; athlete approval and regeneration required. Cross-device programme state is not yet synced; the preview remains branch-only.

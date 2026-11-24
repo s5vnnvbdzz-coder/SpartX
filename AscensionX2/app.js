@@ -92,7 +92,7 @@ manageForm.addEventListener('submit',event=>{
  if(!state.active)return;
  try{
   const source=state.active.plan.profile;
-  const input=getInput(manageForm);
+  const input={...source,...getInput(manageForm)};
   // Disabled structure inputs are absent from FormData once logging starts.
   if(manageForm.elements.weeks.disabled)input.weeks=source.weeks;
   if(manageForm.elements.days.disabled)input.days=source.days;
@@ -148,7 +148,7 @@ function rows(ex,week,profile){
   '<div class="sets">'+sets+'</div><p class="rationale">'+esc(ex.rationale)+'</p>'+record+'</div>';
 }
 function makeSession(s,w,p,index){
- return '<div class="session"><details '+(index===0?'open':'')+'><summary>'+esc(s.name)+' <span class="muted">'+(s.estimatedMinutes?' · ~'+s.estimatedMinutes+' min':'')+'</span></summary>'+
+ return '<div class="session"><details '+(index===0?'open':'')+'><summary>'+(s.day?'<span class="tag secondary">'+esc(s.day)+'</span> ':'')+esc(s.name)+' <span class="muted">'+(s.estimatedMinutes?' · ~'+s.estimatedMinutes+' min':'')+'</span></summary>'+
  s.exercises.map(ex=>rows(ex,w,p)).join('')+'</details></div>';
 }
 function renderProgramme(){
@@ -173,7 +173,7 @@ function renderProgramme(){
   '<div class="stats">'+goals+'</div>'+
   '<p class="hint">'+p.days+' training days · '+p.minutes+' minute target · Created '+new Date(active.created).toLocaleDateString()+' · Separate storage</p>'+
   '<div class="phaseStrip">'+weeks.map(x=>phaseChip(x,viewWeek,active.logs)).join('')+'</div>'+
-  '<div class="actionrow"><button type="button" class="secondary" data-go-review>OPEN INTELLIGENCE</button><button type="button" class="subtle" data-edit-cycle>EDIT CURRENT CYCLE</button></div>'+
+  '<div class="actionrow"><button type="button" class="secondary" data-go-review>OPEN INTELLIGENCE</button><button type="button" class="subtle" data-edit-cycle>EDIT CURRENT CYCLE</button><a href="./assessment.html" class="secondary ax-assessment-link">NEW AX PROGRAMME</a></div>'+
   warnings+'</div>'+
   '<div class="card"><p class="eyebrow">WEEKLY PRESCRIPTION</p><h3>Week '+w.week+' · '+esc(w.phase)+'</h3>'+
   '<label>Select programme week<select id="weekSelector" class="weekselect">'+available+'</select></label>'+
@@ -274,5 +274,5 @@ if(state.active?.plan?.profile)populate(state.active.plan.profile);
 renderAll();
 if(state.active)tab('programme');
 if('serviceWorker' in navigator&&location.protocol==='https:')
- navigator.serviceWorker.register('./sw.js?v=2',{scope:'./'}).catch(()=>{});
+ navigator.serviceWorker.register('./sw.js?v=3',{scope:'./'}).catch(()=>{});
 })();

@@ -646,6 +646,29 @@ body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-foot > *{
 #sxCycleManageLiveSnapshot .sx-cycle-adaptive-roster-day{background:var(--panel)}
 @media(max-width:450px){.sx-cycle-adaptive-roster{padding:12px!important}}
 </style>
+<style id="sx-native-programme-focus-layout">
+/* Integrated AscensionX belongs to SpartanX: no second bottom navigation.
+   Remove the redundant 88px reserved for the old standalone nav. */
+body.sx-ascension-native-page > nav[aria-label="Main navigation"]{display:none!important}
+body.sx-ascension-native-page{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))!important}
+/* Dedicated Workout routes must never flash the underlying AscensionX home.
+   These screens have their own full-page header, content and Back control. */
+html[data-sx-integrated-cycle-route="view"] body > main,
+html[data-sx-integrated-cycle-route="manage"] body > main,
+html[data-sx-integrated-cycle-route="view"] body > header,
+html[data-sx-integrated-cycle-route="manage"] body > header,
+html[data-sx-integrated-cycle-route="view"] body > nav,
+html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
+</style>
+<script>
+/* Set the route before the first paint, not after the dashboard loads. */
+(function(){
+ const q=new URLSearchParams(location.search);
+ if(q.get('sxIntegrated')==='1'&&['view','manage'].includes(q.get('mode'))&&
+  ['workout','activeWorkout'].includes(q.get('from')))
+  document.documentElement.dataset.sxIntegratedCycleRoute=q.get('mode');
+})();
+</script>
 </head>
 <body>
 <header>
@@ -991,8 +1014,11 @@ function openSXWorkoutCycleView(){
  if(!backdrop||!details||!holder||!state.cycle.created)return;
  if(backdrop.classList.contains('open'))return;
  closeCycleEditor();
- showScreen('home',false);
- renderCycle();renderDashboard();
+ // In the dedicated SpartanX Workout route the dashboard is never opened;
+ // its cycleDetails node is reparented directly into the focused cycle view.
+ if(!window.__sxAscNative)showScreen('home',false);
+ renderCycle();
+ if(!window.__sxAscNative)renderDashboard();
  sxCycleViewHomeParent=details.parentNode;
  sxCycleViewHomeSibling=details.nextSibling;
  sxCycleViewCaller=document.activeElement;
@@ -1025,6 +1051,7 @@ function closeSXWorkoutCycleView(save=false){
  const backdrop=$('sxCycleViewBackdrop'),details=$('cycleDetails');
  if(!backdrop?.classList.contains('open'))return;
  if(save)persist(false);
+ delete document.documentElement.dataset.sxIntegratedCycleRoute;
  backdrop.classList.remove('open');
  backdrop.setAttribute('aria-hidden','true');
  if(details&&sxCycleViewHomeParent){
@@ -1084,6 +1111,7 @@ function openCycleEditor(){
 function closeCycleEditor(fromPopState=false){
  const page=$('cycleEditorBackdrop');
  if(!page||!page.classList.contains('open'))return;
+ delete document.documentElement.dataset.sxIntegratedCycleRoute;
  const returnToSpartanX=cycleEditorOpenedFromWorkout,returnScreen=cycleEditorReturnScreen;
  cycleEditorOpenedFromWorkout=false;
  window.SXAscensionAdaptive?.discardDraft?.();
@@ -2350,6 +2378,13 @@ init();
   }else if(mode==='view'&&state.cycle.created){
    openSXWorkoutCycleView();
   }
+  // The initial route class is only for first-paint protection.
+  // In case a cycle was removed between launch and render, restore a usable
+  // page rather than leaving an empty dedicated screen.
+  if(document.documentElement.dataset.sxIntegratedCycleRoute&&
+     !document.body.classList.contains('sx-asc-workout-view')&&
+     !document.body.classList.contains('sx-asc-workout-manage'))
+   delete document.documentElement.dataset.sxIntegratedCycleRoute;
  };
  if(document.readyState==='complete')launch();
  else window.addEventListener('load',launch,{once:true});

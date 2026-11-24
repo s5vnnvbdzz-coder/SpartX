@@ -1740,6 +1740,12 @@ function nextAscensionSupportSlot(){
   slots[0]||null;
 }
 function sxCompactSupportText(ex){
+ if(ex?.sxStrengthSizeCompanion){
+  const first=ex.sets?.[0]||{};
+  const load=first.weight!==''&&first.weight!=null?kg(first.weight):'choose load';
+  return ex.name+' · '+ex.sets.length+' × '+load+' × '+first.reps+
+   ' reps · RPE '+(ex.sxStrengthSizeCompanion.targetRpe||'—');
+ }
  return window.SXAscensionAdaptive?.formatPrescription?.(ex)||ex.name+' '+ex.sets+' sets';
 }
 function renderAscSpartanImportPreview(){
@@ -1764,7 +1770,10 @@ function renderAscSpartanImportPreview(){
    i===0?'Top Set':'Back down '+i;
   return '<div class="asc-spartan-set-line">'+label+' · '+kg(x.weight)+' × '+x.reps+'</div>';
  }).join('');
- const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
+ // Preview the same generated support entries that the SpartanX workout
+ // importer will load, including fixed 45%-TM RDLs and historical weights.
+ const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?
+  (window.SXAscensionCompanion?.forImport?.(prescription,[],localStorage)||[]):[];
  const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT</span>'+adaptive.map(x=>'<div>'+sxCompactSupportText(x)+'</div>').join(''):
   !window.SXAscensionAdaptive?.enabled(prescription.cycleId)?'<div class="tiny" role="status">Adaptive Support is OFF for this active cycle. Enable it in Manage Cycle to include prescribed assistance when you press Continue.</div>':'';
  const guardInfo=prescribed(prescription.exercise,prescription.week);
@@ -2336,6 +2345,7 @@ init();
 <script src="../assets/science/volume-intelligence.js?v=2"></script>
 <script src="../assets/ascension/programming-v2.js?v=408"></script><script src="../assets/ascension/classic-v2-bridge.js?v=414"></script>
 <script src="../assets/ascension/adaptive-programming.js?v=416"></script>
+<script src="../assets/bodybuilding/ascension-companion.js?v=388"></script>
 
 <script id="sx-ascension-first-party-route">
 /* First-party AscensionX programme page — no iframe or duplicate cycle. */

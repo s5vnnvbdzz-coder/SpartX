@@ -73,13 +73,21 @@ check('different focus choices alter live assistance, not only labels',()=>{
  }
  assert.equal(new Set(previews).size,3);
 });
-check('deadlift assistance never injects a second heavy hinge',()=>{
+check('deadlift assistance includes exactly one controlled RDL and no second heavy pull',()=>{
  const {A,storage}=boot();
  for(const focus of ['strength','balanced','hypertrophy']){
   A.save({enabled:true,focus,days:4},storage);
   const ex=A.plan('Deadlift',1,{},storage);
-  assert(ex.length>0);
-  assert(ex.every(x=>!/romanian|rdl|good morning|deadlift|squat/i.test(x.name)),focus+' heavy hinge overlap');
+  assert.deepEqual(Array.from(ex,x=>x.name),
+   ['Romanian Deadlift','Lat Pulldown','Seated Leg Curl']);
+  const rdl=ex[0];
+  assert.equal(rdl.sets,3,focus+' RDL working sets');
+  assert.equal(rdl.min,8,focus+' RDL repetitions');
+  assert.equal(rdl.max,8,focus+' RDL repetitions');
+  assert.equal(rdl.tmPercent,45,focus+' RDL must stay at 45% TM');
+  assert.equal(rdl.targetRpe,7,focus+' RDL target effort');
+  assert(ex.slice(1).every(x=>!/good morning|deadlift|squat/i.test(x.name)),
+   focus+' no extra heavy hinge after prescribed controlled RDL');
  }
 });
 check('four main lifts in five days still use exactly four main sessions and one distinct support',()=>{

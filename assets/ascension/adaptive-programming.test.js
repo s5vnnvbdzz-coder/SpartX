@@ -330,6 +330,20 @@ assert.ok(hostHtml.includes('OPEN SPARTANX INTELLIGENCE</a>')&&
  !hostHtml.includes('OPEN SPARTANX INTELLIGENCE ↗</a>'),
  'SpartanX Intelligence launch no longer displays an arrow');
 
+// Native AscensionX is part of SpartanX, not a second bottom-tab app.
+assert.ok(ascHtml.includes('body.sx-ascension-native-page > nav[aria-label="Main navigation"]{display:none!important}'),
+ 'The old AscensionX bottom nav is hidden only in integrated mode');
+assert.ok(ascHtml.includes("document.documentElement.dataset.sxIntegratedCycleRoute=q.get('mode')")&&
+ ascHtml.includes("if(!window.__sxAscNative)showScreen('home',false)")&&
+ ascHtml.includes('if(!window.__sxAscNative)renderDashboard()'),
+ 'View Cycle opens as a focused native page without the dashboard behind it');
+assert.ok(ascHtml.includes('html[data-sx-integrated-cycle-route="manage"] body > main')&&
+ ascHtml.includes("document.body.classList.add('sx-asc-workout-manage','sx-asc-cycle-page')"),
+ 'Manage Cycle hides the home dashboard from first paint');
+assert.ok(hostHtml.includes('sx-profile-scroll-end-parity')&&
+ hostHtml.includes('main > #profile.screen > .spartanx-page-footer'),
+ 'Profile removes its excess bottom runway without touching other tabs');
+
 // A completed support workout must not be invalidated by new prescription
 // sizes after an engine update (old Week 5 was one set).
 const oneSetLegacy=['Machine Chest Press','Iso-Lateral Row'].map(name=>({
@@ -367,7 +381,7 @@ assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v115')&&embeddedSw.includes('adaptive-programming.js?v=394'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v116')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&

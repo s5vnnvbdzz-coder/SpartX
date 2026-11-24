@@ -39,7 +39,7 @@ ok(prescription.includes('week:6,name:\'Deload & consolidate\''),'The original s
 ok(prescription.includes('week:5,name:\'Heavy strength\''),'The original fifth heavy week remains');
 ok(prescription.includes('reconcileSavedSpartanSessions'),'Old completion progression recovery remains');
 ok(adaptive.includes('SXAscensionAdaptive'),'Six-week adaptive assistance engine preserved');
-ok(quality.includes('SXAscensionSelectionQuality'),'Upgraded exercise-choice engine preserved');
+ok(quality.includes('SXAscensionSelection'),'Upgraded exercise-choice engine preserved');
 ok(oldBeta.includes('../AscensionX2/'),'Old beta bookmark points to independent development app');
 ok(!oldBeta.includes('APPLY REDESIGN TO CURRENT CYCLE'),'Retired beta cannot alter live cycle');
 ok(standalone.includes('ASCENSION')&&standalone.includes('2.0'),'Standalone 2.0 still present');

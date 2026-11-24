@@ -1374,7 +1374,11 @@ function confirmCycleStart(){
   // Return once. Calling closeCycleEditor() here would start a competing
   // history.back()/redirect before this navigation, creating a possible
   // flicker or failed landing after fresh cycle creation on iOS.
-  window.location.replace('../?sxReturn=ascension&sxFrom=workout');
+  // Keep an explicit one-time return target; SpartanX's startup can update
+  // its URL hash before it reads the query string on a fresh install.
+  try{sessionStorage.setItem('sx_ascension_post_create_v1',
+   JSON.stringify({screen:'workout',at:Date.now()}))}catch(_){}
+  window.location.replace('../?sxReturn=ascension&sxFrom=workout#workout');
   return;
  }
  closeCycleEditor();

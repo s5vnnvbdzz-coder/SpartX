@@ -62,7 +62,7 @@ const actualEasy={kg:top(plan.weeks[0],'Bench Press').kg,reps:5,rpe:6};
 check(engine.reviewTop(primary(plan.weeks[0],'Bench Press'),actualEasy).status==='increase-candidate','Low RPE suggests review');
 check(engine.reviewTop(primary(plan.weeks[0],'Bench Press'),{kg:120,reps:3,rpe:9.5}).status==='reduce-review','Missed reps require recovery review');
 check(engine.reviewTop(primary(plan.weeks[0],'Bench Press'),{}).status==='insufficient','Incomplete data cannot adjust');
-check(engine.reviewTop(null,{kg:120,reps:1,rpe:8}).status==='assessment','Test phase no automated adjustment');
+check(engine.reviewTop(plan.weeks[11].sessions[0].exercises[0],{kg:120,reps:1,rpe:8}).status==='assessment','Test phase no automated adjustment');
 for(const mutation of [
  {...base,goals:{...base.goals,'Bench Press':160}},
  {...base,maxes:{...base.maxes,'Back Squat':0}},
@@ -86,7 +86,7 @@ check(shell.includes('name="weeks"')&&shell.includes('value="12"'),'Configurable
 const app=fs.readFileSync(path.join(dir,'app.js'),'utf8');
 check(app.includes("const KEY='ascensionx2_standalone_workspace_v1'"),'Only standalone storage key');
 check(app.includes('data-top-form')&&app.includes('logs.push'),'Standalone top-set logs');
-check(app.includes('data-restore')&&app.includes('EXPORT 2.0'),'Cycle archive and export controls');
+check(app.includes('data-restore')&&app.includes('2.0-only backup exported'),'Cycle archive and export controls');
 const sw=fs.readFileSync(path.join(dir,'sw.js'),'utf8');
 check(sw.includes("ascensionx2-dev-")&&!sw.includes('spartanx-v'),'Scoped cache names');
 check(sw.includes("'/AscensionX2/'"),'Service worker only handles standalone path');

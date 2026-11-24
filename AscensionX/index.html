@@ -735,7 +735,6 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
   <div class="cycle-editor-body" id="cycleEditorScroll">
 <div class="card" id="cycleBuilderCard">
  <div class="row between sx-cycle-setup-intro"><div><div class="eyebrow">SIX-WEEK STRENGTH CYCLE</div><p class="tiny">Set up your lifts, training maxes and supporting exercises. Every compound progresses on its own week counter.</p></div><span class="pill red">6 WEEKS</span></div>
- <div id="sxCycleManageLiveSnapshot" aria-live="polite"></div>
   <div class="asc-cycle-strength-editor" id="cycleStrengthEditor" aria-label="Starting strength for your cycle">
     <div class="eyebrow">01 · STARTING STRENGTH</div>
     <p class="tiny sx-cycle-section-description">Select a compound lift and edit its 1RM. AscensionX automatically recalculates its Training Max.</p>
@@ -869,6 +868,7 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
 <nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
 <script src="../assets/ascension/load-guard.js?v=338"></script>
+<script src="../assets/ascension/workout-prescription.js?v=406"></script>
 <script src="../assets/ascension/cycle-progression.js?v=346"></script>
 <script src="../assets/ascension/cycle-intelligence.js?v=1"></script>
 <script>
@@ -879,14 +879,7 @@ const EXERCISE_LABELS={'Back Squat':'Back Squat','Bench Press':'Bench Press','De
 const TREND_LABELS={'Back Squat':'Squat','Bench Press':'Bench Press','Deadlift':'Deadlift','Overhead Press':'Overhead Press'};
 function selectedLifts(){return Array.isArray(state.cycle.exercises)?state.cycle.exercises.filter(x=>LIFTS.includes(x)):LIFTS.slice()}
 function currentWeekFor(lift){return Math.min(6,Math.max(1,Number(state.cycle.weeks?.[lift]||state.cycle.currentWeek||1)))}
-const PLAN=[
- {week:1,name:'Volume foundation',topPct:72.5,topReps:6,backPct:67.5,backSets:3,backReps:6,rpe:7},
- {week:2,name:'Volume progression',topPct:77.5,topReps:5,backPct:72.5,backSets:4,backReps:5,rpe:7},
- {week:3,name:'Strength development',topPct:82.5,topReps:4,backPct:77.5,backSets:4,backReps:4,rpe:7.5},
- {week:4,name:'Intensification',topPct:87.5,topReps:3,backPct:82.5,backSets:3,backReps:3,rpe:8},
- {week:5,name:'Heavy strength',topPct:92.5,topReps:2,backPct:87.5,backSets:3,backReps:2,rpe:8.5},
- {week:6,name:'Deload & consolidate',topPct:60,topReps:5,backPct:null,backSets:0,backReps:0,rpe:6,deload:true}
-];
+const PLAN=window.SXAscensionPrescription.PLAN;
 let state=load();
 function defaults(){return {profile:{max:{'Back Squat':185,'Bench Press':160,'Deadlift':215,'Overhead Press':105},tmPct:95,rounding:2.5,unit:'kg'},cycle:{created:null,currentWeek:1,exercises:LIFTS.slice(),weeks:Object.fromEntries(LIFTS.map(x=>[x,1])),accessories:{}},logs:[],metrics:[],draft:null,theme:'dark',prestige:{level:0,xpOffset:0}}}
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.profile&&Array.isArray(x.logs)){if(!x.cycle)x.cycle={created:null,currentWeek:1};if(!Array.isArray(x.cycle.exercises))x.cycle.exercises=LIFTS.slice();if(!x.cycle.weeks)x.cycle.weeks=Object.fromEntries(LIFTS.map(l=>[l,Number(x.cycle.currentWeek)||1]));if(!x.profile.max)x.profile.max=defaults().profile.max;if(!x.profile.tmPct)x.profile.tmPct=95;if(!x.profile.rounding)x.profile.rounding=2.5;if(!x.profile.unit)x.profile.unit='kg';if(!('draft' in x))x.draft=null;if(!Array.isArray(x.metrics))x.metrics=[];if(!x.prestige)x.prestige={level:0,xpOffset:0};return x}}catch(e){}return defaults()}
@@ -979,7 +972,12 @@ function sxBuildAdaptiveCycleRoster(){
   const day=document.createElement('div');
   day.className='sx-cycle-adaptive-roster-day';
   const title=document.createElement('strong');
-  title.textContent=slot.kind==='support'?slot.title:slot.day+' · '+slot.lift+' (Week '+slot.week+')';
+  // The weekday shorthand is scheduling metadata, not the athlete-facing
+  // session name. Use stable day order and the correct independent week.
+  const sessionName=slot.kind==='support'?
+   String(slot.title||'Assistance').replace(/\\s*[-–]\\s*Week\\s*\\d+\\s*$/i,''):
+   slot.lift;
+  title.textContent=sessionName+' - Day '+(index+1)+' Week '+slot.week;
   day.appendChild(title);
   if(slot.lift){
    const main=document.createElement('div');
@@ -1708,27 +1706,27 @@ function closeAscSpartanImport(){
 }
 function cancelAscSpartanImport(){
  closeAscSpartanImport();
+ // Legacy direct Continue links must also exit to the launching Workout tab.
+ // The normal SpartanX Continue popup now lives directly over Workout.
+ if(window.__sxAscNative){
+  const q=new URLSearchParams(location.search);
+  if(q.get('mode')==='continue'&&['workout','activeWorkout'].includes(q.get('from'))){
+   const url=new URL('../',location.href);
+   url.searchParams.set('sxReturn','ascension');
+   url.searchParams.set('sxFrom',q.get('from'));
+   location.replace(url.toString());
+   return;
+  }
+ }
  // In Active Session, close the entire embedded window and resume SpartanX.
  if(ascensionEmbeddedBySpartanX&&document.body.classList.contains('sx-spartan-quick-import')){
   try{window.parent.postMessage({type:'spartx:ascensionQuickCancel'},location.origin)}catch(e){}
  }
 }
 function buildAscSpartanWorkout(lift){
- if(!state.cycle.created||!selectedLifts().includes(lift))return null;
- const week=currentWeekFor(lift),info=prescribed(lift,week),p=info.p,trainingMax=tm(lift);
- const warmupSets=ascWarmupPlan(lift,week).map(({weight,reps})=>({weight,reps}));
- const sets=p.deload
-  ?Array.from({length:3},()=>({weight:info.topLoad,reps:p.topReps}))
-  :[{weight:info.topLoad,reps:p.topReps},...Array.from({length:p.backSets},()=>({weight:info.backLoad,reps:p.backReps}))];
- // Carry the human-readable cycle label across the app boundary.
- const liftTitle=({'Back Squat':'Squats','Bench Press':'Bench Press','Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
- const cycleTitle=String(state.cycle.title||state.cycle.name||'').trim().slice(0,75)||liftTitle+' (current week)';
- return {source:'AscensionX',cycleId:state.cycle.created,cycleTitle,exercise:lift,week,weekLabel:p.name,
-  tm:trainingMax,targetRpe:p.rpe,warmupSets,sets,
-  recoveryBridge:info.loadGuard?{
-   fromWeek:info.loadGuard.sourceWeek,previousTop:info.loadGuard.sourceTop,
-   nominalTop:info.loadGuard.nominalTop,adjustedTop:info.topLoad
-  }:null};
+ // The real AscensionX import and the SpartanX Workout popup use the
+ // exact same prescribed loads, recovery bridge and four warm-up sets.
+ return window.SXAscensionPrescription.build(state,lift,localStorage);
 }
 // In a five-day cycle two distinct assistance sessions may be due. Resolve
 // the next INCOMPLETE slot, not the first support slot in the timetable.
@@ -2119,7 +2117,6 @@ function renderCycle(){
  $('saveCycleSelectionBtn').textContent=state.cycle.created?'Save cycle changes':'Create six-week cycle';$('deleteCycleButton').hidden=!state.cycle.created;
  $('cycleTable').innerHTML=PLAN.map(p=>`<tr><td><strong>W${p.week}</strong></td><td>${p.deload?'3×5 @ 60%':`1×${p.topReps} @ ${p.topPct}%`}</td><td>${p.backSets?`${p.backSets}×${p.backReps} @ ${p.backPct}%`:'—'}</td><td>${p.name}</td></tr>`).join('');
  renderCycleLoads();
- sxRenderManageAdaptiveRoster();
 }
 function renderCycleLoads(){
  const lift=$('cycleLift').value,logs=activeCycleLogs().filter(log=>log.lift===lift);

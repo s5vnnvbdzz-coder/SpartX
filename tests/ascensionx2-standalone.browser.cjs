@@ -51,10 +51,43 @@ async function run(browserType,device){
   assert.equal(stored.draft,'draft-sentinel');
   assert.equal(stored.active.plan.profile.weeks,12);
   assert.equal(stored.active.logs.length,1);
+  // Edit CURRENT cycle after saving a top set: no archive, no new identity
+  // and no retroactive rewriting of the logged week or classic storage.
+  const originalId=stored.active.id;
+  const oldWeek=JSON.stringify(stored.active.plan.weeks[0]);
+  const oldFutureTop=stored.active.plan.weeks[8].sessions[0].exercises[0].sets.find(x=>x.type==='top').kg;
+  await page.locator('[data-edit-cycle]').click();
+  assert.equal(await page.locator('#manageDialog').evaluate(el=>el.open),true);
+  assert.equal(await page.locator('#manageForm [name="weeks"]').isDisabled(),true,'Structure locked after logging');
+  await page.locator('#manageForm [name="squatGoal"]').fill('200');
+  await page.locator('#manageForm [name="benchGoal"]').fill('175');
+  await page.locator('#manageForm [name="squatMax"]').fill('195');
+  await page.locator('#manageForm [name="sleep"]').fill('6');
+  await page.locator('#manageForm [name="recovery"]').selectOption('limited');
+  await page.locator('#manageForm button[type=submit]').click();
+  await page.waitForFunction(()=>!document.getElementById('manageDialog').open);
+  const updated=await page.evaluate(()=>JSON.parse(localStorage.getItem('ascensionx2_standalone_workspace_v1')));
+  assert.equal(updated.active.id,originalId,'Current cycle not replaced');
+  assert.equal(updated.archives.length,0,'Edit does not create an archived cycle');
+  assert.equal(updated.active.plan.profile.goals['Back Squat'],200);
+  assert.equal(updated.active.plan.profile.goals['Bench Press'],175);
+  assert.equal(updated.active.plan.weeks.at(-1).attempts['Bench Press'].goal,175);
+  assert.equal(updated.active.plan.profile.sleep,6);
+  assert.equal(updated.active.plan.profile.recovery,'limited');
+  assert.equal(updated.active.logs.length,1,'Top-set history preserved');
+  assert.equal(JSON.stringify(updated.active.plan.weeks[0]),oldWeek,'Completed week unchanged');
+  assert.notEqual(updated.active.plan.weeks[8].sessions[0].exercises[0].sets.find(x=>x.type==='top').kg,oldFutureTop,'Future squat load updated');
+  // Open, cancel and confirm it cannot silently mutate.
+  await page.locator('[data-edit-cycle]').click();
+  await page.locator('#manageForm [name="squatGoal"]').fill('205');
+  await page.locator('#manageCancel').click();
+  const cancelled=await page.evaluate(()=>JSON.parse(localStorage.getItem('ascensionx2_standalone_workspace_v1')));
+  assert.equal(cancelled.active.plan.profile.goals['Back Squat'],200,'Cancel discards draft');
   await page.reload({waitUntil:'load'});
   await page.waitForFunction(()=>!document.getElementById('programme').hidden);
   await page.locator('.session details').nth(1).locator('summary').click();
   assert.match(await page.locator('form[data-top-form="Bench Press"]').innerText(),/UPDATE LOG/,'Saved top set survives reload');
+  assert.match(await page.locator('#programmeView').innerText(),/PR target: 200 kg/,'Edited target survives reload');
   await page.locator('button[data-tab="review"]').click();
   assert.match(await page.locator('#reviewView').innerText(),/122.5 kg × 5/,'Top-set history visible');
   await page.locator('button[data-tab="builder"]').click();

@@ -108,3 +108,20 @@ footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid 
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);min-width:200px;max-width:calc(100% - 30px);z-index:500;background:#28362b;border:1px solid #62936c;border-radius:12px;padding:13px 17px;color:#e7ffe8;font-size:13px;text-align:center;box-shadow:0 14px 44px #000a}
 @media(max-width:760px){.intro{grid-template-columns:1fr}.grid.three,.grid.four{grid-template-columns:1fr 1fr}.shell{padding:18px 12px 60px}.card{padding:15px}.masthead{align-items:flex-start}.devtag{font-size:9px}.tabs button{font-size:10px}.intro{gap:15px}footer{flex-direction:column}}
 @media(max-width:490px){.grid.three,.grid.four{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.stat{padding:10px 6px}.stat strong{font-size:19px}.masthead{gap:8px}.emblem{width:41px;height:41px;font-size:14px}.wordmark{gap:8px}h1{font-size:19px}.devtag{max-width:110px;white-space:normal;text-align:center}.logform .grid{grid-template-columns:repeat(3,minmax(0,1fr))}.actionrow{flex-direction:column;align-items:stretch}.tabs{gap:0}}
+
+/* Independent cycle editing uses a true modal with isolated internal scrolling. */
+#manageDialog{width:min(780px,calc(100% - 22px));max-height:calc(100dvh - 26px);margin:auto;background:var(--card);border:1px solid #56515a;color:var(--txt);border-radius:17px;padding:0;box-shadow:0 25px 100px #000c;overflow:auto;overscroll-behavior:contain}
+#manageDialog::backdrop{background:#000d;backdrop-filter:blur(5px)}
+#manageDialog form{padding:20px}
+#manageDialog .card{padding:14px;margin-top:14px}
+#manageDialog .card h3{font-size:16px}
+#manageDialog .grid.three{gap:9px}
+#manageDialog .liftInput{padding:10px}
+#manageDialog .liftInput strong{margin-bottom:6px}
+#manageDialog .managehead{display:flex;align-items:center;justify-content:space-between;gap:14px}
+#manageDialog .managehead h2{margin:0;font-size:24px}
+#manageDialog .managehead button{flex:none}
+#manageDialog .manageactions{position:sticky;bottom:-20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--card);padding:13px 0 calc(13px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);z-index:1}
+#manageDialog .manageactions button{font-size:12px;padding:13px 8px;min-height:48px}
+#manageDialog select:disabled{opacity:.55}
+@media(max-width:530px){#manageDialog form{padding:14px}#manageDialog .grid.three,#manageDialog .grid.four{grid-template-columns:1fr}#manageDialog .managehead h2{font-size:20px}#manageDialog .liftInput{padding:12px}#manageDialog .manageactions{bottom:-14px}}

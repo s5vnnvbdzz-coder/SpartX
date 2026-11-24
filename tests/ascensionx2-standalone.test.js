@@ -73,6 +73,40 @@ for(const mutation of [
  let threw=false;try{engine.generate(mutation)}catch(e){threw=true}
  check(threw,'Invalid profile rejected');
 }
+// Editing a live cycle must preserve all logged workouts, historical
+// prescriptions, and the existing identity; only unlogged weeks change.
+const previous=engine.generate(base);
+const originalWeek=JSON.stringify(previous.weeks[0]);
+const originalFuture=previous.weeks[8].sessions[0].exercises[0].sets.find(x=>x.type==='top').kg;
+const active={id:'ax2-test-1',plan:previous,logs:[{
+ week:1,lift:'Back Squat',kg:140,reps:5,rpe:7,date:'2026-11-24T15:00:00Z'
+}]};
+let revision=engine.revise(active,{...base,goals:{...base.goals,'Back Squat':200,'Bench Press':172.5}});
+check(revision.preservedThrough===1,'First logged week locked');
+check(revision.plan.profile.goals['Back Squat']===200,'Squat PR goal editable');
+check(revision.plan.profile.goals['Bench Press']===172.5,'Bench PR goal editable');
+check(revision.plan.weeks.at(-1).attempts['Back Squat'].goal===200,'Assessment goal updated');
+check(revision.plan.weeks.at(-1).attempts['Bench Press'].goal===172.5,'Bench assessment goal updated');
+check(JSON.stringify(revision.plan.weeks[0])===originalWeek,'Logged week prescription identical');
+check(active.logs.length===1&&active.logs[0].kg===140,'Actual logged top set untouched');
+check(active.plan.profile.goals['Back Squat']===190,'Original plan has not been mutated');
+check(revision.plan.weeks[8].sessions[0].exercises[0].sets.find(x=>x.type==='top').kg===originalFuture,'Goal change alone does not arbitrarily change compound loading');
+revision=engine.revise(active,{...base,maxes:{...base.maxes,'Back Squat':195},goals:{...base.goals,'Back Squat':200},sleep:6,recovery:'limited',weakPoints:{...base.weakPoints,'Back Squat':['out-of-hole']}});
+check(JSON.stringify(revision.plan.weeks[0])===originalWeek,'New 1RM cannot rewrite logged week');
+check(revision.plan.weeks[8].sessions[0].exercises[0].sets.find(x=>x.type==='top').kg!==originalFuture,'New 1RM recalculates unlogged week');
+check(revision.plan.profile.weakPoints['Back Squat'].includes('out-of-hole'),'Weak point edits applied');
+check(revision.plan.profile.sleep===6&&revision.plan.profile.recovery==='limited','Recovery edits applied');
+const fresh=engine.revise({id:'ax2-empty',plan:previous,logs:[]},{...base,weeks:8,days:3});
+check(fresh.plan.weeks.length===8&&fresh.plan.profile.days===3,'Structural edits before training allowed');
+for(const change of [{...base,weeks:8},{...base,days:5}]){
+ let failed=false;try{engine.revise(active,change);}catch(_){failed=true;}
+ check(failed,'Structural edits forbidden after logging');
+}
+const latter={...active,logs:[{week:1,lift:'Back Squat',kg:140,reps:5,rpe:7},{week:4,lift:'Bench Press',kg:105,reps:5,rpe:6}]};
+revision=engine.revise(latter,{...base,maxes:{...base.maxes,'Deadlift':225},goals:{...base.goals,Deadlift:230}});
+check(revision.preservedThrough===4,'Last logged week determines preservation boundary');
+check(JSON.stringify(revision.plan.weeks.slice(0,4))===JSON.stringify(previous.weeks.slice(0,4)),'All earlier weeks preserved through last recorded week');
+check(JSON.stringify(active)===JSON.stringify({id:'ax2-test-1',plan:previous,logs:[{week:1,lift:'Back Squat',kg:140,reps:5,rpe:7,date:'2026-11-24T15:00:00Z'}]}),'Revision is pure and leaves original unmodified');
 const dir=path.join(__dirname,'../AscensionX2');
 for(const file of ['index.html','app.js','engine.js','style.css','sw.js']){
  const source=fs.readFileSync(path.join(dir,file),'utf8');
@@ -87,6 +121,8 @@ const app=fs.readFileSync(path.join(dir,'app.js'),'utf8');
 check(app.includes("const KEY='ascensionx2_standalone_workspace_v1'"),'Only standalone storage key');
 check(app.includes('data-top-form')&&app.includes('logs.push'),'Standalone top-set logs');
 check(app.includes('data-restore')&&app.includes('2.0-only backup exported'),'Cycle archive and export controls');
+check(app.includes('openManageDialog')&&app.includes('engine.revise'),'In-place cycle editor wired');
+check(shell.includes('id="manageDialog"')&&shell.includes('id="manageForm"'),'Current-cycle editing dialog exists');
 const sw=fs.readFileSync(path.join(dir,'sw.js'),'utf8');
 check(sw.includes("ascensionx2-dev-")&&!sw.includes('spartanx-v'),'Scoped cache names');
 check(sw.includes("'/AscensionX2/'"),'Service worker only handles standalone path');

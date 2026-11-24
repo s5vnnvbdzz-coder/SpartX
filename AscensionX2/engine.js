@@ -169,6 +169,25 @@ function generate(raw){
    'Optional PR attempts require fresh readiness and technique review.'],
   independent:true};
 }
+/* Revise the current development cycle without touching logged training.
+ * Completed/logged weeks keep their original prescriptions. Future weeks
+ * are regenerated deliberately, while the cycle identity is preserved.
+ */
+function revise(active,input){
+ if(!active?.plan?.independent||!Array.isArray(active.plan.weeks)||!Array.isArray(active.logs))
+  throw Error('An active standalone 2.0 cycle is required.');
+ const old=active.plan.profile;
+ const next=generate(input),p=next.profile;
+ const cutoff=active.logs.reduce((highest,log)=>{
+  const week=Number(log?.week);
+  return Number.isInteger(week)&&week>=1&&week<=old.weeks?Math.max(highest,week):highest;
+ },0);
+ if(cutoff&&(p.weeks!==old.weeks||p.days!==old.days))
+  throw Error('Cycle length and training-day count are locked once sessions are logged. Start a new cycle to change them.');
+ const oldWeeks=active.plan.weeks;
+ if(cutoff>0)for(let i=0;i<Math.min(cutoff,next.weeks.length);i++)next.weeks[i]=oldWeeks[i];
+ return {plan:next,preservedThrough:cutoff};
+}
 function reviewTop(planned,actual,step=2.5){
  if(!planned||!actual||!Number.isFinite(+actual.kg)||+actual.kg<=0||!Number.isInteger(+actual.reps)||
    !Number.isFinite(+actual.rpe)||+actual.rpe<6||+actual.rpe>10)return {status:'insufficient',delta:0,reason:'Enter a valid top-set load, reps and RPE to review the next exposure.'};
@@ -180,6 +199,6 @@ function reviewTop(planned,actual,step=2.5){
   return {status:'increase-candidate',delta:step,reason:'Work was easier than target. Consider a small upward adjustment after confirming repeated performance.'};
  return {status:'on-target',delta:0,reason:'On target. Continue the phase plan unless recovery suggests otherwise.'};
 }
-root.SX2Engine=Object.freeze({VERSION,LIFTS,DAYS,CONFIG,normalize,generate,reviewTop,round});
+root.SX2Engine=Object.freeze({VERSION,LIFTS,DAYS,CONFIG,normalize,generate,revise,reviewTop,round});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.SX2Engine;
 })(typeof window!=='undefined'?window:globalThis);

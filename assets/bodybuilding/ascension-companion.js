@@ -157,6 +157,7 @@
             (item.reason?' '+item.reason:''),
           sxStrengthSizeCompanion:{cycleId:active.id,lift:main,week,adaptive:p.adaptive===true,
             targetRir:item.rir,targetRpe:rpe,repsMin:item.min,repsMax:item.max,plannedSets:item.sets,
+            prescribedReps:reps,prescribedKg:prescribedKg>0?prescribedKg:null,
             ...(fixedRdl?{fixedDeadliftRdl:true,trainingMaxKg:Number.isFinite(tm)&&tm>0?tm:null,
               trainingMaxPercent:45}:null)},
           sets:Array.from({length:item.sets},()=>({

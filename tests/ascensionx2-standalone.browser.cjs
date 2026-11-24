@@ -32,7 +32,22 @@ async function run(browserType,device){
   assert.match(text,/SECONDARY/,'Opening Day 4 reveals secondary squat and bench prescriptions');
   await page.locator('#weekSelector').selectOption('1');
   await page.locator('.session details').nth(1).locator('summary').click();
-  const bench=page.locator('form[data-top-form="Bench Press"]');
+  // New AX2 input rule: a single tap selects the existing number on both
+  // native Chromium/Android and WebKit/iPhone; the first typed digit replaces it.
+  const squatWeight=page.locator('form[data-top-form="Back Squat"] input[name="kg"]');
+  await squatWeight.click();
+  const squatSelection=await squatWeight.evaluate(el=>({
+   type:el.type,start:el.selectionStart,end:el.selectionEnd,value:el.value
+  }));
+  assert.equal(squatSelection.type,'text','Number entry becomes selectable while editing');
+  assert.equal(squatSelection.start,0,'Selection starts at the first digit');
+  assert.equal(squatSelection.end,squatSelection.value.length,'Full existing load is highlighted');
+  await squatWeight.press('1');
+  assert.equal(await squatWeight.inputValue(),'1','Typing replaces entire previous load, not appends');
+  await squatWeight.fill('132.5');
+  await squatWeight.press('Tab');
+  assert.equal(await squatWeight.getAttribute('type'),'number','Valid number input restores native type after blur');
+    const bench=page.locator('form[data-top-form="Bench Press"]');
   await bench.locator('input[name="kg"]').fill('122.5');
   await bench.locator('input[name="reps"]').fill('5');
   await bench.locator('input[name="rpe"]').fill('6');

@@ -395,14 +395,37 @@ assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=394'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
-assert.ok(ascHtml.includes('sxRenderManageAdaptiveRoster();'),
- 'Manage Cycle displays live adaptive training days');
+assert.ok(!ascHtml.includes('<div id="sxCycleManageLiveSnapshot"')&&
+ !ascHtml.includes('sxRenderManageAdaptiveRoster();'),
+ 'Manage Cycle removes the duplicated adaptive support roster');
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
 assert.ok(embeddedSw.includes('ascensionx-shell-v117')&&embeddedSw.includes('adaptive-programming.js?v=394'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
+
+// Native Continue stays over SpartanX Workout, with source-prescribed sets.
+const sharedPrescription=fs.readFileSync(path.join(__dirname,'workout-prescription.js'),'utf8');
+assert.ok(sharedPrescription.includes('SXAscensionPrescription=Object.freeze')&&
+ ascHtml.includes('SXAscensionPrescription.build(state,lift,localStorage)')&&
+ hostHtml.includes('workout-prescription.js?v=406'),
+ 'Both the programme page and Workout popup use the shared import calculator');
+assert.ok(quickAccess.includes('sxAscModalOpen(state.upNext?.lift)')&&
+ quickAccess.includes("overlay.id='sxAscContinueBackdrop'")&&
+ quickAccess.includes('function sxAscModalClose()')&&
+ quickAccess.includes('window.spartanxImport531?.(workout)===true'),
+ 'Continue is an in-place native dialog with direct Cancel and Load');
+assert.ok(rootHost.includes('window.spartanxOpenAscensionWorkoutPopup(lift)'),
+ 'Continue shortcuts route to the native Workout popup');
+assert.ok(ascHtml.includes("title.textContent=sessionName+' - Day '+(index+1)+' Week '+slot.week")&&
+ ascHtml.includes('const sessionName=slot.kind'),
+ 'View Cycle shows Day N Week N titles without abbreviated weekdays');
+assert.ok(ascHtml.includes('id="saveCycleSelectionBtn"')&&
+ fs.readFileSync(path.join(__dirname,'cycle-builder-ui.css'),'utf8')
+ .includes('#cycleEditorBackdrop .cycle-editor-actions #saveCycleSelectionBtn'),
+ 'Manage Cycle Save Changes matches the View Cycle Save button');
+
 assert.ok(quickAccess.includes('pendingSupportDay?.()')&&
  quickAccess.includes("lift:'__ADAPTIVE_SUPPORT__'"),
  'Workout Continue must select the fourth day in preference to the next Squat');

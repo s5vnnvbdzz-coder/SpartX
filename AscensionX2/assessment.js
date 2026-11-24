@@ -62,9 +62,9 @@ function fromSpartan(){
  if(old?.maxes)for(const lift of engine.LIFTS){
   if(Number(old.maxes[lift])>0)original[lift]=Number(old.maxes[lift]);
  }
- set('age',old?.age||info.age);
- set('weight',old?.bodyweight||info.weight?.value);
- set('height',old?.height||info.height?.value);
+ set('age',info.age??old?.age);
+ set('weight',info.weight?.value??old?.bodyweight);
+ set('height',info.height?.value??old?.height);
  const names={'Back Squat':'squat','Bench Press':'bench','Deadlift':'deadlift'};
  for(const lift of engine.LIFTS){
   const key=names[lift],max=original[lift];
@@ -198,6 +198,9 @@ form.addEventListener('submit',event=>{
  }catch(error){showError(error.message||'Programme could not be generated. Review the highlighted inputs.');}
 });
 const saved=(()=>{try{const x=JSON.parse(localStorage.getItem(DRAFT)||'null');return x?.version===1?x.answers:null;}catch(_){return null;}})();
-if(saved)restore(saved);else fromSpartan();
+if(saved){
+ restore(saved);
+ $('measurePrefillMessage').textContent='Your saved AX assessment draft has been restored. Review these values before generating; existing Measures and classic strength records are unchanged.';
+}else fromSpartan();
 displayStep(0);
 })();

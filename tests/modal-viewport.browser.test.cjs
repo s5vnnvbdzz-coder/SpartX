@@ -26,7 +26,17 @@ const {chromium,webkit,devices}=require('playwright');
    const outcome=await scroll.evaluate(el=>{const before=scrollY;el.scrollTop=200;const evt=new WheelEvent('wheel',{deltaY:100,bubbles:true,cancelable:true,composed:true});el.dispatchEvent(evt);const internal=el.scrollTop;el.scrollTop=el.scrollHeight;const edge=new WheelEvent('wheel',{deltaY:100,bubbles:true,cancelable:true,composed:true});el.dispatchEvent(edge);const outside=new WheelEvent('wheel',{deltaY:100,bubbles:true,cancelable:true,composed:true});document.querySelector('main').dispatchEvent(outside);return {before,after:scrollY,internal,allowed:!evt.defaultPrevented,edge:edge.defaultPrevented,outside:outside.defaultPrevented};});
    assert(outcome.internal>0&&outcome.allowed&&outcome.edge&&outcome.outside);assert.equal(outcome.before,outcome.after);
    await page.evaluate(()=>{const e=document.createElement('div');e.id='qaNested';e.setAttribute('aria-modal','true');e.style.cssText='position:fixed;inset:0;z-index:999999';document.body.append(e);window.SXModalViewport.refresh();document.querySelector('#sxAscContinueCancel').click();});
-   assert(await page.evaluate(()=>window.SXModalViewport.isOpen()));
+   const nested=await page.evaluate(()=>{
+    const el=document.getElementById('qaNested');
+    return {exists:!!el,rects:el?.getClientRects().length,
+     fixed:el?getComputedStyle(el).position:null,
+     aria:el?.getAttribute('aria-modal'),
+     closed:document.getElementById('sxAscContinueBackdrop')?.hidden,
+     open:window.SXModalViewport.isOpen(),
+     documentLocked:document.documentElement.classList.contains('sx-modal-open')};
+   });
+   console.log('NESTED MODAL STATE',device,nested);
+   assert(nested.open,'Nested modal must retain viewport ownership: '+JSON.stringify(nested));
    await page.evaluate(()=>{document.querySelector('#qaNested').remove();window.SXModalViewport.refresh();});
    assert(!(await page.evaluate(()=>window.SXModalViewport.isOpen())));
    assert(await page.locator('#trackerNav').isVisible());

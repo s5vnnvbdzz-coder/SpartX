@@ -131,6 +131,10 @@ check('production Continue Training calls the live reconciliation before old nam
  assert.ok(body.indexOf('SXAscensionContinueSupport')<body.indexOf('const extras=api.forImport'));
  assert.ok(html.includes('continue-support-sync.js?v=419'));
  assert.ok(html.includes('if(linked||existingUnlinked){'));
+ assert.ok(!html.includes('if(window.SXAscensionV2Bridge?.read(localStorage))return;'),
+  'An old beta preference must not disable live active-cycle assistance recovery');
+ assert.ok(html.includes('SXAscensionContinueSupport?.alignLinked?.(work,details,window.SXAscensionCompanion,localStorage)'),
+  'Existing active workouts must restore support in the current generated order');
  assert.ok(html.includes('if(source===\'AscensionX\')ensureAscensionStrengthSizeCompanions(d)'));
  const classic=fs.readFileSync(path.join(dir,'workout-prescription.js'),'utf8');
  assert.ok(classic.includes("topPct:72.5")&&classic.includes("topPct:92.5")&&classic.includes("topPct:60"));

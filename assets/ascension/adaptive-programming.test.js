@@ -144,8 +144,8 @@ assert.equal(api.plan('Bench Press',4).find(e=>e.name==='Iso-Lateral Row').sugge
 assert.equal(localStorage.getItem('ascensionx_strength_v1'),before,
  'Adaptive support calculations never edit the classic programme');
 const newHostHtml=fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8');
-assert.ok(/id="sxAscensionBetaPreviewCard"[^>]*hidden/.test(newHostHtml),
- 'The separate AscensionX 2.0 programme card is hidden');
+assert.ok(!newHostHtml.includes('sxAscensionBetaPreviewCard'),
+ 'The obsolete 2.0 beta card is removed from classic SpartanX; standalone 2.0 stays separate');
 assert.ok(newHostHtml.includes("weight:Number(ex.suggestedKg)>0?String(ex.suggestedKg):''"),
  'Support day import prepopulates the suggested weight for all classic support exercises');
 

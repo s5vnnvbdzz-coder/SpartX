@@ -22,5 +22,9 @@ jobs:
           node --check assets/ascension/adaptive-programming.js
           node --check assets/bodybuilding/ascension-companion.js
           node --check assets/ascension/adaptive-programming.test.js
+          node --check assets/ascension/continue-support-sync.js
+          node --check assets/ascension/continue-support-sync.test.js
       - name: Run adaptive programme regression tests
-        run: node assets/ascension/adaptive-programming.test.js
+        run: |
+          node assets/ascension/adaptive-programming.test.js
+          node assets/ascension/continue-support-sync.test.js

@@ -1763,7 +1763,8 @@ function renderAscSpartanImportPreview(){
   return '<div class="asc-spartan-set-line">'+label+' · '+kg(x.weight)+' × '+x.reps+'</div>';
  }).join('');
  const adaptive=window.SXAscensionAdaptive?.enabled(prescription.cycleId)?window.SXAscensionAdaptive.plan(prescription.exercise,prescription.week):[];
- const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT</span>'+adaptive.map(x=>'<div>'+sxCompactSupportText(x)+'</div>').join(''):'';
+ const support=adaptive.length?'<span class="asc-spartan-import-label">ADAPTIVE SUPPORT</span>'+adaptive.map(x=>'<div>'+sxCompactSupportText(x)+'</div>').join(''):
+  !window.SXAscensionAdaptive?.enabled(prescription.cycleId)?'<div class="tiny" role="status">Adaptive Support is OFF for this active cycle. Enable it in Manage Cycle to include prescribed assistance when you press Continue.</div>':'';
  const guardInfo=prescribed(prescription.exercise,prescription.week);
  const bridgeNote=guardInfo.loadGuard?'<div class="tiny" role="status" style="margin:9px 0;color:var(--red2)">'+loadGuardSummary(guardInfo)+'</div>':'';
  panel.innerHTML='<strong>WEEK '+prescription.week+' · '+prescription.weekLabel+'</strong>'+bridgeNote+'<span class="asc-spartan-import-label">WARM-UP · '+prescription.warmupSets.length+' SETS</span>'+warmup+'<span class="asc-spartan-import-label">WORKING SETS · '+prescription.sets.length+'</span>'+main+support;
@@ -2318,7 +2319,7 @@ function init(){
   history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  }
  processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=124').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=126').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.

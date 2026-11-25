@@ -272,7 +272,7 @@
    const atNew=Math.floor(30*(capacity/nextLoad-1)-(10-target));
    if(atNew>=min)return out(nextLoad,Math.min(max,atNew),'Two full controlled exposures earned an available load increase ('+equipmentSource+'). Estimated reps; adjust to target RPE.');
   }
-  return out(base,achievable,earned?'Maintain load and progress repetitions; no suitable verified increase at target effort.':'Retain established load and adjust reps to target effort; no blanket taper reduction.');
+  return out(base,achievable,earned?'Maintain the established load or select the next available gym weight if the target RPE permits; no fixed increment required.':'Retain established load and adjust reps to target effort; no blanket taper reduction.');
  }
  function latestSquatAccessoryHistory(name,storage=global.localStorage){
   return exerciseHistory(name,null,Infinity,storage)[0]||null;
@@ -828,8 +828,8 @@
      '</select></div>',
     '</div>',
     '<details class="sx-adaptive-details" id="sxAscEquipmentSettings">',
-    '<summary>AVAILABLE EQUIPMENT LOADS</summary>',
-    '<p class="sx-adaptive-intro">Confirm the increment in logged kilograms for your exercise. For paired dumbbells and iso-lateral machines use the combined-weight increment. Leave unconfirmed to use only previously logged loads.</p>',
+    '<summary>OPTIONAL EQUIPMENT LOAD SETTINGS</summary>',
+    '<p class="sx-adaptive-intro">Optional: enter a known increment for equipment with consistent loading. Cable stacks and machines differ between gyms; leave them unset and use your own logged weight and target RPE. No equipment setup is required.</p>',
     '<div class="field"><label for="sxAscEquipmentExercise">Exercise</label><select id="sxAscEquipmentExercise"></select></div>',
     '<div class="sx-adaptive-fields"><div class="field"><label for="sxAscEquipmentStep">Increment (kg)</label><input id="sxAscEquipmentStep" type="number" min="0.25" max="100" step="any" placeholder="e.g. 5"></div>',
     '<div class="field"><label for="sxAscEquipmentOffset">Starting offset (kg)</label><input id="sxAscEquipmentOffset" type="number" min="0" step="any" placeholder="0"></div></div>',
@@ -847,10 +847,10 @@
   anchor.insertAdjacentElement('afterend',card);
   const equipmentPicker=document.getElementById('sxAscEquipmentExercise');
   const equipmentNames=[...new Set([...Object.values(LIB).flat().map(x=>x.name),
-   ...Object.values(FOURTH).flat(Infinity).map(x=>typeof x==='string'?x:x?.name),'Hack Squat','Leg Press','Bulgarian Split Squat','Cable Crunch','Pause Squat'])].filter(Boolean).sort();
+   ...Object.values(FOURTH).flat(Infinity).map(x=>typeof x==='string'?x:x?.name),...Object.keys(ADDITIONAL),'Hack Squat','Leg Press','Bulgarian Split Squat','Cable Crunch','Pause Squat'])].filter(Boolean).sort();
   for(const name of equipmentNames){const option=document.createElement('option');option.value=name;option.textContent=name;equipmentPicker.appendChild(option)}
   const equipmentStep=document.getElementById('sxAscEquipmentStep'),equipmentOffset=document.getElementById('sxAscEquipmentOffset'),equipmentStatus=document.getElementById('sxAscEquipmentStatus');
-  function showRule(){const rule=equipmentRules()[norm(equipmentPicker.value)];equipmentStep.value=rule?.step??'';equipmentOffset.value=rule?.offset??0;equipmentStatus.textContent=rule?'Confirmed increment for '+equipmentPicker.value:'No confirmed increment. Previously logged loads only.'}
+  function showRule(){const rule=equipmentRules()[norm(equipmentPicker.value)];equipmentStep.value=rule?.step??'';equipmentOffset.value=rule?.offset??0;equipmentStatus.textContent=rule?'Confirmed increment for '+equipmentPicker.value:'Optional — no increment required. Use your recorded working weight and target RPE.'}
   equipmentPicker.addEventListener('change',showRule);
   document.getElementById('sxAscEquipmentSave').addEventListener('click',()=>{try{setEquipment(equipmentPicker.value,{step:equipmentStep.value,offset:equipmentOffset.value});showRule();render()}catch(_){equipmentStatus.textContent='Enter a positive increment and an offset smaller than that increment.'}});
   document.getElementById('sxAscEquipmentClear').addEventListener('click',()=>{try{setEquipment(equipmentPicker.value,null);showRule();render()}catch(_){equipmentStatus.textContent='Unable to clear the setting.'}});

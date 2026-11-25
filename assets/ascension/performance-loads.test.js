@@ -1,0 +1,55 @@
+/* Run: node assets/ascension/performance-loads.test.js */
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const id='2026-11-01T00:00:00Z',name='Iso-Lateral Row',exercise={name,sets:3,min:8,max:12,targetRpe:7};
+const set=(weight,reps,rpe,done=true,type='Working Set')=>({weight,reps,rpe,done,type});
+const trip=(kg,reps,rpe)=>[set(kg,reps,rpe),set(kg,reps,rpe),set(kg,reps,rpe)];
+const session=(date,sets,n=name,other={})=>({date,exercises:[{name:n,sets,...other}]});
+const history=[session('2026-11-20',[set(100,13,6),set(100,13,6.5),set(100,13,7)])];
+function boot(sessions=[],week=5,rule){
+ const map=new Map([['spartx_db',JSON.stringify({sessions})],['ascensionx_strength_v1',JSON.stringify({cycle:{created:id,exercises:['Back Squat','Bench Press','Deadlift'],currentWeek:week,weeks:{'Back Squat':week,'Bench Press':week,'Deadlift':week}}})],['sx_ascension_adaptive_v1',JSON.stringify({[id]:{enabled:true,focus:'strength',days:4}})]]);
+ const storage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v)};
+ const window={localStorage:storage,addEventListener(){}};
+ for(const p of ['selection-quality.js','adaptive-programming.js','../bodybuilding/ascension-companion.js','continue-support-sync.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,p),'utf8'),{window});
+ const api=window.SXAscensionAdaptive;if(rule)api.setEquipment(name,rule,storage);
+ return {api,storage,companion:window.SXAscensionCompanion,sync:window.SXAscensionContinueSupport};
+}
+let {api,storage,companion,sync}=boot(history);
+let checks=0;
+function check(value,message){assert.ok(value,message);checks++}
+const rec=(h,week=5,rule,ex=exercise)=>{const b=boot(h,week,rule);return b.api.recommend(ex,id,week,b.storage)};
+let result=api.recommend(exercise,id,5,storage);
+check(result.suggestedKg===100&&result.targetReps===12,'Reported 100 x 13 at RPE 6-7 -> 100 x 12');
+let plan=api.plan('Bench Press',5,{},storage);
+check(plan.map(e=>e.name).join('|')==='Iso-Lateral Row|Triceps Pushdown (Bar)|Rear Delt Reverse Fly|Lat Pulldown','Current selection order');
+check(plan.every(e=>e.sets===3&&e.targetRpe===7),'All Week 5 bench assistance is 3 sets / target RPE 7');
+const repeated=[session('2026-11-20',trip(100,12,6)),session('2026-11-12',trip(100,12,6))];
+check(rec(repeated,2).suggestedKg===100,'Unknown increment does not extrapolate');
+check(rec(repeated,2,{step:5}).suggestedKg===105,'Confirmed combined 5 kg increment');
+check(rec([...repeated,session('2026-10-11',trip(102.5,9,7))],2).suggestedKg===102.5,'Previously observed next load');
+check(rec([session('2026-11-21',trip(100,12,6).slice(0,2)),...repeated],2,{step:5}).suggestedKg===100,'Partial exposure does not advance');
+check(rec([session('2026-11-21',trip(100,12,'')),...repeated],2,{step:5}).suggestedKg===100,'Missing RPE does not advance');
+check(rec([session('2026-11-20',trip(100,8,10))],5,{step:5}).suggestedKg===95,'Hard effort: next confirmed lower load');
+check(rec([session('2026-11-20',trip(100,8,10))]).suggestedKg===null,'Hard effort: no invented lower load');
+check(rec([]).suggestedKg===null,'No history: athlete chooses');
+check(rec([session('2026-11-22',[set(120,8,6,true,'W'),set(125,8,6,false)]),...history]).suggestedKg===100,'Warmup and unfinished rows excluded');
+check(rec([...Array.from({length:650},(_,i)=>session('2026-11-21',trip(10,8,7),'Unrelated '+i)),...history]).suggestedKg===100,'Full history scan beyond 600 records');
+check(rec([...history,session('2026-11-18',trip(80,12,7),name,{sxStrengthSizeCompanion:{cycleId:id,week:4}})]).suggestedKg===100,'Newer manual history beats older cycle-linked history');
+check(rec([...history,session('2026-11-22',trip(120,12,7),name,{sxStrengthSizeCompanion:{cycleId:id,week:5}})]).suggestedKg===100,'Exclude current-week linked logs');
+check(rec([session('2026-11-21',trip(150,12,7),name,{equipmentId:'B'}),session('2026-11-20',trip(100,13,7),name,{equipmentId:'A'})],5,null,{...exercise,equipmentId:'A'}).suggestedKg===100,'Distinct equipment identity');
+check(api.plan('Deadlift',5,{},storage)[0].tmPercent===45,'Fixed RDL retained');
+check(api.plan('Bench Press',6,{},storage).length===0,'Deload remains unchanged');
+const cycleBefore=storage.getItem('ascensionx_strength_v1'),historyBefore=storage.getItem('spartx_db');
+const details={source:'AscensionX',cycleId:id,exercise:'Bench Press',week:5,tm:150};
+const imported=companion.forImport(details,[],storage);
+check(imported.map(e=>e.name).join('|')===plan.map(e=>e.name).join('|'),'Import follows programme order');
+check(imported[0].sets.every(s=>s.weight==='100'&&s.reps==='12'&&s.rpe===''&&!s.done),'Actual import sets match preview; logged RPE stays blank');
+const main={name:'Bench Press',ascensionLink:{cycleId:id,lift:'Bench Press',week:5,supportSyncVersion:419},sets:[set(140,2,'',false),set(132.5,2,'',false)]};
+const previous={name,sets:Array.from({length:3},()=>set('95','8','',false)),sxStrengthSizeCompanion:{cycleId:id,lift:'Bench Press',week:5,plannedSets:3,prescribedKg:95,prescribedReps:8}};
+let work=[main,previous],mainBefore=JSON.stringify(main.sets);
+check(sync.reconcile(work,details,companion,storage).changed&&work[1].sets[0].weight==='100','Refresh old untouched draft');
+check(JSON.stringify(main.sets)===mainBefore,'Primary compound sets preserved');
+const entered={...previous,sets:previous.sets.map((s,i)=>({...s,done:i===0}))};
+work=[{...main,ascensionLink:{...main.ascensionLink,supportSyncVersion:419}},entered];
+check(sync.reconcile(work,details,companion,storage).protected&&work[1]===entered,'Preserve entered draft');
+check(storage.getItem('ascensionx_strength_v1')===cycleBefore&&storage.getItem('spartx_db')===historyBefore,'Read-only active cycle and completed logs');
+console.log(checks+' performance-load checks passed');

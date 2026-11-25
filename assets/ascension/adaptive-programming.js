@@ -847,7 +847,7 @@
   anchor.insertAdjacentElement('afterend',card);
   const equipmentPicker=document.getElementById('sxAscEquipmentExercise');
   const equipmentNames=[...new Set([...Object.values(LIB).flat().map(x=>x.name),
-   ...FOURTH.map(x=>x.name),'Hack Squat','Leg Press','Bulgarian Split Squat','Cable Crunch','Pause Squat'])].filter(Boolean).sort();
+   ...Object.values(FOURTH).flat(Infinity).map(x=>typeof x==='string'?x:x?.name),'Hack Squat','Leg Press','Bulgarian Split Squat','Cable Crunch','Pause Squat'])].filter(Boolean).sort();
   for(const name of equipmentNames){const option=document.createElement('option');option.value=name;option.textContent=name;equipmentPicker.appendChild(option)}
   const equipmentStep=document.getElementById('sxAscEquipmentStep'),equipmentOffset=document.getElementById('sxAscEquipmentOffset'),equipmentStatus=document.getElementById('sxAscEquipmentStatus');
   function showRule(){const rule=equipmentRules()[norm(equipmentPicker.value)];equipmentStep.value=rule?.step??'';equipmentOffset.value=rule?.offset??0;equipmentStatus.textContent=rule?'Confirmed increment for '+equipmentPicker.value:'No confirmed increment. Previously logged loads only.'}

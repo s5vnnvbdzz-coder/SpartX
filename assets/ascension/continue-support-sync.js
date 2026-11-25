@@ -4,7 +4,7 @@
  */
 (function(root){
  'use strict';
- const VERSION=419;
+ const VERSION=423;
  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
  const number=x=>Number.isFinite(Number(x))?Number(x):null;
  const same=(a,b)=>norm(a)===norm(b);

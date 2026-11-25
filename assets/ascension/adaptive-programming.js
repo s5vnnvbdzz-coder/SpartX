@@ -1,4 +1,4 @@
-/* AscensionX Adaptive Programming v1
+/* AscensionX Adaptive Programming — performance-led loading
  * Six-week, cycle-scoped supporting programme. Main lift prescriptions are never changed.
  * Deterministic training-dose heuristics, not medical recovery predictions.
  */
@@ -175,121 +175,110 @@
   storage.setItem(KEY,JSON.stringify(all));
   return read(c.id,storage);
  }
- function lastLinked(name,cycleId,week,storage=global.localStorage){
-  try{
-   const raw=storage.getItem('spartx_db');
-   if(!raw||raw.length>8000000)return null;
-   const sessions=JSON.parse(raw)?.sessions;
-   if(!Array.isArray(sessions))return null;
-   const found=[];
-   for(const session of sessions.slice(-500)){
-    for(const ex of Array.isArray(session.exercises)?session.exercises:[]){
-     const link=ex.sxStrengthSizeCompanion||ex.sxPowerbuildingSupport;
-     if(link?.cycleId!==cycleId||!(Number(link.week)<week)||norm(ex.name)!==norm(name))continue;
-     const sets=(ex.sets||[]).filter(s=>s.done===true&&s.type!=='Warm-up'&&Number(s.weight)>0&&Number(s.reps)>0);
-     if(sets.length)found.push({when:Date.parse(session.date)||0,sets,week:Number(link.week)});
-    }
-   }
-   found.sort((a,b)=>a.week-b.week||a.when-b.when);
-   return found[found.length-1]||null;
-  }catch(_){return null}
+ // All saved workout history is eligible, not only the current cycle or a
+ // particular slice of the session array. Exact exercise/equipment identity
+ // matters; competition bench is never a secondary-bench loading reference.
+ const EQUIPMENT_KEY='sx_ascension_equipment_v1';
+ function equipmentRules(storage=global.localStorage){
+  try{const rules=JSON.parse(storage.getItem(EQUIPMENT_KEY)||'{}');return rules&&typeof rules==='object'&&!Array.isArray(rules)?rules:{}}catch(_){return {}}
  }
- function recommend(ex,cycleId,week,storage){
-  // The classic six-week main lift stays authoritative. Accessories use only
-  // their own completed lifting history, even if it predates this cycle.
-  // A technical support Bench Press must never inherit a competition bench load.
-  const old=lastLinked(ex.name,cycleId,week,storage)||
-   (ex.name==='Bench Press'?null:latestSquatAccessoryHistory(ex.name,storage));
-  if(!old||old.sets.length<2)return {targetReps:ex.min,suggestedKg:null,
-   reason:'Choose an appropriate starting load, then log completed sets and RPE to individualise this exercise.'};
-  const weights=old.sets.map(s=>Number(s.weight));
-  const base=Math.min(...weights);
-  const sameLoad=weights.every(w=>Math.abs(w-base)<.01);
-  const reps=old.sets.map(s=>Number(s.reps));
-  const low=Math.min(...reps);
-  const rpes=old.sets.map(s=>s.rpe===''||s.rpe==null?NaN:Number(s.rpe));
-  const logged=rpes.every(n=>Number.isFinite(n)&&n>=1&&n<=10);
-  const target=Number(ex.targetRpe)||(10-Number(ex.rir||3));
-  const full=old.sets.length>=2;
-  const missed=reps.some(r=>r<ex.min);
-  const hard=logged&&rpes.some(r=>r>=9.5||r>target+1.5);
-  const easy=logged&&rpes.every(r=>r<=target+.5);
-  const toStep=(kg,step)=>Math.max(step,Math.round(kg/step)*step);
-  if(week>=4)return {targetReps:ex.min,suggestedKg:toStep(base*.95,2.5),
-   reason:'Intensification: suggest a modestly lighter accessory load and reduce fatigue. Adjust to the target RPE.'};
-  if(missed||hard)return {targetReps:ex.min,suggestedKg:toStep(base*.95,2.5),
-   reason:'Previous completed work missed the minimum reps or substantially exceeded target effort; reduce load slightly.'};
-  if(full&&sameLoad&&low>=ex.max&&easy){
-   const increment=base>=50?2.5:base>=20?1.25:.5;
-   return {targetReps:ex.min,suggestedKg:Math.round((base+increment)*4)/4,
-    reason:'All completed sets reached the top of the repetition range at controlled RPE; progress load conservatively.'};
+ function setEquipment(name,rule,storage=global.localStorage){
+  const key=norm(name);if(!key)throw Error('Exercise required');
+  const rules=equipmentRules(storage);
+  if(rule==null){delete rules[key]}else{
+   const step=Number(rule.step),offset=Number(rule.offset??0);
+   if(!Number.isFinite(step)||step<=0||step>100||!Number.isFinite(offset)||offset<0||offset>=step)throw Error('Invalid increment or offset');
+   rules[key]={step,offset,equipmentId:String(rule.equipmentId||'')};
   }
-  if(!logged)return {targetReps:Math.max(ex.min,Math.min(ex.max,low)),suggestedKg:base,
-   reason:'Exercise history provides a starting load; hold progression until RPE has been recorded consistently.'};
-  return {targetReps:Math.min(ex.max,Math.max(ex.min,low+(easy?1:0))),suggestedKg:base,
-   reason:easy?'Previous exercise-specific sets were controlled; add one repetition before increasing load.':
-    'Maintain the previous exercise-specific load and repetitions until target RPE is reached.'};
+  storage.setItem(EQUIPMENT_KEY,JSON.stringify(rules));return rules[key]||null;
  }
-
- // Machine loading is individual to an athlete and machine, so NEVER infer
- // a Hack Squat / Leg Extension load from barbell squat training max.
- // Use only completed exercise-specific history, without changing that history.
- function latestSquatAccessoryHistory(name,storage=global.localStorage){
+ function exerciseHistory(name,cycleId,week,storage, equipmentId=''){
   try{
-   const raw=storage.getItem('spartx_db');
-   if(!raw||raw.length>12000000)return null;
-   const sessions=JSON.parse(raw)?.sessions;
-   if(!Array.isArray(sessions))return null;
+   const sessions=JSON.parse(storage.getItem('spartx_db')||'{}')?.sessions;
+   if(!Array.isArray(sessions))return [];
    const records=[];
-   for(const session of sessions.slice(0,600)){
+   for(const session of sessions){
+    const when=Date.parse(session?.date);
+    if(!Number.isFinite(when))continue;
+    const setsByEquipment=new Map();
     for(const exercise of Array.isArray(session.exercises)?session.exercises:[]){
-     if(norm(exercise.name)!==norm(name))continue;
-     const sets=(exercise.sets||[]).filter(set=>set?.done===true&&
-      !/^(?:w|warm.?up)$/i.test(String(set.type||''))&&
-      Number.isFinite(Number(set.weight))&&Number(set.weight)>0&&
-      Number.isInteger(Number(set.reps))&&Number(set.reps)>0);
-     if(sets.length)records.push({sets,when:Date.parse(session.date)||0});
+     if(norm(exercise?.name)!==norm(name))continue;
+     const link=exercise.sxStrengthSizeCompanion||exercise.sxPowerbuildingSupport;
+     if(cycleId&&link?.cycleId===cycleId&&Number(link.week)>=week)continue;
+     if(name==='Bench Press'&&(!link||exercise.ascensionLink))continue;
+     const equipment=String(exercise.equipmentId||'');
+     if(equipmentId&&equipment!==equipmentId)continue;
+     const sets=(Array.isArray(exercise.sets)?exercise.sets:[]).filter(s=>s?.done===true&&
+      !/^(?:w\d*|warm[ -]?up(?: set)?)$/i.test(String(s.type||''))&&
+      Number.isFinite(Number(s.weight))&&Number(s.weight)>0&&
+      Number.isInteger(Number(s.reps))&&Number(s.reps)>0);
+     if(sets.length)setsByEquipment.set(equipment,[...(setsByEquipment.get(equipment)||[]),...sets]);
     }
+    for(const [equipment,sets] of setsByEquipment)records.push({when,sets,equipment});
    }
    records.sort((a,b)=>b.when-a.when);
-   return records[0]||null;
-  }catch(_){return null}
+   if(!records.length)return [];
+   // Do not blend distinct known machines, even when their exercise names match.
+   const chosen=equipmentId||records[0].equipment;
+   return records.filter(r=>r.equipment===chosen);
+  }catch(_){return []}
  }
- function recommendSquatAccessory(item,week,storage=global.localStorage){
-  const first={targetReps:item.min,suggestedKg:null,
-   reason:'Select a comfortable first working weight on this machine. Log actual reps and RPE so SpartanX can prescribe the next session.'};
-  // Cable/core work stays athlete-selected; machine weights are only compared
-  // against the exact same exercise, not a different machine or squat 1RM.
-  if(!['Hack Squat','Leg Extension','45° Back Extension','Leg Press','Bulgarian Split Squat','Cable Crunch'].includes(item.name))
-   return first;
-  const history=latestSquatAccessoryHistory(item.name,storage);
-  if(!history)return first;
-  const sets=history.sets,weights=sets.map(s=>Number(s.weight));
-  const base=Math.min(...weights);
-  const sameLoad=weights.every(n=>Math.abs(n-base)<0.01);
-  const rpes=sets.map(s=>s.rpe===''||s.rpe==null?NaN:Number(s.rpe));
-  const reliable=rpes.every(n=>Number.isFinite(n)&&n>=1&&n<=10);
-  // Do not award a progression for a partially completed 3-set hack squat.
-  const requiredSets=item.name==='Hack Squat'?3:2;
-  const achieved=sets.length>=requiredSets&&sets.every(s=>Number(s.reps)>=item.max);
-  const easy=reliable&&rpes.every(n=>n<=item.targetRpe);
-  const hard=reliable&&rpes.some(n=>n>=9);
-  const missed=sets.some(s=>Number(s.reps)<item.min);
-  const rounding=n=>Math.max(2.5,Math.round(n/2.5)*2.5);
-  // Taper weeks do not drive load increases. Reduced volume and modestly
-  // reduced load target lower fatigue, without editing any recorded set.
-  if(week>=4)return {targetReps:item.min,suggestedKg:rounding(base*(week===4?.95:.90)),
-   reason:'Reduced loading for the AscensionX taper. Adjust to the prescribed RPE on this machine.'};
-  if(hard||missed)return {targetReps:item.min,suggestedKg:rounding(base*.95),
-   reason:'Previous exposure was too demanding or missed the minimum reps. Suggest a small load reduction; athlete may override.'};
-  if(reliable&&achieved&&easy&&sameLoad){
-   const increment=item.name==='Hack Squat'||item.name==='Leg Press'?5:2.5;
-   return {targetReps:item.min,suggestedKg:rounding(base+increment),
-    reason:'Previous completed sets reached the top of the range at the target RPE. Suggest a small load increase; athlete may override.'};
+ function recommend(ex,cycleId,week,storage=global.localStorage){
+  const min=Number(ex.min),max=Number(ex.max),count=Number(ex.sets)||3;
+  const target=clamp(Number(ex.targetRpe)||(10-Number(ex.rir||3)),6,9);
+  const rule=equipmentRules(storage)[norm(ex.name)];
+  const history=exerciseHistory(ex.name,cycleId,week,storage,String(ex.equipmentId||rule?.equipmentId||''));
+  const manual=(reason,evidence=null)=>({targetReps:min,suggestedKg:null,reason,confidence:'low',evidence});
+  if(!history.length)return manual('No comparable completed weighted sets. Choose starting weight, or progress bodyweight repetitions, and log actual RPE.');
+  const records=history.slice(0,5),last=records[0];
+  // Repeated working load, with the final/lowest rep set as conservative anchor.
+  const weights=last.sets.map(s=>Number(s.weight)),base=Math.min(...weights);
+  const comparable=last.sets.filter(s=>Number(s.weight)===base);
+  const full=comparable.length>=count,same=weights.every(w=>w===base);
+  const validRpe=s=>s.rpe!==''&&s.rpe!=null&&Number.isFinite(Number(s.rpe))&&Number(s.rpe)>=6&&Number(s.rpe)<=10;
+  const known=comparable.every(validRpe),low=Math.min(...comparable.map(s=>Number(s.reps)));
+  const effort=known?Math.max(...comparable.map(s=>Number(s.rpe))):null;
+  const observed=[...new Set(history.flatMap(r=>r.sets.map(s=>Number(s.weight))))].sort((a,b)=>a-b);
+  // An observed weight is known to have been used, but its spacing is not
+  // assumed to be the machine increment. Never extrapolate an unconfirmed ladder.
+  const explicit=Number(ex.incrementKg||rule?.step),offset=Number(rule?.offset||0);
+  const confirmed=Number.isFinite(explicit)&&explicit>0&&explicit<=100&&offset>=0&&offset<explicit;
+  const round=n=>Math.round(n*10000)/10000;
+  const previousLoad=confirmed?round(offset+(Math.ceil((base-offset)/explicit-1e-8)-1)*explicit):observed.filter(w=>w<base).at(-1);
+  const nextLoad=confirmed?round(offset+(Math.floor((base-offset)/explicit+1e-8)+1)*explicit):observed.find(w=>w>base);
+  const equipmentSource=confirmed?'confirmed increment '+explicit+' kg':'previously logged loads only';
+  const evidence={sessions:records.length,totalSessions:history.length,sets:comparable.length,previousKg:base,previousReps:low,previousRpe:effort,date:new Date(last.when).toISOString(),equipmentSource};
+  const prefix='Last comparable performance: '+comparable.length+' × '+base+' kg × '+low+' reps'+(known?' (highest RPE '+effort+')':' (RPE incomplete)')+'. ';
+  const out=(kg,reps,reason)=>({suggestedKg:kg,targetReps:clamp(Math.floor(reps),min,max),reason:prefix+reason,confidence:known&&full&&same?'moderate':'low',evidence});
+  const down=reason=>Number.isFinite(previousLoad)&&previousLoad>0&&previousLoad>=base*.8?
+   out(previousLoad,min,reason+' Reduce to the next confirmed or observed lower load; reassess RPE.'):
+   {...manual(prefix+reason+' Select a lower available weight; no suitable lower load is verified.',evidence)};
+  // A rep at the same weight is a rough RIR-based estimate, not a measured RPE.
+  // Never convert machine performance into a barbell 1RM.
+  if(known&&(effort>=9.5||low<min))return down('Previous effort was too high or minimum reps were missed.');
+  if(!known){
+   if(low<min)return down('Minimum reps were missed, and RPE is missing.');
+   return out(base,low,'Hold established load; no increase without complete RPE.');
   }
-  return {targetReps:item.min,suggestedKg:rounding(base),
-   reason:reliable?'Hold the previous successful working load and progress repetitions within the target RPE.':
-    'Previous weight is known, but RPE was not fully logged. Hold the weight until enough intensity data is available.'};
+  const achievable=low+Math.floor(target-effort);
+  if(achievable<min)return down('Estimated reps at the target RPE fall below the prescribed range.');
+  if(!same||!full)return out(base,Math.min(low,achievable),'Mixed-load or incomplete exposure; no automatic increase.');
+  const earned=week<=3&&records.length>=2&&records.slice(0,2).every(r=>r.sets.length>=count&&
+   r.sets.every(s=>Number(s.weight)===base&&Number(s.reps)>=max&&validRpe(s)&&Number(s.rpe)<=target-1));
+  if(earned&&Number.isFinite(nextLoad)&&nextLoad>base&&nextLoad<=base*1.10){
+   // Conservative estimate of reps at the new load; cap the assumed rep
+   // capacity to limit extrapolation at high-rep machine exercises.
+   const capacity=base*(1+Math.min(20,low+10-effort)/30);
+   const atNew=Math.floor(30*(capacity/nextLoad-1)-(10-target));
+   if(atNew>=min)return out(nextLoad,Math.min(max,atNew),'Two full controlled exposures earned an available load increase ('+equipmentSource+'). Estimated reps; adjust to target RPE.');
+  }
+  return out(base,achievable,earned?'Maintain the established load or select the next available gym weight if the target RPE permits; no fixed increment required.':'Retain established load and adjust reps to target effort; no blanket taper reduction.');
+ }
+ function latestSquatAccessoryHistory(name,storage=global.localStorage){
+  return exerciseHistory(name,null,Infinity,storage)[0]||null;
+ }
+ function recommendSquatAccessory(item,week,storage){
+  return recommend(item,activeCycle(storage)?.id,week,storage);
  }
  // Intelligent exercise selection for an already-active classic cycle:
  // preserve the quad-priority slot, but select the familiar machine using
@@ -414,7 +403,7 @@
   if(main==='Deadlift'&&week>=4)sets=Math.min(sets,2);
   if(week===6)sets=0;
   if(sets<1)return null;
-  const rir=clamp(item.rir+(week>=4?1:0)+(focus==='strength'?1:0),2,5);
+  const rir=clamp(week>=4?Math.max(item.rir,3)+(item.cost>=2?1:0):Math.max(item.rir,focus==='strength'?3:2),2,4);
   const ex={...item,sets,rir,targetRpe:10-rir,sourceLift:main,week};
   const rec=recommend(ex,cycleId,week,storage);
   return {...ex,...rec,reason:rec.reason+' '+(item.cue||'Supports '+item.muscles+' without additional heavy spinal loading.')+
@@ -444,7 +433,7 @@
     dose(itemFor(name),w,focus,lift,cycleId,storage)).filter(Boolean)
     .map(ex=>({...ex,sets:3,
      // Maintain accessory volume through loading weeks; lower effort in taper.
-     targetRpe:w<=3?7:w===4?6.5:6,rir:w<=3?3:w===4?3.5:4}));
+     targetRpe:w<=3?7:w===4?6.5:6,rir:w<=3?3:w===4?3.5:4})).map(ex=>({...ex,...recommend(ex,cycleId,w,storage)}));
    return [fixedRdl,...tail];
   }
   if(lift==='Back Squat')return squatAdaptivePlan(w,storage);
@@ -587,7 +576,7 @@
      directArms||supportBench?easyRir:Math.max(item.rir,easyRir);
     // dose() ran before the final day-specific RPE adjustment. Recalculate
     // the accessory recommendation using the actual prescribed effort.
-    const final={...item,sets,rir,targetRpe:10-rir,supportRole:profile.role,
+    const final={...item,sets,rir:Math.min(4,rir),targetRpe:Math.max(6,10-rir),supportRole:profile.role,
      ...(directArms?{min:10,max:15,targetReps:10}:{}),
      reason:item.reason+' Low-fatigue '+profile.role+' assistance, adjusted to selected compounds and recent main-lift effort.'};
     if(supportSquat){
@@ -604,7 +593,7 @@
     }else{
      const updated=recommend(final,c.id,week,storage);
      final.suggestedKg=updated.suggestedKg;
-     final.targetReps=updated.targetReps;
+     final.targetReps=updated.targetReps; final.evidence=updated.evidence; final.confidence=updated.confidence;
      final.reason+=' '+updated.reason;
     }
     return final;
@@ -838,7 +827,16 @@
       '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
      '</select></div>',
     '</div>',
-    '<p class="sx-adaptive-rule">The same live prescriptions apply to the remaining weeks of your active AscensionX cycle. Main-lift top sets and back-down sets remain unchanged.</p>',
+    '<details class="sx-adaptive-details" id="sxAscEquipmentSettings">',
+    '<summary>OPTIONAL EQUIPMENT LOAD SETTINGS</summary>',
+    '<p class="sx-adaptive-intro">Optional: enter a known increment for equipment with consistent loading. Cable stacks and machines differ between gyms; leave them unset and use your own logged weight and target RPE. No equipment setup is required.</p>',
+    '<div class="field"><label for="sxAscEquipmentExercise">Exercise</label><select id="sxAscEquipmentExercise"></select></div>',
+    '<div class="sx-adaptive-fields"><div class="field"><label for="sxAscEquipmentStep">Increment (kg)</label><input id="sxAscEquipmentStep" type="number" min="0.25" max="100" step="any" placeholder="e.g. 5"></div>',
+    '<div class="field"><label for="sxAscEquipmentOffset">Starting offset (kg)</label><input id="sxAscEquipmentOffset" type="number" min="0" step="any" placeholder="0"></div></div>',
+    '<button type="button" class="secondary" id="sxAscEquipmentSave">SAVE LOAD RULE</button> <button type="button" class="secondary" id="sxAscEquipmentClear">CLEAR RULE</button>',
+    '<p class="sx-adaptive-status" id="sxAscEquipmentStatus" role="status" aria-live="polite"></p>',
+   '</details>',
+   '<p class="sx-adaptive-rule">The same live prescriptions apply to the remaining weeks of your active AscensionX cycle. Main-lift top sets and back-down sets remain unchanged.</p>',
     '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details" open>',
      '<summary>YOUR TRAINING DAYS · LIVE PROGRAMME <span aria-hidden="true">⌄</span></summary>',
      '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
@@ -847,6 +845,16 @@
    '<p id="sxAscAdaptiveStatus" class="sx-adaptive-status" role="status" aria-live="polite"></p>'
   ].join('');
   anchor.insertAdjacentElement('afterend',card);
+  const equipmentPicker=document.getElementById('sxAscEquipmentExercise');
+  const equipmentNames=[...new Set([...Object.values(LIB).flat().map(x=>x.name),
+   ...Object.values(FOURTH).flat(Infinity).map(x=>typeof x==='string'?x:x?.name),...Object.keys(ADDITIONAL),'Hack Squat','Leg Press','Bulgarian Split Squat','Cable Crunch','Pause Squat'])].filter(Boolean).sort();
+  for(const name of equipmentNames){const option=document.createElement('option');option.value=name;option.textContent=name;equipmentPicker.appendChild(option)}
+  const equipmentStep=document.getElementById('sxAscEquipmentStep'),equipmentOffset=document.getElementById('sxAscEquipmentOffset'),equipmentStatus=document.getElementById('sxAscEquipmentStatus');
+  function showRule(){const rule=equipmentRules()[norm(equipmentPicker.value)];equipmentStep.value=rule?.step??'';equipmentOffset.value=rule?.offset??0;equipmentStatus.textContent=rule?'Confirmed increment for '+equipmentPicker.value:'Optional — no increment required. Use your recorded working weight and target RPE.'}
+  equipmentPicker.addEventListener('change',showRule);
+  document.getElementById('sxAscEquipmentSave').addEventListener('click',()=>{try{setEquipment(equipmentPicker.value,{step:equipmentStep.value,offset:equipmentOffset.value});showRule();render()}catch(_){equipmentStatus.textContent='Enter a positive increment and an offset smaller than that increment.'}});
+  document.getElementById('sxAscEquipmentClear').addEventListener('click',()=>{try{setEquipment(equipmentPicker.value,null);showRule();render()}catch(_){equipmentStatus.textContent='Unable to clear the setting.'}});
+  showRule();
   function render(){
    const current=activeCycle(), selected=selectedDraftLifts();
    const pref=current?read(current.id):draft;
@@ -967,7 +975,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,formatPrescription,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,equipmentRules,setEquipment,formatPrescription,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

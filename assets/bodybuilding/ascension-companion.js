@@ -116,11 +116,11 @@
     if(week===5)sets=1;
     return sets;
   }
-  function plan(lift,week,opts={}){
+  function plan(lift,week,opts={},storage=global.localStorage){
     const main=canonical(lift),w=Number(week);
     if(!main||!Number.isInteger(w)||w<1||w>6)return [];
-    if(!global.SXAscensionAdaptive?.enabled())return [];
-    return global.SXAscensionAdaptive.plan(main,w,opts);
+    if(!global.SXAscensionAdaptive?.enabled(null,storage))return [];
+    return global.SXAscensionAdaptive.plan(main,w,opts,storage);
   }
   function forImport(details,existingNames=[],storage=global.localStorage){
     const active=cycle(storage),p=preference(storage);
@@ -132,7 +132,7 @@
     // Ordered squat/deadlift accessories are owned by Adaptive Programming.
     // Dedupe against existing workout entries; prescribed loads remain editable.
     const exists=new Set(existingNames.map(normName));
-    return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding,lifts:active.lifts})
+    return plan(main,week,{volume:p.volume,powerbuilding:p.powerbuilding,lifts:active.lifts},storage)
       .filter(item=>!exists.has(normName(item.name)))
       .map(item=>{
         const fixedRdl=item.name==='Romanian Deadlift'&&Number(item.tmPercent)===45;
@@ -158,6 +158,7 @@
           sxStrengthSizeCompanion:{cycleId:active.id,lift:main,week,adaptive:p.adaptive===true,
             targetRir:item.rir,targetRpe:rpe,repsMin:item.min,repsMax:item.max,plannedSets:item.sets,
             prescribedReps:reps,prescribedKg:prescribedKg>0?prescribedKg:null,
+            prescriptionEvidence:item.evidence||null,prescriptionConfidence:item.confidence||null,
             ...(fixedRdl?{fixedDeadliftRdl:true,trainingMaxKg:Number.isFinite(tm)&&tm>0?tm:null,
               trainingMaxPercent:45}:null)},
           sets:Array.from({length:item.sets},()=>({

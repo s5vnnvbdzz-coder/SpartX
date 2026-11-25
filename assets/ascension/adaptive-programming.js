@@ -827,7 +827,16 @@
       '<option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option>',
      '</select></div>',
     '</div>',
-    '<p class="sx-adaptive-rule">The same live prescriptions apply to the remaining weeks of your active AscensionX cycle. Main-lift top sets and back-down sets remain unchanged.</p>',
+    '<details class="sx-adaptive-details" id="sxAscEquipmentSettings">',
+    '<summary>AVAILABLE EQUIPMENT LOADS</summary>',
+    '<p class="sx-adaptive-intro">Confirm the increment in logged kilograms for your exercise. For paired dumbbells and iso-lateral machines use the combined-weight increment. Leave unconfirmed to use only previously logged loads.</p>',
+    '<div class="field"><label for="sxAscEquipmentExercise">Exercise</label><select id="sxAscEquipmentExercise"></select></div>',
+    '<div class="sx-adaptive-fields"><div class="field"><label for="sxAscEquipmentStep">Increment (kg)</label><input id="sxAscEquipmentStep" type="number" min="0.25" max="100" step="any" placeholder="e.g. 5"></div>',
+    '<div class="field"><label for="sxAscEquipmentOffset">Starting offset (kg)</label><input id="sxAscEquipmentOffset" type="number" min="0" step="any" placeholder="0"></div></div>',
+    '<button type="button" class="secondary" id="sxAscEquipmentSave">SAVE LOAD RULE</button> <button type="button" class="secondary" id="sxAscEquipmentClear">CLEAR RULE</button>',
+    '<p class="sx-adaptive-status" id="sxAscEquipmentStatus" role="status" aria-live="polite"></p>',
+   '</details>',
+   '<p class="sx-adaptive-rule">The same live prescriptions apply to the remaining weeks of your active AscensionX cycle. Main-lift top sets and back-down sets remain unchanged.</p>',
     '<details id="sxAscAdaptivePlanDetails" class="sx-adaptive-details" open>',
      '<summary>YOUR TRAINING DAYS · LIVE PROGRAMME <span aria-hidden="true">⌄</span></summary>',
      '<div id="sxAscAdaptivePreview" class="sx-adaptive-preview"></div>',
@@ -836,6 +845,16 @@
    '<p id="sxAscAdaptiveStatus" class="sx-adaptive-status" role="status" aria-live="polite"></p>'
   ].join('');
   anchor.insertAdjacentElement('afterend',card);
+  const equipmentPicker=document.getElementById('sxAscEquipmentExercise');
+  const equipmentNames=[...new Set([...Object.values(LIB).flat().map(x=>x.name),
+   ...FOURTH.map(x=>x.name),'Hack Squat','Leg Press','Bulgarian Split Squat','Cable Crunch','Pause Squat'])].filter(Boolean).sort();
+  for(const name of equipmentNames){const option=document.createElement('option');option.value=name;option.textContent=name;equipmentPicker.appendChild(option)}
+  const equipmentStep=document.getElementById('sxAscEquipmentStep'),equipmentOffset=document.getElementById('sxAscEquipmentOffset'),equipmentStatus=document.getElementById('sxAscEquipmentStatus');
+  function showRule(){const rule=equipmentRules()[norm(equipmentPicker.value)];equipmentStep.value=rule?.step??'';equipmentOffset.value=rule?.offset??0;equipmentStatus.textContent=rule?'Confirmed increment for '+equipmentPicker.value:'No confirmed increment. Previously logged loads only.'}
+  equipmentPicker.addEventListener('change',showRule);
+  document.getElementById('sxAscEquipmentSave').addEventListener('click',()=>{try{setEquipment(equipmentPicker.value,{step:equipmentStep.value,offset:equipmentOffset.value});showRule();render()}catch(_){equipmentStatus.textContent='Enter a positive increment and an offset smaller than that increment.'}});
+  document.getElementById('sxAscEquipmentClear').addEventListener('click',()=>{try{setEquipment(equipmentPicker.value,null);showRule();render()}catch(_){equipmentStatus.textContent='Unable to clear the setting.'}});
+  showRule();
   function render(){
    const current=activeCycle(), selected=selectedDraftLifts();
    const pref=current?read(current.id):draft;

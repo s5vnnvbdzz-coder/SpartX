@@ -61,6 +61,7 @@
         const originalName=String(ex?.name||'').trim().slice(0,100);
         if(!originalName||CARDIO.test(originalName)||!Array.isArray(ex.sets))return [];
         const name=typeof E?.canonical==='function'?E.canonical(originalName):originalName;
+        const firstTop=ex.sets.findIndex(s=>!/(warm|drop|failure|excluded|cardio|back.?down|back.?off)/i.test(String(s?.type||''))&&!/^(w|b|x|f)$/i.test(String(s?.type||'')));
         const sets=ex.sets.slice(0,80).flatMap((set,index)=>{
           // Only a checked set with valid load/reps is eligible; no future sets.
           if(set?.done!==true||String(set?.type||'').toLowerCase()==='cardio')return [];
@@ -69,7 +70,7 @@
           if(!Number.isFinite(weight)||weight<0||weight>1500||!Number.isInteger(reps)||reps<1||reps>100)return [];
           const rawRpe=set.rpe===''||set.rpe==null?null:Number(set.rpe);
           const rpe=rawRpe!=null&&Number.isFinite(rawRpe)&&rawRpe>=6&&rawRpe<=10?rawRpe:null;
-          return [{weight,reps,rpe,type:String(set.type||'Working Set').slice(0,40),index:index+1,done:true}];
+          return [{weight,reps,rpe,type:String(set.type||'Working Set').slice(0,40),index:index+1,done:true,isTopSet:index===firstTop}];
         });
         const prescribedRpe=ex?.ascensionLink?.targetRpe??ex?.targetRpe;
          const targetRpe=prescribedRpe!==''&&prescribedRpe!=null&&Number.isFinite(Number(prescribedRpe))&&

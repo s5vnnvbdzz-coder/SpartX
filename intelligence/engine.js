@@ -63,6 +63,22 @@
       targetRpe:target!==null&&Number.isFinite(target)&&target>=6&&target<=10?target:null
     };
   }
+  // Strict linkage for live comparisons. Never infer a programme from notes.
+  function programmeLink(ex,name){
+    const main=ascensionLink(ex?.ascensionLink,name);
+    if(main)return {...main,role:'primary',sessionLift:main.lift,plannedCount:main.plannedSets.length};
+    const raw=ex?.sxStrengthSizeCompanion||ex?.sxPowerbuildingSupport;
+    if(!raw||!Number.isFinite(Date.parse(raw.cycleId))||!Number.isInteger(Number(raw.week))||
+      Number(raw.week)<1||Number(raw.week)>6)return null;
+    const count=Number(raw.plannedSets),reps=Number(raw.prescribedReps),kg=Number(raw.prescribedKg);
+    const validCount=Number.isInteger(count)&&count>0&&count<=20?count:null;
+    const target=Number(raw.targetRpe);
+    return {role:'support',cycleId:String(raw.cycleId),week:Number(raw.week),
+      sessionLift:canonical(raw.lift||raw.sourceLift||''),plannedCount:validCount,
+      targetRpe:target>=6&&target<=10?target:null,
+      plannedSets:validCount&&Number.isInteger(reps)&&reps>0&&reps<=100&&kg>0&&kg<=1500?
+        Array.from({length:validCount},()=>({weight:kg,reps})):null};
+  }
   function normalisedProgramme(ex){
     const link=ex.ascensionLink;
     if(!link)return null;
@@ -86,7 +102,7 @@
           const rpe=set.rpe==null||set.rpe===''?null:safeNumber(set.rpe,NaN);
           return [{weight,reps,rpe:Number.isFinite(rpe)&&rpe>=6&&rpe<=10?rpe:null,type:String(set.type||'Working Set'),done:true}];
         });
-        return sets.length?{name,sets,ascensionLink:ascensionLink(ex.ascensionLink,name)}:null;
+        return sets.length?{name,sets,ascensionLink:ascensionLink(ex.ascensionLink,name),programmeLink:programmeLink(ex,name)}:null;
       }).filter(Boolean):[];
       return exercises.length?[{id:String(s.id??'import-'+idx),name:String(s.name||'Workout').slice(0,100),date:new Date(time).toISOString(),duration:clamp(safeNumber(s.duration,0),0,86400),exercises}]:[];
     }).sort((a,b)=>dayStamp(a.date)-dayStamp(b.date));
@@ -291,5 +307,5 @@
     if(a.muscleRows.length)rows.push({kind:'neutral',title:'Muscle exposure overview',text:'Your recent set counts show training exposure, not verified muscle recovery or a recommended individual training dose.'});
     return rows.slice(0,4);
   }
-  global.SXEngine=Object.freeze({CORE,MOVES,normalizeSessions,estimatedMax,makeDemoProfile,analyse,recommendation,insights,canonical});
+  global.SXEngine=Object.freeze({CORE,MOVES,normalizeSessions,programmeLink,estimatedMax,makeDemoProfile,analyse,recommendation,insights,canonical});
 })(window);

@@ -36,6 +36,15 @@
   const exercises=[...grouped.values()].map(group=>{
    const sets=group.sets,work=sets.filter(working);
    const link=group.programmeLink;
+   if(/^bench press static hold$/i.test(group.name)){
+    const holds=work.filter(s=>Number(s.durationSeconds)>0);
+    const prior=saved.slice().reverse().flatMap(s=>s.exercises||[]).filter(e=>E.canonical(e.name)===group.name).flatMap(e=>e.sets||[]).filter(s=>s.durationSeconds>0);
+    const best=holds.reduce((a,b)=>!a||b.weight>a.weight||b.weight===a.weight&&b.durationSeconds>a.durationSeconds?b:a,null);
+    const comparable=best?prior.filter(s=>s.weight===best.weight):[];
+    const prevSeconds=comparable.length?Math.max(...comparable.map(s=>s.durationSeconds)):null;
+    return {...group,isometric:true,completed:sets.length,working:holds.length,warmups:0,volumeKg:0,workVolumeKg:0,bestE1rm:null,avgRpe:avgRpe(holds),highEffort:holds.filter(s=>s.rpe>=9).length,holdSeconds:holds.reduce((n,s)=>n+s.durationSeconds,0),bestHold:best,previousBestSeconds:prevSeconds,
+      fatigue:{kind:'neutral',title:'Isometric effort',detail:'Review duration, load, effort and hold position. Static holds are separate from repetition volume.'},advice:{kind:'neutral',title:'Additional training evidence',detail:'Compare holds at the same weight and position over time. This does not change the prescribed bench sets, training max or estimated 1RM.'}};
+   }
    // Saved history is chronological; search actual eligible work, never
    // substitute a manual workout for a linked AscensionX comparison.
    let previous=null,previousWork=[],previousLink=null;
@@ -80,6 +89,7 @@
    let advice;
    if(group.programmed&&group.targetRpe!==null&&maxRpe>=group.targetRpe+.75)
      advice={kind:'caution',title:'Effort above programme target',detail:'Completed set reached RPE '+maxRpe+' against target '+group.targetRpe+'. Check rest and technique; review remaining accessories. Your main-lift prescription is not automatically changed.'};
+    else if(link?.role==='additional')advice={kind:'neutral',title:'Additional cycle exercise',detail:'Logged as extra training. Review workload and effort; not part of the original prescription.'};
     else if(group.programmed)advice={kind:'neutral',title:'Follow your cycle progression',detail:'This lift belongs to a programmed cycle. Use its prescribed progression rather than an automatic increase.'};
    else if(!work.length)advice={kind:'neutral',title:'Complete working sets first',detail:'There is not enough performance data to recommend a load change.'};
    else if(rpe==null)advice={kind:'neutral',title:'Record RPE for better guidance',detail:'Keep the planned load and log effort before considering an increase.'};

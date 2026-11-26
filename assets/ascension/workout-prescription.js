@@ -120,6 +120,53 @@
    return Array.isArray(saved?.sessions)?saved.sessions:[];
   }catch(_){return []}
  }
+ // Warm-ups track the actual (including recovery-adjusted) working weight.
+ // Four low-rep ramps for volume/deload; an extra submaximal single bridges
+ // large jumps in the heavy weeks. All rounding is in the athlete's units.
+ const WARMUP_VERSION=424;
+ function bridgeSingle(lift,week,top,last,step){
+  if(!LIFTS.includes(lift)||week<4||week>5||!(top>0)||!(step>0)||!(last>0))return null;
+  const gap=top-last;
+  if(gap<Math.max(3*step,top*.13))return null;
+  const ratio=lift==='Bench Press'||lift==='Overhead Press'?.93:.915;
+  const next=Math.min(round(top*ratio,step),top-step);
+  return next>last&&next<top?{weight:next,reps:1}:null;
+ }
+ function warmupPlan(lift,week,top,step=2.5){
+  if(!LIFTS.includes(lift)||!Number.isInteger(week)||week<1||week>6||!Number.isFinite(top)||top<=0||!Number.isFinite(step)||step<=0)return [];
+  const ratios=week===6?[.42,.58,.70,.82]:[.43,.61,.72,.82];
+  const result=[];
+  ratios.forEach((ratio,i)=>{
+   const weight=Math.min(round(top*ratio,step),top-step);
+   if(weight>0&&weight<top&&weight>(result.at(-1)?.weight||0))result.push({weight,reps:[5,3,2,1][i]});
+  });
+  const bridge=bridgeSingle(lift,week,top,result.at(-1)?.weight,step);
+  if(bridge)result.push(bridge);
+  return result;
+ }
+ // Upgrade only an ACTIVE linked draft, adding one bridge single before the
+ // first working set. Preserve every existing set object and any entered data.
+ // Never add a warm-up after working sets have started or to a historical edit.
+ function upgradeActiveWarmups(exercise,cycleId,step=2.5){
+  const link=exercise?.ascensionLink,sets=exercise?.sets;
+  if(!cycleId||link?.cycleId!==cycleId||link.lift!==exercise.name||
+   Number(link.warmupVersion)>=WARMUP_VERSION||!Array.isArray(sets))return false;
+  const warm=s=>/^(?:W|Warm[ -]?up)$/i.test(String(s?.type||''));
+  const index=sets.findIndex(s=>!warm(s));
+  if(index<1||sets.slice(index).some(s=>warm(s)||s?.done===true||s?.rpe!=null&&s.rpe!==''))return false;
+  const first=sets[index],last=sets[index-1];
+  if(!['Working Set','Backdown Set','B'].includes(first.type))return false;
+  // Preserve a deliberately customised warm-up sequence; only bridge an
+  // ascending existing ramp, never delete or overwrite any earlier row.
+  const prefix=sets.slice(0,index);
+  if(prefix.some((s,i)=>!Number.isFinite(Number(s.weight))||Number(s.weight)<=0||
+   i>0&&Number(s.weight)<=Number(prefix[i-1].weight)))return false;
+  const next=bridgeSingle(link.lift,Number(link.week),Number(first.weight),Number(last.weight),step);
+  if(!next)return false;
+  sets.splice(index,0,{weight:String(next.weight),reps:'1',rpe:'',type:'Warm-up',done:false});
+  link.warmupVersion=WARMUP_VERSION;
+  return true;
+ }
  function build(state,lift,storage=global.localStorage){
   const c=state?.cycle,p=state?.profile;
   if(!c?.created||!p||!LIFTS.includes(lift))return null;
@@ -137,12 +184,7 @@
    cycleId:c.created,logs:activeLogs(state),sessions:sessions(storage)
   });
   const top=safe?.topLoad??topNormal,back=safe?.backLoad??backNormal;
-  const warmPct=plan.deload?[25,35,45,55]:plan.topPct<=75?[30,40,50,60]:[40,55,65,75];
-  const warmupSets=warmPct.map((pct,i)=>({
-   weight:Math.max(step,Math.min(round(tm*pct/100,step),
-    safe?.adjusted?round(top*[.55,.7,.8,.9][i],step):top-(4-i)*step)),
-   reps:[5,3,2,1][i]
-  }));
+  const warmupSets=warmupPlan(lift,week,top,step);
   const sets=plan.deload?Array.from({length:3},()=>({weight:top,reps:plan.topReps})):
    [{weight:top,reps:plan.topReps},...Array.from({length:plan.backSets},()=>
     ({weight:back,reps:plan.backReps}))];
@@ -150,11 +192,11 @@
    'Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
   const cycleTitle=String(c.title||c.name||'').trim().slice(0,75)||liftTitle+' (current week)';
   return {source:'AscensionX',cycleId:c.created,cycleTitle,exercise:lift,
-   week,weekLabel:plan.name,tm,targetRpe:plan.rpe,warmupSets,sets,
+   week,weekLabel:plan.name,tm,targetRpe:plan.rpe,warmupSets,sets,warmupVersion:WARMUP_VERSION,
    recoveryBridge:safe?.adjusted?{
     fromWeek:safe.sourceWeek,previousTop:safe.sourceTop,
     nominalTop:safe.nominalTop,adjustedTop:top
    }:null};
  }
- global.SXAscensionPrescription=Object.freeze({PLAN,LIFTS,read,build,reconcileCompletedWeeks,reconcileSavedSpartanSessions});
+ global.SXAscensionPrescription=Object.freeze({PLAN,LIFTS,WARMUP_VERSION,warmupPlan,upgradeActiveWarmups,read,build,reconcileCompletedWeeks,reconcileSavedSpartanSessions});
 })(window);

@@ -95,12 +95,14 @@
       const exercises=Array.isArray(s.exercises)?s.exercises.slice(0,60).map(ex=>{
         const name=canonical(ex.name||ex.exerciseName);
         if(!name)return null;
-        const sets=(Array.isArray(ex.sets)?ex.sets:[]).slice(0,30).flatMap(set=>{
+        const entries=(Array.isArray(ex.sets)?ex.sets:[]).slice(0,30);
+        const firstTop=entries.findIndex(s=>isWorking(s)&&!/back.?down|back.?off|^b$/i.test(String(s?.type||'')));
+        const sets=entries.flatMap((set,index)=>{
           if(set.done===false)return [];
           const weight=safeNumber(set.weight,NaN),reps=safeNumber(set.reps,NaN);
           if(!Number.isFinite(weight)||weight<0||weight>1500||!Number.isFinite(reps)||reps<1||reps>100)return [];
           const rpe=set.rpe==null||set.rpe===''?null:safeNumber(set.rpe,NaN);
-          return [{weight,reps,rpe:Number.isFinite(rpe)&&rpe>=6&&rpe<=10?rpe:null,type:String(set.type||'Working Set'),done:true}];
+          return [{weight,reps,rpe:Number.isFinite(rpe)&&rpe>=6&&rpe<=10?rpe:null,type:String(set.type||'Working Set'),done:true,isTopSet:index===firstTop}];
         });
         return sets.length?{name,sets,ascensionLink:ascensionLink(ex.ascensionLink,name),programmeLink:programmeLink(ex,name)}:null;
       }).filter(Boolean):[];

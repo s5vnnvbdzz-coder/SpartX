@@ -10,13 +10,13 @@ const ex={name:'Machine Chest Press',sxStrengthSizeCompanion:{cycleId:id,week:5,
 const initial=JSON.stringify(ex);
 let hint=G.advise(ex);
 assert.equal(hint.field,'weight');assert.equal(hint.direction,'up');assert.equal(hint.index,0);assert.equal(hint.nextIndex,1);assert.equal(JSON.stringify(ex),initial);
-assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'rpe','down'],[0,'weight','up']]);
+assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'weight','up']]);
 ex.sets[1]=set(87,10,8);hint=G.advise(ex);
 assert.equal(hint.field,'rpe');assert.equal(hint.direction,'down');assert.equal(hint.index,1);assert.equal(hint.nextIndex,2);assert.equal(hint.weight,87);assert.ok(hint.detail.includes('87 kg'));
-assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'rpe','down']]);
+assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
 assert.equal(ex.sets[2].weight,80);assert.equal(ex.sets[2].rpe,'');
 ex.sets[2].done=true;ex.sets[2].rpe=6.5;assert.equal(G.advise(ex),null);
-assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'rpe','down'],[2,'rpe','down']]);
+assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
 ex.sets[2].rpe=7;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'rpe','down']]);
 ex.sets=[set(80,8,6),set(80,8,'',false)];assert.equal(G.advise(ex).field,'reps');
 ex.sets[0].rpe='';assert.equal(G.advise(ex),null);assert.equal(G.indicators(ex).length,0);
@@ -52,4 +52,7 @@ assert.equal(plans(low,5).flatMap(d=>d.exercises).find(e=>e.name===candidate.nam
 const mixed=store(three,4,'strength',[{date:'2026-10-25T10:00:00Z',exercises:[{name:'Machine Chest Press',sets:[set(80,10,6),set(87,10,8)]}]}]);
 const consolidation=A.recommend({name:'Machine Chest Press',sets:3,min:8,max:10,targetRpe:7},id,5,mixed);
 assert.equal(consolidation.suggestedKg,87);assert.equal(consolidation.targetReps,10);
+const established=store(three,4,'strength',[{date:'2026-10-25T10:00:00Z',exercises:[{name:'Machine Chest Press',sets:[set(87,10,8),set(87,10,8),set(87,10,8)]}]}]);
+const retained=A.recommend({name:'Machine Chest Press',sets:3,min:8,max:10,targetRpe:7},id,5,established);
+assert.equal(retained.suggestedKg,87);assert.equal(retained.targetReps,10);assert.ok(retained.reason.includes('Consolidate'));
 console.log('PASS: adaptive set guidance and weekly volume allocation');

@@ -121,6 +121,8 @@
   work.splice(work.indexOf(prior),1);
   if(!exists)work.splice(work.indexOf(row||main)+1,0,chest);
   main.ascensionLink.chestCoverageVersion=428;
+  main.ascensionLink.supportSyncVersion=Math.max(Number(main.ascensionLink.supportSyncVersion)||0,VERSION);
+  main.ascensionLink.supportOrderVersion=Math.max(Number(main.ascensionLink.supportOrderVersion)||0,ORDER_VERSION);
   return {changed:true,previousOrder:before};
  }
  root.SXAscensionContinueSupport=Object.freeze({VERSION,ORDER_VERSION,matchedLink,untouched,reconcile,alignLinked,upgradeBenchChest});

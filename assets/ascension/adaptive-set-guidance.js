@@ -21,27 +21,25 @@
   const last=completed.at(-1);
   if(!valid(last))return null;
   const weight=number(last.weight),reps=number(last.reps),rpe=number(last.rpe);
-  const prior=completed.slice(0,-1).filter(valid).at(-1);
-  const jump=!!prior&&weight>number(prior.weight)&&reps>=number(prior.reps)&&rpe-number(prior.rpe)>=1.5;
-  const high=rpe>=target+1||jump;
+  const high=rpe>target;
   const show=(field,direction,title,detail)=>({index:sets.indexOf(last),nextIndex:index,field,direction,title,detail,weight,reps,rpe,target});
   if(high)return show('rpe','down','Consolidate effort','Keep '+weight+' kg as your progression reference. Work towards RPE '+target+' at comparable repetitions across sessions; do not force lower RPE immediately or push through pain or excessive fatigue. No further increase advised.'+(rpe>=9||reps<min?' Stop or adjust the set if technique or safety deteriorates.':''));
   // In heavy weeks only the first completed assistance set may prompt an increase.
-  if((week>=4&&completed.length>1)||rpe>target-1||reps<min||completed.slice(0,-1).some(s=>valid(s)&&number(s.rpe)>=target+1))return null;
+  if((week>=4&&completed.length>1)||rpe>target-1||reps<min||completed.slice(0,-1).some(s=>valid(s)&&number(s.rpe)>target))return null;
   // A changed next-set value is an athlete decision, not an invitation to stack increases.
   const next=sets[index],nw=number(next.weight),nr=number(next.reps);
   if(Number.isFinite(nw)&&nw>weight||Number.isFinite(nr)&&nr>reps)return null;
   if(reps>=max)return show('weight','up','Consider increasing weight','You achieved '+weight+' kg × '+reps+' at RPE '+rpe+' (target '+target+'). Consider the next available equipment increment if comfortable; you choose the load.');
   return show('reps','up','Consider increasing repetitions','At '+weight+' kg, consider one more repetition within the '+min+'–'+max+' target range if technique and effort permit. Keep the load unchanged.');
  }
- // Keep actual effort achievements distinct from next-set advice.
+ // Red means effort is ABOVE target and needs consolidation; it is not an achievement.
  function indicators(ex){
   const ctx=context(ex);if(!ctx)return [];
   const {sets,target}=ctx;
-  const result=sets.flatMap((set,index)=>valid(set)&&number(set.rpe)<target?[{
-   index,field:'rpe',direction:'down',title:'Below target RPE',
-   detail:'Completed at RPE '+number(set.rpe)+' against target RPE '+target+
-    '. This is a recorded effort difference, not an instruction to reduce the load.'
+  const result=sets.flatMap((set,index)=>valid(set)&&number(set.rpe)>target?[{
+   index,field:'rpe',direction:'down',title:'Consolidate effort',
+   detail:'Completed '+number(set.weight)+' kg × '+number(set.reps)+' at RPE '+number(set.rpe)+' against target RPE '+target+
+    '. Retain this weight and repetition target as a progression reference until RPE is at or below target. Do not force repetitions through pain or excessive fatigue.'
   }]:[]);
   const advice=advise(ex);
   if(advice?.direction==='up')result.push(advice);

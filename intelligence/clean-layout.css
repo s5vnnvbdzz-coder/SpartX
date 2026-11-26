@@ -1,0 +1,57 @@
+/* SpartanX Intelligence: compact, shared presentation for all goal views.
+   No changes to data, programme logic, or navigation. */
+#appContent{max-width:1320px}
+#appContent .page-heading{margin-bottom:12px;align-items:center}
+#appContent .page-heading h1{margin:2px 0 3px;letter-spacing:-.7px}
+#appContent .page-heading .eyebrow{letter-spacing:.8px}
+#appContent .sx-goal-picker{margin:0 0 10px;padding:11px 14px;gap:12px;box-shadow:none!important}
+#appContent .sx-goal-picker .sx-goal-label{letter-spacing:.6px;margin-bottom:2px}
+#appContent .sx-goal-picker .sx-goal-select-label{letter-spacing:.5px}
+#appContent .sx-goal-picker select{font-size:13px;min-height:44px;padding:8px 12px}
+#appContent .demo-banner{margin-bottom:16px;padding:8px 11px;line-height:1.5}
+#appContent .section-top{margin:18px 0 9px}
+#appContent .section-top h3{font-size:16px;line-height:1.3}
+#appContent .section-top p{line-height:1.45}
+#appContent .panel-head{margin-bottom:10px;align-items:center;flex-wrap:wrap}
+#appContent .panel-head>div{min-width:0}
+#appContent .panel-head .eyebrow{letter-spacing:.6px}
+#appContent :is(.panel,.kpi,.workload-hero,.intelligence-intro,.hero-card){box-shadow:none!important}
+#appContent .panel{min-width:0}
+#appContent .intelligence-intro{padding:12px 15px;gap:10px;margin-bottom:12px}
+#appContent .intelligence-intro h3{font-size:17px;line-height:1.3;margin:3px 0}
+#appContent .intelligence-intro .ai-mark{flex:0 0 32px;width:32px;height:32px;font-size:18px}
+#appContent .intelligence-intro p{line-height:1.5}
+#appContent .hero-card{min-height:0;padding:15px 18px;margin-bottom:14px}
+#appContent .hero-card h2{font-size:21px;letter-spacing:-.4px;margin:5px 0}
+#appContent .hero-card p{margin:4px 0 10px;line-height:1.5}
+#appContent .hero-card .primary-button{min-height:40px;padding:8px 12px;font-size:11px}
+#appContent .workload-hero{gap:16px;padding:14px;margin-bottom:12px}
+#appContent .workload-hero-text h3{font-size:18px;margin:4px 0}
+#appContent .app-footer{margin-top:18px;padding-top:16px;letter-spacing:.6px}
+#appContent .sx-intel-disclosure{min-width:0;margin:10px 0;border:1px solid var(--stroke,#34363b);border-radius:12px;background:var(--surface,#111215);overflow:visible}
+#appContent .sx-intel-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;min-height:44px;box-sizing:border-box;cursor:pointer;list-style:none;color:var(--txt,#f1f3f6);font-size:13px;font-weight:700;line-height:1.4}
+#appContent .sx-intel-disclosure>summary::-webkit-details-marker{display:none}
+#appContent .sx-intel-disclosure>summary::after{content:"";width:7px;height:7px;flex:0 0 7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-right:3px}
+#appContent .sx-intel-disclosure[open]>summary::after{transform:rotate(225deg)}
+#appContent .sx-intel-disclosure>summary:focus-visible{outline:2px solid var(--gold,#eee);outline-offset:2px;border-radius:10px}
+#appContent .sx-intel-disclosure-body{padding:0 10px 10px;min-width:0}
+#appContent .sx-intel-disclosure-body>.panel{margin:0}
+#appContent .sx-intel-disclosure-body>.section-top:first-child{margin-top:5px}
+#appContent .sx-intel-disclosure-body>.section-top:not(:first-child){margin-top:14px}
+#appContent .sx-intel-disclosure-body>.panel+.panel{margin-top:10px}
+@media(max-width:650px){
+ #appContent .page-heading{gap:8px}
+ #appContent .sx-goal-picker{flex-direction:row;align-items:center;padding:10px;gap:8px}
+ #appContent .sx-goal-picker>div{flex:1;min-width:0}
+ #appContent .sx-goal-picker .sx-goal-select-label{flex:0 1 47%;width:47%;min-width:0}
+ #appContent .sx-goal-picker p{font-size:11px;line-height:1.4}
+ #appContent .sx-goal-picker select{width:100%;font-size:12px;padding:8px 22px 8px 8px}
+ #appContent .page-heading .select-row select{min-height:44px}
+ #appContent .intelligence-intro{padding:12px}
+ #appContent .hero-card{padding:12px}
+ #appContent .sx-intel-disclosure>summary{padding:11px 12px}
+}
+@media(max-width:340px){
+ #appContent .sx-goal-picker{flex-direction:column;align-items:stretch}
+ #appContent .sx-goal-picker .sx-goal-select-label{width:100%}
+}

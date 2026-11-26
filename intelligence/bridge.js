@@ -74,7 +74,9 @@
         const prescribedRpe=ex?.ascensionLink?.targetRpe??ex?.targetRpe;
          const targetRpe=prescribedRpe!==''&&prescribedRpe!=null&&Number.isFinite(Number(prescribedRpe))&&
           Number(prescribedRpe)>=6&&Number(prescribedRpe)<=10?Number(prescribedRpe):null;
-         return sets.length?[{name,originalName,sets,targetRpe,programmed:!!ex.ascensionLink||/cycle|5\/3\/1|ascensionx/i.test(String(ex.notes||''))}]:[];
+         const programmeLink=E?.programmeLink?.(ex,name)||null;
+         return sets.length?[{name,originalName,sets,targetRpe:programmeLink?.targetRpe??targetRpe,programmeLink,
+           programmed:!!programmeLink||!!ex.ascensionLink||/cycle|5\/3\/1|ascensionx/i.test(String(ex.notes||''))}]:[];
       });
       const completed=exercises.reduce((n,ex)=>n+ex.sets.length,0);
       const elapsed=Math.max(0,Math.min(7*86400,Number(draft.elapsed)||0));

@@ -5,6 +5,9 @@
 'use strict';
 const base=root.SX2Engine||(typeof require==='function'?require('./engine.js'):null);
 const LIFTS=base.LIFTS;
+const TECHNIQUE={"Back Squat":[["out-of-hole","Out of the hole","Paused Back Squat","Practise a controlled pause at depth."],["hips-first","Hips rise before chest","Tempo Squat","Practise coordinated hip and chest rise."],["torso","Torso folds forward","Tempo Squat","Maintain bracing and torso position."],["knees","Knees cave inward","Paused Back Squat","Practise controlled knee tracking."],["depth","Inconsistent depth","Paused Back Squat","Use consistent competition depth."],["midpoint","Stalls above parallel","Paused Back Squat","Maintain force and position through the ascent."],["bracing","Lose brace or upper-back tightness","Tempo Squat","Reset brace before each rep."]],"Bench Press":[["off-chest","Off the chest","Paused Bench Press","Maintain tension during the pause."],["midpoint","Mid-range stall","Paused Bench Press","Practise consistent bar path through mid-range."],["lockout","Lockout","Close-Grip Bench Press","Practise controlled elbow extension."],["bar-path","Inconsistent bar path","Paused Bench Press","Practise repeatable touch point and press path."],["tightness","Lose upper-back tightness","Paused Bench Press","Maintain stable upper-back setup."],["leg-drive","Lose leg drive","Paused Bench Press","Practise continuous leg drive without lifting hips."],["touch-point","Inconsistent touch point","Paused Bench Press","Use a repeatable touch point."]],"Deadlift":[["off-floor","Breaking from the floor","Paused Deadlift","Pause briefly just off the floor while maintaining position."],["knees","Stalls around the knees","Paused Deadlift","Pause just below the knees without losing tension."],["lockout","Lockout","Romanian Deadlift","Practise controlled hip extension without leaning back."],["back-position","Lose back position","Paused Deadlift","Practise bracing and position at submaximal effort."],["tension","Lose tension before liftoff","Paused Deadlift","Take slack out before initiating the pull."],["hips-first","Hips shoot up","Paused Deadlift","Maintain coordinated hip and shoulder rise."],["bar-drift","Bar drifts away from body","Paused Deadlift","Keep the bar close throughout the pull."],["grip","Grip gives way",null,"Review grip setup; use appropriate grip practice without forcing failed pulls."]]};
+function priorities(raw){return LIFTS.map(lift=>{const selected=Array.isArray(raw.weakPoints?.[lift])?raw.weakPoints[lift]:[];const items=TECHNIQUE[lift].filter(x=>selected.includes(x[0]));return {lift,items,labels:items.map(x=>x[1])};}).filter(x=>x.items.length);}
+
 const E=(phase,pct,reps,backPct,backSets,backReps,rpe)=>({phase,pct,reps,backPct,backSets,backReps,rpe});
 const P={
  4:[E('Foundation',.85,5,.75,3,5,7),E('Strength',.90,3,.80,3,3,7.5),E('Intensification',.95,1,.85,3,2,8),E('Deload',.60,5,.55,2,5,6)],
@@ -25,6 +28,7 @@ function generate(raw){
  const tmRatio=Number(raw.tmRatio??.9);
  if(![.85,.9,.925].includes(tmRatio))throw Error('Choose a conservative training max ratio.');
  const pb=discipline==='powerbuilding';
+ const techniquePriorities=priorities(raw);
  const plan=base.generate({...raw,focus:pb?'balanced':'strength'}),p=plan.profile,step=p.step;
  const tables=(pb?B:P)[p.weeks];
  const tm=Object.fromEntries(LIFTS.map(l=>[l,round(p.maxes[l]*tmRatio,step)]));
@@ -53,6 +57,27 @@ function generate(raw){
      if(/Romanian Deadlift/i.test(ex.name)){ex.sets=Array.from({length:count},()=>({type:'work',kg:round(tm.Deadlift*.45,step),reps:8,rpe:lean?6:7}));}
     }
    }
+   // Apply selected squat/bench variations to existing secondary slots. Deadlift
+   // technique replaces the optional back-extension slot on squat day; no extra
+   // heavy pulling is added to deadlift day or to recovery phases.
+   for(const priority of techniquePriorities){
+    const selected=priority.items[0],cue=priority.items.map(x=>x[3]).join(' ');
+    const main=d.exercises.find(e=>e.role==='primary'&&e.name===priority.lift);
+    if(main)main.rationale+=' Technique focus: '+cue;
+    if(lean)continue;
+    if(priority.lift==='Deadlift'){
+     if(selected[2]==='Romanian Deadlift'){
+      const rdl=d.exercises.find(e=>/Romanian Deadlift/i.test(e.name));
+      if(rdl)rdl.rationale+=' '+cue;
+     }else if(selected[2]&&!low&&/Squat$/.test(d.name)){
+      const idx=d.exercises.findIndex(e=>/Back Extension/.test(e.name));
+      if(idx>=0)d.exercises[idx]={name:selected[2],role:'secondary',rest:180,rationale:'Low-fatigue technique practice. '+cue,sets:Array.from({length:2},()=>({type:'work',kg:round(tm.Deadlift*.55,step),reps:3,rpe:6}))};
+     }
+    }else{
+     const variation=d.exercises.find(e=>e.role==='secondary'&&(priority.lift==='Back Squat'?/squat/i.test(e.name):/bench/i.test(e.name)));
+     if(variation&&selected[2]){variation.name=selected[2];variation.rationale='Submaximal technique practice. '+cue;}
+    }
+   }
    if(lean)d.exercises=d.exercises.filter(e=>e.role==='primary'||e.role==='secondary'||/Row|Pulldown|Pull-Up|Leg Curl|Crunch|Dead Bug/.test(e.name)).slice(0,4);
    if(pb&&!lean){
     const add=(name,reps,reason)=>{if(!d.exercises.some(e=>e.name===name))d.exercises.push(support(name,count,reps,low?7:8,reason))};
@@ -68,7 +93,7 @@ function generate(raw){
   }
   return {week:i+1,phase:cfg.phase,assessment,sessions,topPercent:cfg.pct};
  });
- return {discipline,profile:p,trainingMaxes:tm,weeks,lowReadiness:low,independent:true,preview:true};
+ return {discipline,profile:p,trainingMaxes:tm,weeks,lowReadiness:low,techniquePriorities,independent:true,preview:true};
 }
 function advice(target,actual,step=2.5){
  if(!target||!actual||!Number.isFinite(+actual.rpe)||+actual.rpe<6||+actual.rpe>10||!Number.isInteger(+actual.reps)||!Number.isFinite(+actual.kg)||+actual.kg<=0)return {status:'insufficient',delta:0};

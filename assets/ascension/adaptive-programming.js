@@ -253,6 +253,16 @@
   const down=reason=>Number.isFinite(previousLoad)&&previousLoad>0&&previousLoad>=base*.8?
    out(previousLoad,min,reason+' Reduce to the next confirmed or observed lower load; reassess RPE.'):
    {...manual(prefix+reason+' Select a lower available weight; no suitable lower load is verified.',evidence)};
+  // When the athlete moves up within a session, retain the successful new
+  // working-load reference instead of averaging it back down to the first set.
+  // A high-effort or missed-rep set is not evidence of consolidation.
+  const latest=last.sets.at(-1),newKg=Number(latest?.weight);
+  const newSets=last.sets.filter(s=>Number(s.weight)===newKg);
+  if(!same&&newKg>base&&newSets.length&&newSets.every(s=>validRpe(s)&&Number(s.reps)>=min&&Number(s.rpe)<=Math.min(8.5,target+1.5))){
+   const newReps=Math.min(...newSets.map(s=>Number(s.reps)));
+   const newRpe=Math.max(...newSets.map(s=>Number(s.rpe)));
+   return {suggestedKg:newKg,targetReps:clamp(newReps,min,max),reason:'Athlete-selected '+newKg+' kg achieved '+newReps+' reps at RPE '+newRpe+'. Consolidate at this load until effort improves; no additional increase advised.',confidence:'low',evidence:{...evidence,previousKg:newKg,previousReps:newReps,previousRpe:newRpe,sets:newSets.length}};
+  }
   // A rep at the same weight is a rough RIR-based estimate, not a measured RPE.
   // Never convert machine performance into a barbell 1RM.
   if(known&&(effort>=9.5||low<min))return down('Previous effort was too high or minimum reps were missed.');
@@ -411,7 +421,7 @@
     (approvedDelta?' Approved next-cycle set adjustment: '+(approvedDelta>0?'+':'')+approvedDelta+'.':'')};
  }
  // Single selection function shared by draft preview and live cycle plans.
- function buildLiftPlan(lift,week,focus,cycleId,storage=global.localStorage){
+ function rawLiftPlan(lift,week,focus,cycleId,storage=global.localStorage){
   const w=Number(week);
   if(!LIFTS.includes(lift)||!Number.isInteger(w)||w<1||w>6)return [];
   const chosen=FOCUS_LIFTS[focus]||FOCUS_LIFTS.strength;
@@ -534,7 +544,7 @@
   const guarded=shortNext||index>c.lifts.length||fatigue.upper||fatigue.lower;
   return {role,guarded,shortNext,fatigue};
  }
- function supportExercises(c,prefs,index,week,storage=global.localStorage){
+ function rawSupportExercises(c,prefs,index,week,storage=global.localStorage){
   if(week>=6||!c?.lifts||index<c.lifts.length)return [];
   const profile=supportProfile(c,prefs,index,week,storage);
   const roles=SUPPORT_ROLES[prefs.focus]||SUPPORT_ROLES.strength;
@@ -551,7 +561,7 @@
   // prescribe the same accessories on both days. Fill with low-fatigue
   // alternatives, maintaining the last-day two-set recovery cap.
   if(prefs.days===5&&index>c.lifts.length){
-   const previous=new Set(supportExercises(c,prefs,index-1,week,storage).map(ex=>norm(ex.name)));
+   const previous=new Set(rawSupportExercises(c,prefs,index-1,week,storage).map(ex=>norm(ex.name)));
    const distinct=names.filter(name=>!previous.has(norm(name)));
    const backup=['Rear Delt Reverse Fly','Seated Calf Raise','Pallof Press',
     'Dumbbell Curl','Triceps Pushdown (Bar)','Lateral Raise','Seated Leg Curl'];
@@ -605,6 +615,67 @@
     }
     return final;
    });
+ }
+ // Weekly volume guidance is calculated on the complete selected microcycle,
+ // including secondary days and actual classic main-lift working-set counts.
+ // It is a planning heuristic, not a measured hypertrophy dose.
+ function weeklyVolumePlan(c,prefs,week,storage=global.localStorage){
+  const w=Number(week),lifts=c?.lifts||[];
+  const slots=lifts.map(lift=>({lift,exercises:rawLiftPlan(lift,w,prefs.focus,c.id,storage)}));
+  for(let i=lifts.length;i<prefs.days;i++)slots.push({lift:null,exercises:rawSupportExercises(c,prefs,i,w,storage)});
+  const V=global.SXVolumeIntelligence;
+  const primary=global.SXAscensionPrescription?.PLAN?.[w-1];
+  if(!V||!primary||w<1||w>=6)return slots;
+  const goal=prefs.focus==='hypertrophy'?'bodybuilding':prefs.focus==='balanced'?'powerbuilding':'powerlifting';
+  const count=primary.deload?3:1+primary.backSets;
+  const fatigue=recentMainFatigue(c,storage);
+  const protectedSet=(e,slot)=>e.tmPercent===45||e.name==='Romanian Deadlift'||
+    (slot.lift===null&&['Bench Press','Pause Squat'].includes(e.name));
+  // Preserve technical prescriptions, fixed RDLs, recovery-limited five-day
+  // support and athlete-approved next-cycle overrides. Normal baseline is 3.
+  const entries=slots.flatMap(slot=>slot.exercises.map(e=>({slot,e,info:V.classify(e.name)})));
+  for(const {slot,e} of entries){
+   if(protectedSet(e,slot))continue;
+   const approved=w<=3&&c.id?global.SXAscensionCycleIntelligence?.adjustment?.(c.id,e.name,storage)||0:0;
+   const guarded=slot.lift===null&&prefs.days===5&&e.sets<=2;
+   e.sets=approved?clamp(3+approved,2,4):guarded?Math.min(2,e.sets):w>=4&&e.cost>=2?2:3;
+  }
+  const exposure=()=>V.countExposure(slots.map(slot=>({exercises:[
+    ...(slot.lift?[{name:slot.lift,sets:count}]:[]),...slot.exercises]})));
+  for(const {slot,e,info} of entries){
+   if(!info||protectedSet(e,slot))continue;
+   const approved=w<=3&&c.id?global.SXAscensionCycleIntelligence?.adjustment?.(c.id,e.name,storage)||0:0;
+   if(approved||slot.lift===null&&prefs.days===5&&e.sets<=2)continue;
+   const band=V.bandFor(info.primary,{goal,experience:'intermediate'});
+   const effective=exposure()[info.primary]?.effective??0;
+   const region=['Quads','Glutes','Hamstrings','Calves'].includes(info.primary)?'lower':'upper';
+   const rule=equipmentRules(storage)[norm(e.name)];
+   const records=exerciseHistory(e.name,c.id,w,storage,String(rule?.equipmentId||'')).slice(0,2);
+   const full=records.length===2&&records.every(r=>r.sets.length>=3&&r.sets.every(s=>
+    s.rpe!==''&&s.rpe!=null&&Number(s.rpe)>=6&&Number(s.rpe)<=10));
+   const low=full&&records.every(r=>r.sets.every(s=>Number(s.reps)>=e.min&&Number(s.rpe)<=Number(e.targetRpe)+.5));
+   const hard=full&&records.every(r=>r.sets.some(s=>Number(s.rpe)>=Math.max(9,Number(e.targetRpe)+1.5)));
+   const insufficient=effective<band.min;
+   const baseline=e.sets;
+   if(hard&&(fatigue[region]||effective>=band.min||w>=4))e.sets=2;
+   else if(w<=3&&e.cost<2&&e.sets===3&&insufficient&&low&&!fatigue[region])e.sets=4;
+   const why=e.sets>baseline?'Below weekly starting range with two controlled prior exposures; add one low-fatigue set.':
+    e.sets<baseline?'Repeated high effort plus fatigue or sufficient exposure; reduce accessory sets.':
+    'Keep the normal assistance allocation; no automatic extra set without evidence.';
+   e.volumeEvidence={muscle:info.primary,weeklyEffective:effective,targetRange:[band.min,band.max],previousExposures:records.length,controlled:low,highEffort:hard};
+   const rec=recommend(e,c.id,w,storage);
+   Object.assign(e,rec,{reason:e.reason+' Weekly volume: '+why+' Planned '+info.primary+' exposure '+effective+' effective sets (heuristic range '+band.min+'–'+band.max+').'});
+  }
+  return slots;
+ }
+ function buildLiftPlan(lift,week,focus,cycleId,storage=global.localStorage,context=null){
+  const active=context||activeCycle(storage);
+  if(!active?.lifts?.includes(lift)||active.id!==cycleId)return rawLiftPlan(lift,week,focus,cycleId,storage);
+  const prefs={...read(active.id,storage),focus,...(context?.prefs||{})};
+  return weeklyVolumePlan(active,prefs,week,storage).find(s=>s.lift===lift)?.exercises||[];
+ }
+ function supportExercises(c,prefs,index,week,storage=global.localStorage){
+  return weeklyVolumePlan(c,prefs,week,storage)[index]?.exercises||[];
  }
  function supportTitle(c,prefs,index,week,storage=global.localStorage){
   const profile=supportProfile(c,prefs,index,week,storage);
@@ -765,7 +836,7 @@
     const week=inCycle?weekFor(cycleArg,lift):1;
     return {day,kind:'ascension',lift,week,title:lift+' · Week '+week,
      exercises:match&&settings.enabled?plan(lift,week,{},storage):
-      buildLiftPlan(lift,week,focus,inCycle?cycleArg.id:null,storage)};
+      buildLiftPlan(lift,week,focus,holder.id,storage,{...holder,prefs})};
    }
    const week=supportWeek;
    return {day,kind:'support',lift:null,week,
@@ -982,7 +1053,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,equipmentRules,setEquipment,formatPrescription,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,equipmentRules,setEquipment,formatPrescription,weeklyVolumePlan,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

@@ -1,0 +1,51 @@
+/* Run: node assets/ascension/adaptive-set-volume.test.js */
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const root={addEventListener(){},localStorage:{getItem(){return null}}};
+for(const file of ["assets/science/evidence-engine.js","assets/science/volume-intelligence.js","assets/ascension/workout-prescription.js","assets/ascension/selection-quality.js","assets/ascension/adaptive-programming.js","assets/ascension/adaptive-set-guidance.js"])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../..',file),'utf8'),{window:root});
+const A=root.SXAscensionAdaptive,G=root.SXAdaptiveSetGuidance,P=root.SXAscensionPrescription;
+const id='2026-11-01T00:00:00Z';
+const set=(weight,reps,rpe,done=true)=>({weight,reps,rpe,done,type:'Working Set'});
+const ex={name:'Machine Chest Press',sxStrengthSizeCompanion:{cycleId:id,week:5,repsMin:8,repsMax:10,targetRpe:7},sets:[set(80,10,6),set(80,10,'',false),set(80,10,'',false)]};
+const initial=JSON.stringify(ex);
+let hint=G.advise(ex);
+assert.equal(hint.field,'weight');assert.equal(hint.direction,'up');assert.equal(hint.index,1);assert.equal(JSON.stringify(ex),initial);
+ex.sets[1]=set(87,10,8);hint=G.advise(ex);
+assert.equal(hint.field,'rpe');assert.equal(hint.direction,'down');assert.equal(hint.index,2);assert.equal(hint.weight,87);assert.ok(hint.detail.includes('87 kg'));
+assert.equal(ex.sets[2].weight,80);assert.equal(ex.sets[2].rpe,'');
+ex.sets[2].done=true;assert.equal(G.advise(ex),null);
+ex.sets=[set(80,8,6),set(80,8,'',false)];assert.equal(G.advise(ex).field,'reps');
+ex.sets[0].rpe='';assert.equal(G.advise(ex),null);
+ex.sets[0].rpe=6;ex.sxStrengthSizeCompanion.week=6;assert.equal(G.advise(ex),null);
+ex.sxStrengthSizeCompanion.week=5;ex.sxStrengthSizeCompanion.fixedDeadliftRdl=true;assert.equal(G.advise(ex),null);
+delete ex.sxStrengthSizeCompanion.fixedDeadliftRdl;ex.ascensionLink={cycleId:id};assert.equal(G.advise(ex),null);
+delete ex.ascensionLink;ex.sets[1].weight=90;assert.equal(G.advise(ex),null);
+const lifts=['Back Squat','Bench Press','Deadlift','Overhead Press'];
+function store(lifts,days,focus,sessions=[]){
+ const data={'ascensionx_strength_v1':JSON.stringify({cycle:{created:id,exercises:lifts,currentWeek:2}}),'sx_ascension_adaptive_v1':JSON.stringify({[id]:{enabled:true,focus,days}}),'spartx_db':JSON.stringify({sessions})};
+ return {getItem:k=>data[k]??null};
+}
+function plans(storage,week){return A.weeklyVolumePlan(A.activeCycle(storage),A.read(id,storage),week,storage)}
+const baseline=store(lifts,4,'strength');
+const week2=plans(baseline,2);
+assert.equal(week2.length,4);assert.ok(week2.every(d=>d.exercises.length>0));
+assert.ok(week2.flatMap(d=>d.exercises).every(e=>e.sets===3));
+assert.equal(P.PLAN[1].backSets,4);
+assert.ok(plans(baseline,6).every(d=>!d.exercises.length));
+const w5=plans(baseline,5);assert.equal(w5.find(d=>d.lift==='Bench Press').exercises[1].name,'Machine Chest Press');
+assert.equal(w5.find(d=>d.lift==='Deadlift').exercises[0].tmPercent,45);
+assert.equal(w5.find(d=>d.lift==='Deadlift').exercises[0].sets,3);
+assert.ok(w5.find(d=>d.lift==='Overhead Press').exercises.some(e=>e.volumeEvidence));
+const sample=(name,reps,rpe)=>[1,2].map(i=>({date:'2026-10-2'+i+'T10:00:00Z',exercises:[{name,sets:Array.from({length:3},()=>set(30,reps,rpe))}]}));
+const hard=store(lifts,4,'strength',sample('Iso-Lateral Row',10,9.5));
+assert.equal(plans(hard,2).find(d=>d.lift==='Bench Press').exercises[0].sets,2);
+const three=lifts.slice(0,3),empty=store(three,3,'hypertrophy');
+const candidate=plans(empty,2).flatMap(d=>d.exercises).find(e=>e.volumeEvidence&&e.volumeEvidence.weeklyEffective<e.volumeEvidence.targetRange[0]&&e.cost<2);
+assert.ok(candidate,'There must be an underserved eligible muscle slot in this fixture');
+const low=store(three,3,'hypertrophy',sample(candidate.name,candidate.max,6));
+assert.equal(plans(low,2).flatMap(d=>d.exercises).find(e=>e.name===candidate.name).sets,4);
+assert.equal(plans(low,5).flatMap(d=>d.exercises).find(e=>e.name===candidate.name)?.sets===4,false);
+const mixed=store(three,4,'strength',[{date:'2026-10-25T10:00:00Z',exercises:[{name:'Machine Chest Press',sets:[set(80,10,6),set(87,10,8)]}]}]);
+const consolidation=A.recommend({name:'Machine Chest Press',sets:3,min:8,max:10,targetRpe:7},id,5,mixed);
+assert.equal(consolidation.suggestedKg,87);assert.equal(consolidation.targetReps,10);
+console.log('PASS: adaptive set guidance and weekly volume allocation');

@@ -19,7 +19,7 @@
    ['weight','reps','rpe','durationSeconds','distanceKm','floors','steps','calories']
     .some(field=>filled(s?.[field])));
  }
- function prepare(exercise,name,cardio){
+ function prepare(exercise,name,cardio,adaptive=global.SXAscensionAdaptive,storage=global.localStorage){
   const nextName=clean(name);
   if(!exercise||!nextName||clean(exercise.name).toLowerCase()===nextName.toLowerCase())return null;
   const isCardio=!!cardio?.isCardio?.(nextName);
@@ -56,6 +56,36 @@
    result.sxPowerbuildingSupport={...exercise.sxPowerbuildingSupport};
   if(exercise.sxStrengthSizeCompanion&&!isCardio)
    result.sxStrengthSizeCompanion={...exercise.sxStrengthSizeCompanion};
+  // A different exercise needs its own prescription, never the old load or
+  // RPE metadata. Preserve cycle/day identity and original exercise count.
+  if(!isCardio&&!exercise.ascensionLink&&(result.sxStrengthSizeCompanion||result.sxPowerbuildingSupport)){
+   const linkKey=result.sxStrengthSizeCompanion?'sxStrengthSizeCompanion':'sxPowerbuildingSupport';
+   const link=result[linkKey];
+   const plan=adaptive?.substitutePrescription?.(exercise,nextName,storage);
+   if(plan){
+    const reps=Number(plan.targetReps||plan.min),kg=Number(plan.suggestedKg);
+    const fresh={...link,plannedSets:plan.sets,repsMin:plan.min,repsMax:plan.max,
+     prescribedReps:reps,prescribedKg:kg>0?kg:null,targetRir:plan.rir,rir:plan.rir,targetRpe:plan.targetRpe,
+     prescriptionEvidence:plan.evidence||null,prescriptionConfidence:plan.confidence||null,substitutedFrom:clean(exercise.name)};
+    for(const key of ['fixedDeadliftRdl','trainingMaxKg','trainingMaxPercent','tmPercent','equipmentId','incrementKg','plannedSetsDetail'])delete fresh[key];
+    result[linkKey]=fresh;
+    result.rest=plan.rest;
+    result.notes='AscensionX Adaptive Substitute · Week '+link.week+' · '+plan.sets+' × '+plan.min+'–'+plan.max+' reps · Target RPE '+plan.targetRpe+'. '+plan.reason;
+    result.sets=Array.from({length:plan.sets},()=>({weight:kg>0?String(kg):'',reps:String(reps),rpe:'',type:'Working Set',done:false}));
+   }else if(typeof adaptive?.substitutePrescription==='function'){
+    // Unclassified/custom, timed, or non-loading-week substitutions require
+    // athlete input. Do not leave stale prescription metadata or fake targets.
+    for(const key of ['targetRpe','targetRir','rir','repsMin','repsMax','prescribedReps','prescribedKg','fixedDeadliftRdl','trainingMaxKg','trainingMaxPercent','tmPercent','prescriptionEvidence','prescriptionConfidence','equipmentId','incrementKg'])delete link[key];
+    link.plannedSets=result.sets.length;link.substitutedFrom=clean(exercise.name);
+    result.notes='Exercise substituted · Set load, reps and effort manually; no verified adaptive prescription for this movement.';
+    result.sets=result.sets.map(s=>({...s,reps:''}));
+   }
+  }
+  if(!isCardio&&norm(nextName)==='benchpressstatichold'){
+   result.sets=Array.from({length:3},()=>({weight:'',reps:0,durationSeconds:'',rpe:'',type:'Isometric Hold',done:false}));
+   delete result.sxStrengthSizeCompanion;delete result.sxPowerbuildingSupport;
+   result.notes='Timed hold · Enter load and duration in seconds. Not a bench press 1RM.';
+  }
   // Never copy ascensionLink: that would mark a different exercise as a
   // completed main lift and could incorrectly advance the user's cycle.
   return {

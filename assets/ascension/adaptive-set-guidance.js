@@ -9,7 +9,7 @@
   if(!link?.cycleId||link.adaptive===false||ex.ascensionLink||link.fixedDeadliftRdl||Number(link.trainingMaxPercent)>0||
      /^(?:bench press|pause squat|romanian deadlift|bench press static hold)$/i.test(String(ex.name||'')))return null;
   const week=number(link.week),min=number(link.repsMin),max=number(link.repsMax),target=number(link.targetRpe??(10-number(link.rir)));
-  if(!Number.isInteger(week)||week<1||week>5||!Number.isInteger(min)||!Number.isInteger(max)||min<1||max<min||target<6||target>9)return null;
+  if(!Number.isInteger(week)||week<1||week>5||!Number.isInteger(min)||!Number.isInteger(max)||min<1||max<min||!Number.isFinite(target)||target<6||target>9)return null;
   const sets=Array.isArray(ex.sets)?ex.sets:[];
   const index=sets.findIndex(s=>working(s)&&s.done!==true);
   if(index<1||sets.slice(index+1).some(s=>s.done===true))return null;

@@ -17,7 +17,8 @@ assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[
 assert.equal(ex.sets[2].weight,80);assert.equal(ex.sets[2].rpe,'');
 ex.sets[2].done=true;ex.sets[2].rpe=6.5;assert.equal(G.advise(ex),null);
 assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
-ex.sets[2].rpe=7;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'rpe','down']]);
+ex.sets[2].rpe=7;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
+ex.sets[2].rpe=7.5;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down'],[2,'rpe','down']]);
 ex.sets=[set(80,8,6),set(80,8,'',false)];assert.equal(G.advise(ex).field,'reps');
 ex.sets[0].rpe='';assert.equal(G.advise(ex),null);assert.equal(G.indicators(ex).length,0);
 ex.sets[0].rpe=6;ex.sxStrengthSizeCompanion.week=6;assert.equal(G.advise(ex),null);

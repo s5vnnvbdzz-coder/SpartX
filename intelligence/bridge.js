@@ -67,6 +67,10 @@
           if(set?.done!==true||String(set?.type||'').toLowerCase()==='cardio')return [];
           if(set.weight===''||set.weight==null||set.reps===''||set.reps==null)return [];
           const weight=Number(set.weight),reps=Number(set.reps);
+          if(/^bench press static hold$/i.test(name)){
+           const seconds=Number(set.durationSeconds),rpe=Number(set.rpe);
+           return weight>0&&weight<=1500&&Number.isInteger(seconds)&&seconds>0&&seconds<=600?[{weight,reps:0,durationSeconds:seconds,rpe:rpe>=6&&rpe<=10?rpe:null,type:'Isometric Hold',index:index+1,done:true}]:[];
+          }
           if(!Number.isFinite(weight)||weight<0||weight>1500||!Number.isInteger(reps)||reps<1||reps>100)return [];
           const rawRpe=set.rpe===''||set.rpe==null?null:Number(set.rpe);
           const rpe=rawRpe!=null&&Number.isFinite(rawRpe)&&rawRpe>=6&&rawRpe<=10?rawRpe:null;

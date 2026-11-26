@@ -30,6 +30,12 @@
     count:done.length,seconds:sum('durationSeconds'),floors:sum('floors'),steps:sum('steps'),km:sum('distanceKm')
    },all:[],working:[],volume:0};
   }
+  if(/^bench press static hold$/i.test(name)){
+   const holds=entries.filter(s=>s?.done!==false&&num(s.weight)>0&&Number.isInteger(num(s.durationSeconds))&&num(s.durationSeconds)>0&&num(s.durationSeconds)<=600).map(s=>({weight:num(s.weight),reps:0,durationSeconds:num(s.durationSeconds),type:'Isometric Hold',rpe:num(s.rpe),working:true}));
+   if(!holds.length)return null;
+   const best=holds.slice().sort((a,b)=>b.weight-a.weight||b.durationSeconds-a.durationSeconds)[0];
+   return {name,key:key(name),kind:'isometric',label:'ADDITIONAL · ISOMETRIC HOLD',all:holds,working:holds,max:best.weight,best,volume:0,holdSeconds:holds.reduce((n,s)=>n+s.durationSeconds,0),averageRpe:null,programmeLink:global.SXEngine?.programmeLink?.(ex,name)||null,linked:null};
+  }
   const all=entries.flatMap(s=>{
    if(!s||s.done===false)return [];
    const weight=num(s.weight),reps=num(s.reps);
@@ -47,8 +53,8 @@
   const kind=main?'main':legacy||companion?'linked':'additional';
   const label=ex.ascensionLink?'ASCENSIONX MAIN LIFT':
    legacy?'ASCENSIONX ACCESSORY':companion?'STRENGTH & SIZE':
-   main?'COMPOUND LIFT':'ADDITIONAL EXERCISE';
-  const metadata=ex.ascensionLink||ex.ascensionAccessory||ex.sxStrengthSizeCompanion||null;
+   ex.sxUserAddedCycle?'USER-ADDED CYCLE EXERCISE':main?'COMPOUND LIFT':'ADDITIONAL EXERCISE';
+  const metadata=ex.ascensionLink||ex.ascensionAccessory||ex.sxStrengthSizeCompanion||ex.sxUserAddedCycle||null;
   return {name,key:key(name),kind,label,all,working,max,best,
    volume:working.reduce((n,s)=>n+s.weight*s.reps,0),
    averageRpe:rpes.length?rpes.reduce((a,b)=>a+b,0)/rpes.length:null,
@@ -85,6 +91,10 @@
   if(!latest)return {latest:null,history,range:days};
   const items=latest.items.map(item=>{
    if(!item.working.length)return {...item,comparison:null};
+   if(item.kind==='isometric'){
+    const prior=(history.get(item.key)||[]).filter(s=>s.sessionId!==latest.id).flatMap(s=>s.sets).filter(s=>s.weight===item.best.weight&&s.durationSeconds>0);
+    return {...item,comparison:'Heaviest hold: '+fmt(item.best.weight,1)+' kg × '+item.best.durationSeconds+' s. Total hold time: '+item.holdSeconds+' s.'+(prior.length?' Best previous same-load hold: '+Math.max(...prior.map(s=>s.durationSeconds))+' s. Compare the same position.':' Establishing a hold baseline.')+' Excluded from repetition volume and estimated 1RM.'};
+   }
    const link=item.programmeLink;
    const prior=(history.get(item.key)||[]).find(s=>s.sessionId!==latest.id&&(link?s.programmeLink?.cycleId===link.cycleId&&s.programmeLink.role===link.role&&s.programmeLink.sessionLift===link.sessionLift&&s.programmeLink.week<link.week:!s.programmeLink));
    let comparison=link?'No earlier comparable linked session in this cycle.':'No earlier independent session for this exercise within the selected date range.';
@@ -168,12 +178,12 @@
      '<strong>'+html(item.name)+'</strong><span>'+html(bits.join(' · ')||fmt(c.count)+' cardio entries')+'</span></div><span class="sx-session-expand">⌄</span></summary>'+
      '<p class="sx-session-muted">Cardio is listed but excluded from resistance workload calculations.</p></details>';
    }
-   const facts=[fmt(item.working.length)+' resistance sets',
+   const facts=item.kind==='isometric'?fmt(item.working.length)+' holds · '+item.holdSeconds+' s total · Heaviest '+fmt(item.max,1)+' kg':[fmt(item.working.length)+' resistance sets',
     item.max===null?null:'Top '+fmt(item.max,1)+' kg',
     fmt(item.volume)+' kg work volume',
     item.averageRpe!=null?'Avg RPE '+fmt(item.averageRpe,1):null].filter(Boolean).join(' · ');
    const rows=item.all.map((set,i)=>'<div class="sx-session-set"><span>SET '+(i+1)+'</span>'+
-    '<strong>'+fmt(set.weight,1)+' kg × '+fmt(set.reps,0)+'</strong>'+
+    '<strong>'+fmt(set.weight,1)+' kg × '+(item.kind==='isometric'?fmt(set.durationSeconds,0)+' s':fmt(set.reps,0))+'</strong>'+
     '<span>'+html(set.type)+'</span><span>'+(Number.isFinite(set.rpe)&&set.rpe>=6&&set.rpe<=10?'RPE '+fmt(set.rpe,1):'RPE —')+'</span></div>').join('');
    return '<details class="sx-session-exercise"><summary><div><small class="sx-session-tag '+html(item.kind)+'">'+html(item.label)+'</small>'+
     '<strong>'+html(item.name)+'</strong><span>'+html(facts)+'</span></div><span class="sx-session-expand">⌄</span></summary>'+
@@ -193,7 +203,7 @@
    '<p class="sx-session-muted">Open an exercise to see every valid completed set and a cautious prior-session comparison. Exercises without muscle classification are still included.</p>'+
    '</article>';
   if(select){
-   const choices=last.items.filter(i=>i.kind!=='cardio'&&i.working.length);
+   const choices=last.items.filter(i=>i.kind!=='cardio'&&i.kind!=='isometric'&&i.working.length);
    const pick=choices.find(i=>i.key===selected)||choices.find(i=>i.kind!=='main')||choices[0];
    select.replaceChildren();
    for(const item of choices){

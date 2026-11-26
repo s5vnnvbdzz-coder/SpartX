@@ -67,6 +67,8 @@
   function programmeLink(ex,name){
     const main=ascensionLink(ex?.ascensionLink,name);
     if(main)return {...main,role:'primary',sessionLift:main.lift,plannedCount:main.plannedSets.length};
+    const extra=ex?.sxUserAddedCycle;
+    if(extra?.role==='additional'&&Number.isFinite(Date.parse(extra.cycleId))&&Number.isInteger(Number(extra.week))&&Number(extra.week)>=1&&Number(extra.week)<=6)return {role:'additional',cycleId:String(extra.cycleId),week:Number(extra.week),sessionLift:canonical(extra.lift||''),plannedCount:null,plannedSets:null,targetRpe:null};
     const raw=ex?.sxStrengthSizeCompanion||ex?.sxPowerbuildingSupport;
     if(!raw||!Number.isFinite(Date.parse(raw.cycleId))||!Number.isInteger(Number(raw.week))||
       Number(raw.week)<1||Number(raw.week)>6)return null;
@@ -100,11 +102,15 @@
         const sets=entries.flatMap((set,index)=>{
           if(set.done===false)return [];
           const weight=safeNumber(set.weight,NaN),reps=safeNumber(set.reps,NaN);
+          if(/^bench press static hold$/i.test(name)){
+           const seconds=Number(set.durationSeconds),rpe=Number(set.rpe);
+           return weight>0&&weight<=1500&&Number.isInteger(seconds)&&seconds>0&&seconds<=600?[{weight,reps:0,durationSeconds:seconds,rpe:rpe>=6&&rpe<=10?rpe:null,type:'Isometric Hold',done:true}]:[];
+          }
           if(!Number.isFinite(weight)||weight<0||weight>1500||!Number.isFinite(reps)||reps<1||reps>100)return [];
           const rpe=set.rpe==null||set.rpe===''?null:safeNumber(set.rpe,NaN);
           return [{weight,reps,rpe:Number.isFinite(rpe)&&rpe>=6&&rpe<=10?rpe:null,type:String(set.type||'Working Set'),done:true,isTopSet:index===firstTop}];
         });
-        return sets.length?{name,sets,ascensionLink:ascensionLink(ex.ascensionLink,name),programmeLink:programmeLink(ex,name)}:null;
+        return sets.length?{name,sets,ascensionLink:ascensionLink(ex.ascensionLink,name),programmeLink:programmeLink(ex,name),sxUserAddedCycle:ex.sxUserAddedCycle||null}:null;
       }).filter(Boolean):[];
       return exercises.length?[{id:String(s.id??'import-'+idx),name:String(s.name||'Workout').slice(0,100),date:new Date(time).toISOString(),duration:clamp(safeNumber(s.duration,0),0,86400),exercises}]:[];
     }).sort((a,b)=>dayStamp(a.date)-dayStamp(b.date));
@@ -112,7 +118,7 @@
   // Epley estimate: useful trend approximation, not a tested maximum.
   // Limit to work sets of 1–12 reps to reduce misleading extrapolation.
   function estimatedMax(set){
-    if(!set || set.weight<=0 || set.reps<1 || set.reps>12)return null;
+    if(!set || set.type==='Isometric Hold'||set.weight<=0 || set.reps<1 || set.reps>12)return null;
     return +(set.weight*(1+set.reps/30)).toFixed(1);
   }
   function topSet(ex){

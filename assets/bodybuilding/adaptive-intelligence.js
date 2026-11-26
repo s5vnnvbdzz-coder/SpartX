@@ -14,7 +14,7 @@
   Number.isInteger(finite(s.reps))&&Number(s.reps)>=1&&Number(s.reps)<=30;
  const stamp=s=>Date.parse(s?.savedAt||s?.date||s?.createdAt||'')||0;
  function linked(ex,session){
-  const meta=ex?.ascensionLink||ex?.sxStrengthSizeCompanion||ex?.sxPowerbuildingSupport||ex?.sx531Link;
+  const meta=ex?.ascensionLink||ex?.sxStrengthSizeCompanion||ex?.sxPowerbuildingSupport||ex?.sxUserAddedCycle||ex?.sx531Link;
   if(meta?.cycleId||meta?.programmeId)return true;
   // Bodybuilding's programme link is stored on the session, not every exercise.
   try{return !!root.SXBodybuildingModel?.linkedSession?.(session)?.programmeId}catch(_){return false}

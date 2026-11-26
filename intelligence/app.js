@@ -117,7 +117,10 @@
     const deltaClass=n=>n==null?'':n>0?'positive':n<0?'negative':'';
     const mini=(title,value,sub,cls='')=>'<div class="sx-live-mini"><small>'+escapeHtml(title)+
       '</small><strong>'+escapeHtml(value)+'</strong><em class="'+cls+'">'+escapeHtml(sub)+'</em></div>';
-    $('liveExerciseCompare').innerHTML=
+    $('liveExerciseCompare').innerHTML=exercise.isometric?
+      mini('Heaviest hold',exercise.bestHold?fmtKg(exercise.bestHold.weight)+' × '+exercise.bestHold.durationSeconds+' s':'—','Separate from bench press 1RM')+
+      mini('Total hold duration',format(exercise.holdSeconds,0)+' s',exercise.working+' completed holds')+
+      mini('Best previous same-load hold',exercise.previousBestSeconds==null?'—':format(exercise.previousBestSeconds,0)+' s','Compare only if hold position and technique match'):
       mini('Estimated top-set 1RM',exercise.bestE1rm==null?'—':fmtKg(exercise.bestE1rm),
         exercise.bestE1rm==null?'Needs a 1–12 rep working set':'Epley estimate; not a verified max')+
       mini(exercise.comparisonKind==='programme'?'Vs previous linked top set':exercise.comparisonKind==='independent'?'Vs previous independent top set':'Programme comparison',deltaText(exercise.estimateDelta),
@@ -129,7 +132,7 @@
       exercise.sets.map((set,index)=>{
         const main=window.SXLive.working(set);
         return '<div class="sx-live-set-row"><span class="sx-live-set-tag">'+(main?'SET':'OTHER')+' '+escapeHtml(String(set.index||index+1))+
-        '</span><span>'+escapeHtml(format(set.weight,1)+' kg × '+set.reps+' reps')+
+        '</span><span>'+escapeHtml(format(set.weight,1)+' kg × '+(exercise.isometric?set.durationSeconds+' s':set.reps+' reps'))+
         '</span><span>'+escapeHtml(String(set.type||'Working Set'))+
         '</span><span>'+(set.rpe==null?'RPE —':'RPE '+escapeHtml(format(set.rpe,1)))+'</span></div>';
       }).join('');

@@ -123,4 +123,21 @@ assert.equal(independent.comparisonKind,'independent');
 assert.equal(independent.plannedVolume,null);
 assert.equal(independent.volumeDelta,null);
 assert.equal(writes,0);
+// Backdowns checked ahead of the top set cannot masquerade as a top set.
+draft.work[0].ascensionLink=link(5,planned,8.5);
+draft.work[0].sets[5].done=false;
+store.data.spartx_draft_v1=JSON.stringify(draft);
+let outOfOrder=L.summarise(B.readLive(store),realHistory,'Bench Press').selected;
+assert.equal(outOfOrder.bestE1rm,null);
+assert.equal(outOfOrder.workVolumeKg,795);
+assert.match(outOfOrder.comparisonContext,/Complete the prescribed top set/);
+draft.work[0].sets[5].done=true;
+// Saved-session comparisons also exclude the independent workout.
+global.document={addEventListener(){}};
+require('./session-breakdown.js');
+const savedWeek5={id:'w5',date:new Date().toISOString(),name:'Week 5',exercises:draft.work};
+const report=global.SXSessionBreakdown.analyse([older,rogue,savedWeek5],90);
+assert.match(report.latest.items[0].comparison,/linked Week 4/);
+assert.match(report.latest.items[0].comparison,/1,075 kg vs 397.5 kg/);
+assert.equal(report.history.get('bench press').length,3);
 console.log('PASS — SpartanX Intelligence live completed-set regression tests.');

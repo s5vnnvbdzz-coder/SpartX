@@ -5758,7 +5758,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  if(orderChanged)remapActiveExerciseTimer(work.map(ex=>oldOrder.indexOf(ex)));
  if(restored||renamed||rearDelts||upgradedBench||refreshed||migrated||squatMigrated||orderChanged){
   renderWork();updateMinimizedSession();saveDraft();
- }
+ }else refreshAdaptiveSetGuidance();
 })();
 </script>
 <script src="./assets/bodybuilding/programme-model.js?v=5"></script>

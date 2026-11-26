@@ -4175,6 +4175,7 @@ function import531IntoWorkout(d){
     :/^(?:(?:Conventional|Sumo)\s+)?Deadlift$/i.test(String(ex.name||'').trim());
   });
   if(linked||existingUnlinked){
+   if(linked&&editingSessionId===null)window.SXAscensionPrescription?.upgradeActiveWarmups(linked,d.cycleId,Number(d.warmupStep)||2.5);
    ensureAscensionStrengthSizeCompanions(d);
    switchScreen('activeWorkout');renderWork();updateMinimizedSession();saveDraft();
    return true;
@@ -4182,7 +4183,7 @@ function import531IntoWorkout(d){
  }
  const imported={name:d.exercise,rest:120,notes:'Imported from '+source+' · Training max '+d.tm+' kg · Week '+d.week+' ('+d.weekLabel+')'+(d.source==='AscensionX'?' · Target RPE '+d.targetRpe:''),sets:[...warmups.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Warm-up',done:false})),...d.sets.map(x=>({weight:String(x.weight),reps:String(x.reps),rpe:'',type:'Working Set',done:false}))]};
  if(source==='AscensionX'){
-  imported.ascensionLink={cycleId:d.cycleId,cycleTitle:String(d.cycleTitle||d.cycleName||'').trim().slice(0,75),lift:d.exercise,week:Number(d.week),plannedSets:d.sets.map(x=>({weight:Number(x.weight),reps:Number(x.reps)})),targetRpe:Number(d.targetRpe)||null,importedTm:Number(d.tm)||null,recoveryBridge:d.recoveryBridge||null};
+  imported.ascensionLink={cycleId:d.cycleId,cycleTitle:String(d.cycleTitle||d.cycleName||'').trim().slice(0,75),lift:d.exercise,week:Number(d.week),plannedSets:d.sets.map(x=>({weight:Number(x.weight),reps:Number(x.reps)})),targetRpe:Number(d.targetRpe)||null,importedTm:Number(d.tm)||null,warmupVersion:Number(d.warmupVersion)||0,warmupStep:Number(d.warmupStep)||2.5,recoveryBridge:d.recoveryBridge||null};
  }
  work.unshift(imported);
  if(source==='AscensionX')ensureAscensionStrengthSizeCompanions(d);
@@ -5060,9 +5061,20 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=418',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=424',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=356"></script>
-<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=406"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/load-guard.js?v=338"></script><script src="./assets/ascension/workout-prescription.js?v=422"></script><script src="./assets/ascension/quick-access.js?v=421"></script>
+<script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=406"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/load-guard.js?v=338"></script><script src="./assets/ascension/workout-prescription.js?v=424"></script><script>
+(function upgradeRestoredAscensionWarmups(){
+ if(!sessionActive||editingSessionId!==null)return;
+ try{
+  const state=JSON.parse(localStorage.getItem('ascensionx_strength_v1')||'null');
+  const cycleId=state?.cycle?.created,step=Number(state?.profile?.rounding)||2.5;
+  let changed=false;
+  for(const ex of work)if(window.SXAscensionPrescription?.upgradeActiveWarmups(ex,cycleId,step))changed=true;
+  if(changed){renderWork();updateMinimizedSession();saveDraft();}
+ }catch(_){}
+})();
+</script><script src="./assets/ascension/quick-access.js?v=421"></script>
 <script src="./assets/navigation/main-carousel.js?v=413"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -5464,7 +5476,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=414;
+ const BUILD=424;
  // Public version advances by one minor release every 200 internal builds.
  // Keep BUILD numeric for precise update detection, even within one version.
  const versionForBuild=build=>{const milestone=Math.floor(build/200);return (1+Math.floor(milestone/10))+'.'+(milestone%10);};

@@ -44,7 +44,7 @@
   const prior=work.filter(ex=>matchedLink(ex,details));
   // Never partly rewrite a mixed, manually-edited assistance group.
   // A filled first set might be a genuine athlete decision, even if not done.
-  if(prior.some(ex=>!untouched(ex)))
+  if(prior.some(ex=>!untouched(ex)||String(ex.replacementOf||'').trim()))
    return {handled:true,changed:false,protected:true,reason:'Entered assistance is preserved'};
   const planned=companion.forImport(details,[],storage);
   if(!Array.isArray(planned)||!planned.length)

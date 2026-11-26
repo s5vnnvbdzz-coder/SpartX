@@ -4,7 +4,7 @@
  const E=global.SXEngine;
  const working=s=>{
   const t=String(s?.type||'Working Set').toLowerCase();
-  return !/(warm|drop|failure|excluded|backdown)/.test(t)&&!['w','b','x','f'].includes(t);
+  return !/(warm|drop|failure|excluded|cardio)/.test(t)&&!['w','x','f'].includes(t);
  };
  const round=(n,d=1)=>Math.round(n*10**d)/10**d;
  const volume=sets=>sets.reduce((n,s)=>n+s.weight*s.reps,0);
@@ -12,6 +12,12 @@
   const nums=sets.map(s=>E.estimatedMax(s)).filter(n=>n!=null&&Number.isFinite(n));
   return nums.length?Math.max(...nums):null;
  };
+ const topSet=(sets,link)=>{
+  const valid=sets.filter(s=>E.estimatedMax(s)!=null);
+  if(link?.role==='primary')return (sets.some(s=>typeof s.isTopSet==='boolean')?valid.find(s=>s.isTopSet===true):valid.find(s=>!/back.?down|back.?off|^b$/i.test(String(s.type||''))))||null;
+  return valid.reduce((best,s)=>!best||E.estimatedMax(s)>E.estimatedMax(best)?s:best,null);
+ };
+ const sameTrack=(a,b)=>!!a&&!!b&&a.cycleId===b.cycleId&&a.role===b.role&&a.sessionLift===b.sessionLift;
  const avgRpe=sets=>{const arr=sets.map(s=>s.rpe).filter(n=>Number.isFinite(n));return arr.length?round(arr.reduce((a,b)=>a+b,0)/arr.length):null};
  const change=(cur,prev)=>prev>0?round(100*(cur-prev)/prev):null;
  function summarise(live,history,requestedLift){
@@ -20,19 +26,45 @@
   for(const ex of live.exercises||[]){
    const name=E.canonical(ex.name);
    if(!name)continue;
-   if(!grouped.has(name))grouped.set(name,{name,sets:[],programmed:false,targetRpe:null});
+   if(!grouped.has(name))grouped.set(name,{name,sets:[],programmed:false,targetRpe:null,programmeLink:ex.programmeLink||null});
    const row=grouped.get(name);
+   if(row.sets.length&&(!sameTrack(row.programmeLink,ex.programmeLink)&&!!(row.programmeLink||ex.programmeLink))){row.programmeLink=null;row.programmed=true;}
    row.sets.push(...ex.sets);row.programmed ||= !!ex.programmed;
      if(Number.isFinite(ex.targetRpe)&&ex.targetRpe>=6&&ex.targetRpe<=10)row.targetRpe=ex.targetRpe;
   }
   const saved=Array.isArray(history)?history:[];
   const exercises=[...grouped.values()].map(group=>{
    const sets=group.sets,work=sets.filter(working);
-   const previous=saved.slice().reverse().find(s=>s.exercises?.some(e=>E.canonical(e.name)===group.name))||null;
-   const previousSets=previous?.exercises?.filter(e=>E.canonical(e.name)===group.name).flatMap(e=>e.sets||[])||[];
-   const previousWork=previousSets.filter(working);
-   const prevMax=bestEstimate(previousWork),max=bestEstimate(work),delta=max!=null&&prevMax!=null?change(max,prevMax):null;
+   const link=group.programmeLink;
+   // Saved history is chronological; search actual eligible work, never
+   // substitute a manual workout for a linked AscensionX comparison.
+   let previous=null,previousWork=[],previousLink=null;
+   const candidates=saved.slice().reverse();
+   for(const session of candidates){
+    const matches=(session.exercises||[]).filter(e=>{
+     if(E.canonical(e.name)!==group.name)return false;
+     const prior=e.programmeLink||E.programmeLink?.(e,group.name)||null;
+     return link?sameTrack(link,prior)&&prior.week<link.week:!group.programmed&&!prior;
+    });
+    const eligible=matches.find(e=>topSet((e.sets||[]).filter(working),e.programmeLink||E.programmeLink?.(e,group.name)));
+    if(eligible){previous=session;previousWork=eligible.sets.filter(working);previousLink=eligible.programmeLink||E.programmeLink?.(eligible,group.name)||null;break;}
+   }
+   const currentTop=topSet(work,link),priorTop=topSet(previousWork,previousLink);
+   const max=currentTop?E.estimatedMax(currentTop):null,prevMax=priorTop?E.estimatedMax(priorTop):null;
+   const delta=max!=null&&prevMax!=null?change(max,prevMax):null;
    const currentVolume=volume(work),priorVolume=volume(previousWork);
+   const plannedVolume=link?.plannedSets?.length?volume(link.plannedSets):null;
+   const plannedCount=link?.plannedCount||null;
+   const volumeProgress=plannedVolume>0?round(100*currentVolume/plannedVolume):null;
+   const sameReps=!!currentTop&&!!priorTop&&currentTop.reps===priorTop.reps;
+   const comparableRpe=!!currentTop&&!!priorTop&&Number.isFinite(currentTop.rpe)&&Number.isFinite(priorTop.rpe);
+   const rpeDelta=comparableRpe?round(currentTop.rpe-priorTop.rpe):null;
+   const comparisonContext=previous&&!currentTop?'Complete the prescribed top set first':previous?[
+    link?'Week '+previousLink.week+' · same cycle':'Independent workout',
+    currentTop&&priorTop?priorTop.weight+' kg × '+priorTop.reps+' → '+currentTop.weight+' kg × '+currentTop.reps:'',
+    comparableRpe?'RPE '+priorTop.rpe+' → '+currentTop.rpe:'RPE comparison unavailable',
+    !sameReps?'Different rep targets; not proof of strength change':rpeDelta!==0?'Different effort; interpret cautiously':'Estimate only'
+   ].filter(Boolean).join(' · '):link?'No earlier linked session in this cycle':group.programmed?'No verified programme linkage':'No comparable independent session';
    const rpe=avgRpe(work),high=work.filter(s=>s.rpe!=null&&s.rpe>=9).length;
    const maxRpe=Math.max(0,...work.map(s=>s.rpe||0));
    const firstAvg=avgRpe(work.slice(0,Math.floor(work.length/2)));
@@ -52,14 +84,14 @@
    else if(!work.length)advice={kind:'neutral',title:'Complete working sets first',detail:'There is not enough performance data to recommend a load change.'};
    else if(rpe==null)advice={kind:'neutral',title:'Record RPE for better guidance',detail:'Keep the planned load and log effort before considering an increase.'};
    else if(maxRpe>=9)advice={kind:'caution',title:'Maintain the planned load',detail:'A working set reached RPE '+maxRpe+'. Prioritise controlled repetitions and recovery.'};
-   else if(delta!=null&&delta>=-2&&work.length>=2&&rpe<=7.5&&step>0)
+   else if(delta!=null&&delta>=-2&&sameReps&&comparableRpe&&rpeDelta<=0.5&&work.length>=2&&rpe<=7.5&&step>0)
     advice={kind:'positive',title:'Small increase may be suitable next time',detail:'Estimated top-set strength is broadly stable and effort appears controlled. Consider up to +'+step+' kg only if technique and programming allow.'};
    else advice={kind:'neutral',title:'Build a comparable session',detail:'Follow your planned load. In-session volume changes alone do not establish strength progress.'};
    return {
     ...group,completed:sets.length,working:work.length,warmups:sets.length-work.length,
     volumeKg:volume(sets),workVolumeKg:currentVolume,avgRpe:rpe,highEffort:high,bestE1rm:max,
-    previousE1rm:prevMax,estimateDelta:delta,volumeDelta:previousWork.length&&priorVolume>0?change(currentVolume,priorVolume):null,
-    previousSession:previous?{date:previous.date,volumeKg:priorVolume,workingSets:previousWork.length}:null,
+    previousE1rm:prevMax,estimateDelta:delta,comparisonContext,comparisonKind:link?'programme':group.programmed?'unverified':'independent',rpeDelta,plannedVolume,plannedCount,volumeProgress,volumeDelta:null,
+    previousSession:previous?{date:previous.date,week:previousLink?.week??null,volumeKg:priorVolume,workingSets:previousWork.length}:null,
     fatigue,advice
    };
   });

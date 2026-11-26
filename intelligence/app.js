@@ -120,10 +120,11 @@
     $('liveExerciseCompare').innerHTML=
       mini('Estimated top-set 1RM',exercise.bestE1rm==null?'—':fmtKg(exercise.bestE1rm),
         exercise.bestE1rm==null?'Needs a 1–12 rep working set':'Epley estimate; not a verified max')+
-      mini('Vs last saved top set',deltaText(exercise.estimateDelta),
-        exercise.estimateDelta==null?'No comparable saved set':'Estimated 1RM comparison',deltaClass(exercise.estimateDelta))+
+      mini(exercise.comparisonKind==='programme'?'Vs previous linked top set':exercise.comparisonKind==='independent'?'Vs previous independent top set':'Programme comparison',deltaText(exercise.estimateDelta),
+        exercise.comparisonContext||'No comparable saved set')+
       mini('Working volume',fmtKg(exercise.workVolumeKg),
-        exercise.volumeDelta==null?'Live partial session':deltaText(exercise.volumeDelta)+' vs previous full session',deltaClass(exercise.volumeDelta));
+        exercise.plannedVolume>0?fmtKg(exercise.plannedVolume)+' prescribed · '+format(exercise.volumeProgress,1)+'% of planned volume':
+        exercise.plannedCount?exercise.working+' of '+exercise.plannedCount+' prescribed sets · load target unavailable':'Live partial session · full-volume comparison after saving');
     $('liveExerciseSets').innerHTML='<strong>COMPLETED SETS · '+exercise.completed+'</strong>'+
       exercise.sets.map((set,index)=>{
         const main=window.SXLive.working(set);

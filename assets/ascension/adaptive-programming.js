@@ -622,6 +622,54 @@
  // Weekly volume guidance is calculated on the complete selected microcycle,
  // including secondary days and actual classic main-lift working-set counts.
  // It is a planning heuristic, not a measured hypertrophy dose.
+ // A substitution is a new exercise, not a transfer of the old movement's
+ // load, reps, effort or fixed training-max prescription.
+ function substitutePrescription(exercise,name,storage=global.localStorage){
+  const link=exercise?.sxStrengthSizeCompanion||exercise?.sxPowerbuildingSupport;
+  const cycle=activeCycle(storage),week=Number(link?.week);
+  if(exercise?.ascensionLink||!link||link.adaptive===false||cycle?.id!==link.cycleId||
+     !enabled(cycle.id,storage)||!Number.isInteger(week)||week<1||week>5)return null;
+  const key=norm(name);
+  if(!key||/static|isometric|hold|plank|carry/.test(key))return null;
+  const prefs=read(cycle.id,storage),V=global.SXVolumeIntelligence;
+  const info=V?.classify?.(name);
+  const originalInfo=V?.classify?.(exercise.name);
+  let spec=null;
+  try{spec=itemFor(name)}catch(_){}
+  // Explicit movement families take precedence over loose name matching.
+  // Reverse flys target posterior deltoids, not the chest.
+  if(/reardelt|reversefly|reversepecdeck|facepull|lateralraise/.test(key))
+   spec={min:12,max:20,rest:75,cost:1,rir:2};
+  else if(/triceps|pushdown|skullcrusher|biceps|curl/.test(key)&&!/legcurl|singlelegcurl/.test(key))
+   spec={min:10,max:15,rest:75,cost:1,rir:2};
+  else if(/legextension|legcurl|singlelegcurl/.test(key))spec={min:10,max:15,rest:90,cost:1,rir:2};
+  else if(/calf/.test(key))spec={min:10,max:20,rest:75,cost:1,rir:2};
+  else if(/cablekickback/.test(key))spec={min:12,max:15,rest:75,cost:1,rir:2};
+  else if(/chestfly|dumbbellfly|inclinedumbbellfly|cablecrossover|cablefly/.test(key))
+   spec={min:12,max:15,rest:90,cost:1,rir:2};
+  else if(/deadlift|rdl|goodmorning|backsquat|frontsquat|pausesquat|temposquat|boxsquat|safetybarsquat|smithmachinesquat/.test(key))
+   spec={min:6,max:8,rest:150,cost:2,rir:3};
+  else if(/hack|legpress|split squat|splitsquat|lunge|hipthrust|glutebridge/.test(key))
+   spec={min:8,max:12,rest:120,cost:2,rir:3};
+  else if(/crunch|knee.?raise|legraise|situp|abwheel|pallof/.test(key))
+   spec={min:10,max:15,rest:75,cost:1,rir:3};
+  else if(/press|pushup|dip|pulldown|row|pullup|chinup/.test(key))
+   spec={min:8,max:12,rest:120,cost:1,rir:3};
+  else if(!spec&&info){
+   const isolated=['quadIsolation','hamCurl','biceps','triceps','calves','core','lateral','rearDelts','chestAccessory'].includes(info.pattern);
+   spec={min:isolated?10:8,max:isolated?15:12,rest:isolated?75:120,cost:info.axial>=2?2:1,rir:3};
+  }
+  if(!spec)return null;
+  const previous=Number(link.plannedSets);
+  const baseline=Number.isInteger(previous)&&previous>=2&&previous<=4?previous:3;
+  const sets=spec.cost>=2?Math.min(baseline,week>=4?2:3):baseline;
+  const priorTarget=Number(link.targetRpe??(10-Number(link.targetRir??link.rir)));
+  const targetRpe=week>=4?Math.min(7,Number.isFinite(priorTarget)&&priorTarget>=6?priorTarget:7):
+   Math.min(8,10-Number(spec.rir||3),Number.isFinite(priorTarget)&&priorTarget>=6?Math.max(7,priorTarget):8);
+  const item={name,sets,min:spec.min,max:spec.max,rir:10-targetRpe,targetRpe,rest:spec.rest||90,cost:spec.cost||1};
+  const rec=recommend(item,cycle.id,week,storage);
+  return {...item,...rec,reason:'Substitute-specific prescription; '+(info&&originalInfo&&info.primary!==originalInfo.primary?'Different primary muscle from original; review weekly coverage. ':'')+rec.reason};
+ }
  function weeklyVolumePlan(c,prefs,week,storage=global.localStorage){
   const w=Number(week),lifts=c?.lifts||[];
   const slots=lifts.map(lift=>({lift,exercises:rawLiftPlan(lift,w,prefs.focus,c.id,storage)}));
@@ -1056,7 +1104,7 @@
   try{global.dispatchEvent(new global.CustomEvent('spartx:ascensionAdaptiveSupportResult',
     {detail:{success,message}}))}catch(_){}
  });
- global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,equipmentRules,setEquipment,formatPrescription,weeklyVolumePlan,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
+ global.SXAscensionAdaptive=Object.freeze({KEY,LIB,FOURTH,FOCUS_LIFTS,SUPPORT_ROLES,activeCycle,read,enabled,save,plan,previewSchedule,schedule,pendingSupportDay,selectableSupportDay,supportCandidates,confirmSavedSupport,recommend,equipmentRules,setEquipment,formatPrescription,substitutePrescription,weeklyVolumePlan,beginEditor,discardDraft,commitDraft,previewEnabled,refreshEditor});
  if(global.document?.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mountEditor,{once:true});
  else mountEditor();
 })(window);

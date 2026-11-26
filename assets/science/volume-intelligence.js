@@ -34,7 +34,7 @@ function classify(name){
  if(/triceps|pushdown|skullcrusher/.test(key))return {name,primary:'Triceps',secondary:[],axial:0,pattern:'triceps',main:false};
  if(/latpulldown|row|pullup|chinup/.test(key))return {name,primary:'Back',secondary:['Biceps'],axial:0,pattern:'row',main:false};
  if(/shoulderpress|militarypress/.test(key))return {name,primary:'Shoulders',secondary:['Triceps'],axial:1,pattern:'verticalPress',main:false};
- if(/rear.?delt|lateralraise|facepull/.test(key))return {name,primary:'Shoulders',secondary:[],axial:0,pattern:'lateral',main:false};
+ if(/rear.?delt|reversefly|reversepecdeck|lateralraise|facepull/.test(key))return {name,primary:'Shoulders',secondary:[],axial:0,pattern:'lateral',main:false};
  if(/legcurl|nordic/.test(key))return {name,primary:'Hamstrings',secondary:[],axial:0,pattern:'hamCurl',main:false};
  if(/rdl|backextension/.test(key))return {name,primary:'Hamstrings',secondary:['Glutes'],axial:2,pattern:'hinge',main:false};
  if(/legpress|hack|legextension|lunge/.test(key))return {name,primary:'Quads',secondary:['Glutes'],axial:1,pattern:'quad',main:false};

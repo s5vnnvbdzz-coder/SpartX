@@ -270,6 +270,9 @@
    if(low<min)return down('Minimum reps were missed, and RPE is missing.');
    return out(base,low,'Hold established load; no increase without complete RPE.');
   }
+  // Above-target but controlled completed reps are a consolidation target,
+  // not a reason to automatically lower the load or repetition target.
+  if(known&&effort>target&&effort<=8.5&&low>=min)return out(base,low,'Consolidate this weight and repetition target until RPE is at or below '+target+'. No further increase advised.');
   const achievable=low+Math.floor(target-effort);
   if(achievable<min)return down('Estimated reps at the target RPE fall below the prescribed range.');
   if(!same||!full)return out(base,Math.min(low,achievable),'Mixed-load or incomplete exposure; no automatic increase.');

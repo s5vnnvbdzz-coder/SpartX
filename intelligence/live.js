@@ -14,7 +14,7 @@
  };
  const topSet=(sets,link)=>{
   const valid=sets.filter(s=>E.estimatedMax(s)!=null);
-  if(link?.role==='primary')return valid.find(s=>!/back.?down|back.?off|^b$/i.test(String(s.type||'')))||null;
+  if(link?.role==='primary')return (sets.some(s=>typeof s.isTopSet==='boolean')?valid.find(s=>s.isTopSet===true):valid.find(s=>!/back.?down|back.?off|^b$/i.test(String(s.type||''))))||null;
   return valid.reduce((best,s)=>!best||E.estimatedMax(s)>E.estimatedMax(best)?s:best,null);
  };
  const sameTrack=(a,b)=>!!a&&!!b&&a.cycleId===b.cycleId&&a.role===b.role&&a.sessionLift===b.sessionLift;
@@ -59,7 +59,7 @@
    const sameReps=!!currentTop&&!!priorTop&&currentTop.reps===priorTop.reps;
    const comparableRpe=!!currentTop&&!!priorTop&&Number.isFinite(currentTop.rpe)&&Number.isFinite(priorTop.rpe);
    const rpeDelta=comparableRpe?round(currentTop.rpe-priorTop.rpe):null;
-   const comparisonContext=previous?[
+   const comparisonContext=previous&&!currentTop?'Complete the prescribed top set first':previous?[
     link?'Week '+previousLink.week+' · same cycle':'Independent workout',
     currentTop&&priorTop?priorTop.weight+' kg × '+priorTop.reps+' → '+currentTop.weight+' kg × '+currentTop.reps:'',
     comparableRpe?'RPE '+priorTop.rpe+' → '+currentTop.rpe:'RPE comparison unavailable',

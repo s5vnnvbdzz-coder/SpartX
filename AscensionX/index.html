@@ -685,7 +685,7 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
     <div class="asc-spartan-import-scroll">
       <div class="eyebrow">ASCENSIONX × SPARTANX</div>
       <h2 id="ascSpartanImportTitle" style="margin:9px 0">Log this workout in SpartanX?</h2>
-      <p class="tiny" style="margin:0 0 12px">Choose the lift to load as an active SpartanX workout. All four recommended warm-up sets are placed before the prescribed working sets.</p>
+      <p class="tiny" style="margin:0 0 12px">Choose the lift to load as an active SpartanX workout. The recommended adaptive warm-up sets are placed before the prescribed working sets.</p>
       <label for="ascSpartanImportLift">Exercise</label>
       <select id="ascSpartanImportLift" onchange="renderAscSpartanImportPreview()"></select>
       <div id="ascSpartanImportPreview" class="asc-spartan-import-preview" aria-live="polite"></div>
@@ -869,7 +869,7 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
 <nav aria-label="Main navigation"><button class="active" data-screen="home"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v11H3z"/><path d="M9 21v-7h6v7"/></svg></b>HOME</button><button data-screen="workout"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 7v10M9 10v4M15 10v4M18 7v10M21 9v6M6 12h12"/></svg></b>WORKOUT</button><button data-screen="profile"><b class="sx-nav-icon"><svg class="sx-nav-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><img id="navRankEmblem" src="../ranks/mortal.svg" alt="" hidden style="display:none!important"></b>PROFILE</button></nav>
 <div id="toast" class="toast"></div>
 <script src="../assets/ascension/load-guard.js?v=338"></script>
-<script src="../assets/ascension/workout-prescription.js?v=422"></script>
+<script src="../assets/ascension/workout-prescription.js?v=424"></script>
 <script src="../assets/ascension/cycle-progression.js?v=346"></script>
 <script src="../assets/ascension/cycle-intelligence.js?v=1"></script>
 <script>
@@ -1530,20 +1530,11 @@ function closeEmbeddedAscensionFromHeader(){
  if(!ascensionEmbeddedBySpartanX)return;
  try{window.parent.postMessage({type:'spartx:ascensionRequestClose'},location.origin)}catch(e){}
 }
-const ASC_WARMUP_PCTS=[40,55,65,75],ASC_WARMUP_REPS=[5,3,2,1];
-// Keep every suggested warm-up BELOW the prescribed main set, including deload.
+// Use the exact same top-set-based warm-up planner as native Continue.
 function ascWarmupPlan(lift,week){
- const p=PLAN[week-1],trainingMax=tm(lift),info=prescribed(lift,week),main=info.topLoad;
- const percentages=p.deload?[25,35,45,55]:p.topPct<=75?[30,40,50,60]:ASC_WARMUP_PCTS;
- const step=Number(state.profile.rounding)||2.5;
- // A bridged working set must not be preceded by a near-maximal warm-up
- // that is effectively as heavy as the adjusted main load.
- const bridgeCaps=[.55,.7,.8,.9];
- return percentages.map((pct,i)=>({
-  pct,weight:Math.max(step,Math.min(roundTo(trainingMax*pct/100),
-   info.loadGuard?roundTo(main*bridgeCaps[i],step):main-(4-i)*step)),
-  reps:ASC_WARMUP_REPS[i]
- }));
+ const trainingMax=tm(lift),main=prescribed(lift,week).topLoad,step=Number(state.profile.rounding)||2.5;
+ return (window.SXAscensionPrescription?.warmupPlan(lift,week,main,step)||[])
+  .map(x=>({...x,pct:Math.round(x.weight/trainingMax*100)}));
 }
 window.addEventListener('message',e=>{
  if(e.source!==window.parent||e.origin!==location.origin)return;
@@ -1744,7 +1735,7 @@ function cancelAscSpartanImport(){
 }
 function buildAscSpartanWorkout(lift){
  // The real AscensionX import and the SpartanX Workout popup use the
- // exact same prescribed loads, recovery bridge and four warm-up sets.
+ // exact same prescribed loads, recovery bridge and adaptive warm-up sets.
  return window.SXAscensionPrescription.build(state,lift,localStorage);
 }
 // In a five-day cycle two distinct assistance sessions may be due. Resolve
@@ -2067,7 +2058,7 @@ function renderWorkout(){
  <div class="grid"><div class="stat"><span>Training Max</span><strong>${kg(tm(lift))}</strong></div><div class="stat"><span>Top / main load</span><strong>${kg(info.topLoad)}</strong></div></div>
  ${info.loadGuard?'<p class="tiny" role="status" style="margin:12px 0;color:var(--red2)">'+loadGuardSummary(info)+'</p>':''}
  <div class="hero"><div class="mutedline">${p.deload?'DELOAD PRESCRIPTION':'TOP SET TARGET'}</div><div class="big">${p.deload?'3 × 5':`1 × ${p.topReps}`}</div><div class="tiny">${kg(info.topLoad)} · ${info.loadGuard?'recovery bridge (standard '+p.topPct+'% TM)':p.topPct+'% of TM'} · target RPE ${p.rpe}</div>${!p.deload?`<div class="divider"></div><div class="mutedline">BACK-OFF WORK</div><strong>${p.backSets} × ${p.backReps} @ ${kg(info.backLoad)}</strong><div class="tiny">${info.loadGuard?'Recovery bridge (standard '+p.backPct+'% TM)':p.backPct+'% of TM'}</div>`:''}</div>
- <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM${info.loadGuard?' (capped below adjusted main load)':''}. Adjust warm-ups to readiness; they are not working sets.</div>`;
+ <div class="tiny"><strong>Warm-up suggestion:</strong> ${ascWarmupPlan(lift,week).map(x=>`${kg(x.weight)} × ${x.reps}`).join(' · ')}${info.loadGuard?' (capped below adjusted main load)':''}. Adjust warm-ups to readiness; they are not working sets.</div>`;
  if(ascensionEmbeddedBySpartanX){
   $('workoutPrescription').innerHTML=`<div class="row between asc-workout-prescription-head"><div><div class="eyebrow">WEEK ${week} · ${p.name.toUpperCase()}</div><h2 style="margin:5px 0">${lift}</h2></div><span class="pill ${p.deload?'warn':'red'}">${p.deload?'DELOAD':'WORKING WEEK'}</span></div>
   <div class="asc-workout-main-target"><div class="mutedline">${p.deload?'LIGHT TECHNIQUE WORK':'MAIN SET TARGET'}</div>
@@ -2077,7 +2068,7 @@ function renderWorkout(){
   ${info.loadGuard?'<p class="tiny asc-workout-guard" role="status">'+loadGuardSummary(info)+'</p>':''}
   <details class="asc-workout-guidance"><summary>Training max &amp; warm-up guidance</summary>
    <div class="tiny"><strong>Training max:</strong> ${kg(tm(lift))}</div>
-   <div class="tiny"><strong>Warm-up:</strong> ${ascWarmupPlan(lift,week).map(x=>`${x.pct}% (${kg(x.weight)}) × ${x.reps}`).join(' · ')} of TM${info.loadGuard?' (capped below adjusted main load)':''}.</div>
+   <div class="tiny"><strong>Warm-up:</strong> ${ascWarmupPlan(lift,week).map(x=>`${kg(x.weight)} × ${x.reps}`).join(' · ')}${info.loadGuard?' (capped below adjusted main load)':''}.</div>
    <div class="tiny">Warm-ups are not working sets. Adjust to readiness.</div></details>`;
  }
  $('workoutLogger').innerHTML=existing?renderSaved(existing):renderLogger(lift,week,info);

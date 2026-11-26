@@ -6,25 +6,44 @@ for(const file of ["assets/science/evidence-engine.js","assets/science/volume-in
 const A=root.SXAscensionAdaptive,G=root.SXAdaptiveSetGuidance,P=root.SXAscensionPrescription;
 const id='2026-11-01T00:00:00Z';
 const set=(weight,reps,rpe,done=true)=>({weight,reps,rpe,done,type:'Working Set'});
-const ex={name:'Machine Chest Press',sxStrengthSizeCompanion:{cycleId:id,week:5,repsMin:8,repsMax:10,targetRpe:7},sets:[set(80,10,6),set(80,10,'',false),set(80,10,'',false)]};
+const ex={name:'Machine Chest Press',sxStrengthSizeCompanion:{cycleId:id,week:5,repsMin:8,repsMax:12,prescribedReps:10,targetRpe:7},sets:[set(80,10,6),set(80,10,'',false),set(80,10,'',false)]};
 const initial=JSON.stringify(ex);
 let hint=G.advise(ex);
 assert.equal(hint.field,'weight');assert.equal(hint.direction,'up');assert.equal(hint.index,0);assert.equal(hint.nextIndex,1);assert.equal(JSON.stringify(ex),initial);
 assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'weight','up']]);
 ex.sets[1]=set(87,10,8);hint=G.advise(ex);
 assert.equal(hint.field,'rpe');assert.equal(hint.direction,'down');assert.equal(hint.index,1);assert.equal(hint.nextIndex,2);assert.equal(hint.weight,87);assert.ok(hint.detail.includes('87 kg'));
-assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
+assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'weight','up'],[1,'rpe','down']]);
 assert.equal(ex.sets[2].weight,80);assert.equal(ex.sets[2].rpe,'');
-ex.sets[2].done=true;ex.sets[2].rpe=6.5;assert.equal(G.advise(ex),null);
-assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
-ex.sets[2].rpe=7;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down']]);
-ex.sets[2].rpe=7.5;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[1,'rpe','down'],[2,'rpe','down']]);
-ex.sets=[set(80,8,6),set(80,8,'',false)];assert.equal(G.advise(ex).field,'reps');
+ex.sets[2]=set(87,10,6.5);
+assert.equal(G.advise(ex).field,'weight');
+assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'weight','up'],[1,'rpe','down'],[2,'weight','up']]);
+ex.sets[2].rpe=7;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'weight','up'],[1,'rpe','down']]);
+ex.sets[2].rpe=7.5;assert.deepEqual(Array.from(G.indicators(ex),x=>[x.index,x.field,x.direction]),[[0,'weight','up'],[1,'rpe','down'],[2,'rpe','down']]);
+ex.sets=[set(80,8,6),set(80,10,'',false)];assert.equal(G.advise(ex).field,'reps');
 ex.sets[0].rpe='';assert.equal(G.advise(ex),null);assert.equal(G.indicators(ex).length,0);
 ex.sets[0].rpe=6;ex.sxStrengthSizeCompanion.week=6;assert.equal(G.advise(ex),null);
-ex.sxStrengthSizeCompanion.week=5;ex.sxStrengthSizeCompanion.fixedDeadliftRdl=true;assert.equal(G.advise(ex),null);
-delete ex.sxStrengthSizeCompanion.fixedDeadliftRdl;ex.ascensionLink={cycleId:id};assert.equal(G.advise(ex),null);
-delete ex.ascensionLink;ex.sets[1].weight=90;assert.equal(G.advise(ex),null);
+ex.sxStrengthSizeCompanion.week=5;ex.ascensionLink={cycleId:id};assert.equal(G.advise(ex),null);
+delete ex.ascensionLink;
+const rdl={name:'Romanian Deadlift',sxStrengthSizeCompanion:{cycleId:id,lift:'Deadlift',week:5,repsMin:8,repsMax:8,prescribedReps:8,targetRpe:7,fixedDeadliftRdl:true,trainingMaxPercent:45},sets:[set(92.5,8,6),set(92.5,8,'',false),set(92.5,8,'',false)]};
+for(const rpe of [6,6.5,7,7.5,8,8.5,9,9.5,10]){
+ rdl.sets[0].rpe=rpe;
+ const before=JSON.stringify(rdl),arrows=G.indicators(rdl);
+ assert.equal(arrows.length,rpe===7?0:1);
+ if(rpe!==7){assert.equal(arrows[0].index,0);assert.equal(arrows[0].field,rpe<7?'weight':'rpe');assert.equal(arrows[0].direction,rpe<7?'up':'down');}
+ assert.equal(JSON.stringify(rdl),before);
+}
+rdl.sets=[set(92.5,8,7),set(92.5,8,6),set(92.5,8,8)];
+assert.deepEqual(Array.from(G.indicators(rdl),x=>[x.index,x.field,x.direction]),[[1,'weight','up'],[2,'rpe','down']]);
+const machine={name:'Lat Pulldown',sxStrengthSizeCompanion:{cycleId:id,week:5,repsMin:8,repsMax:12,prescribedReps:10,targetRpe:7},sets:[set(68,10,6),set(68,10,'',false)]};
+assert.equal(G.indicators(machine)[0].field,'weight');
+machine.sets[0].done=false;assert.equal(G.indicators(machine).length,0);
+const legacy={name:'Romanian Deadlift',notes:'AscensionX Adaptive Programming · Deadlift · Week 5 · 3 × 8 reps · Target RPE 7 · 45% deadlift training max',sets:[set(92.5,8,6)]};
+assert.equal(G.indicators(legacy)[0].field,'weight');
+legacy.sets[0].rpe=8;assert.equal(G.indicators(legacy)[0].field,'rpe');
+const supportDay={name:'Bench Press',sxPowerbuildingSupport:{cycleId:id,week:5,day:'SAT',repsMin:8,repsMax:10,rir:3},sets:[set(68,10,6)]};
+assert.equal(G.indicators(supportDay)[0].field,'weight');
+assert.equal(G.indicators({name:'Lat Pulldown',sets:[set(68,10,6)]}).length,0);
 const lifts=['Back Squat','Bench Press','Deadlift','Overhead Press'];
 function store(lifts,days,focus,sessions=[]){
  const data={'ascensionx_strength_v1':JSON.stringify({cycle:{created:id,exercises:lifts,currentWeek:2}}),'sx_ascension_adaptive_v1':JSON.stringify({[id]:{enabled:true,focus,days}}),'spartx_db':JSON.stringify({sessions})};

@@ -178,12 +178,12 @@
      '<strong>'+html(item.name)+'</strong><span>'+html(bits.join(' · ')||fmt(c.count)+' cardio entries')+'</span></div><span class="sx-session-expand">⌄</span></summary>'+
      '<p class="sx-session-muted">Cardio is listed but excluded from resistance workload calculations.</p></details>';
    }
-   const facts=[fmt(item.working.length)+' resistance sets',
+   const facts=item.kind==='isometric'?fmt(item.working.length)+' holds · '+item.holdSeconds+' s total · Heaviest '+fmt(item.max,1)+' kg':[fmt(item.working.length)+' resistance sets',
     item.max===null?null:'Top '+fmt(item.max,1)+' kg',
     fmt(item.volume)+' kg work volume',
     item.averageRpe!=null?'Avg RPE '+fmt(item.averageRpe,1):null].filter(Boolean).join(' · ');
    const rows=item.all.map((set,i)=>'<div class="sx-session-set"><span>SET '+(i+1)+'</span>'+
-    '<strong>'+fmt(set.weight,1)+' kg × '+fmt(set.reps,0)+'</strong>'+
+    '<strong>'+fmt(set.weight,1)+' kg × '+(item.kind==='isometric'?fmt(set.durationSeconds,0)+' s':fmt(set.reps,0))+'</strong>'+
     '<span>'+html(set.type)+'</span><span>'+(Number.isFinite(set.rpe)&&set.rpe>=6&&set.rpe<=10?'RPE '+fmt(set.rpe,1):'RPE —')+'</span></div>').join('');
    return '<details class="sx-session-exercise"><summary><div><small class="sx-session-tag '+html(item.kind)+'">'+html(item.label)+'</small>'+
     '<strong>'+html(item.name)+'</strong><span>'+html(facts)+'</span></div><span class="sx-session-expand">⌄</span></summary>'+
@@ -203,7 +203,7 @@
    '<p class="sx-session-muted">Open an exercise to see every valid completed set and a cautious prior-session comparison. Exercises without muscle classification are still included.</p>'+
    '</article>';
   if(select){
-   const choices=last.items.filter(i=>i.kind!=='cardio'&&i.working.length);
+   const choices=last.items.filter(i=>i.kind!=='cardio'&&i.kind!=='isometric'&&i.working.length);
    const pick=choices.find(i=>i.key===selected)||choices.find(i=>i.kind!=='main')||choices[0];
    select.replaceChildren();
    for(const item of choices){

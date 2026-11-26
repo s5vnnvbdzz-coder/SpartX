@@ -62,7 +62,8 @@ ascensionToolCard.innerHTML=
  '<div class="card-head"><h2 id="ascensionXToolTitle">AscensionX</h2></div>'+
  '<p class="hint" style="margin:0 0 13px;line-height:1.55">Full six-week strength programming, adaptive training, training history and progression.</p>'+
  '<a id="openAscensionX" href="./AscensionX/?sxIntegrated=1&from=tools&mode=home" class="ascension-launch">OPEN ASCENSIONX</a>'+
- '<p class="hint" style="margin:11px 0 0">Opens as a full AscensionX programme page within your SpartanX platform.</p>';
+ '<a id="openAscensionXNext" href="./AscensionX2/next.html?from=tools" class="ascension-launch">OPEN ASCENSIONX 2.0</a>'+ 
+ '<p class="hint" style="margin:11px 0 0">Original six-week cycle or the new independent powerlifting and powerbuilding programme preview.</p>';
 shadow.querySelector('main').appendChild(ascensionToolCard);
 
 // Save the exact origin scroll position before navigating to the native
@@ -82,11 +83,11 @@ function rememberAscensionReturnScroll(source,kind='ascension'){
   }));
  }catch(_){}
 }
-ascensionToolCard.querySelector('#openAscensionX')?.addEventListener('click',event=>{
+ascensionToolCard.querySelectorAll('#openAscensionX,#openAscensionXNext').forEach(link=>link.addEventListener('click',event=>{
  if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||
     event.shiftKey||event.altKey)return;
  rememberAscensionReturnScroll('tools');
-});
+}));
 
 // Intelligence launches from Tools, including when the link is clicked
 // inside this shadow root (ordinary document click handlers do not see it).

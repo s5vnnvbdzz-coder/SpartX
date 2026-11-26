@@ -640,13 +640,14 @@
   // Reverse flys target posterior deltoids, not the chest.
   if(/reardelt|reversefly|reversepecdeck|facepull|lateralraise/.test(key))
    spec={min:12,max:20,rest:75,cost:1,rir:2};
-  else if(/triceps|pushdown|skullcrusher|biceps|curl/.test(key)&&!/legcurl/.test(key))
+  else if(/triceps|pushdown|skullcrusher|biceps|curl/.test(key)&&!/legcurl|singlelegcurl/.test(key))
    spec={min:10,max:15,rest:75,cost:1,rir:2};
-  else if(/legextension|legcurl/.test(key))spec={min:10,max:15,rest:90,cost:1,rir:2};
+  else if(/legextension|legcurl|singlelegcurl/.test(key))spec={min:10,max:15,rest:90,cost:1,rir:2};
   else if(/calf/.test(key))spec={min:10,max:20,rest:75,cost:1,rir:2};
+  else if(/cablekickback/.test(key))spec={min:12,max:15,rest:75,cost:1,rir:2};
   else if(/chestfly|dumbbellfly|inclinedumbbellfly|cablecrossover|cablefly/.test(key))
    spec={min:12,max:15,rest:90,cost:1,rir:2};
-  else if(/deadlift|rdl|goodmorning|backsquat|frontsquat|pausesquat|temposquat|boxsquat|safetybarsquat/.test(key))
+  else if(/deadlift|rdl|goodmorning|backsquat|frontsquat|pausesquat|temposquat|boxsquat|safetybarsquat|smithmachinesquat/.test(key))
    spec={min:6,max:8,rest:150,cost:2,rir:3};
   else if(/hack|legpress|split squat|splitsquat|lunge|hipthrust|glutebridge/.test(key))
    spec={min:8,max:12,rest:120,cost:2,rir:3};

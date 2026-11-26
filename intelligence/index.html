@@ -39,6 +39,7 @@
 <link rel="stylesheet" href="./powerlifting-obsidian.css?v=354">
 <script defer src="../assets/charts/touch-scrub.js?v=344"></script>
 
+<link rel="stylesheet" href="./clean-layout.css?v=1">
 </head>
 <body data-theme="black-yellow" class="sx-theme-child sx-intel-obsidian">
 <div class="app-shell">
@@ -191,15 +192,15 @@
             <div class="note"><span>ⓘ</span> This is a comparison with your estimated top-set 1RM, not a verified competition lift.</div>
           </article>
         </div>
-        <div class="section-top"><div><h3>Strength breakdown</h3><p>Estimated top-set strength by compound movement</p></div></div>
-        <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>EXERCISE</th><th>LATEST</th><th>BEST IN RANGE</th><th>TREND</th><th>SESSIONS</th></tr></thead><tbody id="strengthTable"></tbody></table></div></div>
+        <details class="sx-intel-disclosure"><summary>Strength breakdown</summary><div class="sx-intel-disclosure-body"><div class="section-top"><div><h3>Strength breakdown</h3><p>Estimated top-set strength by compound movement</p></div></div>
+        <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>EXERCISE</th><th>LATEST</th><th>BEST IN RANGE</th><th>TREND</th><th>SESSIONS</th></tr></thead><tbody id="strengthTable"></tbody></table></div></div></div></details>
       </section>
 
       <section class="page" id="musclesPage" data-page="muscles" hidden>
         <div class="section-top"><div><h3>Muscle workload</h3><p>How your recent training is distributed</p></div><span class="micro-tag">LAST 7 DAYS</span></div>
         <div class="workload-hero"><div class="sx-intel-anatomy-panel"><div id="sxIntelligenceBodyMap" class="sx-intel-anatomy-map" role="img" aria-label="Front and back anatomical muscle map highlighting muscles represented by recent working sets"></div><span class="sx-intel-anatomy-caption">Bright = primary · softer = secondary · last 7 days</span></div><div class="workload-hero-text"><div class="eyebrow">WORKLOAD AT A GLANCE</div><h3>Know what you've trained.</h3><p>Working-set counts show training exposure across major muscle groups. They do not measure exact muscle fatigue, readiness or recovery.</p><div class="workload-legend"><span><i class="legend-color low"></i> 0–3 sets</span><span><i class="legend-color med"></i> 4–9 sets</span><span><i class="legend-color high"></i> 10+ sets</span></div></div></div>
         <div class="muscle-grid" id="muscleGrid"></div>
-        <article class="panel sx-programme-intelligence-entry" aria-label="Programme Centre">
+        <details class="sx-intel-disclosure"><summary>Programme builder</summary><div class="sx-intel-disclosure-body"><article class="panel sx-programme-intelligence-entry" aria-label="Programme Centre">
           <div class="eyebrow">PROGRAMME INTELLIGENCE</div>
           <h3>Turn these insights into your next training block</h3>
           <p>Create an eight-week, 3/4/5-day strength and hypertrophy programme, or coordinate your existing AscensionX lifts with Powerbuilding. Your completed workouts remain your progression evidence.</p>
@@ -207,21 +208,21 @@
             <a href="../?sxOpen=bodybuilding">OPEN STRENGTH BUILDER</a>
             <a href="../?sxOpen=powerbuilding">OPEN POWERBUILDING</a>
           </div>
-        </article>
-        <article class="panel disclaimer"><div class="eyebrow">UNDERSTANDING THIS VIEW</div><h3>What this does — and doesn't — mean</h3><p>Counts are assigned to the primary muscle group of each recognised exercise. Compound movements also recruit other muscles, so this is a simplified workload view. Recovery depends on sleep, effort, nutrition and individual variation; SpartanX does not diagnose injury or determine whether a muscle is fully recovered.</p></article>
+        </article></div></details>
+        <details class="sx-intel-disclosure"><summary>About these metrics &amp; limitations</summary><div class="sx-intel-disclosure-body"><article class="panel disclaimer"><div class="eyebrow">UNDERSTANDING THIS VIEW</div><h3>What this does — and doesn't — mean</h3><p>Counts are assigned to the primary muscle group of each recognised exercise. Compound movements also recruit other muscles, so this is a simplified workload view. Recovery depends on sleep, effort, nutrition and individual variation; SpartanX does not diagnose injury or determine whether a muscle is fully recovered.</p></article></div></details>
       </section>
 
       <section class="page" id="intelligencePage" data-page="intelligence" hidden>
         <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Your next session, informed by your last.</h3><p>Simple, explainable recommendations from completed sets and RPE. Nothing is changed in your training plan.</p></div></div>
         <article class="panel" id="sxAdaptiveIntelligence" aria-label="Athlete response, live RPE and weekly scheduling intelligence"></article>
-         <article class="panel" id="sxScientificVolume" aria-label="Unified programme workload and science-informed working sets"></article>
-        <article class="panel sx-decision-intelligence-host" id="sxDecisionIntelligence" aria-label="AscensionX and Bodybuilding programme decision analysis"></article>
+         <details class="sx-intel-disclosure"><summary>Programme workload &amp; scientific analysis</summary><div class="sx-intel-disclosure-body"><article class="panel" id="sxScientificVolume" aria-label="Unified programme workload and science-informed working sets"></article></div></details>
+        <details class="sx-intel-disclosure"><summary>Programme decision analysis</summary><div class="sx-intel-disclosure-body"><article class="panel sx-decision-intelligence-host" id="sxDecisionIntelligence" aria-label="AscensionX and Bodybuilding programme decision analysis"></article></div></details>
         <div class="section-top"><div><h3>Progression suggestions</h3><p>Review a lift to see why a recommendation was made</p></div></div>
         <div class="recommendation-grid" id="recommendationGrid"></div>
-        <article class="panel sx-session-insights-panel" id="sxLatestSessionInsight" aria-label="Latest completed session and accessory insight"></article>
-        <div class="section-top"><div><h3>Training insights</h3><p>Signals worth noticing, not automatic training decisions</p></div></div>
-        <div class="insight-grid" id="allInsights"></div>
-        <article class="panel disclaimer"><div class="eyebrow">IMPORTANT LIMITATIONS</div><h3>Intelligence is a decision aid, not a coach or clinician.</h3><p>Recommendations currently use recent top sets, repetitions, estimated strength trends and logged RPE. They cannot assess bar speed, technique, sleep quality, pain, injury risk or actual muscle recovery. Use judgement and adapt training to how you feel. This module does not write to SpartanX or change any workout.</p></article>
+        <details class="sx-intel-disclosure"><summary>Latest session &amp; accessory analysis</summary><div class="sx-intel-disclosure-body"><article class="panel sx-session-insights-panel" id="sxLatestSessionInsight" aria-label="Latest completed session and accessory insight"></article></div></details>
+        <details class="sx-intel-disclosure"><summary>Additional training insights</summary><div class="sx-intel-disclosure-body"><div class="section-top"><div><h3>Training insights</h3><p>Signals worth noticing, not automatic training decisions</p></div></div>
+        <div class="insight-grid" id="allInsights"></div></div></details>
+        <details class="sx-intel-disclosure"><summary>About these metrics &amp; limitations</summary><div class="sx-intel-disclosure-body"><article class="panel disclaimer"><div class="eyebrow">IMPORTANT LIMITATIONS</div><h3>Intelligence is a decision aid, not a coach or clinician.</h3><p>Recommendations currently use recent top sets, repetitions, estimated strength trends and logged RPE. They cannot assess bar speed, technique, sleep quality, pain, injury risk or actual muscle recovery. Use judgement and adapt training to how you feel. This module does not write to SpartanX or change any workout.</p></article></div></details>
       </section>
       <footer class="app-footer">SPARTANX INTELLIGENCE <span>·</span> TRAIN SMARTER <span>·</span> V0.3 · ADAPTIVE INTELLIGENCE</footer>
     </main>

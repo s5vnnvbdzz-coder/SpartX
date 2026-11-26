@@ -27,6 +27,7 @@
 <script defer src="../assets/themes/shared-theme.js?v=328"></script>
 <link rel="stylesheet" href="../assets/themes/cyberpunk-black.css?v=328">
 <link rel="stylesheet" href="../assets/ui/page-navigation.css?v=318">
+<link rel="stylesheet" href="./clean-layout.css?v=1">
 </head>
 <body data-theme="black-yellow" class="sx-goals sx-theme-child">
 <div class="app-shell">
@@ -69,19 +70,10 @@
       <section id="gxBodybuilding" aria-label="Bodybuilding Intelligence">
         <div class="gx-nav-page" data-tab-page="overview">
           <article class="hero-card">
-            <div class="hero-text"><div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">BODYBUILDING</span></div><h2>BUILD WITH <em>PURPOSE.</em><br>PROGRESS WITH PROOF.</h2>
+            <div class="hero-text"><div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">BODYBUILDING</span></div><h2>Hypertrophy overview</h2>
               <p>See how consistently you're training each muscle and whether your exercises are progressing.</p>
               <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
-            </div><div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div></div>
-          </article>
-          <div class="section-top sx-session-section-top"><div><h3>Your latest completed workout</h3><p>All saved exercises and accessories, including those not mapped to a muscle group</p></div><span class="micro-tag">FULL SESSION</span></div>
-          <div id="sxLatestWorkoutAnalysis" aria-live="polite"></div>
-          <div class="section-top sx-session-section-top"><div><h3>Exercise progression</h3><p>Explore completed training volume for an exercise from your latest session</p></div></div>
-          <article class="panel sx-session-trend-panel">
-            <div class="panel-head"><div><div class="eyebrow">ACCESSORY PERFORMANCE</div><h3>Recorded training volume</h3></div><select class="compact-select" id="sxSessionTrendSelect" aria-label="Choose an exercise to view training volume"></select></div>
-            <div id="sxSessionTrendChart" class="sx-session-trend-chart"></div>
-            <p class="sx-session-muted" id="sxSessionTrendNote"></p>
-          </article>
+            </div></article>
           <div class="section-top"><div><h3>Your hypertrophy snapshot</h3><p>Working sets, individual targets and comparable performance</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
           <div class="gx-metrics kpi-grid">
             <article class="gx-metric kpi"><span>Selected muscle / week</span><strong id="gxMuscleSets">—</strong><small>Primary working-set estimates</small></article>
@@ -100,6 +92,14 @@
               <button class="text-button" type="button" data-go="intelligence">EXPLORE INSIGHTS <span>↗</span></button>
             </article>
           </div>
+          <details class="sx-intel-disclosure"><summary>Latest workout &amp; exercise trends</summary><div class="sx-intel-disclosure-body"><div class="section-top sx-session-section-top"><div><h3>Your latest completed workout</h3><p>All saved exercises and accessories, including those not mapped to a muscle group</p></div><span class="micro-tag">FULL SESSION</span></div>
+          <div id="sxLatestWorkoutAnalysis" aria-live="polite"></div>
+          <div class="section-top sx-session-section-top"><div><h3>Exercise progression</h3><p>Explore completed training volume for an exercise from your latest session</p></div></div>
+          <article class="panel sx-session-trend-panel">
+            <div class="panel-head"><div><div class="eyebrow">ACCESSORY PERFORMANCE</div><h3>Recorded training volume</h3></div><select class="compact-select" id="sxSessionTrendSelect" aria-label="Choose an exercise to view training volume"></select></div>
+            <div id="sxSessionTrendChart" class="sx-session-trend-chart"></div>
+            <p class="sx-session-muted" id="sxSessionTrendNote"></p>
+          </article></div></details>
         </div>
         <div class="gx-nav-page" data-tab-page="performance" hidden>
           <div class="section-top"><div><h3>Exercise progression</h3><p>Compare repetitions at the same weight over time</p></div></div>
@@ -109,7 +109,7 @@
             <div class="gx-chart" id="gxProgressChart" role="img" aria-label="Best repetitions at a consistent load"></div>
             <div class="panel-foot" id="gxProgressDescription">Weeks without a comparable load remain blank.</div>
           </article>
-          <article class="panel disclaimer"><div class="eyebrow">WHAT PROGRESSION MEANS</div><h3>Strength and muscle growth aren't identical.</h3><p>More repetitions at a given load are evidence of improved exercise performance. Workouts alone do not measure how much muscle has grown.</p></article>
+          <details class="sx-intel-disclosure"><summary>About these metrics &amp; limitations</summary><div class="sx-intel-disclosure-body"><article class="panel disclaimer"><div class="eyebrow">WHAT PROGRESSION MEANS</div><h3>Strength and muscle growth aren't identical.</h3><p>More repetitions at a given load are evidence of improved exercise performance. Workouts alone do not measure how much muscle has grown.</p></article></div></details>
         </div>
         <div class="gx-nav-page" data-tab-page="muscles" hidden>
           <div class="section-top"><div><h3>Muscle workload</h3><p>Training exposure across muscles and weeks</p></div></div>
@@ -127,19 +127,18 @@
         </div>
         <div class="gx-nav-page" data-tab-page="intelligence" hidden>
           <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>Train the muscle, track the progress.</h3><p>Explanations from saved sets, not automatic programme changes.</p></div></div>
-          <article class="panel" id="sxScientificVolume" aria-label="Scientific programming and weekly working-set analysis"></article>
+          <details class="sx-intel-disclosure"><summary>Programme workload &amp; scientific analysis</summary><div class="sx-intel-disclosure-body"><article class="panel" id="sxScientificVolume" aria-label="Scientific programming and weekly working-set analysis"></article></div></details>
           <div class="gx-insight panel" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your training shows</h3><p id="gxBodyInsight"></p><small id="gxBodyCoverage"></small></div>
-          <article class="panel disclaimer"><div class="eyebrow">DATA LIMITATIONS</div><h3>Workload is not a direct growth or recovery score.</h3><p>Training-set counts are simplified, and the primary muscle mapping may need refining for different exercise variants. Progression recommendations should consider technique, effort, sleep and individual recovery.</p></article>
+          <details class="sx-intel-disclosure"><summary>About these metrics &amp; limitations</summary><div class="sx-intel-disclosure-body"><article class="panel disclaimer"><div class="eyebrow">DATA LIMITATIONS</div><h3>Workload is not a direct growth or recovery score.</h3><p>Training-set counts are simplified, and the primary muscle mapping may need refining for different exercise variants. Progression recommendations should consider technique, effort, sleep and individual recovery.</p></article></div></details>
         </div>
       </section>
       <section id="gxWeightLoss" hidden aria-label="Weight Loss Intelligence">
         <div class="gx-nav-page" data-tab-page="overview">
           <article class="hero-card">
-            <div class="hero-text"><div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">WEIGHT LOSS</span></div><h2>BUILD BETTER <em>HABITS.</em><br>TRACK REAL PROGRESS.</h2>
+            <div class="hero-text"><div class="eyebrow">SPARTANX INTELLIGENCE <span class="version">WEIGHT LOSS</span></div><h2>Weight management overview</h2>
               <p>Follow bodyweight trends, cardio, consistency and strength performance without obsessing over individual weigh-ins.</p>
               <button class="primary-button" type="button" data-go="intelligence">VIEW YOUR INSIGHTS <span>→</span></button>
-            </div><div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-a"></div><div class="hero-orbit orbit-b"></div><div class="hero-x">X</div></div>
-          </article>
+            </div></article>
           <div class="section-top"><div><h3>Your weight-management snapshot</h3><p>Bodyweight averages, training days and cardio time</p></div><span class="micro-tag">SAVED WORKOUT DATA</span></div>
           <div class="gx-metrics kpi-grid">
             <article class="gx-metric kpi"><span>Bodyweight trend</span><strong id="gxWeightChange">—</strong><small>Available rolling averages</small></article>
@@ -181,7 +180,7 @@
         <div class="gx-nav-page" data-tab-page="intelligence" hidden>
           <div class="intelligence-intro"><span class="ai-mark">✦</span><div><div class="eyebrow">THE INTELLIGENCE ENGINE</div><h3>See trends, not daily fluctuations.</h3><p>Review long-term progress and training habits before making changes.</p></div></div>
           <div class="gx-insight panel" role="status"><div class="eyebrow">SPARTANX TRAINING ANALYSIS</div><h3>What your trend shows</h3><p id="gxWeightInsight"></p><small>Workout activity alone cannot explain fat loss. Nutrition, sleep, daily activity and individual circumstances influence results.</small></div>
-          <article class="panel disclaimer"><div class="eyebrow">DATA LIMITATIONS</div><h3>Intelligence is a decision aid.</h3><p>Weight changes do not automatically distinguish fat, water and lean tissue. Maintaining logged strength is encouraging but is not proof of muscle retention.</p></article>
+          <details class="sx-intel-disclosure"><summary>About these metrics &amp; limitations</summary><div class="sx-intel-disclosure-body"><article class="panel disclaimer"><div class="eyebrow">DATA LIMITATIONS</div><h3>Intelligence is a decision aid.</h3><p>Weight changes do not automatically distinguish fat, water and lean tissue. Maintaining logged strength is encouraging but is not proof of muscle retention.</p></article></div></details>
         </div>
       </section>
       <footer class="app-footer">SPARTANX INTELLIGENCE <span>·</span> TRAIN SMARTER <span>·</span> GOAL-SPECIFIC VIEWS <span>·</span> READ-ONLY WORKOUTS</footer>

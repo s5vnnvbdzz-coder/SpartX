@@ -52,6 +52,7 @@
   return {name,key:key(name),kind,label,all,working,max,best,
    volume:working.reduce((n,s)=>n+s.weight*s.reps,0),
    averageRpe:rpes.length?rpes.reduce((a,b)=>a+b,0)/rpes.length:null,
+   programmeLink:global.SXEngine?.programmeLink?.(ex,global.SXEngine.canonical(name))||null,
    linked:metadata?{week:num(metadata.week),lift:clean(metadata.lift||metadata.sourceLift||name)}:null};
  }
  function readRaw(storage=global.localStorage){
@@ -77,15 +78,16 @@
    if(!item.working.length)continue;
    const list=history.get(item.key)||[];
    list.push({date:session.date,sessionId:session.id,volume:item.volume,
-    max:item.max,best:item.best,sets:item.working});
+    max:item.max,best:item.best,sets:item.working,programmeLink:item.programmeLink});
    history.set(item.key,list);
   }
   const latest=sessions[0]||null;
   if(!latest)return {latest:null,history,range:days};
   const items=latest.items.map(item=>{
    if(!item.working.length)return {...item,comparison:null};
-   const prior=(history.get(item.key)||[]).find(s=>s.sessionId!==latest.id);
-   let comparison='First recorded session for this exercise within the selected date range.';
+   const link=item.programmeLink;
+   const prior=(history.get(item.key)||[]).find(s=>s.sessionId!==latest.id&&(link?s.programmeLink?.cycleId===link.cycleId&&s.programmeLink.role===link.role&&s.programmeLink.sessionLift===link.sessionLift&&s.programmeLink.week<link.week:!s.programmeLink));
+   let comparison=link?'No earlier comparable linked session in this cycle.':'No earlier independent session for this exercise within the selected date range.';
    if(prior&&item.best){
     const matched=prior.sets.filter(s=>s.weight===item.best.weight);
     if(matched.length){
@@ -94,6 +96,7 @@
       (difference>0?'+':'')+fmt(difference)+' best-set reps at '+fmt(item.best.weight,1)+' kg versus previous session.';
     }else comparison='Previous top load: '+fmt(prior.max,1)+' kg. Different loads mean a direct rep comparison is not valid.';
    }
+   if(prior&&prior.volume>0){const delta=(item.volume-prior.volume)*100/prior.volume;comparison+=' Saved session volume: '+fmt(item.volume,1)+' kg vs '+fmt(prior.volume,1)+' kg ('+(delta>0?'+':'')+fmt(delta,1)+'%; '+(link?'linked Week '+prior.programmeLink.week:'previous independent session')+'). Volume reflects programmed sets, reps and loads, not strength loss.';}
    return {...item,comparison};
   });
   const resistance=items.filter(i=>i.kind!=='cardio');

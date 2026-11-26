@@ -62,7 +62,7 @@ ascensionToolCard.innerHTML=
  '<div class="card-head"><h2 id="ascensionXToolTitle">AscensionX</h2></div>'+
  '<p class="hint" style="margin:0 0 13px;line-height:1.55">Full six-week strength programming, adaptive training, training history and progression.</p>'+
  '<a id="openAscensionX" href="./AscensionX/?sxIntegrated=1&from=tools&mode=home" class="ascension-launch">OPEN ASCENSIONX</a>'+
- '<a id="openAscensionXNext" href="./AscensionX2/next.html?from=tools" class="ascension-launch">OPEN ASCENSIONX 2.0</a>'+ 
+ '<a id="openAscensionXNext" href="./AscensionX2/next.html?from=tools&amp;v=437" class="ascension-launch">OPEN ASCENSIONX 2.0</a>'+ 
  '<p class="hint" style="margin:11px 0 0">Original six-week cycle or the new independent powerlifting and powerbuilding programme preview.</p>';
 shadow.querySelector('main').appendChild(ascensionToolCard);
 

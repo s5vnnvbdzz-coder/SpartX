@@ -23,13 +23,20 @@ jobs:
           if grep -Fq '<input type="hidden" id="workoutName"' /tmp/site.html; then echo 'PASS: Workout Logger input hidden'; else echo 'FAIL: Workout Logger still has text field'; exit 1; fi
           build=$(grep -oE 'sw.js\?v=[0-9]+' /tmp/site.html | head -1 | cut -d= -f2)
           test -n "$build" || { echo 'FAIL: SW registration not found'; exit 1; }
-          if grep -Fq "Build ${build}" /tmp/site.html; then echo "PASS: Settings matches Build ${build}"; else echo 'FAIL: Settings/SW build mismatch'; exit 1; fi
+          if grep -Fq "const BUILD=${build};" /tmp/site.html; then echo "PASS: internal revision ${build} matches SW registration"; else echo 'FAIL: internal revision/SW build mismatch'; exit 1; fi
           tools_version=$(grep -oE 'tools/replica.js\?v=[0-9]+' /tmp/site.html | head -1 | cut -d= -f2)
           if test -n "$tools_version"; then echo "PASS: 5/3/1 tools script version ${tools_version} is referenced"; else echo 'FAIL: 5/3/1 tools script reference missing'; exit 1; fi
           echo '=== Live SW response ==='
           curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/sw.js?iphone-check=$(date +%s)" -o /tmp/site-sw.js
           head -c 130 /tmp/site-sw.js
           if grep -Fq "const CACHE='spartanx-v${build}'" /tmp/site-sw.js; then echo "PASS: iPhone SW ${build} available"; else echo 'FAIL: Registered SW cache version differs from published HTML'; exit 1; fi
+          echo '=== Live AscensionX 2.0 files ==='
+          curl -fLsS --retry 3 --max-time 25 -H 'Cache-Control: no-cache' "${base}/AscensionX2/next.html?iphone-check=$(date +%s)" -o /tmp/site-ax2.html
+          grep -Fq 'name="weakDeadlift"' /tmp/site-ax2.html && echo 'PASS: Deadlift technique options published'
+          grep -Fq 'select-replace-inputs.js' /tmp/site-ax2.html && echo 'PASS: Select-to-replace helper published'
+          test "$(grep -o 'name="weakDeadlift"' /tmp/site-ax2.html | wc -l)" -eq 8
+          curl -fLsS --retry 3 --max-time 25 -H 'Cache-Control: no-cache' "${base}/AscensionX2/next.css?iphone-check=$(date +%s)" -o /tmp/site-ax2.css
+          grep -Fq 'font-size:16px' /tmp/site-ax2.css && echo 'PASS: Mobile input font size published'
           echo '=== Live safe recovery page ==='
           curl -fLsS --max-time 20 -H 'Cache-Control: no-cache' "${base}/refresh.html?iphone-check=$(date +%s)" -o /tmp/site-refresh.html
           grep -Fq 'Refresh app files safely' /tmp/site-refresh.html && echo 'PASS: Recovery page published'

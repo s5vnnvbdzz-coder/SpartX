@@ -1,6 +1,6 @@
 /* SpartanX PWA — lightweight install so iOS is not blocked by any optional
    image/theme/tool asset. All successfully fetched files are cached on use. */
-const CACHE='spartanx-v436';
+const CACHE='spartanx-v437';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE)
@@ -42,7 +42,8 @@ self.addEventListener('fetch',event=>{
   return;
  }
  // Don't let Safari's HTTP cache mask a newly deployed HTML document.
- const live=navigate?fetch(new Request(request,{cache:'no-store'})):fetch(request);
+ const freshAX2=/\/AscensionX2\/(?:next\.html|next-(?:engine|ui)\.js|next\.css|select-replace-inputs\.js)$/i.test(url.pathname);
+ const live=(navigate||freshAX2)?fetch(new Request(request,{cache:'no-store'})):fetch(request);
  event.respondWith(live.then(response=>{
   if(response&&response.ok){
    const copy=response.clone();

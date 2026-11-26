@@ -100,5 +100,30 @@
   return {changed,previousOrder:original,ordered:sortable.map(ex=>ex.name)};
  }
 
- root.SXAscensionContinueSupport=Object.freeze({VERSION,ORDER_VERSION,matchedLink,untouched,reconcile,alignLinked});
+ // Targeted chest coverage migration: replace ONLY the untouched legacy
+ // pulldown row, even when earlier assistance has already been completed.
+ function upgradeBenchChest(work,details,companion,storage=root.localStorage){
+  if(!Array.isArray(work)||details?.source!=='AscensionX'||!same(details.exercise,'Bench Press')||
+    !details.cycleId||Number(details.week)<1||Number(details.week)>5)return {changed:false};
+  const main=work.find(ex=>mainLink(ex,details));
+  if(!main||Number(main.ascensionLink.chestCoverageVersion)>=428)return {changed:false};
+  const active=companion?.cycle?.(storage),prefs=companion?.preference?.(storage);
+  if(active?.id!==details.cycleId||!prefs?.enabled||!prefs?.adaptive)return {changed:false};
+  const prior=work.find(ex=>matchedLink(ex,details)&&same(ex.name,'Lat Pulldown')&&!ex.replacementOf);
+  if(!prior||!untouched(prior)||prior.sets.some(s=>String(s.weight??'')===''&&Number(prior.sxStrengthSizeCompanion.prescribedKg)>0))return {changed:false};
+  const plan=companion.forImport(details,[],storage);
+  const chest=Array.isArray(plan)?plan.find(ex=>['machinechestpress','inclinedumbbellpress'].includes(norm(ex.name))):null;
+  if(!chest||plan.some(ex=>same(ex.name,'Lat Pulldown')))return {changed:false};
+  // Do not override a manually added chest exercise or reorder any logged rows.
+  const exists=work.some(ex=>same(ex.name,chest.name));
+  const row=work.find(ex=>matchedLink(ex,details)&&same(ex.name,'Iso-Lateral Row'));
+  const before=work.slice();
+  work.splice(work.indexOf(prior),1);
+  if(!exists)work.splice(work.indexOf(row||main)+1,0,chest);
+  main.ascensionLink.chestCoverageVersion=428;
+  main.ascensionLink.supportSyncVersion=Math.max(Number(main.ascensionLink.supportSyncVersion)||0,VERSION);
+  main.ascensionLink.supportOrderVersion=Math.max(Number(main.ascensionLink.supportOrderVersion)||0,ORDER_VERSION);
+  return {changed:true,previousOrder:before};
+ }
+ root.SXAscensionContinueSupport=Object.freeze({VERSION,ORDER_VERSION,matchedLink,untouched,reconcile,alignLinked,upgradeBenchChest});
 })(typeof window!=='undefined'?window:globalThis);

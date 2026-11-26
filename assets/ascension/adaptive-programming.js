@@ -93,7 +93,7 @@
   // is handled separately by its dedicated adaptive prescription.
   strength:{
    'Back Squat':['Leg Extension','Seated Leg Curl','45° Back Extension','Standing Calf Raise','Pallof Press'],
-   'Bench Press':['Iso-Lateral Row','Triceps Pushdown (Bar)','Hanging Knee Raise','Rear Delt Reverse Fly','Lat Pulldown'],
+   'Bench Press':['Iso-Lateral Row','Machine Chest Press','Triceps Pushdown (Bar)','Rear Delt Reverse Fly'],
    'Deadlift':['Lat Pulldown','Seated Leg Curl','Pallof Press','Seated Calf Raise'],
    'Overhead Press':['Dumbbell Row','Lateral Raise','Triceps Pushdown (Bar)','Dumbbell Curl']
   },
@@ -438,12 +438,19 @@
   }
   if(lift==='Back Squat')return squatAdaptivePlan(w,storage);
   const chosenNames=lift==='Bench Press'&&global.SXAscensionSelection?.bench?
-   global.SXAscensionSelection.bench(focus):(chosen[lift]||FOCUS_LIFTS.strength[lift]);
+   global.SXAscensionSelection.bench(focus,w):(lift==='Bench Press'&&focus==='strength'&&w<=3?['Iso-Lateral Row','Incline Dumbbell Press','Triceps Pushdown (Bar)','Rear Delt Reverse Fly']:(chosen[lift]||FOCUS_LIFTS.strength[lift]));
   const candidates=pickItems(chosenNames)
    .filter(item=>item.name!=='Romanian Deadlift');
   const cap=16;
   const maxExercises=4;
-  const prescribed=candidates.map(item=>dose(item,w,focus,lift,cycleId,storage)).filter(Boolean);
+  const prescribed=candidates.map(item=>{
+   const chest=lift==='Bench Press'&&focus==='strength'&&['Incline Dumbbell Press','Machine Chest Press'].includes(item.name);
+   if(!chest)return dose(item,w,focus,lift,cycleId,storage);
+   const ex=dose({...item,min:8,max:w>=3?10:12,rir:3,cue:'Direct chest development to support bench strength; use a comfortable range and do not press through shoulder pain.'},w,focus,lift,cycleId,storage);
+   if(!ex)return null;
+   const adjusted={...ex,sets:3,targetRpe:7,rir:3};
+   return {...adjusted,...recommend(adjusted,cycleId,w,storage),reason:'Direct chest assistance for bench strength. '+recommend(adjusted,cycleId,w,storage).reason};
+  }).filter(Boolean);
   const pinnedName=focus==='strength'?PINNED[lift]:null;
   const pinnedSets=prescribed.find(ex=>ex.name===pinnedName)?.sets||0;
   let count=fixedRdl?.sets||0,pinnedSelected=false;

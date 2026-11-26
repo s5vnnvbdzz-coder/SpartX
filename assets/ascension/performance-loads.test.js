@@ -20,7 +20,7 @@ const rec=(h,week=5,rule,ex=exercise)=>{const b=boot(h,week,rule);return b.api.r
 let result=api.recommend(exercise,id,5,storage);
 check(result.suggestedKg===100&&result.targetReps===12,'Reported 100 x 13 at RPE 6-7 -> 100 x 12');
 let plan=api.plan('Bench Press',5,{},storage);
-check(plan.map(e=>e.name).join('|')==='Iso-Lateral Row|Triceps Pushdown (Bar)|Rear Delt Reverse Fly|Lat Pulldown','Current selection order');
+check(plan.map(e=>e.name).join('|')==='Iso-Lateral Row|Machine Chest Press|Triceps Pushdown (Bar)|Rear Delt Reverse Fly','Current selection order');
 check(plan.every(e=>e.sets===3&&e.targetRpe===7),'All Week 5 bench assistance is 3 sets / target RPE 7');
 const repeated=[session('2026-11-20',trip(100,12,6)),session('2026-11-12',trip(100,12,6))];
 check(rec(repeated,2).suggestedKg===100,'Unknown increment does not extrapolate');
@@ -52,4 +52,22 @@ const entered={...previous,sets:previous.sets.map((s,i)=>({...s,done:i===0}))};
 work=[{...main,ascensionLink:{...main.ascensionLink,supportSyncVersion:419}},entered];
 check(sync.reconcile(work,details,companion,storage).protected&&work[1]===entered,'Preserve entered draft');
 check(storage.getItem('ascensionx_strength_v1')===cycleBefore&&storage.getItem('spartx_db')===historyBefore,'Read-only active cycle and completed logs');
+// Migrate only the old pulldown after a completed or partially logged row.
+const oldLat={name:'Lat Pulldown',sets:Array.from({length:3},()=>set('65','8','',false)),sxStrengthSizeCompanion:{cycleId:id,lift:'Bench Press',week:5,plannedSets:3,prescribedKg:65,prescribedReps:8}};
+const activeMain={...main,ascensionLink:{...main.ascensionLink,supportSyncVersion:423}};
+const hold={name:'Bench Press Static Hold',sets:[{weight:150,durationSeconds:8,reps:0,done:true}]};
+const tri=imported[2],rear=imported[3];work=[activeMain,entered,tri,rear,oldLat,hold];
+const enteredBefore=JSON.stringify(entered),holdBefore=JSON.stringify(hold);
+check(sync.upgradeBenchChest(work,details,companion,storage).changed,'Targeted migration after starting rows');
+check(work.map(e=>e.name).join('|')==='Bench Press|Iso-Lateral Row|Machine Chest Press|Triceps Pushdown (Bar)|Rear Delt Reverse Fly|Bench Press Static Hold','New chest order and additional hold retained');
+check(work[1]===entered&&JSON.stringify(entered)===enteredBefore&&work.at(-1)===hold&&JSON.stringify(hold)===holdBefore,'Entered rows and holds preserved');
+check(work[2].sets.length===3&&work[2].sxStrengthSizeCompanion.targetRpe===7,'Chest three sets RPE 7');
+check(!sync.upgradeBenchChest(work,details,companion,storage).changed,'No duplicate migration');
+const protectedLat={...oldLat,sets:oldLat.sets.map((s,i)=>({...s,done:i===0}))};
+work=[{...main,ascensionLink:{...main.ascensionLink,chestCoverageVersion:0}},entered,protectedLat];
+check(!sync.upgradeBenchChest(work,details,companion,storage).changed,'Never replace entered pulldown');
+for(let week=1;week<=5;week++){
+ const p=api.plan('Bench Press',week,{},storage);
+ check(p[1].name===(week<=3?'Incline Dumbbell Press':'Machine Chest Press')&&p[1].sets===3&&p[1].targetRpe===7,'Phase-specific chest Week '+week);
+}
 console.log(checks+' performance-load checks passed');

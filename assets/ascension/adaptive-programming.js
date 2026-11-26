@@ -253,6 +253,16 @@
   const down=reason=>Number.isFinite(previousLoad)&&previousLoad>0&&previousLoad>=base*.8?
    out(previousLoad,min,reason+' Reduce to the next confirmed or observed lower load; reassess RPE.'):
    {...manual(prefix+reason+' Select a lower available weight; no suitable lower load is verified.',evidence)};
+  // When the athlete moves up within a session, retain the successful new
+  // working-load reference instead of averaging it back down to the first set.
+  // A high-effort or missed-rep set is not evidence of consolidation.
+  const latest=last.sets.at(-1),newKg=Number(latest?.weight);
+  const newSets=last.sets.filter(s=>Number(s.weight)===newKg);
+  if(!same&&newKg>base&&newSets.length&&newSets.every(s=>validRpe(s)&&Number(s.reps)>=min&&Number(s.rpe)<=Math.min(8.5,target+1.5))){
+   const newReps=Math.min(...newSets.map(s=>Number(s.reps)));
+   const newRpe=Math.max(...newSets.map(s=>Number(s.rpe)));
+   return {suggestedKg:newKg,targetReps:clamp(newReps,min,max),reason:'Athlete-selected '+newKg+' kg achieved '+newReps+' reps at RPE '+newRpe+'. Consolidate at this load until effort improves; no additional increase advised.',confidence:'low',evidence:{...evidence,previousKg:newKg,previousReps:newReps,previousRpe:newRpe,sets:newSets.length}};
+  }
   // A rep at the same weight is a rough RIR-based estimate, not a measured RPE.
   // Never convert machine performance into a barbell 1RM.
   if(known&&(effort>=9.5||low<min))return down('Previous effort was too high or minimum reps were missed.');

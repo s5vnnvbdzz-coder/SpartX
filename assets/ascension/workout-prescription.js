@@ -123,7 +123,7 @@
  // Warm-ups track the actual (including recovery-adjusted) working weight.
  // Four low-rep ramps for volume/deload; an extra submaximal single bridges
  // large jumps in the heavy weeks. All rounding is in the athlete's units.
- const WARMUP_VERSION=424;
+ const WARMUP_VERSION=425;
  function bridgeSingle(lift,week,top,last,step){
   if(!LIFTS.includes(lift)||week<4||week>5||!(top>0)||!(step>0)||!(last>0))return null;
   const gap=top-last;
@@ -132,12 +132,22 @@
   const next=Math.min(round(top*ratio,step),top-step);
   return next>last&&next<top?{weight:next,reps:1}:null;
  }
- function warmupPlan(lift,week,top,step=2.5){
+ function warmupPlan(lift,week,top,step=2.5,oneRM=null){
   if(!LIFTS.includes(lift)||!Number.isInteger(week)||week<1||week>6||!Number.isFinite(top)||top<=0||!Number.isFinite(step)||step<=0)return [];
+  // A first loaded set at ~37.5% of the athlete's actual 1RM is a coaching
+  // starting point, NOT a minimum that may override a light working set.
+  // No separate empty-bar/movement pattern set is added.
+  const max=Number(oneRM),known=Number.isFinite(max)&&max>0;
   const ratios=week===6?[.42,.58,.70,.82]:[.43,.61,.72,.82];
+  const floor=known&&week!==6?Math.min(top*.60,max*.375):0;
+  const start=Math.max(top*ratios[0],floor);
+  // Spread the remaining warm-ups across the available interval. Keep
+  // the heavier phase bridge and the lower-stress deload calculation.
+  const fractions=[0,.30,.50,.70];
   const result=[];
   ratios.forEach((ratio,i)=>{
-   const weight=Math.min(round(top*ratio,step),top-step);
+   const desired=known&&week!==6?Math.max(top*ratio,start+(top-start)*fractions[i]):top*ratio;
+   const weight=Math.min(round(desired,step),top-step);
    if(weight>0&&weight<top&&weight>(result.at(-1)?.weight||0))result.push({weight,reps:[5,3,2,1][i]});
   });
   const bridge=bridgeSingle(lift,week,top,result.at(-1)?.weight,step);
@@ -147,7 +157,7 @@
  // Upgrade only an ACTIVE linked draft, adding one bridge single before the
  // first working set. Preserve every existing set object and any entered data.
  // Never add a warm-up after working sets have started or to a historical edit.
- function upgradeActiveWarmups(exercise,cycleId,step=2.5){
+ function upgradeActiveWarmups(exercise,cycleId,step=2.5,oneRM=null){
   const link=exercise?.ascensionLink,sets=exercise?.sets;
   if(!cycleId||link?.cycleId!==cycleId||link.lift!==exercise.name||
    Number(link.warmupVersion)>=WARMUP_VERSION||!Array.isArray(sets))return false;
@@ -161,7 +171,24 @@
   const prefix=sets.slice(0,index);
   if(prefix.some((s,i)=>!Number.isFinite(Number(s.weight))||Number(s.weight)<=0||
    i>0&&Number(s.weight)<=Number(prefix[i-1].weight)))return false;
-  const next=bridgeSingle(link.lift,Number(link.week),Number(first.weight),Number(last.weight),step);
+  // Only replace an untouched, precisely recognised previous-version
+  // prescription. Completed, manually modified, or partial warm-ups stay
+  // intact. The original bridge migration can still append a missing single.
+  const untouched=prefix.every(s=>s.done===false&&(s.rpe==null||s.rpe===''));
+  const week=Number(link.week),top=Number(first.weight);
+  if(untouched&&Number(link.warmupVersion)===424&&Number(oneRM)>0){
+   const old=warmupPlan(link.lift,week,top,step);
+   const matches=old.length===prefix.length&&old.every((s,i)=>s.weight===Number(prefix[i].weight)&&s.reps===Number(prefix[i].reps));
+   if(matches){
+    const next=warmupPlan(link.lift,week,top,step,oneRM);
+    if(next.length!==old.length||next.some((s,i)=>s.weight!==old[i]?.weight||s.reps!==old[i]?.reps)){
+     sets.splice(0,index,...next.map(s=>({weight:String(s.weight),reps:String(s.reps),rpe:'',type:'Warm-up',done:false})));
+     link.warmupVersion=WARMUP_VERSION;return true;
+    }
+    return false;
+   }
+  }
+  const next=bridgeSingle(link.lift,week,top,Number(last.weight),step);
   if(!next)return false;
   sets.splice(index,0,{weight:String(next.weight),reps:'1',rpe:'',type:'Warm-up',done:false});
   link.warmupVersion=WARMUP_VERSION;
@@ -184,7 +211,7 @@
    cycleId:c.created,logs:activeLogs(state),sessions:sessions(storage)
   });
   const top=safe?.topLoad??topNormal,back=safe?.backLoad??backNormal;
-  const warmupSets=warmupPlan(lift,week,top,step);
+  const warmupSets=warmupPlan(lift,week,top,step,Number(p.max[lift]));
   const sets=plan.deload?Array.from({length:3},()=>({weight:top,reps:plan.topReps})):
    [{weight:top,reps:plan.topReps},...Array.from({length:plan.backSets},()=>
     ({weight:back,reps:plan.backReps}))];
@@ -192,7 +219,7 @@
    'Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
   const cycleTitle=String(c.title||c.name||'').trim().slice(0,75)||liftTitle+' (current week)';
   return {source:'AscensionX',cycleId:c.created,cycleTitle,exercise:lift,
-   week,weekLabel:plan.name,tm,targetRpe:plan.rpe,warmupSets,sets,warmupVersion:WARMUP_VERSION,warmupStep:step,
+   week,weekLabel:plan.name,tm,targetRpe:plan.rpe,warmupSets,sets,warmupVersion:WARMUP_VERSION,warmupStep:step,warmupOneRM:Number(p.max[lift])||null,
    recoveryBridge:safe?.adjusted?{
     fromWeek:safe.sourceWeek,previousTop:safe.sourceTop,
     nominalTop:safe.nominalTop,adjustedTop:top

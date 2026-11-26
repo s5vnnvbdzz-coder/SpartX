@@ -6,7 +6,7 @@
  'use strict';
  const QUAD_2=Object.freeze(['Bulgarian Split Squat','Leg Extension']);
  const BENCH=Object.freeze({
-  strength:Object.freeze(['Iso-Lateral Row','Triceps Pushdown (Bar)','Rear Delt Reverse Fly','Lat Pulldown']),
+  strength:Object.freeze(['Iso-Lateral Row','Machine Chest Press','Triceps Pushdown (Bar)','Rear Delt Reverse Fly']),
   balanced:Object.freeze(['Iso-Lateral Row','Machine Chest Press','Rear Delt Reverse Fly','Triceps Pushdown (Bar)']),
   hypertrophy:Object.freeze(['Seated Cable Row','Machine Chest Press','Rear Delt Reverse Fly','Triceps Pushdown (Bar)'])
  });
@@ -18,8 +18,10 @@
   return [quad==='Leg Press'?'Leg Press':'Hack Squat',week>=4?QUAD_2[1]:QUAD_2[0],
    '45° Back Extension','Cable Crunch'];
  }
- function bench(focus){
-  return Array.from(BENCH[focus]||BENCH.strength);
+ function bench(focus,week){
+  const result=Array.from(BENCH[focus]||BENCH.strength);
+  if((!focus||focus==='strength')&&Number(week)>=1&&Number(week)<=3)result[1]='Incline Dumbbell Press';
+  return result;
  }
  function fourth({days,lifts,role,week,fatigue}={}){
   if(Number(days)!==4||!Array.isArray(lifts)||lifts.join('|')!==

@@ -128,7 +128,7 @@
   if(!LIFTS.includes(lift)||week<4||week>5||!(top>0)||!(step>0)||!(last>0))return null;
   const gap=top-last;
   if(gap<Math.max(3*step,top*.13))return null;
-  const ratio=lift==='Bench Press'||lift==='Overhead Press'?.93:.915;
+  const ratio=(lift==='Bench Press'||lift==='Overhead Press') ? .93 : .915;
   const next=Math.min(round(top*ratio,step),top-step);
   return next>last&&next<top?{weight:next,reps:1}:null;
  }
@@ -192,7 +192,7 @@
    'Deadlift':'Deadlifts','Overhead Press':'Overhead Press'})[lift]||lift;
   const cycleTitle=String(c.title||c.name||'').trim().slice(0,75)||liftTitle+' (current week)';
   return {source:'AscensionX',cycleId:c.created,cycleTitle,exercise:lift,
-   week,weekLabel:plan.name,tm,targetRpe:plan.rpe,warmupSets,sets,warmupVersion:WARMUP_VERSION,
+   week,weekLabel:plan.name,tm,targetRpe:plan.rpe,warmupSets,sets,warmupVersion:WARMUP_VERSION,warmupStep:step,
    recoveryBridge:safe?.adjusted?{
     fromWeek:safe.sourceWeek,previousTop:safe.sourceTop,
     nominalTop:safe.nominalTop,adjustedTop:top

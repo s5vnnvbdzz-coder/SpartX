@@ -22,8 +22,8 @@
   const high=rpe>=target+1||jump;
   const show=(field,direction,title,detail)=>({index,field,direction,title,detail,weight,reps,rpe,target});
   if(high)return show('rpe','down','Consolidate effort','Keep '+weight+' kg as your progression reference. Work towards RPE '+target+' at comparable repetitions across sessions; do not force lower RPE immediately or push through pain or excessive fatigue. No further increase advised.'+(rpe>=9||reps<min?' Stop or adjust the set if technique or safety deteriorates.':''));
-  // Heavy weeks may consolidate, but do not encourage increases.
-  if(week>=4||rpe>target-1||reps<min||completed.slice(0,-1).some(s=>valid(s)&&number(s.rpe)>=target+1))return null;
+  // In heavy weeks only the first completed assistance set may prompt an increase.
+  if((week>=4&&completed.length>1)||rpe>target-1||reps<min||completed.slice(0,-1).some(s=>valid(s)&&number(s.rpe)>=target+1))return null;
   // A changed next-set value is an athlete decision, not an invitation to stack increases.
   const next=sets[index],nw=number(next.weight),nr=number(next.reps);
   if(Number.isFinite(nw)&&nw>weight||Number.isFinite(nr)&&nr>reps)return null;

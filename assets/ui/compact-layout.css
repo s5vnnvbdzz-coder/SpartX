@@ -1,0 +1,38 @@
+/* SpartanX revision 441 — compact mobile layout.
+   Geometry only: preserve the existing Obsidian palette, rank artwork,
+   programme engines, navigation, fixed controls and desktop widths. */
+:root{
+  --sx-mobile-gutter:8px;
+  --sx-mobile-card-gap:8px;
+  --sx-mobile-card-padding:12px;
+  --sx-mobile-card-radius:10px;
+}
+@media (max-width:760px){
+  /* Root content only; full-page native routes own their existing shell. */
+  html body:not(:has(>main>.screen.active:is(#native531,.sx-profile-secondary))) > main,
+  html body main.main-content,
+  html body main.gx-main{
+    padding-left:max(var(--sx-mobile-gutter),env(safe-area-inset-left,0px))!important;
+    padding-right:max(var(--sx-mobile-gutter),env(safe-area-inset-right,0px))!important;
+  }
+  /* Ordinary cards, not inner exercise controls, prestige art or dialogs. */
+  main > .screen > .card,
+  main > .card,
+  main.shell > section > .card{
+    margin-block:var(--sx-mobile-card-gap);
+    padding:var(--sx-mobile-card-padding);
+    border-radius:var(--sx-mobile-card-radius);
+  }
+  main > .screen > .grid,
+  main > .grid{
+    gap:var(--sx-mobile-card-gap);
+  }
+  /* Existing full-page cycle scrollers: leave vertical and fixed-footer
+     geometry untouched, so the Save buttons remain accessible. */
+  html body.sx-asc-workout-view #sxCycleViewDialog .sx-cycle-view-scroll,
+  html body.sx-asc-workout-manage #cycleEditorBackdrop .cycle-editor-body,
+  html body.sx-cycle-page-active #sxQuick531CycleOverlay.sx-531-manage-page #sxQuick531CycleScroll{
+    padding-left:max(var(--sx-mobile-gutter),env(safe-area-inset-left,0px))!important;
+    padding-right:max(var(--sx-mobile-gutter),env(safe-area-inset-right,0px))!important;
+  }
+}

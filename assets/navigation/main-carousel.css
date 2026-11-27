@@ -26,3 +26,9 @@
 @media (prefers-reduced-motion:reduce){
  body.sx-carousel-in-motion main>.screen.drag-settle{transition:none!important}
 }
+
+@media (max-width:767px) and (pointer:coarse){
+ body.sx-carousel-in-motion > main{overflow-x:clip;overflow-y:visible;overflow-anchor:none}
+ body.sx-carousel-in-motion main>.screen.drag-preview{user-select:none;-webkit-user-select:none}
+ body.sx-carousel-in-motion main>.screen.dragging,body.sx-carousel-in-motion main>.screen.drag-settle{backface-visibility:hidden;transform-style:flat}
+}

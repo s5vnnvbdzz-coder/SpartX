@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'assets/ui/**'
+      - 'assets/navigation/**'
       - 'assets/workouts/workout-card-order.js'
       - 'assets/ascension/quick-access.js'
       - 'assets/workouts/531-cycle-flow.js'
@@ -33,6 +34,11 @@ jobs:
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-ui-server.log 2>&1 &
           node assets/ui/navigation-workflow-browser.test.cjs
+      - name: Execute main-tab motion checks
+        if: always()
+        run: |
+          curl -fsS http://127.0.0.1:4173/index.html >/dev/null || (python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-motion-server.log 2>&1 & sleep 2)
+          node assets/navigation/main-carousel-browser.test.cjs
       - name: Save browser screenshots
         if: always()
         uses: actions/upload-artifact@v4

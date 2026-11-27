@@ -27,6 +27,7 @@
  let bypass=false;
  let phaseToken=0;
  let timer=null;
+ let settling=null,queued=null;
  let suppressClickUntil=0;
  let suppressClickPage=null;
  // A swipe across a button must not also open its click action.
@@ -58,12 +59,14 @@
     begin on a card's button or link, which was the main source of misses. */
  const editableTarget=t=>!!t?.closest?.(
   'input,textarea,select,iframe,[contenteditable="true"],[role="slider"],'+
-  '#trackerNav,header,.feed-menu,.set-type-sheet,.rpe-sheet,.number-pad-sheet,.detail-overlay,'+
+  '#trackerNav,header,.feed-menu,.set-type-sheet,.rpe-sheet,.number-pad-sheet,.detail-overlay,.sx-cs-carousel,.sx-workout-ordering,'+
   '.sx-ascensionx-overlay,[data-no-carousel],.library-categories,[data-native-horizontal-scroll]'
  );
  const clear=(keepHighlight=false)=>{
   phaseToken++;
   if(timer!==null){window.clearTimeout(timer);timer=null;}
+  if(settling){settling.page.removeEventListener('transitionend',settling.handler);settling=null;}
+  queued=null;
   for(const id of PAGES){
    const page=get(id);
    if(!page)continue;
@@ -82,21 +85,21 @@
  };
  window.spartanxClearDrag=clear;
  const place=(page,x)=>{
-  page.style.transform='translate3d('+Math.round(x)+'px,0,0)';
+  page.style.transform='translate3d('+x.toFixed(2)+'px,0,0)';
  };
  const metrics=page=>{
-  const container=getComputedStyle(main);
-  const bounds=page.getBoundingClientRect();
-  return {width:bounds.width,
-          left:parseFloat(container.paddingLeft)||16,
-          top:parseFloat(container.paddingTop)||16};
+  const bounds=page.getBoundingClientRect(),host=main.getBoundingClientRect();
+  const padding=getComputedStyle(main);
+  const headerBottom=document.querySelector('body > header')?.getBoundingClientRect().bottom||0;
+  return {width:host.width||bounds.width,contentWidth:bounds.width,left:page.offsetLeft,
+          top:Math.max(page.offsetTop,headerBottom-host.top+(parseFloat(padding.paddingLeft)||0))};
  };
  const makePair=(origin,neighbor,direction)=>{
   const m=metrics(origin);
   if(!neighbor)return {...m,neighbor:null,direction};
   neighbor.classList.add('drag-preview','dragging');
   neighbor.style.position='absolute';
-  neighbor.style.width=m.width+'px';
+  neighbor.style.width=m.contentWidth+'px';
   neighbor.style.left=m.left+'px';
   neighbor.style.right='auto';
   neighbor.style.top=m.top+'px';
@@ -116,7 +119,8 @@
   highlightNav(targetId||origin.id);
   const width=metrics(origin).width;
   const endX=targetId?-direction*width:0;
-  const time=reduced.matches?0:(targetId?320:260);
+  const remaining=Math.abs(endX-initialX)/Math.max(1,width);
+  const time=reduced.matches?0:Math.round(Math.max(130,Math.min(290,130+160*remaining)));
   origin.classList.remove('dragging');
   origin.classList.add('drag-settle');
   if(neighbor){
@@ -124,7 +128,7 @@
    neighbor.classList.add('drag-settle');
   }
   if(time){
-   origin.style.transition='transform '+time+'ms cubic-bezier(.22,.8,.2,1)';
+   origin.style.transition='transform '+time+'ms cubic-bezier(.22,.72,.18,1)';
    if(neighbor)neighbor.style.transition=origin.style.transition;
   }
   const complete=()=>{
@@ -132,9 +136,11 @@
    if(targetId&&window.switchScreen){
     // Keep the destination tab lit throughout the final commit. Clearing
     // the animation must not briefly re-highlight the old page.
+    const next=queued;
     bypass=true;
-    try{clear(true);window.switchScreen(targetId);}finally{bypass=false;}
-   }else clear();
+    try{clear(true);window.switchScreen(targetId,{instant:true});}finally{bypass=false;}
+    if(next&&next!==targetId)window.requestAnimationFrame(()=>window.spartanxCarouselNavigate(next));
+   }else {const next=queued;clear();if(next&&next!==origin.id)window.requestAnimationFrame(()=>window.spartanxCarouselNavigate(next));}
   };
   if(!time){
    place(origin,endX);
@@ -142,21 +148,21 @@
    complete();
    return;
   }
-  // Two frames guarantee iOS paints the starting position before snapping.
+  const handler=event=>{if(event.target===origin&&event.propertyName==='transform')complete();};
+  settling={page:origin,handler};origin.addEventListener('transitionend',handler);
+  void origin.getBoundingClientRect();
   window.requestAnimationFrame(()=>{
    if(localToken!==phaseToken)return;
-   window.requestAnimationFrame(()=>{
-    if(localToken!==phaseToken)return;
-    place(origin,endX);
-    if(neighbor)place(neighbor,direction*width+endX);
-   });
+   place(origin,endX);
+   if(neighbor)place(neighbor,direction*width+endX);
   });
-  timer=window.setTimeout(complete,time+70);
+  timer=window.setTimeout(complete,time+55);
  };
  // This hook is invoked by the existing switchScreen function. On desktop,
  // disabled mode or non-main screens, the original switch stays untouched.
  window.spartanxCarouselNavigate=function(targetId){
-  if(bypass||!enabled||!mobile.matches||!PAGES.includes(targetId))return false;
+  if(bypass||!enabled||!mobile.matches||reduced.matches||!PAGES.includes(targetId))return false;
+  if(busy){queued=targetId;return true;}
   const origin=active();
   if(!origin||!PAGES.includes(origin.id)||origin.id===targetId||!ready())return false;
   clear();
@@ -168,7 +174,7 @@
   return true;
  };
  document.addEventListener('touchstart',event=>{
-  if(!ready()||event.touches.length!==1||editableTarget(event.target)){drag=null;return;}
+  if(reduced.matches||!ready()||event.touches.length!==1||editableTarget(event.target)){drag=null;return;}
   suppressClickUntil=0;
   suppressClickPage=null;
   const page=active();
@@ -244,5 +250,6 @@
   finish(d.origin,d.neighbor,d.direction,wanted,d.dx);
  },{passive:true});
  document.addEventListener('touchcancel',()=>{if(drag)clear();},{passive:true});
- window.addEventListener('pagehide',clear,{passive:true});
+ window.addEventListener('resize',()=>{if(drag||busy)clear();},{passive:true});
+ window.addEventListener('pagehide',()=>clear(),{passive:true});
 })();

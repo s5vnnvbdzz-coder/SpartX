@@ -19,6 +19,9 @@ const actionPack=top.querySelector('.profile-action-buttons');
 if(!actionPack.querySelector('.sx-profile-share-button')){
  const share=document.createElement('button');share.type='button';share.className='sx-profile-share-button';
  share.setAttribute('aria-label','Share profile summary');share.title='Share profile summary';share.innerHTML=icon.share;
+ const edit=actionPack.querySelector('#editProfile');
+ share.classList.add('sx-main-header-action');share.style.cssText=edit.style.cssText;
+ share.querySelector('svg').style.cssText=edit.querySelector('svg').style.cssText;
  const settings=actionPack.querySelector('#openProfileSettings');actionPack.insertBefore(share,settings);
  share.addEventListener('click',async()=>{
   const p=db.profile||{},rank=getWorkoutRank();

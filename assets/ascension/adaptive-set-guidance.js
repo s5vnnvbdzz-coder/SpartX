@@ -20,7 +20,7 @@
    prescribed: number(link?.prescribedReps),fixed:!!link?.fixedDeadliftRdl||number(link?.trainingMaxPercent)>0||
    /romanian deadlift|^rdl$/i.test(String(ex.name||'')),technical:/^(?:bench press|pause squat)$/i.test(String(ex.name||''))};
  }
- function at(ctx,index){
+ function at(ctx,index,reference){
   const {sets,min,max,target,prescribed,fixed,technical}=ctx;
   const s=sets[index];if(!valid(s))return null;
   const weight=number(s.weight),reps=number(s.reps),rpe=number(s.rpe);
@@ -31,7 +31,13 @@
   // upper end of its permitted range. Fixed RDLs keep their exact 8 reps.
   const goal=Number.isInteger(prescribed)&&prescribed>=min&&prescribed<=max?prescribed:
    Number.isInteger(nextReps)&&nextReps>=min&&nextReps<=max?nextReps:min;
-  const show=(field,direction,title,detail)=>({index,nextIndex,field,direction,title,detail,weight,reps,rpe,target});
+  const previous=typeof reference==='function'?reference(s,index):null;
+  const oldRpe=number(previous?.rpe);
+  const comparable=Number.isFinite(oldRpe)&&oldRpe>=6&&oldRpe<=10&&Math.abs(number(previous?.weight)-weight)<.051&&number(previous?.reps)===reps;
+  const improved=comparable&&rpe<oldRpe;
+  const show=(field,direction,title,detail,tone=direction==='up'?'positive':'negative')=>({index,nextIndex,field,direction,title,detail,tone,weight,reps,rpe,target,previousRpe:comparable?oldRpe:null});
+  if(improved&&rpe>=target&&reps>=goal&&rpe<9.5)return show('rpe','down','RPE improved — maintain load',
+   'Same '+weight+' kg × '+reps+' at RPE '+rpe+' versus previous '+oldRpe+'. Effort improved by '+(oldRpe-rpe).toFixed(1)+' RPE. '+(rpe>target?'Target '+target+' has not yet been reached. Keep this load and reps while consolidating.':'Target '+target+' reached. Maintain the load until effort is below target before considering an increase.')+' No values are changed automatically.','positive');
   if(rpe>target)return show('rpe','down','Consolidate effort',
    'Completed '+weight+' kg × '+reps+' at RPE '+rpe+' against target '+target+
    '. Retain this load and repetition target as a progression reference until RPE is at or below target. Do not force repetitions through pain or excessive fatigue.'+
@@ -44,14 +50,14 @@
   return show('reps','up','Consider increasing repetitions',
    'Consider reaching the prescribed '+goal+' reps at the current load if technique and effort permit. No values are changed automatically.');
  }
- function advise(ex){
+ function advise(ex,reference){
   const ctx=context(ex);if(!ctx)return null;
   let index=-1;for(let i=0;i<ctx.sets.length;i++)if(valid(ctx.sets[i]))index=i;
-  return index<0?null:at(ctx,index);
+  return index<0?null:at(ctx,index,reference);
  }
- function indicators(ex){
+ function indicators(ex,reference){
   const ctx=context(ex);if(!ctx)return [];
-  return ctx.sets.flatMap((s,index)=>{const a=at(ctx,index);return a?[a]:[]});
+  return ctx.sets.flatMap((s,index)=>{const a=at(ctx,index,reference);return a?[a]:[]});
  }
  root.SXAdaptiveSetGuidance=Object.freeze({advise,indicators});
 })(typeof window!=='undefined'?window:globalThis);

@@ -35,6 +35,7 @@ jobs:
         run: |
           node assets/ascension/adaptive-programming.test.js
           node assets/ascension/selection-quality.test.js
+          node assets/ascension/adaptive-set-guidance.test.js
           node assets/ascension/week-completion.test.js
           node assets/ascension/continue-support-sync.test.js
           node tests/ascension-classic-restoration.test.js

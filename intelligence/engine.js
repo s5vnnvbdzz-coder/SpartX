@@ -210,16 +210,21 @@
     }
     const muscles={};
     for(const session of last7)for(const ex of session.exercises){
-      const muscle=global.SXMuscleLibrary?.primaryGroup(ex.name)||MOVES[ex.name]?.muscle||'Other';
+      const groups=global.SXMuscleLibrary?.primaryGroups(ex.name)||[];
       const count=ex.sets.filter(isWorking).length;
-      const prior=muscles[muscle]||{name:muscle,sets:0,last:0};
-      prior.sets+=count;prior.last=Math.max(prior.last,dayStamp(session.date));muscles[muscle]=prior;
+      if(!count)continue;
+      for(const muscle of new Set(groups.length?groups:[MOVES[ex.name]?.muscle||'Other'])){
+        const prior=muscles[muscle]||{name:muscle,sets:0,last:0};
+        prior.sets+=count;prior.last=Math.max(prior.last,dayStamp(session.date));muscles[muscle]=prior;
+      }
     }
     // "Last trained" uses the complete history, not only the last seven days.
     const allMuscles={};
     for(const session of valid)for(const ex of session.exercises){
-      const muscle=global.SXMuscleLibrary?.primaryGroup(ex.name)||MOVES[ex.name]?.muscle||'Other';
-      allMuscles[muscle]=Math.max(allMuscles[muscle]||0,dayStamp(session.date));
+      const groups=global.SXMuscleLibrary?.primaryGroups(ex.name)||[];
+      if(!ex.sets.some(isWorking))continue;
+      for(const muscle of new Set(groups.length?groups:[MOVES[ex.name]?.muscle||'Other']))
+        allMuscles[muscle]=Math.max(allMuscles[muscle]||0,dayStamp(session.date));
     }
     const muscleRows=Object.keys(allMuscles).map(name=>({
       name,sets:muscles[name]?.sets||0,daysSince:Math.max(0,Math.floor((now-allMuscles[name])/timeDay))

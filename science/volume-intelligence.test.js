@@ -19,6 +19,10 @@ check('three goal tracks use evidence-noted starting ranges, not universal optim
 check('major named lifts and accessories are classified, unknown exercises are not invented',()=>{
  assert.equal(V.classify('Bench Press').primary,'Chest');
  assert.equal(V.classify('Deadlift').primary,'Hamstrings');
+ assert.deepEqual(V.classify('Deadlift').primaryGroups,['Hamstrings','Glutes','Quads']);
+ const dl=V.countExposure([{exercises:[{name:'Deadlift',sets:3}]}]);
+ for(const m of ['Hamstrings','Glutes','Quads'])assert.equal(dl[m].direct,3);
+ assert.equal(dl.Back.direct,0);assert.equal(dl.Back.indirect,1.5);
  assert.equal(V.classify('Triceps Pushdown (Bar)').primary,'Triceps');
  assert.equal(V.classify('Hanging Knee Raise').primary,'Core');
  assert.equal(V.classify('Nonsense Exercise'),null);

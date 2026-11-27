@@ -12,8 +12,9 @@ const EVIDENCE=Object.freeze([
  {id:'ROBINSON2024',level:'exploratory-meta-regression',title:'Robinson et al. Proximity to Failure and Adaptation (2024)',url:'https://pubmed.ncbi.nlm.nih.gov/38970765/',use:'Hypertrophy may benefit from closer proximity to failure; precision of the RIR relationship is uncertain.'},
  {id:'AUTOREG2025',level:'systematic-review',title:'Autoregulated Resistance Training for Maximal Strength (2025)',url:'https://pubmed.ncbi.nlm.nih.gov/40791980/',use:'Supports evaluating autoregulation; exact response thresholds below are conservative engineering choices, not study-derived cutoffs.'}
 ]);
+// Deadlift roles: PMID 32107499, 30662500; doi:10.3389/fbioe.2025.1597209. Broad Back exposure stays fractional, not a full row equivalent.
 const MUSCLES=['Chest','Back','Shoulders','Quads','Hamstrings','Glutes','Calves','Biceps','Triceps','Core'];
-const ex=(id,name,pattern,equipment,primary,secondary=[],axial=0,kind='accessory')=>Object.freeze({id,name,pattern,equipment,primary,secondary,axial,kind});
+const ex=(id,name,pattern,equipment,primary,secondary=[],axial=0,kind='accessory',primaryGroups=[primary])=>Object.freeze({id,name,pattern,equipment,primary,secondary,axial,kind,primaryGroups:Object.freeze(primaryGroups)});
 const EXERCISES=Object.freeze([
  ex('barbell-squat','Back Squat','squat','barbell','Quads',['Glutes','Core'],3,'main'),
  ex('paused-squat','Paused Squat','squatSecondary','barbell','Quads',['Glutes','Core'],2,'main'),
@@ -23,7 +24,7 @@ const EXERCISES=Object.freeze([
  ex('split-squat','Bulgarian Split Squat','singleLeg','dumbbell','Quads',['Glutes'],1),
  ex('body-split-squat','Split Squat','singleLeg','bodyweight','Quads',['Glutes'],0),
  ex('leg-extension','Leg Extension','quadIsolation','machine','Quads',[],0),
- ex('conventional-deadlift','Deadlift','deadlift','barbell','Hamstrings',['Glutes','Back'],3,'main'),
+ ex('conventional-deadlift','Deadlift','deadlift','barbell','Hamstrings',['Back','Core','Calves'],3,'main',['Hamstrings','Glutes','Quads']),
  ex('romanian-deadlift','Romanian Deadlift','hinge','barbell','Hamstrings',['Glutes','Back'],3),
  ex('dumbbell-rdl','Dumbbell Romanian Deadlift','hinge','dumbbell','Hamstrings',['Glutes'],2),
  ex('seated-curl','Seated Leg Curl','hamCurl','machine','Hamstrings',[],0),
@@ -112,7 +113,7 @@ function prescription(exercise,pattern,p,dayName){
  const rationale=main?'Lift-specific heavier practice is prioritised for strength (ACSM2026).':
   exercise.axial>=2?'Posterior-chain stimulus with additional axial fatigue; keep recovery under review.':
   'Supporting muscle exposure with controlled loading and recoverable effort.';
- return {id:exercise.id,name:exercise.name,pattern,primary:exercise.primary,secondary:exercise.secondary,
+ return {id:exercise.id,name:exercise.name,pattern,primary:exercise.primary,primaryGroups:exercise.primaryGroups,secondary:exercise.secondary,
   equipment:exercise.equipment,axial:exercise.axial,sets,repsMin:low,repsMax:high,rir,restSeconds:rest,
   estimatedMinutes:Math.ceil(sets*(rest/60+0.8)),evidence:main?['ACSM2026','AUTOREG2025']:['ACSM2026','PELLAND2026','ROBINSON2024'],
   reason:rationale+(priority?' Extra attention to selected muscle priority.':'')};
@@ -142,8 +143,9 @@ function exposure(sessions){
  for(const day of sessions){
   const seen=new Set();
   for(const x of day.exercises){
-   per[x.primary].direct+=x.sets;seen.add(x.primary);
-   for(const m of x.secondary){if(m!==x.primary){per[m].indirect+=x.sets*.5;seen.add(m);}}
+   const direct=new Set(x.primaryGroups||[x.primary]);
+   for(const m of direct){per[m].direct+=x.sets;seen.add(m);}
+   for(const m of x.secondary){if(!direct.has(m)){per[m].indirect+=x.sets*.5;seen.add(m);}}
   }
   for(const m of seen)per[m].days++;
  }

@@ -187,7 +187,7 @@
           '<label class="sx-bb-companion-lift-header"><input type="checkbox" data-bb-companion-lift="'+esc(lift)+'" '+(enabled?'checked':'')+'>'+
           '<span><strong>'+esc(lift)+'</strong><small>Week '+week+' of 6</small></span></label>'+
           (planned.length?planned.map(ex=>'<div class="sx-bb-companion-ex"><strong>'+esc(ex.name)+'</strong><span>'+
-            ex.sets+' × '+ex.min+'–'+ex.max+' · '+ex.rir+' RIR</span></div>').join(''):
+            ex.sets+' × '+ex.min+'–'+ex.max+' reps</span></div>').join(''):
             '<p class="sx-bb-help">Recovery week: no new companion exercises.</p>')+
           '</div>';
       }).join('')+'</div>'+
@@ -372,9 +372,8 @@
           (complete?'✓ COMPLETE':logged?'PARTIAL LOG':'PLANNED')+'</span></summary>'+
           '<div class="sx-bb-day-body">'+plannedDay(p,day,progress.week).exercises.map(e=>
             '<div class="sx-bb-preview-ex"><strong>'+esc(e.name)+'</strong><span>'+e.sets+' × '+e.repsMin+'–'+e.repsMax+
-            ' reps · '+e.rir+' RIR · RPE '+(e.targetRpe||10-e.rir)+
+            ' reps'+
             (e.startingKg>0?' · '+e.startingKg+' kg':'')+'</span>'+
-            (e.recommendation?'<small>'+esc(e.recommendation.reason)+'</small>':'')+
             '</div>').join('')+
             (!finished?'<button type="button" class="sx-bb-secondary sx-bb-full sx-bb-day-start" data-bb-action="start" data-day-id="'+esc(day.id)+'">'+
             (complete?'REPEAT THIS DAY':'START '+esc(day.name).toUpperCase())+' · WEEK '+progress.week+'</button>':'')+'</div></details>';

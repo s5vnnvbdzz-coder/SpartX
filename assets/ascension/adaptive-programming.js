@@ -322,12 +322,12 @@
   const fraction=week<=3?.65:week===4?.60:.55;
   return Math.max(2.5,Math.round(tm*fraction/2.5)*2.5);
  }
- function formatPrescription(ex){
+ function formatPrescription(ex,{showRpe=true}={}){
   const count=Math.max(0,Number(ex?.sets)||0),reps=Number(ex?.targetReps||ex?.min)||0;
   const kg=Number(ex?.suggestedKg)>0?Number(ex.suggestedKg)+' kg':'choose starting kg';
   const range=ex?.min===ex?.max?String(ex.min):ex?.min+'–'+ex?.max;
   return String(ex?.name||'Exercise')+' · '+count+' × '+kg+' × '+reps+
-   ' reps (range '+range+') · RPE '+(ex?.targetRpe??(10-Number(ex?.rir||3)));
+   ' reps (range '+range+')'+(showRpe?' · RPE '+(ex?.targetRpe??(10-Number(ex?.rir||3))):'');
  }
 
  // Squat strength is the priority: a knee-dominant compound immediately after

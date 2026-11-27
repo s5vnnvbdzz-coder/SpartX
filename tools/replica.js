@@ -108,7 +108,8 @@ const sxToolInfoStyles=document.createElement('style');
 sxToolInfoStyles.textContent=
  '.sx-tools-intelligence-card{color:var(--txt)}.sx-tools-intelligence-card h2{font-size:17px}'+
  '#ascensionXToolCard .ascension-launch,.sx-tools-intelligence-card a.sx-intelligence-entry-link{display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;min-height:47px!important;width:100%!important;box-sizing:border-box!important;margin-top:13px!important;padding:12px 15px!important;font-size:12px!important;line-height:1.25!important;font-weight:850!important;letter-spacing:.7px!important;text-decoration:none!important;background:color-mix(in srgb,var(--lime) 16%,var(--panel2))!important;border:1px solid color-mix(in srgb,var(--lime) 58%,var(--line))!important;color:var(--txt)!important;border-radius:11px!important;box-shadow:inset 0 1px 0 #ffffff09!important}'+
- '.page-title-row .page-actions{display:none!important}';
+ '.page-title-row .page-actions{display:none!important}'+
+ 'main>.eyebrow{margin:0;line-height:1.25}.page-title-row{margin:4px 0 13px}.page-title-row h1{margin:0;font-size:var(--sx-main-title-size,27px);line-height:1.2}.intro{margin-top:0}';
 shadow.appendChild(sxToolInfoStyles);
 
 // Low-priority document prefetch reduces the first navigation delay on

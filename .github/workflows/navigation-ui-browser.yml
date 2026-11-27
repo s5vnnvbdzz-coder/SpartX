@@ -39,6 +39,11 @@ jobs:
         run: |
           curl -fsS http://127.0.0.1:4173/index.html >/dev/null || (python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-motion-server.log 2>&1 & sleep 2)
           node assets/navigation/main-carousel-browser.test.cjs
+      - name: Verify uniform main-tab headers
+        if: always()
+        run: |
+          curl -fsS http://127.0.0.1:4173/index.html >/dev/null || (python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/spartanx-header-server.log 2>&1 & sleep 2)
+          node assets/navigation/main-header-browser.test.cjs
       - name: Save browser screenshots
         if: always()
         uses: actions/upload-artifact@v4

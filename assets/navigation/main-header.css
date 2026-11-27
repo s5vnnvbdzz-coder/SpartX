@@ -13,8 +13,9 @@ html body>header #sxHeaderProfileActions{display:none!important;min-width:0;flex
 html body:has(>main>#profile.screen.active)>header #sxHeaderProfileActions{display:flex!important}
 html body:has(>main>#profile.screen.active)>header #sxBrandHeader{display:none!important}
 #sxHeaderProfileActions>div:first-child{flex:1;min-width:0}
+html body>header #sxHeaderProfileActions{gap:var(--sx-main-action-gap)!important;border-radius:0!important;outline:none!important;background-color:transparent!important;background-image:none!important}
+html body>header #sxHeaderProfileActions::before,html body>header #sxHeaderProfileActions::after{content:none!important;display:none!important}
 #sxHeaderProfileActions .sx-profile-handle{font-size:clamp(18px,5.25vw,27px);font-weight:850;letter-spacing:-.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html body>header #sxHeaderProfileActions .profile-action-buttons{position:static!important;display:flex!important;align-items:center!important;gap:var(--sx-main-action-gap)!important;flex:none;margin:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
 html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions){gap:var(--sx-main-action-gap)!important;align-items:center!important;flex:none}
 html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a){
  box-sizing:border-box!important;appearance:none!important;-webkit-appearance:none!important;

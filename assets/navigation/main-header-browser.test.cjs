@@ -17,7 +17,7 @@ const {chromium}=require('playwright');
     const m=await page.evaluate(id=>{
      const rect=el=>el.getBoundingClientRect(),header=rect(document.querySelector('body>header'));
      const first=id==='tools'?document.querySelector('#toolsReplica').shadowRoot.querySelector('main>.eyebrow'):document.querySelector('#'+id).firstElementChild;
-     const groups={tools:'#sxHeaderToolActions',workout:'#sxHeaderWorkoutActions',profile:'#sxHeaderProfileActions .profile-action-buttons'};
+     const groups={tools:'#sxHeaderToolActions',workout:'#sxHeaderWorkoutActions',profile:'#sxHeaderProfileActions'};
      return {height:header.height,gap:rect(first).top-header.bottom,buttons:groups[id]?[...document.querySelectorAll(groups[id]+' button,'+groups[id]+' a')].map(el=>{
       const r=rect(el),svg=el.querySelector('svg'),i=svg?rect(svg):null;
       return {id:el.id||el.getAttribute('aria-label'),w:r.width,h:r.height,radius:getComputedStyle(el).borderRadius,background:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderTopColor,dx:i?(i.left+i.right-r.left-r.right)/2:0,dy:i?(i.top+i.bottom-r.top-r.bottom)/2:0};
@@ -33,7 +33,10 @@ const {chromium}=require('playwright');
      if(!baselineSize)baselineSize=button;else{assert.ok(Math.abs(button.w-baselineSize.w)<.5,msg);assert.equal(button.background,baselineSize.background,msg);assert.equal(button.border,baselineSize.border,msg);}
     }
    }
-   assert.equal(await page.locator('#sxHeaderProfileActions .profile-action-buttons button').count(),3);
+   assert.equal(await page.locator('#sxHeaderProfileActions > button.sx-main-header-action').count(),3);
+   assert.equal(await page.locator('#sxHeaderProfileActions .profile-action-buttons').count(),0,'Legacy pill wrapper must not exist');
+   const shell=await page.locator('#sxHeaderProfileActions').evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderTopWidth,background:s.backgroundColor,radius:s.borderRadius,shadow:s.boxShadow,outline:s.outlineStyle};});
+   assert.deepEqual(shell,{border:'0px',background:'rgba(0, 0, 0, 0)',radius:'0px',shadow:'none',outline:'none'},'Profile toolbar shell must be visually absent');
    await page.locator('#editProfile').click();
    await page.waitForSelector('#editProfileOverlay.screen.active');
    await page.close();

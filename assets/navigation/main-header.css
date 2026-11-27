@@ -1,0 +1,46 @@
+/* Shared main-tab chrome. Scope to Tools, Home, Workout and Profile only. */
+:root{--sx-main-header-height:calc(70px + env(safe-area-inset-top,0px));--sx-main-title-gap:16px;--sx-main-action-size:40px;--sx-main-action-gap:7px;--sx-main-title-size:27px}
+html body:has(>main>.screen.active:is(#tools,#home,#workout,#profile))>header{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;
+ height:var(--sx-main-header-height)!important;min-height:var(--sx-main-header-height)!important;max-height:var(--sx-main-header-height)!important;
+ padding:env(safe-area-inset-top,0px) 18px 0!important;box-sizing:border-box!important;
+}
+html body:has(>main>.screen.active:is(#tools,#home,#workout,#profile))>#sxMainHeaderSpacer{
+ display:block!important;height:var(--sx-main-header-height)!important;min-height:var(--sx-main-header-height)!important;
+}
+html body:has(>main>.screen.active:is(#tools,#home,#workout,#profile))>main{padding-top:var(--sx-main-title-gap)!important}
+html body>header #sxHeaderProfileActions{display:none!important;min-width:0;flex:1;align-items:center;justify-content:space-between;gap:8px;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important}
+html body:has(>main>#profile.screen.active)>header #sxHeaderProfileActions{display:flex!important}
+html body:has(>main>#profile.screen.active)>header #sxBrandHeader{display:none!important}
+#sxHeaderProfileActions>div:first-child{flex:1;min-width:0}
+#sxHeaderProfileActions .sx-profile-handle{font-size:clamp(18px,5.25vw,27px);font-weight:850;letter-spacing:-.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body>header #sxHeaderProfileActions .profile-action-buttons{position:static!important;display:flex!important;align-items:center!important;gap:var(--sx-main-action-gap)!important;flex:none;margin:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions){gap:var(--sx-main-action-gap)!important;align-items:center!important;flex:none}
+html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a){
+ box-sizing:border-box!important;appearance:none!important;-webkit-appearance:none!important;
+ display:grid!important;place-items:center!important;align-content:center!important;justify-content:center!important;
+ width:var(--sx-main-action-size)!important;height:var(--sx-main-action-size)!important;
+ min-width:var(--sx-main-action-size)!important;min-height:var(--sx-main-action-size)!important;
+ max-width:var(--sx-main-action-size)!important;max-height:var(--sx-main-action-size)!important;
+ flex:0 0 var(--sx-main-action-size)!important;position:relative!important;inset:auto!important;
+ margin:0!important;padding:0!important;line-height:1!important;text-align:center!important;
+ background:var(--panel2)!important;background-image:none!important;border:1px solid var(--line)!important;border-radius:50%!important;
+ color:var(--txt)!important;box-shadow:none!important;text-shadow:none!important;text-decoration:none!important;
+}
+html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a) svg{
+ display:block!important;width:19px!important;height:19px!important;margin:0!important;padding:0!important;
+ fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transform:none!important
+}
+html body>header #sxHeaderWorkoutActions .sx-header-ascension{font-size:13px!important;font-weight:950!important;letter-spacing:0!important;line-height:1!important}
+html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a)[aria-pressed="true"]{border-color:var(--lime)!important;color:var(--lime)!important;box-shadow:0 0 9px color-mix(in srgb,var(--lime) 20%,transparent)!important}
+html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a):focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+#home>.eyebrow{margin:0!important;line-height:1.25}
+#home .sx-home-titlebar{margin:4px 0 13px!important}
+#home .sx-home-titlebar h1{font-size:var(--sx-main-title-size);line-height:1.2;margin:0}
+#workout>#today{margin:0 0 13px!important;line-height:1.25}
+#profile>.profile-identity{margin-top:0!important}
+@media(max-width:390px){
+ :root{--sx-main-action-size:36px;--sx-main-action-gap:5px}
+ html body:has(>main>.screen.active:is(#tools,#home,#workout,#profile))>header{padding-inline:10px!important}
+ html body>header #sxBrandHeader .sub{font-size:8px!important;letter-spacing:.5px!important}
+}

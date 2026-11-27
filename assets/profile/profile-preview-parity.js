@@ -10,7 +10,7 @@ const icon={
  share:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
  dumbbell:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6m4-9v12m10-12v12m4-9v6M7 12h10M1 9v6m22-6v6"/></svg>'
 };
-const top=root.querySelector('.sx-profile-layout-top'),profile=root.querySelector('.profile-identity'),avatar=$('profileAvatar'),title=$('profileDisplayName'),pTabs=$('performanceTabs'),chart=$('performanceCard');
+const top=$('sxHeaderProfileActions'),profile=root.querySelector('.profile-identity'),avatar=$('profileAvatar'),title=$('profileDisplayName'),pTabs=$('performanceTabs'),chart=$('performanceCard');
 if(!top||!profile||!avatar||!title||!pTabs||!chart)return;
 /* Use the same two real buttons, grouped with a local summary share action. */
 const topLabel=top.firstElementChild;

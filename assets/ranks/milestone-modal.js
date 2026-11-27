@@ -44,9 +44,9 @@
    '<div class="sx-milestone-top"><div class="sx-milestone-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+icons[c.icon]+'</svg></div>'+
    '<div class="sx-milestone-title"><h3>'+esc(c.name)+'</h3><small>'+(c.currentBadge?esc(c.currentTier+' · '+c.currentBadge):'First achievement pending')+'</small></div>'+
    '<span class="sx-milestone-step">'+c.unlocked+' / 3</span></div>'+
-   '<div class="sx-milestone-next">'+esc(next)+'</div>'+
-   '<div class="sx-milestone-count">'+esc(current)+'</div>'+
-   '<div class="sx-milestone-progress" role="progressbar" aria-label="'+esc(c.name)+' progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(c.progress*100)+'"><span style="width:'+Math.round(c.progress*100)+'%"></span></div>'+
+   '<div class="sx-milestone-ring-row"><div class="sx-milestone-progress" role="progressbar" aria-label="'+esc(c.name)+' progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(c.progress*100)+'"><span style="width:'+Math.round(c.progress*100)+'%"></span></div>'+
+   '<div class="sx-milestone-ring-copy"><div class="sx-milestone-next">'+esc(next)+'</div>'+
+   '<div class="sx-milestone-count">'+esc(current)+'</div></div></div>'+
    '<div class="sx-milestone-levels">'+steps+'</div></section>';
  }
  function mount(){
@@ -89,6 +89,7 @@
   $('sxMilestoneOverview').innerHTML='<strong>'+model.earned+' <span>/ '+model.total+'</span></strong>'+
    '<div><span>ACHIEVEMENT TIERS EARNED</span><small>4 paths · Bronze / Silver / Gold</small></div>';
   $('sxMilestoneCollection').innerHTML=model.categories.map(card).join('');
+  $('sxMilestoneCollection').querySelectorAll('.sx-milestone-progress').forEach(el=>window.SXProgressRing?.set(el,Number(el.getAttribute('aria-valuenow'))));
   ui.hidden=false;
   document.body.classList.add('sx-milestones-open');
   ui.querySelector('.sx-milestone-close').focus();

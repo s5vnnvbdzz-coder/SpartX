@@ -1,0 +1,41 @@
+/* Small, theme-aware rings; do not create extra cards. */
+.sx-ring{--sx-ring-size:52px;--sx-ring-pct:0;--sx-ring-color:var(--lime,#a66af5);position:relative!important;display:grid!important;place-items:center;flex:0 0 var(--sx-ring-size);width:var(--sx-ring-size)!important;height:var(--sx-ring-size)!important;min-width:var(--sx-ring-size);margin:0!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;isolation:isolate}
+.sx-ring[hidden],#sxHomeWeekly[hidden]{display:none!important}
+.sx-ring-art{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform:rotate(-90deg);pointer-events:none}
+.sx-ring-art circle{fill:none;stroke-width:4;stroke-linecap:round}
+.sx-ring-track{stroke:color-mix(in srgb,var(--muted,#777) 30%,transparent)}
+.sx-ring-arc{stroke:var(--sx-ring-color);stroke-dasharray:var(--sx-ring-pct) 100;transition:stroke-dasharray .32s ease}
+.sx-ring-value{position:relative;z-index:1;color:var(--txt,#fff)!important;font-size:12px!important;font-weight:800!important;letter-spacing:-.35px!important;font-variant-numeric:tabular-nums;line-height:1!important;background:none!important;box-shadow:none!important;white-space:nowrap;width:auto!important;height:auto!important;margin:0!important;text-align:center!important}
+.sx-ring>span:not(.sx-ring-value),.sx-ring>i{display:none!important}
+#homeRankProgression #rankExperienceTrack.sx-ring{--sx-ring-size:43px}
+#homeRankProgression .rank-card-actions{gap:5px}
+#homeRankProgression #rankExperienceTrack .sx-ring-value{font-size:10px!important}
+#sxHomeWeekly{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:10px;white-space:nowrap}
+#sxHomeWeeklyRing{--sx-ring-size:38px}
+#sxHomeWeeklyRing .sx-ring-value{font-size:10px!important}
+.sx-feed-heading-metrics{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;min-width:0}
+#workout #sxAscensionQuickCard .sx-asc-ring-row{display:flex;align-items:center;gap:10px;margin:5px 0 8px}
+#workout #sxAscensionQuickCard #sxAscensionProgress{--sx-ring-size:52px}
+#workout #sxAscensionQuickCard .sx-asc-ring-copy{flex:1;min-width:0}
+#workout #sxAscensionQuickCard .sx-asc-ring-copy .sx-programme-meta{margin:3px 0 0}
+#workout #sxAscensionQuickCard .sx-asc-ring-label{color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.4px}
+#profile #sxProfileXP:has(.sx-ring){display:grid;grid-template-columns:54px minmax(0,1fr);grid-template-rows:auto auto;column-gap:11px;row-gap:5px;align-items:center;padding:8px 12px;margin:14px 0 20px}
+#profile #sxProfileXP .sx-profile-xp-track.sx-ring{--sx-ring-size:54px;grid-column:1;grid-row:1/3}
+#profile #sxProfileXP .sx-profile-xp-head,#profile #sxProfileXP .sx-profile-xp-foot{grid-column:2;flex-wrap:wrap;gap:3px 8px}
+#profile #sxProfileXP .sx-profile-xp-head{grid-row:1}
+#profile #sxProfileXP .sx-profile-xp-foot{grid-row:2}
+#activeWorkout #sxWorkingSetRing{--sx-ring-size:38px;align-self:center}
+#activeWorkout #sxWorkingSetRing .sx-ring-value{font-size:10px!important}
+#activeWorkout .sx-session-set-metric:has(.sx-ring:not([hidden])){align-items:center;gap:2px}
+#activeWorkout .sx-session-set-metric:has(.sx-ring:not([hidden]))>strong{margin-top:0;font-size:10px!important;line-height:1!important}
+#activeWorkout .sx-session-set-metric:has(.sx-ring:not([hidden]))>span:first-child{font-size:8px!important;white-space:nowrap}
+.sx-milestone-ring-row,.sx-prestige-ring-row,.sx-cycle-ring-row{display:flex;align-items:center;gap:10px;min-width:0;margin:8px 0}
+.sx-milestone-ring-row .sx-milestone-progress.sx-ring{--sx-ring-size:54px}
+.sx-milestone-ring-copy,.sx-prestige-ring-copy,.sx-cycle-ring-copy{flex:1;min-width:0}
+.sx-milestone-ring-copy .sx-milestone-next,.sx-milestone-ring-copy .sx-milestone-count{margin-top:2px}
+.sx-prestige-ring-row .sx-prestige-meter.sx-ring{--sx-ring-size:52px;--sx-ring-color:var(--sx-prestige-accent,var(--lime,#a66af5))}
+.sx-prestige-ring-copy .sx-prestige-next-top{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.sx-cycle-ring-row .sx-cycle-view-progress.sx-ring{--sx-ring-size:52px}
+.sx-cycle-ring-copy .sx-cycle-view-muted{margin:3px 0 0}
+@media(max-width:375px){#homeRankProgression #rankExperienceTrack.sx-ring{--sx-ring-size:36px}#homeRankProgression .rank-card-actions{gap:3px}#sxHomeWeekly{gap:3px}#sxHomeWeeklyRing{--sx-ring-size:32px}#activeWorkout #sxWorkingSetRing{--sx-ring-size:32px}#activeWorkout #sxWorkingSetRing .sx-ring-value{font-size:9px!important}}
+@media(prefers-reduced-motion:reduce){.sx-ring-arc{transition:none}}

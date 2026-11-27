@@ -672,6 +672,7 @@ html[data-sx-integrated-cycle-route="manage"] body > nav{display:none!important}
 })();
 </script>
 <link rel="stylesheet" href="../assets/ui/modal-viewport.css?v=413">
+<link rel="stylesheet" href="../assets/ui/progress-ring.css?v=438"><script src="../assets/ui/progress-ring.js?v=438"></script>
 </head>
 <body>
 <header>
@@ -1062,10 +1063,11 @@ function openSXWorkoutCycleView(){
  summary.className='sx-cycle-view-overview';
  summary.innerHTML='<div class="sx-cycle-view-topline"><strong></strong><span class="sx-cycle-view-tag">6 WEEKS</span></div>'+
   '<p class="sx-cycle-view-muted">AscensionX powerlifting · '+active.length+' selected '+(active.length===1?'lift':'lifts')+'</p>'+
-  '<div class="sx-cycle-view-topline"><span>Cycle progress</span><strong>'+percent+'%</strong></div>'+
-  '<div class="sx-cycle-view-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><i style="width:'+percent+'%"></i></div>'+
-  '<p class="sx-cycle-view-muted">'+active.map(lift=>lift+' · Week '+currentWeekFor(lift)).join(' · ')+'</p>';
+  '<div class="sx-cycle-ring-row"><div class="sx-cycle-view-progress" role="progressbar" aria-label="Primary lift cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percent+'"><i style="width:'+percent+'%"></i></div>'+
+  '<div class="sx-cycle-ring-copy"><div class="sx-cycle-view-topline"><span>Primary lift progress</span></div>'+
+  '<p class="sx-cycle-view-muted">'+active.map(lift=>lift+' · Week '+currentWeekFor(lift)).join(' · ')+'</p></div></div>';
  summary.querySelector('strong').textContent=title;
+ window.SXProgressRing?.set(summary.querySelector('.sx-cycle-view-progress'),percent);
  holder.replaceChildren(summary);
  holder.appendChild(sxBuildAdaptiveCycleRoster());
  holder.appendChild(details);
@@ -2340,7 +2342,7 @@ function init(){
   history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  }
  processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=132').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=141').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.

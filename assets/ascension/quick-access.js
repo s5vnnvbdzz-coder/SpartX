@@ -21,9 +21,7 @@ card.innerHTML=`
    <div class="sx-programme-options" id="sxAscensionOptionsMenu" hidden><button type="button" id="sxAscensionView">VIEW CYCLE</button><button type="button" id="sxAscensionManage">MANAGE CYCLE</button></div>
   </div>
  </div>
- <p class="sx-programme-meta" id="sxAscensionSummary">AscensionX · Powerlifting · Week 1 of 6</p>
- <div class="sx-programme-progressline"><span>CYCLE PROGRESS</span><strong id="sxAscensionPercent">0%</strong></div>
- <div class="sx-programme-progress" role="progressbar" aria-label="AscensionX cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sxAscensionProgress"><span id="sxAscensionProgressFill"></span></div>
+ <div class="sx-asc-ring-row"><div class="sx-programme-progress" role="progressbar" aria-label="AscensionX primary lift cycle progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sxAscensionProgress"><span id="sxAscensionProgressFill"></span></div><div class="sx-asc-ring-copy"><span class="sx-asc-ring-label">PRIMARY LIFT PROGRESS <strong id="sxAscensionPercent" hidden>0%</strong></span><p class="sx-programme-meta" id="sxAscensionSummary">AscensionX · Powerlifting · Week 1 of 6</p></div></div>
  <div class="sx-programme-footer"><div class="sx-programme-next" id="sxAscensionNext">NEXT: Select lift</div><button type="button" class="sx-programme-continue" id="sxAscensionContinue">CONTINUE ›</button></div>`;
 const slot=document.getElementById('sxAscensionProgrammeSlot');
 const startCard=workout.querySelector('.start-card');
@@ -256,6 +254,7 @@ function refresh(){
  byId('sxAscensionPercent').textContent=percent+'%';
  byId('sxAscensionProgressFill').style.width=percent+'%';
  byId('sxAscensionProgress').setAttribute('aria-valuenow',String(percent));
+ window.SXProgressRing?.set(byId('sxAscensionProgress'),percent);
  byId('sxAscensionContinue').dataset.lift=upNext.lift;
 }
 function launch(mode,context='auto'){

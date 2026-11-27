@@ -170,6 +170,7 @@ function rankAndIdentity(){
  // The earlier display incorrectly compared lifetime XP against workout counts.
  const progress=Math.max(0,Math.min(1,rank.rankProgress));
  $('sxProfileXPFill').style.width=(progress*100).toFixed(1)+'%';
+ window.SXProgressRing?.set($('sxProfileXPFill').parentElement,progress*100,null,'XP towards next rank or prestige');
  $('sxProfileXPCount').textContent=rank.rankXP+' / '+window.SpartanXXP.PER_RANK+' XP';
  $('sxProfileXPNext').textContent=Math.round(progress*100)+'% to '+(rank.next?'next rank':'next prestige');
  const bio=(p.bio||'').trim()||'Add a little about yourself.';

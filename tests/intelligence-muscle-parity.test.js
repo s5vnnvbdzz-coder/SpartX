@@ -33,6 +33,14 @@ const byName=Object.fromEntries(out.muscleRows.map(row=>[row.name,row.sets]));
 assert.equal(byName['Upper Back'],2,'Both row types count as upper-back exposure');
 assert.equal(byName['Lats'],1,'Pulldowns count as lat exposure');
 assert.equal(byName['Back'],undefined,'No generic back category replaces specific groups');
+for(const name of ['Deadlift','Conventional Deadlift','Barbell Deadlift','Paused Deadlift']){
+ const roles=host.exerciseMuscles(name);
+ assert.deepEqual(roles.primary,['glutes','hamstrings','quads','lower_back']);
+ assert.deepEqual(roles.secondary,['adductors','lats','upper_back','traps','forearms','core','calves']);
+ assert.deepEqual(intel.muscles(name),roles);
+}
+const dl=engine.analyse(engine.normalizeSessions([{id:'dl',date,name:'Deadlift',exercises:[{name:'Deadlift',sets:[{weight:'100',reps:'5',done:true,type:'Working Set'}]}]}]),90,now);
+for(const muscle of ['Glutes','Hamstrings','Quads','Lower Back'])assert.equal(dl.muscleRows.find(x=>x.name===muscle).sets,1);
 const app=fs.readFileSync('intelligence/app.js','utf8');
 assert(app.includes('window.SXMuscleLibrary?.muscles?.(ex.name)'),
  'Intelligence anatomy uses source primary/secondary roles');

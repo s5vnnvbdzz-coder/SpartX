@@ -24,13 +24,13 @@ const aliases={
  'inclinedumbbellpress':'incline-db','dumbbellrow':'db-row',
  'lateralraise':'lateral-raise','benchpress':'barbell-bench',
  'backsquat':'barbell-squat','squat':'barbell-squat','deadlift':'conventional-deadlift',
- 'conventionaldeadlift':'conventional-deadlift','overheadpress':'ohp'
+ 'conventionaldeadlift':'conventional-deadlift','barbelldeadlift':'conventional-deadlift','conventionalbarbelldeadlift':'conventional-deadlift','pauseddeadlift':'conventional-deadlift','overheadpress':'ohp'
 };
 function classify(name){
  const key=n(name);if(!key)return null;
  let match=catalogue.find(e=>n(e.name)===key||n(e.id)===key);
  if(!match){const id=aliases[key];if(id)match=catalogue.find(e=>e.id===id);}
- if(match)return {name:String(name),primary:match.primary,secondary:match.secondary.slice(),axial:match.axial,pattern:match.pattern,main:match.kind==='main'};
+ if(match)return {name:String(name),primary:match.primary,primaryGroups:[...(match.primaryGroups||[match.primary])],secondary:match.secondary.slice(),axial:match.axial,pattern:match.pattern,main:match.kind==='main'};
  if(/triceps|pushdown|skullcrusher/.test(key))return {name,primary:'Triceps',secondary:[],axial:0,pattern:'triceps',main:false};
  if(/latpulldown|row|pullup|chinup/.test(key))return {name,primary:'Back',secondary:['Biceps'],axial:0,pattern:'row',main:false};
  if(/shoulderpress|militarypress/.test(key))return {name,primary:'Shoulders',secondary:['Triceps'],axial:1,pattern:'verticalPress',main:false};
@@ -53,8 +53,9 @@ function countExposure(days){
    const info=classify(exercise?.name);
    const count=safeCount(exercise?.sets);
    if(!info||!count)continue;
-   out[info.primary].direct+=count;seen.add(info.primary);
-   for(const muscle of info.secondary)if(muscle!==info.primary){out[muscle].indirect+=count*.5;seen.add(muscle);}
+   const direct=new Set(info.primaryGroups||[info.primary]);
+   for(const muscle of direct){out[muscle].direct+=count;seen.add(muscle);}
+   for(const muscle of info.secondary)if(!direct.has(muscle)){out[muscle].indirect+=count*.5;seen.add(muscle);}
   }
   for(const muscle of seen)out[muscle].days++;
  }

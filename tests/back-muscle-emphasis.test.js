@@ -34,7 +34,7 @@ for(const name of vertical){
 }
 assert.deepEqual(data.exerciseMuscles('Iso-Lateral Row').primary,['upper_back']);
 assert.deepEqual(data.exerciseMuscles('Lat Pulldown').primary,['lats']);
-assert(data.exerciseMuscles('Deadlift').secondary.includes('lower_back'),
+assert(data.exerciseMuscles('Deadlift').primary.includes('lower_back'),
  'Deadlift uses specific erector muscles, not generic back');
 assert(data.exerciseMuscles('Romanian Deadlift').secondary.includes('lower_back'),
  'RDL lower-back stabilization remains specified');

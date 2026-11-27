@@ -1,4 +1,4 @@
-const CACHE='spartanx-tools-v70';
+const CACHE='spartanx-tools-v71';
 const ASSETS=['./','./index.html','./settings.html','../assets/themes/spartanx-settings-surface.css?v=209', '../assets/themes/uniform-surfaces.css?v=340', '../assets/themes/shared-theme.js?v=340', '../assets/themes/cyberpunk-subtle.css?v=340', '../assets/themes/obsidian-white.css?v=340', '../assets/charts/touch-scrub.js?v=340','./531-cycle.html','./531-cycle.webmanifest','./embedded.html','./embedded-settings.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('spartanx-tools-v') && k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

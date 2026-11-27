@@ -34,6 +34,8 @@
     '<div class="sx-bb-two"><label>TRAINING DAYS<select id="sxBBDays" data-bb-field="days"><option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option></select></label>',
     '<label>PROGRAMME LENGTH<select id="sxBBWeeks" data-bb-field="weeks"><option value="4">4 weeks</option><option value="6">6 weeks</option><option value="8">8 weeks</option><option value="12">12 weeks</option></select></label></div>',
     '<label>TRAINING PRIORITY<select id="sxBBPriority" data-bb-field="priority"><option value="balanced">Balanced development</option><option value="upper">Upper-body emphasis</option><option value="lower">Lower-body emphasis</option></select></label>',
+    '<label>TRAINING SPLIT<select id="sxSplitPreset"><option value="default3">Full body · 3 days</option><option value="default4">Upper / lower · 4 days</option><option value="default5">Upper / lower + PPL · 5 days</option><option value="hybrid5">Upper push / lower pull / upper pull / lower push / accessory &amp; core</option><option value="default6">Push / pull / legs · 6 days</option></select></label>',
+    '<button type="button" class="sx-bb-secondary" data-bb-action="apply-split">GENERATE SELECTED SPLIT</button>',
     '<p class="sx-bb-help">Changing training days rebuilds the exercise split. Changing priority does not overwrite your edited exercises until you choose Rebuild Template.</p>',
     '<button type="button" class="sx-bb-secondary" data-bb-action="optimise-volume">◈ INTELLIGENCE: REVIEW WORKING SETS</button>'+
     '<p class="sx-bb-help">Use evidence-informed weekly volume distribution to recommend working sets. This changes only this editable draft; confirm Save to apply.</p>'+
@@ -45,7 +47,7 @@
     '<p class="sx-bb-help">Eight-week plans adapt working sets and RIR by phase. Completed reps, load and RPE inform the next workout; adjustments are recommendations, not silent changes to saved programmes.</p>',
     '<div id="sxBBDraftStats" class="sx-bb-stats"></div><p id="sxBBMuscleCoverage" class="sx-bb-help"></p></article></div>',
     '<div class="sx-bb-sectionhead"><div class="eyebrow">YOUR WEEKLY SPLIT</div><h2>Edit training days</h2><p>All exercises, working sets, rep ranges, RIR, rest and starting loads can be changed.</p></div>',
-    '<div id="sxBBEditorDays" class="sx-bb-days"></div>',
+    '<section class="card" id="sxSplitAudit" aria-live="polite"></section><div id="sxBBEditorDays" class="sx-bb-days"></div>',
     '<div class="sx-bb-actions"><button type="button" class="sx-bb-secondary" data-bb-action="discard">DISCARD</button>',
     '<button type="button" class="sx-bb-primary" data-bb-action="save">SAVE PROGRAMME</button></div></section>',
     '<div id="sxBBPicker" class="sx-bb-picker" role="dialog" aria-modal="true" aria-labelledby="sxBBPickerTitle" hidden>',
@@ -389,12 +391,16 @@
     return '<label>'+label+'<input type="number" inputmode="decimal" data-bb-ex-field="'+key+'" data-day="'+day+
       '" data-ex="'+ex+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+esc(value)+'"></label>';
   }
+  function renderSplitAudit(){
+    const host=$('sxSplitAudit'),audit=window.SXSplitAudit?.audit(draft,window.SXVolumeIntelligence);if(!host||!audit)return;
+    host.innerHTML='<div class="eyebrow">SPARTANX INTELLIGENCE · SPLIT AUDIT</div><h2>Weekly training analysis</h2><p>Direct sets plus half-weighted secondary sets are an exposure estimate. Starting ranges are coaching guides, not individual optima.</p><table class="sx-split-audit-table"><thead><tr><th>Muscle</th><th>Direct / adjusted</th><th>Days</th><th>Guide</th><th>Review</th></tr></thead><tbody>'+audit.muscles.map(m=>'<tr><td>'+esc(m.name)+'</td><td>'+m.direct+' / '+m.effective+'</td><td>'+m.days+'</td><td>'+m.min+'–'+m.max+'</td><td>'+esc(m.status)+'</td></tr>').join('')+'</tbody></table><p><strong>Day workloads:</strong> '+audit.days.map(d=>esc(d.name)+': '+d.sets+' sets').join(' · ')+'</p><p><strong>Movement coverage:</strong> '+esc([...new Set(audit.days.flatMap(d=>d.patterns))].join(', '))+'</p><p><strong>Review:</strong> '+(audit.notes.length?audit.notes.map(esc).join(' '):'No consecutive high-axial-load or high-set-count flags in the listed order. Actual recovery depends on rest days and loading.')+'</p><p>Review the exercise choices and block progression before saving. This audit does not change your existing programmes.</p>';
+  }
   function renderEdit(){
     const p=draft;if(!p)return;
     $('sxBBName').value=p.name;$('sxBBKind').value=p.kind;
     $('sxBBExperience').value=p.experience;$('sxBBDays').value=String(p.days);
     $('sxBBWeeks').value=String(p.weeks);$('sxBBPriority').value=p.priority;
-    $('sxBBDraftStats').innerHTML=statsHTML(p);
+    $('sxBBDraftStats').innerHTML=statsHTML(p);renderSplitAudit();
     $('sxBBBalanceLegs').hidden=![4,5,6].includes(Number(p.days));
     const muscle=E?.coverage?.(p);
     $('sxBBMuscleCoverage').textContent=muscle?
@@ -487,6 +493,12 @@
     if(action==='close-picker')return pickerClose();
     if(action==='add')return pickerOpen(day);
     if(action==='pick')return pickerChoose(el.dataset.exerciseName);
+    if(action==='apply-split'){
+      if(!draft||!window.SXSplitAudit||!window.confirm('Generate this split in the current draft? Existing unsaved exercise choices will be replaced. Saved cycles and workouts are unchanged.'))return;
+      draft=window.SXSplitAudit.build(M,$('sxSplitPreset').value,draft);
+      if(window.SXVolumeIntelligence)draft=window.SXVolumeIntelligence.rebalancePlan(draft,{goal:draft.kind==='hybrid'?'powerbuilding':'bodybuilding',experience:draft.experience,priority:draft.priority==='upper'?'Shoulders':draft.priority==='lower'?'Quads':'Balanced'});
+      dirty=true;renderEdit();return;
+    }
     if(action==='optimise-volume'){
       if(!draft||!window.SXVolumeIntelligence)return window.alert('Spartan Intelligence is not available. Refresh and try again.');
       if(!window.confirm('Review and update accessory working sets in this draft using weekly muscle volume? This will not edit saved workouts or active AscensionX/5/3/1 cycles.'))return;
@@ -533,7 +545,7 @@
     }
     if(el.dataset.bbExField){
       const ex=draft.sessions[+el.dataset.day]?.exercises[+el.dataset.ex];
-      if(ex){ex[el.dataset.bbExField]=Number(el.value);dirty=true}
+      if(ex){ex[el.dataset.bbExField]=Number(el.value);dirty=true;renderSplitAudit()}
     }
   });
   // Preserve expanded training days across routine edits and re-renders.

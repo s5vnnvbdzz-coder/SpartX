@@ -15,7 +15,7 @@ if(!top||!profile||!avatar||!title||!pTabs||!chart)return;
 /* Use the same two real buttons, grouped with a local summary share action. */
 const topLabel=top.firstElementChild;
 topLabel.innerHTML='<div class="sx-profile-handle" id="sxProfileHandle">SpartanX athlete</div>';
-const actionPack=top.querySelector('.profile-action-buttons');
+const actionPack=top; // Direct sibling buttons: no legacy pill wrapper.
 if(!actionPack.querySelector('.sx-profile-share-button')){
  const share=document.createElement('button');share.type='button';share.className='sx-profile-share-button';
  share.setAttribute('aria-label','Share profile summary');share.title='Share profile summary';share.innerHTML=icon.share;

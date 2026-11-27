@@ -377,8 +377,32 @@ function renderPlateDiagram(loaded){
   left+right;
  $('plateDiagramCaption').textContent=loaded.length?loaded.map(p=>p.count+' × '+fmt(fromKg(p.size))+' '+unit()).join(' · ')+' per side':'No plates required — bar only';
 }
-function calcPlates(){const target=toKg(+$('target').value),bar=toKg(+$('bar').value);const out=$('plates');out.innerHTML='';if($('target').value.trim()===''||$('bar').value.trim()===''){$('plateTotal').textContent='—';$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';renderPlateDiagram([]);return;}if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';renderPlateDiagram([]);return;}let rem=(target-bar)/2,loaded=[];$('plateTotal').textContent=fmt(fromKg(rem))+' '+unit()+' per side';const sizes=[25,20,15,10,5,2.5,1.25].filter(p=>settings.plates[p]);sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(fromKg(p))+' '+unit();chip.style.backgroundColor=plateColors[p].fill;chip.style.color=plateColors[p].text;out.appendChild(chip);loaded.push({size:p,count:n});rem=+(rem-n*p).toFixed(4);}});renderPlateDiagram(loaded);$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(fromKg(rem))+' '+unit()+' per side. Enable more plate sizes in settings or check the target/bar weight.':'Plates required per side, using your enabled plate sizes.';}
-$('plateDiagramWrap').style.display=settings.diagram?'block':'none';
+function calcPlates(){const target=toKg(+$('target').value),bar=toKg(+$('bar').value);const out=$('plates');out.innerHTML='';if($('target').value.trim()===''||$('bar').value.trim()===''){$('plateTotal').textContent='—';$('plateHint').textContent='Enter a target weight and bar weight to calculate the plates.';renderPlateDiagram([]);return;}if(target<bar){$('plateTotal').textContent='—';$('plateHint').textContent='Target weight cannot be lower than the bar weight.';renderPlateDiagram([]);return;}let rem=(target-bar)/2,loaded=[];$('plateTotal').textContent=fmt(fromKg(rem))+' '+unit()+' per side';const sizes=[25,20,15,10,5,2.5,1.25].filter(p=>settings.plates[p]);sizes.forEach(p=>{const n=Math.floor((rem+0.0001)/p);if(n>0){const chip=document.createElement('span');chip.className='plate';chip.textContent=n+' × '+fmt(fromKg(p))+' '+unit();chip.style.backgroundColor=plateColors[p].fill;chip.style.color=plateColors[p].text;out.appendChild(chip);loaded.push({size:p,count:n});rem=+(rem-n*p).toFixed(4);}});renderPlateDiagram(loaded);$('plateHint').textContent=rem>.01?'Unmatched: '+fmt(fromKg(rem))+' '+unit()+' per side. Enable more plate sizes below or check the target/bar weight.':'Plates required per side, using your enabled plate sizes.';}
+
+// Plate preferences live with the calculator. Keep the existing storage key.
+(function mountPlatePreferences(){
+ const host=$('plateHint').parentElement;
+ const panel=document.createElement('div');panel.className='sx-plate-preferences';
+ panel.innerHTML='<style>.sx-plate-preferences{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.sx-plate-preferences .sx-plate-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;color:var(--txt);font-size:13px;font-weight:750}.sx-plate-preferences .switch{margin:0;flex:0 0 48px}.sx-plate-preferences .sx-plate-label{font-size:13px;font-weight:750;color:var(--txt);margin:0}.sx-plate-preferences .hint{margin:4px 0 0}.sx-plate-preferences .plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}.sx-plate-preferences .plate-setting{display:flex;align-items:center;gap:7px;min-height:39px;margin:0;padding:7px 9px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-size:12px;cursor:pointer}.sx-plate-preferences .plate-setting input{appearance:auto!important;width:17px!important;height:17px!important;min-width:17px!important;margin:0 0 0 auto!important;padding:0!important;accent-color:var(--lime)}.sx-plate-preferences .plate-dot{width:12px;height:12px;flex:0 0 12px;border-radius:4px}.sx-plate-preferences .switch:focus-within{outline:2px solid var(--lime);outline-offset:3px;border-radius:20px}</style><div class="sx-plate-toggle"><span>Barbell diagram</span><label class="switch"><input id="diagramToggle" type="checkbox" aria-label="Show barbell diagram"><span></span></label></div><p class="sx-plate-label">Available plates</p><p class="hint">Only enabled plate sizes are used in the calculation.</p><div class="plate-settings" id="plateSettings"></div>';
+ host.appendChild(panel);
+ const diagram=panel.querySelector('#diagramToggle'),list=panel.querySelector('#plateSettings'),inputs=new Map();
+ for(const size of [25,20,15,10,5,2.5,1.25]){
+  const label=document.createElement('label');label.className='plate-setting';
+  const dot=document.createElement('span');dot.className='plate-dot';dot.style.background=plateColors[size].fill;
+  const name=document.createElement('span');name.textContent=size+' kg';
+  const input=document.createElement('input');input.type='checkbox';input.dataset.plateSize=String(size);
+  inputs.set(size,input);label.append(dot,name,input);list.append(label);
+  input.addEventListener('change',()=>{readLatest();settings.plates[size]=input.checked;saveSettings();sync();calcPlates();});
+ }
+ function readLatest(){try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...settings.plates,...(saved.plates||{})}};}catch(e){}}
+ function sync(){diagram.checked=!!settings.diagram;$('plateDiagramWrap').style.display=settings.diagram?'block':'none';for(const [size,input] of inputs)input.checked=!!settings.plates[size];}
+ diagram.addEventListener('change',()=>{readLatest();settings.diagram=diagram.checked;saveSettings();sync();calcPlates();});
+ function refresh(){readLatest();sync();calcPlates();}
+ window.addEventListener('storage',e=>{if(e.key==='spartxToolsSettings')refresh();});
+ window.addEventListener('pageshow',refresh);
+ sync();
+})();
+
 // Training Max is integrated into 5/3/1 Working Weights.
 // Keep calculator entries while navigating to Settings and back in the same app session.
 const calculatorInputIds=['ormWeight','ormReps','tmFinderOneRm','tmFinderRound','tm','applyLift','week','target','bar'];

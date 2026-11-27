@@ -93,7 +93,6 @@
    '<ol class="sx-prestige-stage-list">'+stageRows(model)+'</ol>'+
    '<p class="sx-prestige-footnote">Prestige is continuous. Rank progression repeats every 6,000 XP; previously unlocked badges remain yours.</p>'+
    '</div>';
-  const nextPanel=pageBody.querySelector('.sx-prestige-next'),meter=pageBody.querySelector('.sx-prestige-meter'),copy=pageBody.querySelector('.sx-prestige-next-top');if(nextPanel&&meter&&copy&&global.SXProgressRing){nextPanel.classList.add('sx-prestige-ring-row');const wrap=document.createElement('div');wrap.className='sx-prestige-ring-copy';wrap.appendChild(copy);nextPanel.replaceChildren(meter,wrap);global.SXProgressRing.set(meter,model.progress*100);}
   if(!activePage())global.spartanxNavigateScreen('prestigeShowcase',{instant:true});
   else global.scrollTo(0,0);
   page.querySelector('#sxPrestigePageBack')?.focus({preventScroll:true});

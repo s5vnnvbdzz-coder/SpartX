@@ -2129,7 +2129,6 @@ main > #profile.screen > .spartanx-page-footer{
 #activeWorkout .set-row .set-number-pad-trigger.sx-has-guidance{display:inline-flex;justify-content:center;align-items:center;gap:1px}
 #activeWorkout .set-row .set-rpe-trigger.sx-has-guidance{gap:1px}
 </style>
-<link rel="stylesheet" href="./assets/ui/progress-ring.css?v=438"><script src="./assets/ui/progress-ring.js?v=438"></script>
 <link rel="stylesheet" href="./assets/ui/training-labs.css?v=440">
 <link rel="stylesheet" href="./assets/ui/compact-layout.css?v=441">
 </head>
@@ -2166,11 +2165,12 @@ main > #profile.screen > .spartanx-page-footer{
   <div class="row between rank-card-heading">
     <div><div class="eyebrow">YOUR JOURNEY</div><h2 style="margin:5px 0 0">Rank Progression</h2></div>
     <div class="rank-card-actions">
-      <span class="rank-xp-total" id="rankXP">0 XP</span><div class="rank-progress-track" id="rankExperienceTrack" role="progressbar" aria-label="Experience towards next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rankProgressFill"></span></div>
+      <span class="rank-xp-total" id="rankXP">0 XP</span>
       <button type="button" class="rank-collapse-toggle" id="rankCollapseToggle" aria-expanded="false" aria-label="Expand Rank Progression" aria-controls="rankCurrentDetails rankProgressLabels rankXpHelp" title="Expand Rank Progression"><span aria-hidden="true" class="rank-collapse-symbol">+</span></button>
     </div>
   </div>
   <div class="rank-current-row rank-expanded-detail" id="rankCurrentDetails"><img id="currentRankEmblem" src="./ranks/mortal.svg" alt="Mortal rank emblem"><div class="rank-current-copy"><span class="tiny muted">CURRENT RANK</span><strong id="currentRankName">Mortal - Rank I</strong><span class="tiny muted" id="rankWorkoutCount">0 completed workouts</span></div><button id="rankPrestigeMark" type="button" class="sx-gamer-prestige sx-rank-prestige-mark sx-prestige-trigger" data-open-prestige-showcase aria-label="Open Prestige Showcase" hidden></button></div>
+  <div class="rank-progress-track" id="rankExperienceTrack" role="progressbar" aria-label="Experience towards next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="rankProgressFill"></span></div>
   <div class="row between rank-progress-labels rank-expanded-detail" id="rankProgressLabels"><span id="rankProgressFrom">Mortal</span><span id="rankProgressTo">Next: Spartan</span></div>
   <div class="rank-tier-strip" id="homeRankTiers"></div>
   <div class="rank-milestone-track" aria-label="Ranks achieved"><span id="rankMilestoneFill"></span></div>
@@ -2189,7 +2189,7 @@ main > #profile.screen > .spartanx-page-footer{
   <a class="sx-intelligence-entry-link" href="./intelligence/?sxIntegrated=1" style="display:flex;align-items:center;justify-content:center;margin-top:13px;padding:12px 15px;border:1px solid color-mix(in srgb,var(--lime) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--lime) 9%,var(--panel2));color:var(--lime);font-size:12px;letter-spacing:.8px;font-weight:850;text-decoration:none">OPEN SPARTANX INTELLIGENCE</a>
 </section>
 
-<div class="row between" style="margin:20px 2px 8px"><div><div class="eyebrow">YOUR TRAINING JOURNEY</div><h2 style="margin:5px 0 0">Workout Feed</h2></div><div class="sx-feed-heading-metrics"><span class="tiny" id="workoutFeedCount">0 workouts</span><div id="sxHomeWeekly" hidden><span>This week</span><div id="sxHomeWeeklyRing"></div></div></div></div>
+<div class="row between" style="margin:20px 2px 8px"><div><div class="eyebrow">YOUR TRAINING JOURNEY</div><h2 style="margin:5px 0 0">Workout Feed</h2></div><span class="tiny" id="workoutFeedCount">0 workouts</span></div>
 <div id="workoutFeed"><div class="card"><p class="muted tiny" style="margin:0">Your completed workouts will appear here. Log your first session to get started.</p></div></div>
 </section>
 <section id="prestigeShowcase" class="screen sx-prestige-page" aria-labelledby="sxPrestigePageTitle" data-no-carousel>
@@ -2329,7 +2329,7 @@ main > #profile.screen > .spartanx-page-footer{
 <section id="routineBuilderScreen" class="screen"><div class="row between"><div><div class="eyebrow">ROUTINE BUILDER</div><h1>Create routine</h1></div><button type="button" class="back-button spartan-back-button sx-page-back" id="cancelRoutineBuilder"><span class="sx-page-back-arrow" aria-hidden="true">←</span></button></div><div class="card"><label for="routineName">ROUTINE NAME</label><input id="routineName" maxlength="40" placeholder="e.g. Upper body A"><div class="row between" style="margin-top:15px"><h2>Exercises</h2><span class="tiny" id="routineExerciseCount">0 exercises</span></div><div id="routineDraftList"><p class="muted tiny">Add exercises to build your routine.</p></div><button id="addRoutineExercise" class="secondary" style="width:100%;margin-top:10px">＋ ADD EXERCISE</button><button id="saveRoutine" class="start-workout-button">SAVE ROUTINE</button></div></section>
 <section id="activeWorkout" class="screen">
  <div class="sx-active-workout-name"><h1 id="activeWorkoutName" role="button" tabindex="0" title="Tap to rename workout" aria-label="Rename active workout">Workout</h1></div>
-<div class="session-summary-sticky" id="sessionSummarySticky"><div class="session-summary-bar"><div class="summary-metric session-duration-metric"><span>DURATION</span><div class="session-duration-control"><strong id="sessionClock">00:00:00</strong><button type="button" id="sessionPauseButton" class="session-pause-button" aria-label="Pause workout timer" title="Pause workout timer">Ⅱ</button></div></div><div class="summary-metric"><span>VOLUME</span><strong id="liveVolume">0 kg</strong></div><div class="summary-metric sx-session-set-metric"><span id="sxWorkingSetLabel">SETS</span><div id="sxWorkingSetRing" hidden></div><strong id="liveSets" title="Total sets logged, including warm-ups">0</strong></div><button type="button" class="muscle-preview" id="openMuscleDiagram" aria-label="View muscles worked" title="View muscles worked"><div id="muscleDiagram"></div></button><button type="button" class="summary-dismiss" id="dismissSessionSummary" aria-label="Hide session summary">×</button></div></div><div id="discardWorkoutOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="discardWorkoutTitle"><div class="detail-panel" style="max-width:360px;text-align:center"><div class="eyebrow">END SESSION</div><h2 id="discardWorkoutTitle" style="font-size:22px;margin:10px 0">Are you sure?</h2><p class="muted" style="margin:0 0 20px">Do you want to discard this workout? Your exercises and logged sets will be lost.</p><div class="row" style="gap:10px"><button id="cancelDiscardWorkout" class="secondary" type="button" style="flex:1">NO</button><button id="confirmDiscardWorkout" type="button" style="flex:1;background:#e34b4b;color:#fff">YES</button></div></div></div><div id="muscleOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2>Muscles worked</h2><button class="secondary small" id="closeMuscleDiagram">Close</button></div><div id="muscleDiagramLarge" class="muscle-diagram"></div><div id="muscleLegend" class="muscle-legend"></div></div></div><div id="prOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prTitle"><div class="detail-panel sx-achievement-modal"><div class="row between"><div><div class="eyebrow">NEW PERSONAL RECORD</div><h2 id="prTitle">Achievements</h2></div><button type="button" class="secondary small" id="closePr" aria-label="Close achievement details">✕</button></div><div id="prDetails" aria-live="polite"></div></div></div>
+<div class="session-summary-sticky" id="sessionSummarySticky"><div class="session-summary-bar"><div class="summary-metric session-duration-metric"><span>DURATION</span><div class="session-duration-control"><strong id="sessionClock">00:00:00</strong><button type="button" id="sessionPauseButton" class="session-pause-button" aria-label="Pause workout timer" title="Pause workout timer">Ⅱ</button></div></div><div class="summary-metric"><span>VOLUME</span><strong id="liveVolume">0 kg</strong></div><div class="summary-metric"><span>SETS</span><strong id="liveSets">0</strong></div><button type="button" class="muscle-preview" id="openMuscleDiagram" aria-label="View muscles worked" title="View muscles worked"><div id="muscleDiagram"></div></button><button type="button" class="summary-dismiss" id="dismissSessionSummary" aria-label="Hide session summary">×</button></div></div><div id="discardWorkoutOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="discardWorkoutTitle"><div class="detail-panel" style="max-width:360px;text-align:center"><div class="eyebrow">END SESSION</div><h2 id="discardWorkoutTitle" style="font-size:22px;margin:10px 0">Are you sure?</h2><p class="muted" style="margin:0 0 20px">Do you want to discard this workout? Your exercises and logged sets will be lost.</p><div class="row" style="gap:10px"><button id="cancelDiscardWorkout" class="secondary" type="button" style="flex:1">NO</button><button id="confirmDiscardWorkout" type="button" style="flex:1;background:#e34b4b;color:#fff">YES</button></div></div></div><div id="muscleOverlay" class="detail-overlay hidden"><div class="detail-panel"><div class="row between"><h2>Muscles worked</h2><button class="secondary small" id="closeMuscleDiagram">Close</button></div><div id="muscleDiagramLarge" class="muscle-diagram"></div><div id="muscleLegend" class="muscle-legend"></div></div></div><div id="prOverlay" class="detail-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prTitle"><div class="detail-panel sx-achievement-modal"><div class="row between"><div><div class="eyebrow">NEW PERSONAL RECORD</div><h2 id="prTitle">Achievements</h2></div><button type="button" class="secondary small" id="closePr" aria-label="Close achievement details">✕</button></div><div id="prDetails" aria-live="polite"></div></div></div>
 <div id="exerciseList"></div>
 <button id="openExerciseLibrary" class="library-add-button">＋ ADD EXERCISE</button>
 <div id="regularWorkoutActions" class="row" style="display:flex;gap:10px;margin-top:16px;align-items:stretch"><button type="button" id="discardWorkout" class="secondary" style="flex:1;min-width:0;border-color:#a94444;color:#ff7777;padding:15px 8px;font-weight:850">DISCARD</button><button type="button" id="finishWorkoutBottom" class="start-workout-button" style="flex:1;min-width:0;margin:0;padding:15px 8px;font-weight:850">✓ FINISH &amp; SAVE</button></div>
@@ -2682,7 +2682,6 @@ function buildGamingProfileCard(profile,name,photo,sessionLog=''){
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='toggleProfileCards'){localStorage.setItem(PROFILE_CARD_PREF,String(e.target.checked));renderWorkoutFeed()}});
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#openProfileSettings, #openToolsSettings')){const toggle=$('toggleProfileCards');if(toggle)toggle.checked=profileCardsEnabled()}});
 function renderWorkoutFeed(){
- window.SXProgressRing?.updateWeekly(db.sessions||[]);
  const feed=$('workoutFeed'),count=$('workoutFeedCount');
  if(!feed)return;
  const sessions=Array.isArray(db.sessions)?db.sessions:[];
@@ -3079,7 +3078,7 @@ function renderSpartanProgress(){
    'Open Prestige Showcase');
   prestigeMark.dataset.sxPrestigeBand=window.SpartanXXP.prestigeBand(state.prestige);
  }
- $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankExperienceTrack')?.setAttribute('aria-valuenow',String(Math.round(state.progress*100)));window.SXProgressRing?.set($('rankExperienceTrack'),state.progress*100);$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=(state.prestige?'Prestige '+state.prestige+' · ':'')+spartanxRankLabel(state.current.name,state.index);
+ $('rankProgressFill').style.width=(state.progress*100)+'%';$('rankExperienceTrack')?.setAttribute('aria-valuenow',String(Math.round(state.progress*100)));$('rankMilestoneFill').style.width=((state.index+0.5)/activeProgressRanks().length*100)+'%';$('rankProgressFrom').textContent=(state.prestige?'Prestige '+state.prestige+' · ':'')+spartanxRankLabel(state.current.name,state.index);
  $('rankProgressTo').textContent=state.next?'Next: '+spartanxRankLabel(state.next.name,state.index+1)+' · '+state.remainingToNext+' XP to go':'Prestige '+(state.prestige+1)+' · '+state.toPrestige+' XP to go';
  $('homeRankTiers').innerHTML=activeProgressRanks().map((r,i)=>'<div class="rank-tier '+(i<=state.index?'earned':'')+(i===state.index?' current':'')+'"><img src="./ranks/'+r.file+'" alt=""><span class="rank-tier-name">'+esc(r.name)+'</span><span class="rank-tier-level">Rank '+(SPARTANX_RANK_NUMERALS[i]||'I')+'</span></div>').join('');
  // Current rank resets each prestige; achievements never do.
@@ -4328,7 +4327,7 @@ function refreshAdaptiveSetGuidance(){
   }
  }
 }
-function updateLiveStats(){let completed=work.flatMap(e=>e.sets.filter(s=>s.done&&isValidTrackedSet(s,e.name)).map(s=>({weight:+s.weight||0,reps:+s.reps})));$('liveVolume').textContent=kg(completed.reduce((a,s)=>a+s.weight*s.reps,0));$('liveSets').textContent=completed.length;const ring=$('sxWorkingSetRing');if(ring&&window.SXProgressRing){const m=window.SXProgressRing.activeSets(work,isValidTrackedSet,name=>window.SpartanXCardio?.isCardio(name));ring.hidden=!m.total;$('sxWorkingSetLabel').textContent=m.total?'WORK SETS':'SETS';window.SXProgressRing.set(ring,m.percent,m.done+'/'+m.total,'Completed working sets: '+m.done+' of '+m.total+'; warm-ups excluded');}renderMuscles();refreshAdaptiveSetGuidance();}
+function updateLiveStats(){let completed=work.flatMap(e=>e.sets.filter(s=>s.done&&isValidTrackedSet(s,e.name)).map(s=>({weight:+s.weight||0,reps:+s.reps})));$('liveVolume').textContent=kg(completed.reduce((a,s)=>a+s.weight*s.reps,0));$('liveSets').textContent=completed.length;renderMuscles();refreshAdaptiveSetGuidance();}
 function renderMuscles(){
  const trained=work.filter(ex=>(ex.sets||[]).some(set=>set.done&&isValidTrackedSet(set,ex.name))).map(ex=>exerciseMuscles(ex.name));
  const primary=new Set(trained.flatMap(x=>x.primary));
@@ -5156,7 +5155,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=441',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=442',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=356"></script>
 <script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=437"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/load-guard.js?v=338"></script><script src="./assets/ascension/workout-prescription.js?v=425"></script><script>
 (function upgradeRestoredAscensionWarmups(){
@@ -5169,7 +5168,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
   if(changed){renderWork();updateMinimizedSession();saveDraft();}
  }catch(_){}
 })();
-</script><script src="./assets/ascension/quick-access.js?v=438"></script>
+</script><script src="./assets/ascension/quick-access.js?v=442"></script>
 <script src="./assets/navigation/main-carousel.js?v=413"></script>
 <script>
 /* Keep fixed-header spacer exactly as tall as the rendered header.
@@ -5571,7 +5570,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=441;
+ const BUILD=442;
  // Public version advances by one minor release every 200 internal builds.
  // Keep BUILD numeric for precise update detection, even within one version.
  const versionForBuild=build=>{const milestone=Math.floor(build/200);return (1+Math.floor(milestone/10))+'.'+(milestone%10);};
@@ -5637,9 +5636,9 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Check once on relaunch; never refresh automatically or interrupt a workout.
 })();
 </script>
-<script src="./assets/profile/profile-preview-parity.js?v=438"></script>
+<script src="./assets/profile/profile-preview-parity.js?v=442"></script>
 <script src="./assets/ranks/milestone-engine.js?v=379"></script>
-<script src="./assets/ranks/milestone-modal.js?v=438"></script>
+<script src="./assets/ranks/milestone-modal.js?v=442"></script>
 <script src="./assets/profile/profile-photo-crop.js?v=247"></script>
 <script src="./assets/workouts/workout-date.js?v=249"></script>
 <script src="./assets/exercises/exercise-stats-layout.js?v=304"></script>
@@ -5822,7 +5821,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 <script src="./assets/bodybuilding/decision-policy.js?v=306"></script>
 <script src="./assets/bodybuilding/decision-panels.js?v=306"></script>
 <script src="./assets/bodybuilding/split-audit.js?v=439"></script><script src="./assets/bodybuilding/programme-builder.js?v=439"></script><script src="./assets/ui/motion-core.js?v=440"></script><script src="./assets/ui/motion-analysis.js?v=440"></script>
-<script src="./assets/ranks/prestige-showcase.js?v=438"></script>
+<script src="./assets/ranks/prestige-showcase.js?v=442"></script>
 <script id="sx-ascension-native-workout-handoff">
 (function(){
  'use strict';
@@ -5847,5 +5846,4 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
 })();
 </script>
 <script src="./assets/ui/modal-viewport.js?v=419"></script>
-<script>window.addEventListener("load",()=>window.SXProgressRing?.updateWeekly(db.sessions||[]),{once:true});</script>
 </body></html>

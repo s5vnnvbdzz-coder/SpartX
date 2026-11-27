@@ -2127,6 +2127,7 @@ main > #profile.screen > .spartanx-page-footer{
 #activeWorkout .set-row .sx-set-guidance-arrow{display:inline;flex:none;margin-left:2px;padding:0;border:0;background:none!important;box-shadow:none;font-size:12px;font-weight:900;line-height:1;vertical-align:baseline;cursor:pointer}
 #activeWorkout .sx-set-guidance-arrow.up{color:#73f08c!important}
 #activeWorkout .sx-set-guidance-arrow.down{color:#ff8585!important}
+#activeWorkout .sx-set-guidance-arrow.down.positive{color:#73f08c!important}
 #activeWorkout .set-row .set-number-pad-trigger.sx-has-guidance{display:inline-flex;justify-content:center;align-items:center;gap:1px}
 #activeWorkout .set-row .set-rpe-trigger.sx-has-guidance{gap:1px}
 </style>
@@ -2561,7 +2562,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/cardio/cardio.js?v=304"></script>
 <script src="./assets/workouts/exercise-replacement.js?v=432"></script>
 <script src="./assets/ascension/continue-support-sync.js?v=432"></script>
-<script src="./assets/ascension/adaptive-set-guidance.js?v=433"></script>
+<script src="./assets/ascension/adaptive-set-guidance.js?v=445"></script>
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/workouts/session-achievements.js?v=396"></script>
@@ -4303,6 +4304,8 @@ function refreshAdaptiveSetGuidance(){
   }
  }
  if(!sessionActive||editingSessionId!==null)return;
+ const trend=window.SpartanXRpeTrend;
+ const history=trend?.historyIndex(db.sessions||[]);
  for(let i=0;i<work.length;i++){
   const ex=work[i];
   const engine=window.SXAdaptiveSetGuidance;
@@ -4316,10 +4319,10 @@ function refreshAdaptiveSetGuidance(){
    if(!field.hasAttribute('data-sx-guide-original-title'))field.setAttribute('data-sx-guide-original-title',field.getAttribute('title')||'');
    field.title=detail;
   };
-  for(const advice of engine?.indicators(ex)||[]){
+  for(const advice of engine?.indicators(ex,set=>trend?.reference(ex.name,set,history,true))||[]){
    const field=fieldFor(advice);if(!field)continue;
    const arrow=document.createElement('span');
-   arrow.className='sx-set-guidance-arrow '+advice.direction;
+   arrow.className='sx-set-guidance-arrow '+advice.direction+' '+(advice.tone==='positive'?'positive':'negative');
    arrow.textContent=advice.direction==='up'?'↑':'↓';
    arrow.title=advice.title;arrow.setAttribute('aria-label',advice.title);
    arrow.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();alert(advice.title+'\n\n'+advice.detail);});
@@ -5158,7 +5161,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=444',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=445',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=356"></script>
 <script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=437"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/load-guard.js?v=338"></script><script src="./assets/ascension/workout-prescription.js?v=425"></script><script>
 (function upgradeRestoredAscensionWarmups(){
@@ -5573,7 +5576,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=444;
+ const BUILD=445;
  // Public version advances by one minor release every 200 internal builds.
  // Keep BUILD numeric for precise update detection, even within one version.
  const versionForBuild=build=>{const milestone=Math.floor(build/200);return (1+Math.floor(milestone/10))+'.'+(milestone%10);};

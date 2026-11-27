@@ -24,7 +24,7 @@ html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfi
  max-width:var(--sx-main-action-size)!important;max-height:var(--sx-main-action-size)!important;
  flex:0 0 var(--sx-main-action-size)!important;position:relative!important;inset:auto!important;
  margin:0!important;padding:0!important;line-height:1!important;text-align:center!important;
- background:var(--panel2)!important;background-image:none!important;border:1px solid var(--line)!important;border-radius:50%!important;
+ background-color:var(--panel2)!important;background-image:none!important;border:1px solid var(--line)!important;border-radius:50%!important;
  color:var(--txt)!important;box-shadow:none!important;text-shadow:none!important;text-decoration:none!important;
 }
 html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a) svg{
@@ -44,3 +44,8 @@ html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfi
  html body:has(>main>.screen.active:is(#tools,#home,#workout,#profile))>header{padding-inline:10px!important}
  html body>header #sxBrandHeader .sub{font-size:8px!important;letter-spacing:.5px!important}
 }
+
+/* All toolbar actions use the same geometry even when a legacy theme rule
+   has higher specificity. Geometry on the original elements is identical. */
+html body>header .sx-main-header-action[aria-pressed="true"]{--sx-action-border:var(--lime);--sx-action-ink:var(--lime)}
+html body>header .sx-main-header-action::before,html body>header .sx-main-header-action::after{content:none!important;display:none!important}

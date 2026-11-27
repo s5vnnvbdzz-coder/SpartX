@@ -2128,6 +2128,7 @@ main > #profile.screen > .spartanx-page-footer{
 #activeWorkout .sx-set-guidance-arrow.up{color:#73f08c!important}
 #activeWorkout .sx-set-guidance-arrow.down{color:#ff8585!important}
 #activeWorkout .sx-set-guidance-arrow.down.positive{color:#73f08c!important}
+#sxAdaptiveGuidanceDialog{position:fixed;inset:0;margin:auto;width:min(calc(100% - 32px),440px);max-height:calc(100dvh - 48px);overflow:auto;overscroll-behavior:contain;padding:20px;background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 65px #0008}#sxAdaptiveGuidanceDialog::backdrop{background:#000b}#sxAdaptiveGuidanceDialog h2{font-size:20px;line-height:1.3;margin:10px 0}#sxAdaptiveGuidanceDialog p{font-size:14px;line-height:1.6;color:var(--muted);margin:12px 0 20px}#sxAdaptiveGuidanceDialog button{width:100%;min-height:44px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px}
 #activeWorkout .set-row .set-number-pad-trigger.sx-has-guidance{display:inline-flex;justify-content:center;align-items:center;gap:1px}
 #activeWorkout .set-row .set-rpe-trigger.sx-has-guidance{gap:1px}
 </style>
@@ -2562,7 +2563,7 @@ body.sx-black-yellow .sx-gamer-card{box-shadow:0 0 15px rgba(244,205,55,.10),ins
 <script src="./assets/cardio/cardio.js?v=304"></script>
 <script src="./assets/workouts/exercise-replacement.js?v=432"></script>
 <script src="./assets/ascension/continue-support-sync.js?v=432"></script>
-<script src="./assets/ascension/adaptive-set-guidance.js?v=445"></script>
+<script src="./assets/ascension/adaptive-set-guidance.js?v=447"></script>
 <script src="./assets/workouts/active-exercise-actions.js?v=302"></script>
 <script src="./assets/workouts/rpe-trend.js?v=362"></script>
 <script src="./assets/workouts/session-achievements.js?v=396"></script>
@@ -4291,6 +4292,20 @@ $('activeWorkoutName').addEventListener('click',renameActiveWorkout);
 $('activeWorkoutName').addEventListener('keydown',e=>{if(e.target.id==='activeWorkoutName'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();renameActiveWorkout()}});
 function resumeSession(){if(!sessionActive)return;libraryMode='workout';switchScreen('activeWorkout');renderWork();beginSessionClock();updateMinimizedSession();saveDraft();}
 window.resumeActiveWorkout=resumeSession;
+function showAdaptiveGuidanceMessage(advice,origin){
+ const prior=document.getElementById('sxAdaptiveGuidanceDialog');
+ if(prior?.open)return;
+ const dialog=document.createElement('dialog');dialog.id='sxAdaptiveGuidanceDialog';dialog.setAttribute('aria-labelledby','sxAdaptiveGuidanceTitle');dialog.setAttribute('aria-describedby','sxAdaptiveGuidanceDetail');
+ const panel=document.createElement('div');panel.className='sx-guidance-message-panel';
+ const kicker=document.createElement('div');kicker.className='eyebrow';kicker.textContent='SPARTANX · ADAPTIVE GUIDANCE';
+ const heading=document.createElement('h2');heading.id='sxAdaptiveGuidanceTitle';heading.textContent=advice.title;
+ const detail=document.createElement('p');detail.id='sxAdaptiveGuidanceDetail';detail.textContent=advice.detail;
+ const close=document.createElement('button');close.type='button';close.textContent='CLOSE';
+ panel.append(kicker,heading,detail,close);dialog.append(panel);document.body.append(dialog);
+ const cleanup=()=>{dialog.remove();window.SXModalViewport?.refresh();if(origin?.isConnected)origin.focus({preventScroll:true});};
+ close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',cleanup,{once:true});
+ try{dialog.showModal();window.SXModalViewport?.refresh();close.focus({preventScroll:true});}catch(e){cleanup();console.warn('Guidance dialog unavailable',e);}
+}
 function refreshAdaptiveSetGuidance(){
  const list=$('exerciseList');if(!list)return;
  // Keep the existing numeric controls intact: only append plain inline glyphs.
@@ -4308,6 +4323,7 @@ function refreshAdaptiveSetGuidance(){
  const history=trend?.historyIndex(db.sessions||[]);
  for(let i=0;i<work.length;i++){
   const ex=work[i];
+  if(window.SpartanXCardio?.isCardio(ex.name))continue;
   const engine=window.SXAdaptiveSetGuidance;
   const rows=list.children[i]?.querySelectorAll('.set-row');
   if(!rows)continue;
@@ -4325,7 +4341,7 @@ function refreshAdaptiveSetGuidance(){
    arrow.className='sx-set-guidance-arrow '+advice.direction+' '+(advice.tone==='positive'?'positive':'negative');
    arrow.textContent=advice.direction==='up'?'↑':'↓';
    arrow.title=advice.title;arrow.setAttribute('aria-label',advice.title);
-   arrow.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();alert(advice.title+'\n\n'+advice.detail);});
+   arrow.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();showAdaptiveGuidanceMessage(advice,field);});
    field.classList.add('sx-has-guidance');title(field,advice.detail);
    field.appendChild(arrow);
   }
@@ -5161,7 +5177,7 @@ document.addEventListener('keydown',e=>{
  if(!$('completedWorkoutOverlay').classList.contains('hidden')&&calendarWorkoutReturn){e.preventDefault();closeCompletedWorkout();return;}
  if(!$('workoutCalendarOverlay').classList.contains('hidden')&&!calendarWorkoutReturn){e.preventDefault();closeWorkoutCalendar();}
 });
-$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=446',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
+$('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').value;$('measuresOverlay').classList.remove('hidden');};$('closeMeasures').onclick=()=>$('measuresOverlay').classList.add('hidden');$('measuresOverlay').addEventListener('click',e=>{if(e.target===$('measuresOverlay'))$('measuresOverlay').classList.add('hidden');});renderSpartanRanks();renderLatestSessionRank();renderProfile();savePreferences();renderWork();updateMinimizedSession();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=447',{updateViaCache:'none'}).catch(()=>{});const hashScreen=location.hash.slice(1);const validScreens=new Set(Array.from(document.querySelectorAll('.screen')).map(screen=>screen.id));const restoreScreen=['home','tools','workout','profile'].includes(hashScreen)?hashScreen:(hashScreen==='activeWorkout'&&sessionActive?'activeWorkout':'home');try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(_){}switchScreen(restoreScreen);if(sessionActive){beginSessionClock();updateSessionClock();}
 </script><script src="./assets/stats/statistics.js?v=356"></script>
 <script src="./assets/profile/measures.js?v=328"></script><script src="./assets/profile/profile-dashboard-headers.js?v=329"></script><script src="./social.js?v=317"></script><script src="./assets/workouts/active-cycle-guard.js?v=287"></script><script src="./tools/replica.js?v=437"></script><script src="./tools/531-native.js?v=328"></script><script src="./tools/531-multilift.js?v=287"></script><script src="./assets/workouts/531-manage-design.js?v=314"></script><script src="./assets/ascension/load-guard.js?v=338"></script><script src="./assets/ascension/workout-prescription.js?v=425"></script><script>
 (function upgradeRestoredAscensionWarmups(){
@@ -5576,7 +5592,7 @@ $('openMeasures').onclick=()=>{$('measureBodyweight').value=$('rankBodyweight').
  // Use an immutable build number, not the mutable Settings status label.
  // A stale "Build 296" label caused repeat update prompts on Build 298.
  const status=document.getElementById('sxUpdateStatus');
- const BUILD=446;
+ const BUILD=447;
  // Public version advances by one minor release every 200 internal builds.
  // Keep BUILD numeric for precise update detection, even within one version.
  const versionForBuild=build=>{const milestone=Math.floor(build/200);return (1+Math.floor(milestone/10))+'.'+(milestone%10);};

@@ -336,7 +336,7 @@ function applyToolVisibility(){
 }
 applyToolVisibility();
 window.addEventListener('spartx:toolVisibilityChanged',e=>{toolVisibility={...toolVisibility,...(e.detail||{})};applyToolVisibility();});
-const defaultSettings={warmup:true,diagram:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
+const defaultSettings={warmup:true,diagram:true,plateOptionsExpanded:true,trainingMaxFinder:true,plates:{25:true,20:true,15:true,10:true,5:true,2.5:true,1.25:true}};
 let settings={...defaultSettings,plates:{...defaultSettings.plates}};
 try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...defaultSettings.plates,...(saved.plates||{})}};}catch(e){}
 function saveSettings(){try{localStorage.setItem('spartxToolsSettings',JSON.stringify(settings));}catch(e){}}
@@ -366,14 +366,9 @@ function renderPlateDiagram(loaded){
    offset+=w;
   }
  });
- // Bar shaft, sleeves and end caps are drawn first so the plates sit on top.
- const collarLeft=63;
- const collarRight=370;
+ // One uniform slim shaft, drawn behind the plates.
  svg.innerHTML=
-  '<rect x="20" y="54" width="400" height="8" rx="4" fill="#aeb7c0"/>'+
-  '<rect x="70" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
-  '<rect x="270" y="51" width="100" height="14" rx="3" fill="#aeb7c0"/>'+
-  '<rect x="170" y="47" width="100" height="22" rx="6" fill="#737d87"/>'+
+  '<rect data-bar-shaft="true" x="20" y="54" width="400" height="8" rx="4" fill="#aeb7c0"/>'+
   left+right;
  $('plateDiagramCaption').textContent=loaded.length?loaded.map(p=>p.count+' × '+fmt(fromKg(p.size))+' '+unit()).join(' · ')+' per side':'No plates required — bar only';
 }
@@ -383,9 +378,9 @@ function calcPlates(){const target=toKg(+$('target').value),bar=toKg(+$('bar').v
 (function mountPlatePreferences(){
  const host=$('plateHint').parentElement;
  const panel=document.createElement('div');panel.className='sx-plate-preferences';
- panel.innerHTML='<style>.sx-plate-preferences{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.sx-plate-preferences .sx-plate-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;color:var(--txt);font-size:13px;font-weight:750}.sx-plate-preferences .switch{margin:0;flex:0 0 48px}.sx-plate-preferences .sx-plate-label{font-size:13px;font-weight:750;color:var(--txt);margin:0}.sx-plate-preferences .hint{margin:4px 0 0}.sx-plate-preferences .plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}.sx-plate-preferences .plate-setting{display:flex;align-items:center;gap:7px;min-height:39px;margin:0;padding:7px 9px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-size:12px;cursor:pointer}.sx-plate-preferences .plate-setting input{appearance:auto!important;width:17px!important;height:17px!important;min-width:17px!important;margin:0 0 0 auto!important;padding:0!important;accent-color:var(--lime)}.sx-plate-preferences .plate-dot{width:12px;height:12px;flex:0 0 12px;border-radius:4px}.sx-plate-preferences .switch:focus-within{outline:2px solid var(--lime);outline-offset:3px;border-radius:20px}</style><div class="sx-plate-toggle"><span>Barbell diagram</span><label class="switch"><input id="diagramToggle" type="checkbox" aria-label="Show barbell diagram"><span></span></label></div><p class="sx-plate-label">Available plates</p><p class="hint">Only enabled plate sizes are used in the calculation.</p><div class="plate-settings" id="plateSettings"></div>';
+ panel.innerHTML='<style>.sx-plate-preferences{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.sx-plate-preferences .sx-plate-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0;color:var(--txt);font-size:13px;font-weight:750}.sx-plate-preferences .switch{margin:0;flex:0 0 48px}.sx-plate-preferences #plateOptions[hidden]{display:none!important}.sx-plate-preferences #plateOptions{margin-top:12px}.sx-plate-preferences .hint{margin:4px 0 0}.sx-plate-preferences .plate-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}.sx-plate-preferences .plate-setting{display:flex;align-items:center;gap:7px;min-height:39px;margin:0;padding:7px 9px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-size:12px;cursor:pointer}.sx-plate-preferences .plate-setting input{appearance:auto!important;width:17px!important;height:17px!important;min-width:17px!important;margin:0 0 0 auto!important;padding:0!important;accent-color:var(--lime)}.sx-plate-preferences .plate-dot{width:12px;height:12px;flex:0 0 12px;border-radius:4px}.sx-plate-preferences .switch:focus-within{outline:2px solid var(--lime);outline-offset:3px;border-radius:20px}</style><div class="sx-plate-toggle"><span>Available plates</span><label class="switch"><input id="plateOptionsToggle" type="checkbox" aria-label="Show available plates" aria-controls="plateOptions"><span></span></label></div><div id="plateOptions"><p class="hint">Only enabled plate sizes are used in the calculation.</p><div class="plate-settings" id="plateSettings"></div></div>';
  host.appendChild(panel);
- const diagram=panel.querySelector('#diagramToggle'),list=panel.querySelector('#plateSettings'),inputs=new Map();
+ const toggle=panel.querySelector('#plateOptionsToggle'),options=panel.querySelector('#plateOptions'),list=panel.querySelector('#plateSettings'),inputs=new Map();
  for(const size of [25,20,15,10,5,2.5,1.25]){
   const label=document.createElement('label');label.className='plate-setting';
   const dot=document.createElement('span');dot.className='plate-dot';dot.style.background=plateColors[size].fill;
@@ -395,8 +390,8 @@ function calcPlates(){const target=toKg(+$('target').value),bar=toKg(+$('bar').v
   input.addEventListener('change',()=>{readLatest();settings.plates[size]=input.checked;saveSettings();sync();calcPlates();});
  }
  function readLatest(){try{const saved=JSON.parse(localStorage.getItem('spartxToolsSettings')||'null');if(saved)settings={...settings,...saved,plates:{...settings.plates,...(saved.plates||{})}};}catch(e){}}
- function sync(){diagram.checked=!!settings.diagram;$('plateDiagramWrap').style.display=settings.diagram?'block':'none';for(const [size,input] of inputs)input.checked=!!settings.plates[size];}
- diagram.addEventListener('change',()=>{readLatest();settings.diagram=diagram.checked;saveSettings();sync();calcPlates();});
+ function sync(){toggle.checked=settings.plateOptionsExpanded!==false;options.hidden=!toggle.checked;$('plateDiagramWrap').style.display='block';for(const [size,input] of inputs)input.checked=!!settings.plates[size];}
+ toggle.addEventListener('change',()=>{readLatest();settings.plateOptionsExpanded=toggle.checked;saveSettings();sync();});
  function refresh(){readLatest();sync();calcPlates();}
  window.addEventListener('storage',e=>{if(e.key==='spartxToolsSettings')refresh();});
  window.addEventListener('pageshow',refresh);

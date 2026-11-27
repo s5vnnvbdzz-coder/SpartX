@@ -24,7 +24,7 @@ html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfi
  max-width:var(--sx-main-action-size)!important;max-height:var(--sx-main-action-size)!important;
  flex:0 0 var(--sx-main-action-size)!important;position:relative!important;inset:auto!important;
  margin:0!important;padding:0!important;line-height:1!important;text-align:center!important;
- background:var(--panel2)!important;background-image:none!important;border:1px solid var(--line)!important;border-radius:50%!important;
+ background-color:var(--panel2)!important;background-image:none!important;border:1px solid var(--line)!important;border-radius:50%!important;
  color:var(--txt)!important;box-shadow:none!important;text-shadow:none!important;text-decoration:none!important;
 }
 html body>header :is(#sxHeaderToolActions,#sxHeaderWorkoutActions,#sxHeaderProfileActions) :is(button,a) svg{

@@ -21,6 +21,8 @@ if(!actionPack.querySelector('.sx-profile-share-button')){
  share.setAttribute('aria-label','Share profile summary');share.title='Share profile summary';share.innerHTML=icon.share;
  const edit=actionPack.querySelector('#editProfile');
  share.classList.add('sx-main-header-action');share.style.cssText=edit.style.cssText;
+ share.style.setProperty('background-color','var(--panel2)','important');
+ share.style.setProperty('background-image','none','important');
  share.querySelector('svg').style.cssText=edit.querySelector('svg').style.cssText;
  const settings=actionPack.querySelector('#openProfileSettings');actionPack.insertBefore(share,settings);
  share.addEventListener('click',async()=>{

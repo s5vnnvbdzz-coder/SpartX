@@ -1749,13 +1749,7 @@ function nextAscensionSupportSlot(){
   slots[0]||null;
 }
 function sxCompactSupportText(ex){
- if(ex?.sxStrengthSizeCompanion){
-  const first=ex.sets?.[0]||{};
-  const load=first.weight!==''&&first.weight!=null?kg(first.weight):'choose load';
-  return ex.name+' · '+ex.sets.length+' × '+load+' × '+first.reps+
-   ' reps';
- }
- return window.SXAscensionAdaptive?.formatPrescription?.(ex,{showRpe:false})||ex.name+' '+ex.sets+' sets';
+ return window.SXAscensionAdaptive?.formatPrescription?.(ex,{showRpe:false,formatWeight:kg})||ex.name+' · '+(Array.isArray(ex.sets)?ex.sets.length:ex.sets)+' sets';
 }
 function renderAscSpartanImportPreview(){
  if($('ascSpartanImportLift').value==='__ADAPTIVE_SUPPORT__'){
@@ -2341,7 +2335,7 @@ function init(){
   history.replaceState({screen:'home'},'',location.pathname+location.search+'#home');
  }
  processAscensionSpartanCompletionQueue();
- if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=143').catch(()=>{});
+ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol))navigator.serviceWorker.register('./sw.js?v=144').catch(()=>{});
 }
 window.addEventListener('pagehide',()=>{if(state.draft)try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}});
 /* Apply the iframe's Obsidian appearance before the parent handshake paints.
@@ -2355,7 +2349,7 @@ init();
 <script src="../assets/science/evidence-engine.js?v=443"></script>
 <script src="../assets/science/volume-intelligence.js?v=443"></script>
 <script src="../assets/ascension/selection-quality.js?v=428"></script>
-<script src="../assets/ascension/adaptive-programming.js?v=446"></script>
+<script src="../assets/ascension/adaptive-programming.js?v=454"></script>
 <script src="../assets/bodybuilding/ascension-companion.js?v=423"></script>
 
 <script id="sx-ascension-first-party-route">

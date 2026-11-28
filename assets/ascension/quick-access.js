@@ -118,7 +118,7 @@ function sxAscModalRender(){
   sxAscModalLine(box,slot.title,true);
   if(!slot.ready)sxAscModalLine(box,'Upcoming assistance · You can preview or manually reschedule this session. The primary lifts remain the recommended next workout.');
   for(const ex of slot.exercises||[]){
-   const rendered=window.SXAscensionAdaptive?.formatPrescription?.(ex,{showRpe:false});
+   const rendered=window.SXAscensionAdaptive?.formatPrescription?.(ex,{showRpe:false,formatWeight:weight});
    sxAscModalLine(box,rendered||ex.name+' · '+ex.sets+' sets');
   }
   const api=window.SXAscensionAdaptive,c=api?.activeCycle?.();
@@ -151,10 +151,8 @@ function sxAscModalRender(){
   const items=window.SXAscensionCompanion?.forImport?.(workout,[],localStorage)||[];
   if(items.length)sxAscModalLine(box,'ADAPTIVE SUPPORT',true);
   for(const ex of items){
-   const sets=ex.sets||[],first=sets[0]||{};
-   sxAscModalLine(box,ex.name+' · '+sets.length+' × '+
-    (first.weight!==''&&first.weight!=null?weight(first.weight):'choose load')+
-    ' × '+first.reps+' reps');
+   const rendered=window.SXAscensionAdaptive?.formatPrescription?.(ex,{showRpe:false,formatWeight:weight});
+   sxAscModalLine(box,rendered||ex.name+' · '+(ex.sets||[]).length+' sets');
   }
  }else{
   sxAscModalLine(box,'Adaptive Support is OFF for this cycle. Enable it in Manage Cycle to include supporting exercises.');

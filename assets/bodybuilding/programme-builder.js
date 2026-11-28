@@ -371,20 +371,13 @@
           '<strong>'+esc(day.name)+'</strong></div><span class="sx-bb-day-state '+(complete?'is-done':'')+'">'+
           (complete?'✓ COMPLETE':logged?'PARTIAL LOG':'PLANNED')+'</span></summary>'+
           '<div class="sx-bb-day-body">'+plannedDay(p,day,progress.week).exercises.map(e=>
-            '<div class="sx-bb-preview-ex"><strong>'+esc(e.name)+'</strong><span>'+e.sets+' × '+e.repsMin+'–'+e.repsMax+
-            ' reps'+
-            (e.startingKg>0?' · '+e.startingKg+' kg':'')+'</span>'+
+            '<div class="sx-bb-preview-ex"><strong>'+esc(e.name)+'</strong><span>'+e.sets+' × '+(e.startingKg>0?e.startingKg+'kg':'choose load')+' - '+e.repsMin+(e.repsMin===e.repsMax?'':' - '+e.repsMax)+'</span>'+
             '</div>').join('')+
             (!finished?'<button type="button" class="sx-bb-secondary sx-bb-full sx-bb-day-start" data-bb-action="start" data-day-id="'+esc(day.id)+'">'+
             (complete?'REPEAT THIS DAY':'START '+esc(day.name).toUpperCase())+' · WEEK '+progress.week+'</button>':'')+'</div></details>';
       }).join('')+'</div>'+
       '<article class="card sx-bb-info"><div class="eyebrow">SPARTANX WORKOUT INTEGRATION</div>'+
       '<p>Continue Training loads planned exercises and unchecked working sets into the normal SpartanX logger. Programme completion is calculated from saved working sets, not merely from starting a workout. Future loads are calculated from your previous completed sets, rep targets and recorded RPE. Week 5 automatically reduces training volume; planned sets remain adjustable.</p></article>';
-    const hero=host.querySelector('.sx-bb-view-hero');
-    if(hero){
-      hero.insertAdjacentHTML('afterend','<section id="sxBBDecisionPanel" aria-label="Spartan Intelligence bodybuilding programme decisions"></section>');
-      window.SXDecisionPanels?.body?.('sxBBDecisionPanel');
-    }
   }
   function input(label,key,value,day,ex,min,max,step){
     return '<label>'+label+'<input type="number" inputmode="decimal" data-bb-ex-field="'+key+'" data-day="'+day+

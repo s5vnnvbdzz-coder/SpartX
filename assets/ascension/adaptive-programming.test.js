@@ -180,8 +180,13 @@ assert.equal(activeSupport.exercises[0].name,'Bench Press');
 assert.equal(activeSupport.exercises[0].sets,3);
 assert.equal(activeSupport.exercises[0].suggestedKg,90,
  'Upper assistance bench is derived conservatively from its existing 150 kg TM');
-assert.ok(existingLive.api.formatPrescription(activeSupport.exercises[0]).includes('90 kg × 8 reps'),
- 'Live cycle exposes the prescribed load and reps');
+assert.ok(existingLive.api.formatPrescription(activeSupport.exercises[0]).includes('90kg - 8'),
+ 'Live cycle exposes the prescribed load and rep range');
+const preview=existingLive.api.formatPrescription({name:'Example',sets:3,suggestedKg:10,min:8,max:10,targetReps:8},{showRpe:false});
+assert.equal(preview,'Example · 3 × 10kg - 8 - 10');
+assert.equal(existingLive.api.formatPrescription({name:'Pause Squat',sets:3,suggestedKg:85,min:4,max:4},{showRpe:false}),'Pause Squat · 3 × 85kg - 4');
+assert.equal(existingLive.api.formatPrescription({name:'Row',sets:[{weight:'68',reps:'10'},{weight:'68',reps:'10'},{weight:'68',reps:'10'}],sxStrengthSizeCompanion:{repsMin:10,repsMax:15}},{showRpe:false}),'Row · 3 × 68kg - 10 - 15');
+assert.equal(existingLive.api.formatPrescription({name:'Raise',sets:3,min:12,max:20},{showRpe:false}),'Raise · 3 × choose load - 12 - 20');
 assert.equal(existingLive.api.plan('Back Squat',4)[0].name,'Leg Press',
  'Active cycle uses logged machine history to select a familiar quad support exercise');
 assert.equal(existingLive.localStorage.getItem('ascensionx_strength_v1'),oldClassicJson,
@@ -460,7 +465,7 @@ week5Done.localStorage.setItem('spartx_db',JSON.stringify({sessions:[{
 assert.equal(week5Done.api.pendingSupportDay()?.week,5,
  'A support session missing one of its originally planned exercises remains incomplete');
 // Cycle views and embedded SW must load the current live support programme.
-assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=432'),
+assert.ok(ascHtml.includes('../assets/ascension/adaptive-programming.js?v=454'),
  'Embedded AscensionX must reference the current adaptive build');
 assert.ok(ascHtml.includes('holder.appendChild(sxBuildAdaptiveCycleRoster())'),
  'View Cycle displays live adaptive training days');
@@ -470,7 +475,7 @@ assert.ok(!ascHtml.includes('<div id="sxCycleManageLiveSnapshot"')&&
 assert.ok(ascHtml.includes('Six-week accessory roadmap'),
  'View Cycle also shows a six-week accessory overview');
 const embeddedSw=fs.readFileSync(path.join(__dirname,'../../AscensionX/sw.js'),'utf8');
-assert.ok(embeddedSw.includes('ascensionx-shell-v140')&&embeddedSw.includes('adaptive-programming.js?v=432'),
+assert.ok(embeddedSw.includes('ascensionx-shell-v144')&&embeddedSw.includes('adaptive-programming.js?v=454'),
  'Embedded service-worker shell caches the current engine');
 const quickAccess=fs.readFileSync(path.join(__dirname,'quick-access.js'),'utf8');
 

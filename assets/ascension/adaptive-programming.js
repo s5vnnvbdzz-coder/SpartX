@@ -322,12 +322,16 @@
   const fraction=week<=3?.65:week===4?.60:.55;
   return Math.max(2.5,Math.round(tm*fraction/2.5)*2.5);
  }
- function formatPrescription(ex,{showRpe=true}={}){
-  const count=Math.max(0,Number(ex?.sets)||0),reps=Number(ex?.targetReps||ex?.min)||0;
-  const kg=Number(ex?.suggestedKg)>0?Number(ex.suggestedKg)+' kg':'choose starting kg';
-  const range=ex?.min===ex?.max?String(ex.min):ex?.min+'–'+ex?.max;
-  return String(ex?.name||'Exercise')+' · '+count+' × '+kg+' × '+reps+
-   ' reps (range '+range+')'+(showRpe?' · RPE '+(ex?.targetRpe??(10-Number(ex?.rir||3))):'');
+ function formatPrescription(ex,{showRpe=true,formatWeight=value=>Number(value)+'kg'}={}){
+  const imported=Array.isArray(ex?.sets),first=imported?ex.sets[0]||{}:{},meta=ex?.sxStrengthSizeCompanion||{};
+  const count=imported?ex.sets.length:Math.max(0,Number(ex?.sets)||0);
+  const min=Number(meta.repsMin??ex?.min??ex?.targetReps??first.reps)||0;
+  const max=Number(meta.repsMax??ex?.max??min)||min;
+  const value=imported?first.weight:ex?.suggestedKg;
+  const load=Number(value)>0?String(formatWeight(Number(value))).replace(/\s+(kg|lbs)$/i,'$1'):'choose load';
+  const range=min===max?String(min):min+' - '+max;
+  return String(ex?.name||'Exercise')+' · '+count+' × '+load+' - '+range+
+   (showRpe?' · RPE '+(meta.targetRpe??ex?.targetRpe??(10-Number(ex?.rir||3))):'');
  }
 
  // Squat strength is the priority: a knee-dominant compound immediately after

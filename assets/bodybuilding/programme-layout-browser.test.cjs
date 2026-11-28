@@ -76,7 +76,19 @@ async function main(){
   assert(small.back.width>=44&&small.back.height>=44,'Back action must remain touch-sized');
   assert(small.scrollWidth<=small.viewport+2,'No mobile horizontal overflow');
   assert(small.rootHeader.display==='none','Mobile must not show duplicated SpartanX header');
+  // Chromium cannot supply iOS env() insets: inject a 59px equivalent to verify the safe-area calculation.
+  await mobile.evaluate(()=>document.documentElement.style.setProperty('--sx-bb-safe-top','59px'));
+  assert(await mobile.locator('#sxBodybuildingBuilder > .sx-bb-header').evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)>=73),'Header clears the iPhone status bar');
+  await mobile.evaluate(()=>window.scrollTo(0,300));
+  await mobile.waitForFunction(()=>window.scrollY>100);
+  assert(Math.abs(await mobile.locator('#sxBodybuildingBuilder > .sx-bb-header').evaluate(el=>el.getBoundingClientRect().top))<=2,'Programme header remains pinned while scrolling');
+  await mobile.evaluate(()=>window.scrollTo(0,0));
   await mobile.screenshot({path:'bodybuilding-builder-mobile.png',fullPage:false});
+  await mobile.locator('#sxBBEdit > .sx-bb-actions [data-bb-action="save"]').click();
+  await mobile.waitForSelector('#sxBBView:not([hidden])');
+  assert.equal(await mobile.locator('#sxBBDecisionPanel').count(),0,'Programme overview no longer duplicates Intelligence recommendations');
+  assert(await mobile.locator('#sxBBView .sx-bb-days').isVisible(),'Programme sessions remain available');
+  assert.equal(await mobile.locator('#sxBBView .sx-bb-view-hero > .sx-bb-actions').evaluate(el=>getComputedStyle(el).position),'static','Overview actions do not float over content');
   console.log('PASS mobile layout');
 
   desktop.once('dialog',dialog=>dialog.accept());
